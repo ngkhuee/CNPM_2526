@@ -1,0 +1,12 @@
+
+1. Tài liệu chung:
+	- React/React-native monorepo with yarn workspaces tutorial 
+		+ https://nickhfarrelly.medium.com/react-react-native-monorepo-with-yarn-workspaces-tutorial-a55e7f4d2d86
+	- CallStack:
+		+ https://www.callstack.com/blog/setting-up-react-native-monorepo-with-yarn-workspaces
+
+
+2. Học React Native:
+	- YT Duy Le: https://www.youtube.com/watch?v=F_wnhylmN2A&list=PLPXtIDPmlGgjYD-tQuZlyp_lQxf0qh49P&index=3
+
+
