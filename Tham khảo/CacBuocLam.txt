@@ -1,0 +1,20 @@
+
+1. Chuẩn bị môi trường:
+	- Cài Node.js
+	- Cài yarn
+	- Cài Android Studio
+		+ Thêm biến môi trường
+		+ Thêm path...
+
+2. Tạo dự án với expo:
+	- Tạo thư mục mới: ReactApp/apps - chứa 3 file mobile, web, shared
+	- Chạy "yarn init -y" - để tạo package.json (trên ReactApp và shared)
+		+ Cấu hình Yarn Workspaces: mở package.json trên ReactApp, thêm:
+			"private": true,
+			"workspaces": [
+			     "apps/*"
+			 ]
+	- Mở apps, tạo 3 thư mục con:
+		+ Mobile: npx create-expo-app mobile --template blank
+		+ Web:
+		+ Share: 

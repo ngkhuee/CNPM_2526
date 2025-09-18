@@ -6,7 +6,13 @@
 		+ https://www.callstack.com/blog/setting-up-react-native-monorepo-with-yarn-workspaces
 
 
-2. Học React Native:
+2. Học ReactJS:
+	- F8: https://fullstack.edu.vn/learning/reactjs?id=4443aa3d-8a90-4891-b574-797e5c70debe
+		+ SPA / MPA
+		+ 
+
+
+3. Học React Native:
 	- YT Duy Le: https://www.youtube.com/watch?v=F_wnhylmN2A&list=PLPXtIDPmlGgjYD-tQuZlyp_lQxf0qh49P&index=3
 
 
