@@ -8,7 +8,7 @@
 
 2. Học ReactJS:
 	- F8: https://fullstack.edu.vn/learning/reactjs?id=4443aa3d-8a90-4891-b574-797e5c70debe
-		+ SPA / MPA
+		+ SPA (*) / MPA 
 		+ 
 
 
