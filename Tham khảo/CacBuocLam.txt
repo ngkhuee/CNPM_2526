@@ -4,7 +4,7 @@
 	- Cài yarn
 	- Cài Android Studio
 		+ Thêm biến môi trường
-		+ Thêm path...
+		+ Thêm path... 
 
 2. Tạo dự án với expo:
 	- Tạo thư mục mới: ReactApp/apps - chứa 3 file mobile, web, shared
