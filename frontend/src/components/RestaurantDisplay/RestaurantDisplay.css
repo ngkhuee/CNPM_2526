@@ -1,0 +1,24 @@
+.restaurant-filter-bar {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.restaurant-filter-bar button {
+  padding: 8px 16px;
+  border-radius: 20px;
+  border: none;
+  background-color: #eee;
+  cursor: pointer;
+}
+
+.restaurant-filter-bar button.active {
+  background-color: #FF4C24;
+  color: white;
+}
+
+.restaurant-display-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}

@@ -1,0 +1,58 @@
+/* Container chính */
+.partners-container {
+  max-width: 800px;
+  margin: 20px auto;
+  padding: 20px;
+  background-color: #f9f9f9; /* nền nhạt */
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  font-family: Arial, sans-serif;
+}
+
+/* Tiêu đề */
+.partners-container h2 {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+/* Danh sách partners */
+.partners-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+/* Mỗi item trong danh sách */
+.partners-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 15px;
+  margin-bottom: 10px;
+  background-color: #fff;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+/* Hover mỗi item */
+.partners-list li:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+/* Button manage */
+.partners-list button {
+  padding: 6px 12px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.partners-list button:hover {
+  background-color: #0056b3;
+}

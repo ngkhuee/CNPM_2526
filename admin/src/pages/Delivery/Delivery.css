@@ -1,0 +1,9 @@
+/* src/pages/Delivery/Delivery.css */
+.delivery-page {
+  padding: 20px;
+}
+/* Delivery.css */
+.leaflet-container {
+  width: 100%;
+  height: 500px; /* chiều cao bản đồ */
+}

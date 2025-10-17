@@ -1,0 +1,59 @@
+.food-display{
+    margin-top: 30px;
+}
+.food-display h2{
+    font-size: max(2vw,24px);
+    font-weight: 600;
+}
+.food-display-list{
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    margin-top: 30px;
+    gap: 30px;
+    row-gap: 50px;
+}
+
+/* Food Display Header: filter + search */
+.food-display-header {
+  display: flex;
+  justify-content: space-between; /* filter trái, search phải */
+  align-items: center; /* căn thẳng hàng */
+  margin-bottom: 1rem;
+  flex-wrap: wrap; /* màn hình nhỏ xuống dòng */
+  gap: 10px;
+}
+
+/* Filter Bar */
+.food-filter-bar {
+  display: flex;
+  flex-wrap: wrap; /* khi màn hình nhỏ, các nút xuống dòng */
+  gap: 12px;
+}
+
+.food-filter-bar button {
+  padding: 8px 18px;
+  border: none;
+  border-radius: 25px;
+  background-color: #f0f0f0;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.3s;
+}
+
+.food-filter-bar button:hover,
+.food-filter-bar button.active {
+  background-color: #FF4C24;
+  color: white;
+  transform: scale(1.05);
+}
+
+/* Search Bar */
+.food-search-input {
+  padding: 0.5rem 1rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  width: 200px; /* có thể tăng/dãn theo layout */
+}
+
+
