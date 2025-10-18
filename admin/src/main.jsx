@@ -1,7 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App.jsx'
-import './index.css'
+import '../../shared/styles/global.css'
 import { BrowserRouter } from 'react-router-dom';
 import { FoodProvider } from './Context/FoodContext';
 import { OrderProvider } from './Context/OrderContext'

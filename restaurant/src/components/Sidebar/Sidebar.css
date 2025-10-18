@@ -1,0 +1,60 @@
+.sidebar {
+    /* keep responsive width but use admin colors/layout */
+    width: 18%;
+    min-height: 100vh;
+    background: #2c3e50;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    border-top: 0;
+}
+
+.sidebar-options {
+    padding-top: 50px;
+    padding-left: 20%;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.sidebar-top {
+    padding: 20px;
+    text-align: center;
+}
+
+.sidebar-logo {
+    width: 120px;
+}
+
+.sidebar-bottom {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 10px;
+}
+
+.sidebar-option {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px;
+    color: #fff;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.sidebar-option.active {
+    background-color: #1abc9c;
+    border-radius: 5px;
+}
+
+.sidebar-option img {
+    width: 20px;
+    margin-right: 10px;
+}
+
+@media (max-width: 900px) {
+    .sidebar-option p {
+        display: none;
+    }
+}
