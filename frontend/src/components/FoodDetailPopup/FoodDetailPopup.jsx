@@ -38,7 +38,7 @@ const FoodDetailPopup = ({ food, onClose, addToCart }) => {
             </div>
 
             <button className="popup-cta" onClick={handleAddToCart}>
-              GỌI ĐẶT HÀNG - 19006960
+              Thêm vào giỏ
             </button>
           </div>
         </div>

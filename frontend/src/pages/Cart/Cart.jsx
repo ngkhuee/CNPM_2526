@@ -65,7 +65,7 @@ const Cart = () => {
             return (
               <div key={index}>
                 <div className="cart-items-title cart-items-item">
-                  <img src={url + "/images/" + item.image} alt="" />
+                  <img src={item.image} alt="" />
                   <p>{item.name}</p>
                   <p>{(item.price * 1000).toLocaleString("vi-VN")}đ</p>
                   <div>{cartItems[item._id]}</div>
@@ -105,7 +105,7 @@ const Cart = () => {
               <b>{total.toLocaleString("vi-VN")}đ</b>
             </div>
           </div>
-          <button onClick={handleCheckout}>PROCEED TO CHECKOUT</button>
+          <button onClick={() => navigate("/checkout-info")}>PROCEED TO CHECKOUT</button>
         </div>
 
         <div className="cart-promocode">

@@ -20,12 +20,15 @@ import Orders from './pages/Restaurant/Orders';
 import MenuList from './pages/Restaurant/MenuList';
 import MenuAdd from './pages/Restaurant/MenuAdd';
 import { accounts } from './assets/assets';
+import CheckoutInfo from './pages/CheckOutInfo/CheckOutInfo';
+import Tracking from './pages/Tracking/Tracking';
+
 
 
 
 // Xoá orders cũ khi reload (chỉ để test)
-localStorage.removeItem("orders");
-console.log("Đã xoá localStorage key 'orders'");
+// localStorage.removeItem("orders");
+// console.log("Đã xoá localStorage key 'orders'");
 
 const App = () => {
   const [showLogin, setShowLogin] = useState(false);
@@ -63,9 +66,12 @@ const App = () => {
             <Route path='/' element={<Home />}/>
             <Route path='/menu' element={<Menu />}/>
             <Route path='/cart' element={<Cart />}/>
-            <Route path='/order' element={<PlaceOrder />}/>
+            <Route path='/order' element={<PlaceOrder />}/> 
             <Route path='/myorders' element={<MyOrders />}/>
             <Route path='/verify' element={<Verify />}/>
+            <Route path="/checkout-info" element={<CheckoutInfo />} />
+            <Route path="/tracking/:id" element={<Tracking />} />
+
 
             {/* Restaurant super-admin */}
             <Route path='/restaurant/dashboard' element={<Dashboard />} />
