@@ -30,12 +30,12 @@ const StoreContextProvider = (props) => {
         setToken("");
         };
 
-        const addToCart = (itemId) => {
-        setCartItems((prev) => ({
-            ...prev,
-            [itemId]: (prev[itemId] || 0) + 1, // nếu chưa có thì = 1, nếu có thì +1
-        }));
-    };
+        const addToCart = (itemId, qty = 1) => {
+            setCartItems((prev) => ({
+                ...prev,
+                [itemId]: (prev[itemId] || 0) + qty, // nếu chưa có thì = qty, nếu có thì +qty
+            }));
+        };
 
     const removeFromCart = (itemId) => {
         setCartItems((prev) => {

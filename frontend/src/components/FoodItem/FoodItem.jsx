@@ -2,15 +2,22 @@ import React, { useContext, useState } from 'react'
 import './FoodItem.css'
 import { assets } from '../../assets/assets'
 import { StoreContext } from '../../Context/StoreContext';
+import FoodDetailPopup from '../FoodDetailPopup/FoodDetailPopup';
 
 const FoodItem = ({ image, name, price, desc , id , restaurant}) => {
+    const [showPopup, setShowPopup] = useState(false);
 
     const {cartItems,addToCart,removeFromCart,url} = useContext(StoreContext);
+
+    const food = { id, image, name, price, description: desc };
+
+    const openPopup = () => setShowPopup(true);
+    const closePopup = () => setShowPopup(false);
 
     return (
         <div className='food-item'>
             <div className='food-item-img-container'>
-                <img className='food-item-image' src={image} alt={name} />
+                <img className='food-item-image' src={image} alt={name} onClick={openPopup} />
 
                 {!cartItems[id] ? (
                     // Nếu chưa có trong giỏ thì hiện nút thêm
@@ -47,6 +54,13 @@ const FoodItem = ({ image, name, price, desc , id , restaurant}) => {
                 </p>
                 <p className="food-item-restaurant">🏪 {restaurant}</p>
             </div>
+            {showPopup && (
+                <FoodDetailPopup
+                    food={food}
+                    onClose={closePopup}
+                    addToCart={(itemId, qty) => { addToCart(itemId, qty); }}
+                />
+            )}
         </div>
     )
 }

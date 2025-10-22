@@ -1,0 +1,123 @@
+.popup-overlay{
+  position: fixed;
+  top:0;left:0;right:0;bottom:0;
+  background: rgba(0,0,0,0.4);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index: 9999;
+}
+.popup-content{
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  max-width: 900px;
+  width: 100%;
+}
+.popup-body{display:flex;gap:20px}
+.popup-image{width:260px;height:180px;object-fit:cover}
+.popup-info{flex:1}
+.quantity-control{display:flex;gap:10px;align-items:center;margin:10px 0}
+.add-btn{background:#1abc9c;color:#fff;padding:10px 16px;border:none;border-radius:6px}
+.close-btn{background:transparent;border:none;font-size:18px;float:right}.popup-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+.popup-content {
+  background: white;
+  border-radius: 16px;
+  width: 700px;
+  max-width: 90%;
+  padding: 20px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  animation: popupFade 0.25s ease;
+}
+
+@keyframes popupFade {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.close-btn {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  background: transparent;
+  border: none;
+  font-size: 22px;
+  cursor: pointer;
+}
+
+.popup-body {
+  display: flex;
+  gap: 20px;
+}
+
+.popup-image {
+  width: 45%;
+  border-radius: 10px;
+  object-fit: cover;
+}
+
+.popup-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.popup-title {
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.popup-description {
+  color: #555;
+  margin: 8px 0;
+}
+
+.popup-price {
+  color: #e91e63;
+  font-weight: 600;
+  font-size: 20px;
+}
+
+.quantity-control {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.quantity-control button {
+  width: 30px;
+  height: 30px;
+  font-size: 20px;
+  border: 1px solid #ddd;
+  background: white;
+  cursor: pointer;
+}
+
+.add-btn {
+  background: #ff6600;
+  color: white;
+  border: none;
+  padding: 12px;
+  margin-top: 20px;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.add-btn:hover {
+  background: #e55b00;
+}
