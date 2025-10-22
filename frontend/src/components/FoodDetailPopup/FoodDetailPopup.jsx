@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { createPortal } from "react-dom";
 import "./FoodDetailPopup.css";
 
 const FoodDetailPopup = ({ food, onClose, addToCart }) => {
@@ -15,7 +16,7 @@ const FoodDetailPopup = ({ food, onClose, addToCart }) => {
   const increaseQty = () => setQuantity((prev) => prev + 1);
   const decreaseQty = () => setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
 
-  return (
+  const popup = (
     <div className="popup-overlay" onClick={onClose}>
       <div className="popup-content" onClick={(e) => e.stopPropagation()}>
         <button className="close-btn" onClick={onClose}>✕</button>
@@ -44,6 +45,12 @@ const FoodDetailPopup = ({ food, onClose, addToCart }) => {
       </div>
     </div>
   );
+
+  if (typeof document !== 'undefined') {
+    return createPortal(popup, document.body);
+  }
+
+  return popup;
 };
 
 export default FoodDetailPopup;
