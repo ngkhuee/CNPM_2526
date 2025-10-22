@@ -20,10 +20,12 @@ const FoodDetailPopup = ({ food, onClose, addToCart }) => {
       <div className="popup-content" onClick={(e) => e.stopPropagation()}>
         <button className="close-btn" onClick={onClose}>✕</button>
 
-        <div className="popup-body">
-          <img src={food.image} alt={food.name} className="popup-image" />
+        <div className="popup-inner">
+          <div className="popup-left">
+            <img src={food.image} alt={food.name} className="popup-image" />
+          </div>
 
-          <div className="popup-info">
+          <div className="popup-right">
             <h2 className="popup-title">{food.name}</h2>
             <p className="popup-description">{food.description}</p>
             <p className="popup-price">{(food.price * 1000).toLocaleString()}đ</p>
@@ -34,8 +36,8 @@ const FoodDetailPopup = ({ food, onClose, addToCart }) => {
               <button onClick={increaseQty}>+</button>
             </div>
 
-            <button className="add-btn" onClick={handleAddToCart}>
-              🛒 Thêm vào giỏ
+            <button className="popup-cta" onClick={handleAddToCart}>
+              GỌI ĐẶT HÀNG - 19006960
             </button>
           </div>
         </div>
