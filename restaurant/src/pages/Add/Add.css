@@ -1,35 +1,102 @@
-.add{
-    width: 70%;
-    margin-left: max(5vw,25px);
-    margin-top: 50px;
-    color: #6D6D6D;
-    font-size: 16px;
+.add {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  max-width: 900px;
+  margin: 0 auto;
+  font-family: 'Arial', sans-serif;
 }
-.add form{
-   gap: 20px;
+
+.add-title {
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 10px;
 }
-.add-img-upload img{
-    width: 120px;
+
+.add-form {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
 }
-.add-product-name, .add-product-description{
-    width: max(40%,280px);
+
+.add-left, .add-right {
+  flex: 1;
+  min-width: 250px;
 }
-.add-product-name input ,.add-product-description textarea{
-    padding: 10px 10px;
+
+.label {
+  font-weight: 500;
+  margin-bottom: 5px;
 }
-.add-category-price{
-    display: flex;
-    gap: 30px;
+
+.upload-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  border: 2px dashed #ccc;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: border-color 0.2s;
 }
-.add-category-price select,.add-category-price input{
-    max-width: 120px;
-    padding: 10px;
+
+.upload-box:hover {
+  border-color: #888;
 }
-.add-btn{
-    max-width: 120px;
-    border: none;
-    padding: 10px;
-    background-color: black;
-    color: white;
-    cursor: pointer;
+
+.upload-box img {
+  width: 150px;
+  height: 150px;
+  object-fit: cover;
+  margin-bottom: 5px;
+  border-radius: 6px;
+}
+
+.add-right input[type="text"],
+.add-right input[type="number"],
+.add-right textarea,
+.add-right select {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.add-bottom {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.category-box, .price-box {
+  flex: 1;
+  min-width: 120px;
+}
+
+.price-preview {
+  margin-top: 3px;
+  color: #555;
+  font-size: 14px;
+}
+
+.add-btn {
+  background-color: #4caf50;
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+  margin-top: 10px;
+  transition: background-color 0.2s;
+}
+
+.add-btn:hover {
+  background-color: #45a049;
 }

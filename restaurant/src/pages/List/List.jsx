@@ -1,66 +1,88 @@
-import React, { useEffect, useState } from 'react'
-import './List.css'
-import { url } from '../../assets/assets'
-import axios from 'axios';
-import { toast } from 'react-toastify';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import './List.css';
 
-const List = () => {
+const List = ({ foods, setFoods }) => {
+  const [search, setSearch] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('All');
+  const navigate = useNavigate();
 
-  const [list,setList] = useState([]);
-  
-  const fetchList = async () => {
-    const response = await axios.get(`${url}/api/food/list`)
-    if(response.data.success)
-    {
-      setList(response.data.data);
-    }
-    else{
-      toast.error("Error")
-    }
-  }
+  useEffect(() => {
+    const storedFoods = JSON.parse(localStorage.getItem('foods') || '[]');
+    setFoods(storedFoods);
+  }, [setFoods]);
 
-  const removeFood = async (foodId) => {
-    const response = await axios.post(`${url}/api/food/remove`,{
-      id:foodId
-    })
-    await fetchList();
-    if (response.data.success) {
-      toast.success(response.data.message);
-    }
-    else {
-      toast.error("Error")
-    }
-  }
+  const updateFoods = (newFoods) => {
+    setFoods(newFoods);
+    localStorage.setItem('foods', JSON.stringify(newFoods));
+  };
 
-  useEffect(()=>{
-    fetchList();
-  },[])
+  const removeFood = (id) => updateFoods(foods.filter((f) => f.id !== id));
+
+  const formatVND = (value) =>
+    new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
+      currency: 'VND',
+    }).format(value || 0);
+
+  const categories = ['All', ...new Set(foods.map((f) => f.category || 'Uncategorized'))];
+
+  const filteredFoods = foods.filter((item) => {
+    const matchName = item.name.toLowerCase().includes(search.toLowerCase());
+    const matchCategory = categoryFilter === 'All' || item.category === categoryFilter;
+    return matchName && matchCategory;
+  });
 
   return (
-    <div className='list add flex-col'>
-        <p>All Foods List</p>
-        <div className='list-table'>
-          <div className="list-table-format title">
-            <b>Image</b>
-            <b>Name</b>
-            <b>Category</b>
-            <b>Price</b>
-            <b>Action</b>
-          </div>
-          {list.map((item,index)=>{
-            return (
-              <div key={index} className='list-table-format'>
-                <img src={`${url}/images/`+item.image} alt="" />
-                <p>{item.name}</p>
-                <p>{item.category}</p>
-                <p>${item.price}</p>
-                <p className='cursor' onClick={()=>removeFood(item._id)}>x</p>
-              </div>
-            )
-          })}
-        </div>
-    </div>
-  )
-}
+    <div className="main-content">
+      <div className="list-header">
+        <h2>All Foods List</h2>
+        <button className="add-btn" onClick={() => navigate('/add')}>
+          + Add New Food
+        </button>
+      </div>
 
-export default List
+      <div className="list-filters">
+        <input
+          type="text"
+          placeholder="Search by name..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
+        <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)}>
+          {categories.map((cat, idx) => (
+            <option key={idx} value={cat}>
+              {cat}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div className="cards-wrapper">
+        {filteredFoods.length > 0 ? (
+          filteredFoods.map((food) => (
+            <div className="food-card" key={food.id}>
+              <div className="food-img-wrapper">
+                {food.image ? <img src={food.image} alt={food.name} /> : <p>No image</p>}
+              </div>
+              <div className="food-info">
+                <h4>{food.name}</h4>
+                <p>{food.restaurantName}</p>
+                <p>{formatVND(food.price)}</p>
+              </div>
+              <div className="card-actions">
+                <button className="remove-btn" onClick={() => removeFood(food.id)}>
+                  Remove
+                </button>
+              </div>
+            </div>
+          ))
+        ) : (
+          <p className="no-foods">No foods available</p>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default List;

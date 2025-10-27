@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 
 const CheckoutInfo = () => {
   const { cartItems, food_list, getTotalCartAmount, setCartItems } = useContext(StoreContext);
-   const { addOrder } = useContext(OrderContext); 
+  const { addOrder } = useContext(OrderContext);
   const [customer, setCustomer] = useState({
     name: "",
     phone: "",
@@ -25,14 +25,14 @@ const CheckoutInfo = () => {
       return;
     }
 
-    // Tạo đơn hàng
+    // Tạo đơn hàng gốc cho khách (dùng cho MyOrders)
     const newOrder = {
       id: Date.now(),
-      customer: {   // <-- phải có
+      customer: {
         name: customer.name,
         phone: customer.phone,
-        address: customer.address
-        },
+        address: customer.address,
+      },
       items: food_list
         .filter(item => cartItems[item._id] > 0)
         .map(item => ({
@@ -46,14 +46,55 @@ const CheckoutInfo = () => {
       status: "Đang xử lý",
       createdAt: new Date().toLocaleString("vi-VN"),
     };
-    addOrder(newOrder);   // Thêm đơn hàng vào OrderContext
-    setCartItems({});     // Xóa giỏ hàng
+
+    // 🧾 Lưu vào context cho khách (MyOrders)
+    addOrder(newOrder);
+
+    // 🍽️ Gom đơn hàng theo từng nhà hàng
+    const groupedByRestaurant = {};
+    newOrder.items.forEach(item => {
+      if (!groupedByRestaurant[item.restaurant]) {
+        groupedByRestaurant[item.restaurant] = [];
+      }
+      groupedByRestaurant[item.restaurant].push(item);
+    });
+
+    // 🧍‍♂️ Chuẩn bị dữ liệu khách hàng
+    const addressInfo = {
+      firstName: customer.name.split(" ")[0],
+      lastName: customer.name.split(" ")[1] || "",
+      phone: customer.phone,
+      street: customer.address,
+      city: "Hồ Chí Minh",
+      state: "VN",
+      country: "Việt Nam",
+    };
+
+    // 📦 Tạo đơn hàng riêng cho từng nhà hàng
+    const existingOrders = JSON.parse(localStorage.getItem("orders") || "[]");
+    Object.entries(groupedByRestaurant).forEach(([restaurantName, items]) => {
+      const restaurantOrder = {
+        id: newOrder.id + "-" + restaurantName,
+        restaurantName,
+        items,
+        address: addressInfo,
+        amount: items.reduce((sum, it) => sum + it.total, 0),
+        status: "Food Processing",
+        createdAt: newOrder.createdAt,
+      };
+      existingOrders.push(restaurantOrder);
+    });
+
+    // 💾 Lưu vào localStorage để nhà hàng đọc
+    localStorage.setItem("orders", JSON.stringify(existingOrders));
+
+    // ✅ Reset giỏ hàng và điều hướng
+    setCartItems({});
     navigate("/myorders");
   };
 
   return (
     <div className="checkout-page">
-      {/* PHẦN 1 - Form nhập thông tin khách hàng */}
       <div className="checkout-info">
         <h2>Thông tin khách hàng</h2>
         <form onSubmit={handleSubmit}>
@@ -86,7 +127,6 @@ const CheckoutInfo = () => {
         </form>
       </div>
 
-      {/* PHẦN 2 - Danh sách order và tổng bill */}
       <div className="checkout-summary">
         <div className="order-list">
           <h3>Đơn hàng của bạn</h3>

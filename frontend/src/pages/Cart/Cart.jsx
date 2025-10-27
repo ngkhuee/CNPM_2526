@@ -52,6 +52,7 @@ const Cart = () => {
     navigate('/myorders')
   }
 
+  
   return (
     <div className='cart'>
       <div className="cart-items">

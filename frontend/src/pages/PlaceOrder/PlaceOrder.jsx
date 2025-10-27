@@ -55,48 +55,26 @@ const PlaceOrder = () => {
     //         toast.error("Something Went Wrong")
     //     }
     // }
-    const { token, getTotalCartAmount, cartItems, food_list, user } = useContext(StoreContext);
-    const { restaurantId, partners } = useContext(RestaurantContext);
+    const { addOrder } = useContext(OrderContext);
+    const { orders, setOrders } = useContext(RestaurantContext);
+    const { restaurantId } = useContext(RestaurantContext);
+    const { token, getTotalCartAmount } = useContext(StoreContext);
 
     const handlePlaceOrder = () => {
-      if (!restaurantId) return alert("Select a restaurant first!");
-      if (!cartItems || Object.keys(cartItems).length === 0) return alert("Giỏ hàng rỗng");
+    if (!restaurantId) return alert("Select a restaurant first!");
 
-      // build items array from cartItems and food_list
-      const items = [];
-      for (const fid of Object.keys(cartItems)) {
-        const qty = cartItems[fid];
-        const info = (food_list || []).find(f => String(f._id) === String(fid));
-        if (info) {
-          items.push({ name: info.name, quantity: qty, price: info.price });
-        } else {
-          items.push({ name: fid, quantity: qty, price: 0 });
-        }
-      }
-
-      const restaurant = (partners || []).find(r => r._id === restaurantId) || {};
-
-      const amount = items.reduce((s, it) => s + (Number(it.price || 0) * 1000) * it.quantity, 0);
-
-      const newOrder = {
-        id: Date.now().toString(),
-        _id: Date.now().toString(),
-        restaurantId,
-        restaurantName: restaurant.name || "Unknown",
-        items,
-        user: user ? (user.firstName || user.name || user.email) : "Guest",
-        status: "pending",
-        droneStatus: "waiting",
-        amount
-      };
-
-      // write to shared localStorage key 'orders'
-      const existing = JSON.parse(localStorage.getItem('orders') || '[]');
-      existing.push(newOrder);
-      localStorage.setItem('orders', JSON.stringify(existing));
-
-      alert('Order placed!');
+    const newOrder = {
+      _id: Date.now().toString(),
+      restaurantId, // liên kết order với nhà hàng
+      items: ["Pizza 4 Formaggi", "Double Whopper Jr."], // bạn có thể map từ cart
+      user: userName || "User 1",
+      status: "pending",
+      droneStatus: "waiting"
     };
+
+    addOrder(newOrder);
+    alert("Order placed!");
+  };
     // const handlePlaceOrder = () => {
     //     const newOrder = {
     //     _id: Date.now().toString(),
