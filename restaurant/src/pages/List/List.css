@@ -157,3 +157,12 @@
     justify-content: center;
   }
 }
+.food-price {
+  font-weight: 700;
+  color: #fff;
+  background: #a8a4a7; 
+  padding: 4px 10px;
+  border-radius: 8px;
+  display: inline-block;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}

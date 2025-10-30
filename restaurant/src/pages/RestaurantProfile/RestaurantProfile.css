@@ -1,0 +1,257 @@
+.restaurant-profile {
+  padding: 20px;
+  max-width: 900px;
+  margin: auto;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+.restaurant-profile h2 {
+  text-align: center;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.banner-section {
+  position: relative;
+  width: 100%;
+}
+
+.restaurant-banner {
+  width: 100%; 
+  height: auto; 
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+.upload-banner-btn {
+  position: absolute;
+  bottom: 15px;
+  right: 15px;
+  background: #fff;
+  padding: 6px 12px;
+  border-radius: 5px;
+  font-size: 14px;
+  cursor: pointer;
+  border: 1px solid #ccc;
+}
+
+.profile-container {
+  display: flex;
+  align-items: flex-start;
+  gap: 30px;
+  margin-top: 20px;
+}
+
+.left {
+  flex: 1;
+  text-align: center;
+}
+
+.restaurant-logo {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #ddd;
+}
+
+.upload-logo-btn {
+  display: inline-block;
+  margin-top: 10px;
+  font-size: 14px;
+  color: #007bff;
+  cursor: pointer;
+}
+
+.right {
+  flex: 2;
+}
+
+.right form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+label {
+  font-weight: 600;
+  color: #444;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="tel"],
+input[type="time"],
+textarea {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  margin-top: 4px;
+}
+
+textarea {
+  resize: vertical;
+}
+
+.time-row {
+  display: flex;
+  gap: 15px;
+}
+
+.button-group {
+  margin-top: 15px;
+  display: flex;
+  gap: 10px;
+}
+
+.edit-btn, .save-btn, .cancel-btn {
+  padding: 8px 14px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.edit-btn {
+  background: #007bff;
+  color: white;
+}
+
+.save-btn {
+  background: #28a745;
+  color: white;
+}
+
+.cancel-btn {
+  background: #dc3545;
+  color: white;
+}
+.main-content {
+  margin-left: 240px;
+  width: calc(100% - 240px);
+  padding: 20px;
+  box-sizing: border-box;
+  background-color: #f7f9fb;
+  min-height: 100vh;
+}
+.restaurant-profile {
+  max-width: 1000px;
+  margin: 0 auto;
+  background: #fff;
+  border-radius: 10px;
+  padding: 24px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+}
+
+.banner-section {
+  position: relative;
+  width: 100%;
+  height: 200px;
+  overflow: hidden;
+  border-radius: 10px;
+}
+
+.restaurant-banner {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.upload-banner-btn {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  background-color: rgba(0,0,0,0.6);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.profile-container {
+  display: flex;
+  gap: 30px;
+  margin-top: 20px;
+}
+
+.left {
+  flex: 1;
+  text-align: center;
+}
+
+.restaurant-logo {
+  width: 150px;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 3px solid #ddd;
+}
+
+.upload-logo-btn {
+  display: block;
+  margin-top: 10px;
+  background: #f1f1f1;
+  border-radius: 6px;
+  padding: 6px 12px;
+  cursor: pointer;
+}
+
+.right {
+  flex: 2;
+}
+
+.right form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.right label {
+  font-weight: 500;
+  display: flex;
+  flex-direction: column;
+  color: #333;
+}
+
+.right input,
+.right textarea {
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+.time-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.button-group {
+  margin-top: 20px;
+  display: flex;
+  gap: 10px;
+}
+
+.save-btn, .cancel-btn, .edit-btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  color: white;
+  font-weight: 500;
+}
+
+.save-btn {
+  background-color: #4caf50;
+}
+
+.cancel-btn {
+  background-color: #f44336;
+}
+
+.edit-btn {
+  background-color: #ff9800;
+}

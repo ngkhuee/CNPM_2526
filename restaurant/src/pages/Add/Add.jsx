@@ -19,24 +19,54 @@ const Add = ({ foods, setFoods, restaurants }) => {
     setFoods(storedFoods)
   }, [setFoods])
 
-  const onSubmitHandler = (event) => {
-    event.preventDefault()
-    const newFood = {
-      id: Date.now(),
-      ...data,
-      price: Number(data.price),
-      image: image ? URL.createObjectURL(image) : null,
-      // restaurantName: selectedRestaurant,
-      active: true
-    }
-    const updatedFoods = [...foods, newFood]
-    setFoods(updatedFoods)
-    localStorage.setItem('foods', JSON.stringify(updatedFoods))
-    toast.success("✅ Product added successfully!")
+  // const onSubmitHandler = (event) => {
+  //   event.preventDefault()
+  //   const newFood = {
+  //     id: Date.now(),
+  //     ...data,
+  //     price: Number(data.price),
+  //     image: image ? URL.createObjectURL(image) : null,
+  //     // restaurantName: selectedRestaurant,
+  //     active: true
+  //   }
+  //   const updatedFoods = [...foods, newFood]
+  //   setFoods(updatedFoods)
+  //   localStorage.setItem('foods', JSON.stringify(updatedFoods))
+  //   toast.success("✅ Product added successfully!")
 
-    setData({ name: "", description: "", price: "", category: "Pizza" })
-    setImage(null)
+  //   setData({ name: "", description: "", price: "", category: "Pizza" })
+  //   setImage(null)
+  // }
+
+  const onSubmitHandler = (event) => {
+  event.preventDefault();
+
+  if (!image) {
+    toast.error("Please upload an image");
+    return;
   }
+
+  const reader = new FileReader();
+    reader.onloadend = () => {
+      const newFood = {
+        id: Date.now(),
+        ...data,
+        price: Number(data.price),
+        image: reader.result, // ✅ lưu dạng base64 thay vì URL tạm
+        active: true
+      };
+
+      const updatedFoods = [...foods, newFood];
+      setFoods(updatedFoods);
+      localStorage.setItem('foods', JSON.stringify(updatedFoods));
+      toast.success("✅ Product added successfully!");
+
+      setData({ name: "", description: "", price: "", category: "Pizza" });
+      setImage(null);
+    };
+
+    reader.readAsDataURL(image); // đọc ảnh ra base64
+  };
 
   const onChangeHandler = (event) => {
     const { name, value } = event.target
@@ -91,6 +121,7 @@ const Add = ({ foods, setFoods, restaurants }) => {
                 <option>Chicken</option>
                 <option>Wrap</option>
                 <option>Burger</option>
+                <option>Drink</option>
               </select>
             </div>
 

@@ -32,6 +32,7 @@ const Dashboard = () => {
   // }, []);
 
   return (
+  <div className="main-content">
     <div className="dashboard-page">
       <h2>Admin Dashboard</h2>
 
@@ -39,11 +40,13 @@ const Dashboard = () => {
       <div className="cards-container">
         <CardStats title="Users" value={stats.users} />
         <CardStats title="Orders" value={stats.orders} />
-        <CardStats 
-        title="Revenue" 
-        value={new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(stats.revenue)} 
+        <CardStats
+          title="Revenue"
+          value={new Intl.NumberFormat('vi-VN', {
+            style: 'currency',
+            currency: 'VND',
+          }).format(stats.revenue)}
         />
-
       </div>
 
       {/* Biểu đồ */}
@@ -58,7 +61,9 @@ const Dashboard = () => {
         </div>
       </div>
     </div>
-  );
+  </div>
+);
+
 };
 
 export default Dashboard;
