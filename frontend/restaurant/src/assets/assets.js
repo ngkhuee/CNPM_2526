@@ -13,6 +13,7 @@ import Shrimp_combo from './Shrimp_combo.png'
 import milk_coffee from './milk_coffee.png'
 import default_logo from './default_logo.png'
 import default_banner from './default_banner.png'
+import login_bg from './login_bg.png'
 export const assets ={
     logo,
     add_icon,
@@ -28,7 +29,8 @@ export const assets ={
     Shrimp_combo,
     milk_coffee,
     default_logo,
-    default_banner
+    default_banner,
+    login_bg,
 }
 
 export const url = 'https://tomato-food-del-backend-p1ni.onrender.com'

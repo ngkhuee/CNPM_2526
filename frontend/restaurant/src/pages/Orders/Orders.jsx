@@ -30,6 +30,7 @@ const Orders = ({ currentRestaurant }) => {
     new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(value);
 
   return (
+    <div className="main-content">
     <div className="order add">
       <h3>Orders for {currentRestaurant}</h3>
 
@@ -75,6 +76,7 @@ const Orders = ({ currentRestaurant }) => {
         </div>
       )}
     </div>
+  </div>
   );
 };
 

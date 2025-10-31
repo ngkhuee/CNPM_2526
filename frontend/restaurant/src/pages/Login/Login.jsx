@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Login.css';
+import login_bg from '../../assets/login_bg.png';
 
 const restaurants = [
   { username: 'lotteria', password: '123456', name: 'Lotteria' },
@@ -31,27 +32,37 @@ const Login = ({ setCurrentUser }) => {
     };
 
   return (
-    <div className="login-page">
-      <form className="login-form" onSubmit={handleSubmit}>
-        <h2>Đăng nhập nhà hàng</h2>
+    // <div className="login-page">
+    //   <form className="login-form" onSubmit={handleSubmit}>
+    //     <h2>Restaurant Login</h2>
+    //     {error && <p className="error">{error}</p>}
+    //     <input
+    //       type="text"
+    //       placeholder="Username"
+    //       value={username}
+    //       onChange={(e) => setUsername(e.target.value)}
+    //       required
+    //     />
+    //     <input
+    //       type="password"
+    //       placeholder="Password"
+    //       value={password}
+    //       onChange={(e) => setPassword(e.target.value)}
+    //       required
+    //     />
+    //     <button type="submit">Đăng nhập</button>
+    //   </form>
+    // </div>
+    <div className="login-page" style={{ backgroundImage: `url(${login_bg})` }}>
+    <form className="login-form" onSubmit={handleSubmit}>
+        <h2>Restaurant Login</h2>
         {error && <p className="error">{error}</p>}
-        <input
-          type="text"
-          placeholder="Username"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          required
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
-        <button type="submit">Đăng nhập</button>
-      </form>
+        <input type="text" placeholder="Username" value={username} onChange={(e) => setUsername(e.target.value)} required />
+        <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+        <button type="submit">Log in</button>
+    </form>
     </div>
+
   );
 };
 

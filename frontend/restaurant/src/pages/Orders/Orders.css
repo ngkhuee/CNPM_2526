@@ -40,3 +40,11 @@ select {
   border-radius: 6px;
   border: 1px solid #ccc;
 }
+.main-content {
+  margin-left: 240px;
+  width: calc(100% - 240px);
+  padding: 20px;
+  box-sizing: border-box;
+  background-color: #f7f9fb;
+  min-height: 100vh;
+}
