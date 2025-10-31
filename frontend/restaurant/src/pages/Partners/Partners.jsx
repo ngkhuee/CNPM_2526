@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { restaurant_list } from "C:/Users/Admin/Desktop/CNPM/SGU_CNPM/frontend/src/assets/assets.js";
+import { restaurant_list } from "../../../customer/customer-web/src/assets/assets.js";
 import "./Partners.css";
 
 const Partners = () => {
@@ -9,20 +9,20 @@ const Partners = () => {
   const [formData, setFormData] = useState({ name: "", category: "" });
 
   useEffect(() => {
-    const data = restaurant_list.map(r => ({
+    const data = restaurant_list.map((r) => ({
       id: r._id,
       name: r.name,
       email: r.ownerEmail || "example@email.com",
       category: r.category,
       openedAt: r.openedAt,
-      image: r.image
+      image: r.image,
     }));
     setPartners(data);
   }, []);
 
   const handleDelete = (id) => {
     if (window.confirm("Bạn có chắc muốn xóa đối tác này?")) {
-      setPartners(prev => prev.filter(p => p.id !== id));
+      setPartners((prev) => prev.filter((p) => p.id !== id));
     }
   };
 
@@ -33,9 +33,9 @@ const Partners = () => {
   };
 
   const handleSave = () => {
-    setPartners(prev => prev.map(p =>
-      p.id === editingPartner.id ? { ...p, ...formData } : p
-    ));
+    setPartners((prev) =>
+      prev.map((p) => (p.id === editingPartner.id ? { ...p, ...formData } : p))
+    );
     setModalOpen(false);
     setEditingPartner(null);
   };
@@ -55,16 +55,25 @@ const Partners = () => {
           </tr>
         </thead>
         <tbody>
-          {partners.map(p => (
+          {partners.map((p) => (
             <tr key={p.id}>
-              <td><img src={p.image} alt={p.name} className="partner-img" /></td>
+              <td>
+                <img src={p.image} alt={p.name} className="partner-img" />
+              </td>
               <td>{p.name}</td>
               <td>{p.category}</td>
               <td>{p.openedAt}</td>
               <td>{p.email}</td>
               <td>
-                <button className="btn-edit" onClick={() => handleEdit(p)}>Edit</button>
-                <button className="btn-delete" onClick={() => handleDelete(p.id)}>Delete</button>
+                <button className="btn-edit" onClick={() => handleEdit(p)}>
+                  Edit
+                </button>
+                <button
+                  className="btn-delete"
+                  onClick={() => handleDelete(p.id)}
+                >
+                  Delete
+                </button>
               </td>
             </tr>
           ))}
@@ -80,7 +89,9 @@ const Partners = () => {
               <input
                 type="text"
                 value={formData.name}
-                onChange={e => setFormData({...formData, name: e.target.value})}
+                onChange={(e) =>
+                  setFormData({ ...formData, name: e.target.value })
+                }
               />
             </label>
             <label>
@@ -88,7 +99,9 @@ const Partners = () => {
               <input
                 type="text"
                 value={formData.category}
-                onChange={e => setFormData({...formData, category: e.target.value})}
+                onChange={(e) =>
+                  setFormData({ ...formData, category: e.target.value })
+                }
               />
             </label>
             <div className="modal-actions">

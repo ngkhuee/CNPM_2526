@@ -1,15 +1,15 @@
-import food_1 from 'C:/Users/Admin/Desktop/CNPM/SGU_CNPM/frontend/src/assets/food_1.png';
-import food_2 from 'C:/Users/Admin/Desktop/CNPM/SGU_CNPM/frontend/src/assets/food_2.png';
-import food_3 from 'C:/Users/Admin/Desktop/CNPM/SGU_CNPM/frontend/src/assets/food_3.png';
-import food_4 from 'C:/Users/Admin/Desktop/CNPM/SGU_CNPM/frontend/src/assets/food_4.png';
-import food_5 from 'C:/Users/Admin/Desktop/CNPM/SGU_CNPM/frontend/src/assets/food_5.png';
-import food_6 from 'C:/Users/Admin/Desktop/CNPM/SGU_CNPM/frontend/src/assets/food_6.png';
-import food_7 from 'C:/Users/Admin/Desktop/CNPM/SGU_CNPM/frontend/src/assets/food_7.png';
-import food_8 from 'C:/Users/Admin/Desktop/CNPM/SGU_CNPM/frontend/src/assets/food_8.png';
-import food_9 from 'C:/Users/Admin/Desktop/CNPM/SGU_CNPM/frontend/src/assets/food_9.png';
-import food_10 from 'C:/Users/Admin/Desktop/CNPM/SGU_CNPM/frontend/src/assets/food_10.png';
-import food_11 from 'C:/Users/Admin/Desktop/CNPM/SGU_CNPM/frontend/src/assets/food_11.png';
-import food_12 from 'C:/Users/Admin/Desktop/CNPM/SGU_CNPM/frontend/src/assets/food_12.png';
+import food_1 from "../../customer/customer-web/src/assets/food_1.png";
+import food_2 from "../../customer/customer-web/src/assets/food_2.png";
+import food_3 from "../../customer/customer-web/src/assets/food_3.png";
+import food_4 from "../../customer/customer-web/src/assets/food_4.png";
+import food_5 from "../../customer/customer-web/src/assets/food_5.png";
+import food_6 from "../../customer/customer-web/src/assets/food_6.png";
+import food_7 from "../../customer/customer-web/src/assets/food_7.png";
+import food_8 from "../../customer/customer-web/src/assets/food_8.png";
+import food_9 from "../../customer/customer-web/src/assets/food_9.png";
+import food_10 from "../../customer/customer-web/src/assets/food_10.png";
+import food_11 from "../../customer/customer-web/src/assets/food_11.png";
+import food_12 from "../../customer/customer-web/src/assets/food_12.png";
 
 export const food_list = [
   // Pizza Belga
@@ -20,7 +20,7 @@ export const food_list = [
     price: 300000,
     description: "Mozzarella, Gouda, Parmesan, Gorgonzola",
     category: "Pizza",
-    restaurant: "Belga Pizza"
+    restaurant: "Belga Pizza",
   },
   {
     _id: "2",
@@ -29,7 +29,7 @@ export const food_list = [
     price: 260000,
     description: "Tomato, Mozzarella, Goat Cheese, Honey, Walnuts",
     category: "Pizza",
-    restaurant: "Belga Pizza"
+    restaurant: "Belga Pizza",
   },
 
   // Lotteria
@@ -40,7 +40,7 @@ export const food_list = [
     price: 91000,
     description: "two beef Whopper grilled",
     category: "Burger",
-    restaurant: "Lotteria"
+    restaurant: "Lotteria",
   },
   {
     _id: "4",
@@ -49,7 +49,7 @@ export const food_list = [
     price: 95000,
     description: "Juicy chicken burger with cheese",
     category: "Chicken",
-    restaurant: "Lotteria"
+    restaurant: "Lotteria",
   },
 
   // Pizza 4P's
@@ -60,7 +60,7 @@ export const food_list = [
     price: 254000,
     description: "Spicy garlic shrimp pizza",
     category: "Pizza",
-    restaurant: "Pizza 4P's"
+    restaurant: "Pizza 4P's",
   },
   {
     _id: "6",
@@ -69,7 +69,7 @@ export const food_list = [
     price: 298000,
     description: "Fresh burrata with tomatoes",
     category: "Pizza",
-    restaurant: "Pizza 4P's"
+    restaurant: "Pizza 4P's",
   },
 
   // Texas Chicken
@@ -80,7 +80,7 @@ export const food_list = [
     price: 69000,
     description: "Signature crispy fried chicken",
     category: "Wrap",
-    restaurant: "Texas Chicken"
+    restaurant: "Texas Chicken",
   },
   {
     _id: "8",
@@ -89,7 +89,7 @@ export const food_list = [
     price: 189000,
     description: "Golden crispy nuggets",
     category: "Chicken",
-    restaurant: "Texas Chicken"
+    restaurant: "Texas Chicken",
   },
 
   // Today With You
@@ -100,16 +100,17 @@ export const food_list = [
     price: 290000,
     description: "Fettuccine, Chicken, Tomato Sauce, Cream",
     category: "Pasta",
-    restaurant: "Today With You"
+    restaurant: "Today With You",
   },
   {
     _id: "10",
     name: "PESCE",
     image: food_10,
     price: 450000,
-    description: "Shrimps, Squid, Octopus,Mussels, Clam, Tomato Sauce, Pepperoncino",
+    description:
+      "Shrimps, Squid, Octopus,Mussels, Clam, Tomato Sauce, Pepperoncino",
     category: "Pasta",
-    restaurant: "Today With You"
+    restaurant: "Today With You",
   },
 
   // Burger King
@@ -120,7 +121,7 @@ export const food_list = [
     price: 69000,
     description: "Cheesy beef burger",
     category: "Burger",
-    restaurant: "Burger King"
+    restaurant: "Burger King",
   },
   {
     _id: "12",
@@ -129,6 +130,6 @@ export const food_list = [
     price: 125000,
     description: "3pcs crispy chicken with bbq sauce, fries and drink",
     category: "Chicken",
-    restaurant: "Burger King"
+    restaurant: "Burger King",
   },
 ];
