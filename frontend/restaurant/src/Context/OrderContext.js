@@ -1,66 +1,96 @@
 // src/Context/OrderContext.js
 import React, { createContext, useState, useEffect } from "react";
+import { orderService } from "@api/services";
+import { authService } from "@api/services";
 
 export const OrderContext = createContext();
 
 export const OrderProvider = ({ children }) => {
-  
-  const [orders, setOrders] = useState(() => {
-    // Lấy từ localStorage (user thêm đơn vào đây)
-    const saved = localStorage.getItem("orders");
-    return saved ? JSON.parse(saved) : [];
-  });
-  // Khi user tạo đơn, lưu vào localStorage
-  const addOrder = (order) => {
-    const updated = [...orders, order];
-    setOrders(updated);
-    localStorage.setItem("orders", JSON.stringify(updated));
-  };
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-  const updateOrderStatus = (id, status) => {
-    const updated = orders.map(o => o._id === id ? { ...o, status } : o);
-    setOrders(updated);
-    localStorage.setItem("orders", JSON.stringify(updated));
-  };
-
-  // Lắng nghe thay đổi từ tab khác (admin app)
+  // Fetch restaurant orders on mount (requires restaurantId from user)
   useEffect(() => {
-    const handleStorage = (e) => {
-      if (e.key === "orders") {
-        const newOrders = e.newValue ? JSON.parse(e.newValue) : [];
-        setOrders(newOrders);
-      }
-    };
-    window.addEventListener("storage", handleStorage);
-    return () => window.removeEventListener("storage", handleStorage);
+    const user = authService.getCurrentUser();
+    if (user && user.restaurantId) {
+      fetchRestaurantOrders(user.restaurantId);
+    }
   }, []);
 
-    // Nếu user thêm đơn mới thì admin tự động sync lại
+  // Auto-refresh orders every 30 seconds
+  useEffect(() => {
+    const user = authService.getCurrentUser();
+    if (user && user.restaurantId) {
+      const interval = setInterval(() => {
+        fetchRestaurantOrders(user.restaurantId);
+      }, 30000);
+      return () => clearInterval(interval);
+    }
+  }, []);
 
-    // useEffect(() => {
-    //   const syncOrders = () => {
-    //     const saved = localStorage.getItem("orders");
-    //     setOrders(saved ? JSON.parse(saved) : []);
-    //   };
+  // Fetch orders for specific restaurant
+  const fetchRestaurantOrders = async (restaurantId) => {
+    try {
+      setLoading(true);
+      const restaurantOrders = await orderService.getByRestaurant(restaurantId);
+      setOrders(restaurantOrders);
+    } catch (error) {
+      console.error("Error fetching restaurant orders:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    //   window.addEventListener("storage", syncOrders);
-    //   return () => window.removeEventListener("storage", syncOrders);
-    // }, []);
+  // Add new order
+  const addOrder = async (orderData) => {
+    try {
+      const newOrder = await orderService.create(orderData);
+      setOrders((prev) => [...prev, newOrder]);
+      return { success: true, order: newOrder };
+    } catch (error) {
+      console.error("Error adding order:", error);
+      return { success: false, message: error.message };
+    }
+  };
 
-    // Hàm cập nhật trạng thái đơn hàng
+  // Update order status
+  const updateOrderStatus = async (orderId, status) => {
+    try {
+      await orderService.updateStatus(orderId, status);
+      setOrders((prev) =>
+        prev.map((o) => (o.id === orderId ? { ...o, status } : o))
+      );
+    } catch (error) {
+      console.error("Error updating order status:", error);
+    }
+  };
 
-    // const updateOrderStatus = (orderId, newStatus) => {
-    //   const updated = orders.map((order) =>
-    //     order._id === orderId ? { ...order, status: newStatus } : order
-    //   );
-    //   setOrders(updated);
-    //   localStorage.setItem("orders", JSON.stringify(updated)); // lưu lại để đồng bộ
-    // };
+  // Update drone status
+  const updateDroneStatus = async (orderId, droneStatus) => {
+    try {
+      await orderService.update(orderId, { droneStatus });
+      setOrders((prev) =>
+        prev.map((o) => (o.id === orderId ? { ...o, droneStatus } : o))
+      );
+    } catch (error) {
+      console.error("Error updating drone status:", error);
+    }
+  };
 
-    // Dùng React.createElement thay cho JSX
+  // Dùng React.createElement thay cho JSX
   return React.createElement(
     OrderContext.Provider,
-    { value: { orders, setOrders, updateOrderStatus } },
+    {
+      value: {
+        orders,
+        setOrders,
+        updateOrderStatus,
+        updateDroneStatus,
+        addOrder,
+        fetchRestaurantOrders,
+        loading,
+      },
+    },
     children
   );
 };

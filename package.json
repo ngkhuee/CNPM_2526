@@ -2,15 +2,17 @@
   "name": "cnpm-food-delivery",
   "version": "1.0.0",
   "scripts": {
-    "install:all": "cd frontend/customer/customer-web && npm install && cd ../../admin && npm install && cd ../restaurant && npm install && cd ../../backend && npm install",
+    "install:all": "cd frontend/customer/customer-web && npm install && cd ../../admin && npm install && cd ../restaurant && npm install && cd ../../backend/json-server && npm install",
     "dev:customer": "cd frontend/customer/customer-web && npm run dev",
     "dev:admin": "cd frontend/admin && npm run dev",
     "dev:restaurant": "cd frontend/restaurant && npm run dev",
-    "dev:backend": "cd backend && npm start",
-    "dev": "concurrently \"npm run dev:customer\" \"npm run dev:admin\" \"npm run dev:restaurant\" \"npm run dev:backend\"",
+    "dev:backend": "cd backend/json-server && npm run dev",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:customer\" \"npm run dev:admin\" \"npm run dev:restaurant\"",
     "dev:frontend": "concurrently \"npm run dev:customer\" \"npm run dev:admin\" \"npm run dev:restaurant\""
   },
   "dependencies": {
+    "axios": "^1.13.1",
+    "jwt-decode": "^4.0.0",
     "react-router-dom": "^7.9.4",
     "recharts": "^3.3.0"
   },

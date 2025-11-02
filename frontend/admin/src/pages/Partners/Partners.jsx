@@ -1,24 +1,38 @@
 import React, { useState, useEffect } from "react";
-import { restaurant_list } from "../../assets/assets.js";
+import { restaurantService } from "@api/services";
+import { getImageUrl } from "@utils/imageHelper";
 import "./Partners.css";
 
 const Partners = () => {
   const [partners, setPartners] = useState([]);
-  const [editingPartner, setEditingPartner] = useState(null); // partner đang edit
+  const [editingPartner, setEditingPartner] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [formData, setFormData] = useState({ name: "", category: "" });
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const data = restaurant_list.map((r) => ({
-      id: r._id,
-      name: r.name,
-      email: r.ownerEmail || "example@email.com",
-      category: r.category,
-      openedAt: r.openedAt,
-      image: r.image,
-    }));
-    setPartners(data);
+    fetchPartners();
   }, []);
+
+  const fetchPartners = async () => {
+    try {
+      setLoading(true);
+      const restaurants = await restaurantService.getAll();
+      const data = restaurants.map((r) => ({
+        id: r.id,
+        name: r.name,
+        email: r.ownerEmail || "example@email.com",
+        category: r.category,
+        openedAt: r.openedAt,
+        image: r.image,
+      }));
+      setPartners(data);
+    } catch (error) {
+      console.error("Error fetching partners:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleDelete = (id) => {
     if (window.confirm("Bạn có chắc muốn xóa đối tác này?")) {
@@ -58,7 +72,11 @@ const Partners = () => {
           {partners.map((p) => (
             <tr key={p.id}>
               <td>
-                <img src={p.image} alt={p.name} className="partner-img" />
+                <img
+                  src={getImageUrl(p.image)}
+                  alt={p.name}
+                  className="partner-img"
+                />
               </td>
               <td>{p.name}</td>
               <td>{p.category}</td>

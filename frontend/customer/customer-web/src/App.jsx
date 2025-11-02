@@ -6,7 +6,6 @@ import Navbar from "./components/Navbar/Navbar";
 import { Route, Routes, useNavigate } from "react-router-dom";
 import Cart from "./pages/Cart/Cart";
 import LoginPopup from "./components/LoginPopup/LoginPopup";
-import { users } from "./assets/assets";
 import PlaceOrder from "./pages/PlaceOrder/PlaceOrder";
 import MyOrders from "./pages/MyOrders/MyOrders";
 import { ToastContainer } from "react-toastify";
@@ -19,38 +18,15 @@ import Partners from "./pages/Restaurant/Partners";
 import Orders from "./pages/Restaurant/Orders";
 import MenuList from "./pages/Restaurant/MenuList";
 import MenuAdd from "./pages/Restaurant/MenuAdd";
-import { accounts } from "./assets/assets";
 import CheckoutInfo from "./pages/CheckOutInfo/CheckOutInfo";
 import Tracking from "./pages/Tracking/Tracking";
 
-// Xoá orders cũ khi reload (chỉ để test)
-// localStorage.removeItem("orders");
-// console.log("Đã xoá localStorage key 'orders'");
-
 const App = () => {
   const [showLogin, setShowLogin] = useState(false);
-  const [restaurantId, setRestaurantId] = useState(null); // chọn nhà hàng để quản lý
+  const [restaurantId, setRestaurantId] = useState(null);
   const navigate = useNavigate();
 
-  const handleLogin = (email, password) => {
-    const found = accounts.find(
-      (u) => u.email === email && u.password === password
-    );
-    if (found) {
-      localStorage.setItem("user", JSON.stringify(found));
-      alert(`Đăng nhập thành công với role: ${found.role}`);
-
-      if (found.role === "admin") {
-        window.location.href = "http://localhost:5174/admin"; // admin app
-      } else if (found.role === "restaurant") {
-        navigate("/restaurant/dashboard"); // restaurant super-admin
-      } else {
-        navigate("/"); // user app
-      }
-    } else {
-      alert("Email hoặc mật khẩu không đúng!");
-    }
-  };
+  // handleLogin is now handled in LoginPopup via authService
 
   return (
     <OrderProvider>

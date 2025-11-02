@@ -1,15 +1,14 @@
 import React, { useContext, useEffect, useState } from "react";
 import { RestaurantContext } from "../../Context/RestaurantContext";
-import { restaurant_list } from "../../assets/assets";
 
 const Dashboard = () => {
-  const { restaurantId } = useContext(RestaurantContext); // id hiện tại
+  const { partners, restaurantId } = useContext(RestaurantContext); // get from context
   const [restaurantData, setRestaurantData] = useState(null);
 
   useEffect(() => {
-    const data = restaurant_list.find(r => r._id === restaurantId);
+    const data = partners.find((r) => r.id === restaurantId);
     setRestaurantData(data);
-  }, [restaurantId]);
+  }, [restaurantId, partners]);
 
   if (!restaurantData) return <div>Loading...</div>;
 
@@ -19,12 +18,14 @@ const Dashboard = () => {
       <h3>Orders:</h3>
       <ul>
         {restaurantData.orders?.length > 0 ? (
-            restaurantData.orders.map((order, i) => (
-                <li key={i}>{order.item} - {order.status}</li>
-            ))
-            ) : (
-            <li>No orders yet</li>
-            )}
+          restaurantData.orders.map((order, i) => (
+            <li key={i}>
+              {order.item} - {order.status}
+            </li>
+          ))
+        ) : (
+          <li>No orders yet</li>
+        )}
       </ul>
     </div>
   );

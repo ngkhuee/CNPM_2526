@@ -1,11 +1,14 @@
 import React, { useState } from "react";
 import { createPortal } from "react-dom";
 import "./FoodDetailPopup.css";
+import { getImageUrl } from "@utils/imageHelper";
 
 const FoodDetailPopup = ({ food, onClose, addToCart }) => {
   const [quantity, setQuantity] = useState(1);
 
   if (!food) return null;
+
+  const imageUrl = getImageUrl(food.image); // Build full URL
 
   const handleAddToCart = () => {
     // addToCart supports (itemId, qty)
@@ -19,17 +22,21 @@ const FoodDetailPopup = ({ food, onClose, addToCart }) => {
   const popup = (
     <div className="popup-overlay" onClick={onClose}>
       <div className="popup-content" onClick={(e) => e.stopPropagation()}>
-        <button className="close-btn" onClick={onClose}>✕</button>
+        <button className="close-btn" onClick={onClose}>
+          ✕
+        </button>
 
         <div className="popup-inner">
           <div className="popup-left">
-            <img src={food.image} alt={food.name} className="popup-image" />
+            <img src={imageUrl} alt={food.name} className="popup-image" />
           </div>
 
           <div className="popup-right">
             <h2 className="popup-title">{food.name}</h2>
             <p className="popup-description">{food.description}</p>
-            <p className="popup-price">{(food.price * 1000).toLocaleString()}đ</p>
+            <p className="popup-price">
+              {(food.price * 1000).toLocaleString()}đ
+            </p>
 
             <div className="quantity-control">
               <button onClick={decreaseQty}>−</button>
@@ -46,7 +53,7 @@ const FoodDetailPopup = ({ food, onClose, addToCart }) => {
     </div>
   );
 
-  if (typeof document !== 'undefined') {
+  if (typeof document !== "undefined") {
     return createPortal(popup, document.body);
   }
 

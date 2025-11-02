@@ -1,66 +1,88 @@
 // src/Context/OrderContext.js
 import React, { createContext, useState, useEffect } from "react";
+import { orderService } from "@api/services";
 
 export const OrderContext = createContext();
 
 export const OrderProvider = ({ children }) => {
-  
-  const [orders, setOrders] = useState(() => {
-    // Lấy từ localStorage (user thêm đơn vào đây)
-    const saved = localStorage.getItem("orders");
-    return saved ? JSON.parse(saved) : [];
-  });
-  // Khi user tạo đơn, lưu vào localStorage
-  const addOrder = (order) => {
-    const updated = [...orders, order];
-    setOrders(updated);
-    localStorage.setItem("orders", JSON.stringify(updated));
-  };
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-  const updateOrderStatus = (id, status) => {
-    const updated = orders.map(o => o._id === id ? { ...o, status } : o);
-    setOrders(updated);
-    localStorage.setItem("orders", JSON.stringify(updated));
-  };
-
-  // Lắng nghe thay đổi từ tab khác (admin app)
+  // Fetch all orders on mount (Admin sees all orders)
   useEffect(() => {
-    const handleStorage = (e) => {
-      if (e.key === "orders") {
-        const newOrders = e.newValue ? JSON.parse(e.newValue) : [];
-        setOrders(newOrders);
-      }
-    };
-    window.addEventListener("storage", handleStorage);
-    return () => window.removeEventListener("storage", handleStorage);
+    fetchOrders();
   }, []);
 
-    // Nếu user thêm đơn mới thì admin tự động sync lại
+  // Auto-refresh orders every 30 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetchOrders();
+    }, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
-    // useEffect(() => {
-    //   const syncOrders = () => {
-    //     const saved = localStorage.getItem("orders");
-    //     setOrders(saved ? JSON.parse(saved) : []);
-    //   };
+  // Fetch all orders from API
+  const fetchOrders = async () => {
+    try {
+      setLoading(true);
+      const allOrders = await orderService.getAll();
+      setOrders(allOrders);
+    } catch (error) {
+      console.error("Error fetching orders:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    //   window.addEventListener("storage", syncOrders);
-    //   return () => window.removeEventListener("storage", syncOrders);
-    // }, []);
+  // Add new order
+  const addOrder = async (orderData) => {
+    try {
+      const newOrder = await orderService.create(orderData);
+      setOrders((prev) => [...prev, newOrder]);
+      return { success: true, order: newOrder };
+    } catch (error) {
+      console.error("Error adding order:", error);
+      return { success: false, message: error.message };
+    }
+  };
 
-    // Hàm cập nhật trạng thái đơn hàng
+  // Update order status
+  const updateOrderStatus = async (orderId, status) => {
+    try {
+      await orderService.updateStatus(orderId, status);
+      setOrders((prev) =>
+        prev.map((o) => (o.id === orderId ? { ...o, status } : o))
+      );
+    } catch (error) {
+      console.error("Error updating order status:", error);
+    }
+  };
 
-    // const updateOrderStatus = (orderId, newStatus) => {
-    //   const updated = orders.map((order) =>
-    //     order._id === orderId ? { ...order, status: newStatus } : order
-    //   );
-    //   setOrders(updated);
-    //   localStorage.setItem("orders", JSON.stringify(updated)); // lưu lại để đồng bộ
-    // };
+  // Cancel order
+  const cancelOrder = async (orderId) => {
+    try {
+      await orderService.cancel(orderId);
+      setOrders((prev) =>
+        prev.map((o) => (o.id === orderId ? { ...o, status: "Cancelled" } : o))
+      );
+    } catch (error) {
+      console.error("Error cancelling order:", error);
+    }
+  };
 
-    // Dùng React.createElement thay cho JSX
   return React.createElement(
     OrderContext.Provider,
-    { value: { orders, setOrders, updateOrderStatus } },
+    {
+      value: {
+        orders,
+        setOrders,
+        updateOrderStatus,
+        addOrder,
+        cancelOrder,
+        fetchOrders,
+        loading,
+      },
+    },
     children
   );
 };
