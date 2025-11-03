@@ -1,12 +1,33 @@
-.myorders { padding: 20px; }
-.order-card { background: #fff; padding: 15px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
-.order-card table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-.order-card th, .order-card td { border-bottom: 1px solid #ddd; padding: 8px; text-align: left; }
+.myorders {
+  padding: 20px;
+}
+.order-card {
+  background: #fff;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+.order-card table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+.order-card th,
+.order-card td {
+  border-bottom: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
 /* Nút theo dõi đơn hàng */
 .track-btn {
   display: inline-block;
   padding: 10px 20px;
-  background: linear-gradient(90deg, #ff7e5f, #feb47b); /* gradient màu nổi bật */
+  background: linear-gradient(
+    90deg,
+    #ff7e5f,
+    #feb47b
+  ); /* gradient màu nổi bật */
   color: #fff;
   font-weight: 600;
   border: none;
@@ -15,18 +36,18 @@
   transition: all 0.3s ease;
   text-decoration: none;
   font-size: 14px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 .track-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 12px rgba(0,0,0,0.25);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.25);
   background: linear-gradient(90deg, #ff9966, #ff5e62);
 }
 
 .track-btn:active {
   transform: translateY(1px);
-  box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
 }
 
 /* Optional: responsive text */
@@ -35,4 +56,144 @@
     padding: 8px 16px;
     font-size: 13px;
   }
+}
+
+/* Order actions */
+.order-actions {
+  display: flex;
+  gap: 10px;
+  margin: 15px 0;
+}
+
+.review-btn {
+  padding: 10px 20px;
+  background: #ffc107;
+  color: #333;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 14px;
+}
+
+.review-btn:hover {
+  background: #ffb300;
+  transform: translateY(-2px);
+}
+
+.order-total {
+  margin-top: 15px;
+  font-size: 16px;
+}
+
+/* Review Modal */
+.review-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.review-modal {
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  max-width: 500px;
+  width: 90%;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.review-modal h3 {
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.rating-section {
+  margin: 20px 0;
+}
+
+.rating-section label {
+  display: block;
+  margin-bottom: 10px;
+  font-weight: 600;
+  color: #555;
+}
+
+.stars {
+  display: flex;
+  gap: 10px;
+  font-size: 32px;
+}
+
+.star {
+  cursor: pointer;
+  opacity: 0.3;
+  transition: all 0.2s;
+}
+
+.star.filled {
+  opacity: 1;
+}
+
+.star:hover {
+  transform: scale(1.2);
+}
+
+.comment-section {
+  margin: 20px 0;
+}
+
+.comment-section label {
+  display: block;
+  margin-bottom: 10px;
+  font-weight: 600;
+  color: #555;
+}
+
+.comment-section textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  resize: vertical;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.modal-actions button {
+  flex: 1;
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.modal-actions button:first-child {
+  background: tomato;
+  color: white;
+}
+
+.modal-actions button:last-child {
+  background: #ddd;
+  color: #555;
+}
+
+.modal-actions button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }

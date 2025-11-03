@@ -30,9 +30,22 @@ apiClient.interceptors.response.use(
   (response) => response.data,
   (error) => {
     if (error.response?.status === 401) {
+      // Clear auth data
       localStorage.removeItem("token");
       localStorage.removeItem("user");
-      window.location.href = "/login";
+
+      // Don't force redirect - let components handle it
+      // This prevents infinite refresh loops
+      console.warn("Unauthorized - Please login");
+
+      // Only redirect if not already on login/home page
+      if (
+        window.location.pathname !== "/" &&
+        window.location.pathname !== "/login"
+      ) {
+        // Use React Router navigation instead of hard reload
+        // Components should handle auth state changes
+      }
     }
 
     const errorMessage =

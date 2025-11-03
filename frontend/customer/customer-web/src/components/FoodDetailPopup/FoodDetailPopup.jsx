@@ -34,9 +34,7 @@ const FoodDetailPopup = ({ food, onClose, addToCart }) => {
           <div className="popup-right">
             <h2 className="popup-title">{food.name}</h2>
             <p className="popup-description">{food.description}</p>
-            <p className="popup-price">
-              {(food.price * 1000).toLocaleString()}đ
-            </p>
+            <p className="popup-price">{food.price.toLocaleString("vi-VN")}đ</p>
 
             <div className="quantity-control">
               <button onClick={decreaseQty}>−</button>

@@ -96,7 +96,7 @@ const List = () => {
       alert("✅ Food updated successfully!");
       handleCloseEditModal();
     } else {
-      alert(`❌ Failed to update: ${result.message}`);
+      alert(` Failed to update: ${result.message}`);
     }
   };
   // const handleImageChange = (file) => {
@@ -230,7 +230,9 @@ const List = () => {
                 <h4>{food.name}</h4>
                 <p className="food-category">{getCategoryName(food)}</p>
                 <div className="price-container">
-                  <p className="food-price"><MdLocalOffer /> {formatVND(food.price)}</p>
+                  <p className="food-price">
+                    <MdLocalOffer /> {formatVND(food.price)}
+                  </p>
                 </div>
               </div>
               <div className="card-actions">

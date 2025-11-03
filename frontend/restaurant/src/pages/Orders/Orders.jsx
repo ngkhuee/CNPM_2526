@@ -6,9 +6,17 @@ import { RestaurantContext } from "../../Context/RestaurantContext";
 import { authService } from "@api/services";
 
 const Orders = () => {
-  const { orders, updateOrderStatus, loading } = useContext(OrderContext);
+  const { orders, updateOrderStatus, fetchRestaurantOrders, loading } =
+    useContext(OrderContext);
   const { currentRestaurant } = useContext(RestaurantContext);
   const user = authService.getCurrentUser();
+
+  // Handler để refresh orders thủ công
+  const handleRefresh = async () => {
+    if (user?.restaurantId) {
+      await fetchRestaurantOrders(user.restaurantId);
+    }
+  };
 
   // Filter orders for current restaurant
   const restaurantOrders = orders.filter(
@@ -36,7 +44,56 @@ const Orders = () => {
   return (
     <div className="main-content">
       <div className="order add">
-        <h3>Orders for {currentRestaurant?.name || "Restaurant"}</h3>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: "20px",
+          }}
+        >
+          <div>
+            <h3>Orders for {currentRestaurant?.name || "Restaurant"}</h3>
+            <p
+              style={{
+                fontSize: "12px",
+                color: "#4CAF50",
+                margin: "5px 0 0 0",
+                display: "flex",
+                alignItems: "center",
+                gap: "5px",
+              }}
+            >
+              <span
+                style={{
+                  width: "8px",
+                  height: "8px",
+                  borderRadius: "50%",
+                  backgroundColor: "#4CAF50",
+                  display: "inline-block",
+                  animation: "pulse 2s infinite",
+                }}
+              />
+              Auto-refreshing every 10s
+            </p>
+          </div>
+          <button
+            onClick={handleRefresh}
+            disabled={loading}
+            style={{
+              padding: "10px 20px",
+              backgroundColor: "#4CAF50",
+              color: "white",
+              border: "none",
+              borderRadius: "5px",
+              cursor: loading ? "not-allowed" : "pointer",
+              fontSize: "14px",
+              fontWeight: "500",
+            }}
+          >
+            {loading ? "Refreshing..." : "Manual Refresh"}
+          </button>
+        </div>
 
         {restaurantOrders.length === 0 ? (
           <p>No orders yet for this restaurant.</p>

@@ -3,9 +3,11 @@ import "./CheckOutInfo.css";
 import { StoreContext } from "../../Context/StoreContext";
 import { OrderContext } from "../../Context/OrderContext";
 import { useNavigate } from "react-router-dom";
+import { MdLocationOn, MdCheckCircle, MdError } from "react-icons/md";
 
 const CheckoutInfo = () => {
-  const { cartItems, food_list, getTotalCartAmount, setCartItems } = useContext(StoreContext);
+  const { cartItems, food_list, getTotalCartAmount, clearCart, user } =
+    useContext(StoreContext);
   const { addOrder } = useContext(OrderContext);
   const [customer, setCustomer] = useState({
     name: "",
@@ -18,79 +20,98 @@ const CheckoutInfo = () => {
     setCustomer({ ...customer, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!customer.name || !customer.phone || !customer.address) {
-      alert("❌ Vui lòng nhập đầy đủ thông tin!");
+  const [gpsLocation, setGpsLocation] = React.useState(null);
+  const [loadingGPS, setLoadingGPS] = React.useState(false);
+
+  const handleGetGPS = () => {
+    if (!navigator.geolocation) {
+      alert("Trình duyệt không hỗ trợ GPS");
       return;
     }
 
-    // Tạo đơn hàng gốc cho khách (dùng cho MyOrders)
-    const newOrder = {
-      id: Date.now(),
-      customer: {
-        name: customer.name,
-        phone: customer.phone,
-        address: customer.address,
+    setLoadingGPS(true);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        setGpsLocation({ lat: latitude, lng: longitude });
+        setLoadingGPS(false);
+        alert(
+          `Đã lấy vị trí GPS: ${latitude.toFixed(4)}, ${longitude.toFixed(4)}`
+        );
       },
-      items: food_list
-        .filter(item => cartItems[item._id] > 0)
-        .map(item => ({
-          name: item.name,
-          restaurant: item.restaurant,
-          price: item.price * 1000,
-          quantity: cartItems[item._id],
-          total: item.price * 1000 * cartItems[item._id],
-        })),
-      total: getTotalCartAmount(),
-      status: "Đang xử lý",
-      createdAt: new Date().toLocaleString("vi-VN"),
-    };
-
-    // 🧾 Lưu vào context cho khách (MyOrders)
-    addOrder(newOrder);
-
-    // 🍽️ Gom đơn hàng theo từng nhà hàng
-    const groupedByRestaurant = {};
-    newOrder.items.forEach(item => {
-      if (!groupedByRestaurant[item.restaurant]) {
-        groupedByRestaurant[item.restaurant] = [];
+      (error) => {
+        setLoadingGPS(false);
+        console.error("GPS error:", error);
+        alert("Không thể lấy vị trí GPS. Vui lòng nhập địa chỉ thủ công.");
       }
-      groupedByRestaurant[item.restaurant].push(item);
+    );
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!customer.name || !customer.phone || !customer.address) {
+      alert("Vui lòng nhập đầy đủ thông tin!");
+      return;
+    }
+
+    // Prepare order items
+    const orderItems = food_list
+      .filter((item) => cartItems[item._id] > 0)
+      .map((item) => ({
+        foodId: item._id,
+        name: item.name,
+        price: item.price, // Price already in VND from DB
+        quantity: cartItems[item._id],
+        restaurantId: item.restaurantId, // Use camelCase from foodService
+      }));
+
+    // Group by restaurant
+    const groupedByRestaurant = {};
+    orderItems.forEach((item) => {
+      if (!groupedByRestaurant[item.restaurantId]) {
+        groupedByRestaurant[item.restaurantId] = [];
+      }
+      groupedByRestaurant[item.restaurantId].push(item);
     });
 
-    // 🧍‍♂️ Chuẩn bị dữ liệu khách hàng
-    const addressInfo = {
-      firstName: customer.name.split(" ")[0],
-      lastName: customer.name.split(" ")[1] || "",
-      phone: customer.phone,
-      street: customer.address,
-      city: "Hồ Chí Minh",
-      state: "VN",
-      country: "Việt Nam",
-    };
+    // Create orders for each restaurant
+    try {
+      for (const [restaurantId, items] of Object.entries(groupedByRestaurant)) {
+        const orderData = {
+          customerId: user?.id || "guest",
+          restaurantId,
+          items,
+          customer: {
+            name: customer.name,
+            phone: customer.phone,
+            address: customer.address,
+          },
+          dropoff_gps: gpsLocation || null, // GPS coordinates hoặc null
+          total_amount: items.reduce(
+            (sum, it) => sum + it.price * it.quantity,
+            0
+          ),
+          status: "pending",
+          payment_method: "online",
+        };
 
-    // 📦 Tạo đơn hàng riêng cho từng nhà hàng
-    const existingOrders = JSON.parse(localStorage.getItem("orders") || "[]");
-    Object.entries(groupedByRestaurant).forEach(([restaurantName, items]) => {
-      const restaurantOrder = {
-        id: newOrder.id + "-" + restaurantName,
-        restaurantName,
-        items,
-        address: addressInfo,
-        amount: items.reduce((sum, it) => sum + it.total, 0),
-        status: "Food Processing",
-        createdAt: newOrder.createdAt,
-      };
-      existingOrders.push(restaurantOrder);
-    });
+        console.log("📦 Creating order:", orderData);
+        const result = await addOrder(orderData);
+        if (!result.success) {
+          alert(`Lỗi tạo đơn hàng: ${result.message}`);
+          return;
+        }
+      }
 
-    // 💾 Lưu vào localStorage để nhà hàng đọc
-    localStorage.setItem("orders", JSON.stringify(existingOrders));
+      // Reset cart (cả frontend và backend)
+      await clearCart();
 
-    // ✅ Reset giỏ hàng và điều hướng
-    setCartItems({});
-    navigate("/myorders");
+      alert(`✅ Đặt hàng thành công! Vui lòng chờ nhà hàng xác nhận.`);
+      navigate("/myorders");
+    } catch (error) {
+      console.error("Order error:", error);
+      alert("Có lỗi xảy ra khi đặt hàng!");
+    }
   };
 
   return (
@@ -121,6 +142,34 @@ const CheckoutInfo = () => {
             onChange={handleInput}
             placeholder="Nhập địa chỉ chi tiết"
           ></textarea>
+
+          <button
+            type="button"
+            onClick={handleGetGPS}
+            disabled={loadingGPS}
+            className="gps-btn"
+            style={{
+              marginBottom: "10px",
+              background: gpsLocation ? "#28a745" : "#007bff",
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              justifyContent: "center",
+            }}
+          >
+            {loadingGPS ? (
+              "Đang lấy GPS..."
+            ) : gpsLocation ? (
+              <>
+                <MdCheckCircle /> Đã lấy GPS
+              </>
+            ) : (
+              <>
+                <MdLocationOn /> Lấy vị trí GPS
+              </>
+            )}
+          </button>
+
           <button type="submit" className="confirm-btn">
             Xác nhận đặt hàng
           </button>
@@ -130,16 +179,17 @@ const CheckoutInfo = () => {
       <div className="checkout-summary">
         <div className="order-list">
           <h3>Đơn hàng của bạn</h3>
-          {food_list.filter(item => cartItems[item._id] > 0).length === 0 ? (
+          {food_list.filter((item) => cartItems[item._id] > 0).length === 0 ? (
             <p>Chưa có sản phẩm nào.</p>
           ) : (
             food_list
-              .filter(item => cartItems[item._id] > 0)
+              .filter((item) => cartItems[item._id] > 0)
               .map((item, i) => (
                 <div key={i} className="order-item">
                   <span>{item.name}</span>
                   <span>
-                    {cartItems[item._id]} x {(item.price * 1000).toLocaleString("vi-VN")}đ
+                    {cartItems[item._id]} x {item.price.toLocaleString("vi-VN")}
+                    đ
                   </span>
                 </div>
               ))

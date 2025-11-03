@@ -417,6 +417,18 @@
       "createdAt": "2023-06-15T00:00:00.000Z"
     },
     {
+      "id": "u_belga",
+      "email": "belga@yummy.com",
+      "password": "123",
+      "role": "restaurant",
+      "name": "Belga Pizza Manager",
+      "restaurantId": "r1",
+      "phone": "0901234567",
+      "avatar": "/images/avatars/restaurant.png",
+      "status": "active",
+      "createdAt": "2020-01-01T00:00:00.000Z"
+    },
+    {
       "id": "u3",
       "email": "lotteria@yummy.com",
       "password": "123",
@@ -491,6 +503,53 @@
   ],
   "orders": [],
   "carts": [],
+  "user_addresses": [
+    {
+      "id": "addr1",
+      "userId": "u2",
+      "address_line": "123 Lê Lợi, Phường Bến Thành",
+      "lat": 10.7729,
+      "lng": 106.6981,
+      "city": "TP.HCM",
+      "district": "Quận 1",
+      "is_default": true,
+      "created_at": "2023-06-15T00:00:00.000Z"
+    }
+  ],
+  "payments": [
+    {
+      "id": "pay1",
+      "orderId": "ord1",
+      "userId": "u2",
+      "amount": 150000,
+      "method": "momo",
+      "status": "success",
+      "transaction_id": "MOMO20251103001",
+      "gateway": "momo",
+      "created_at": "2025-11-03T10:30:00.000Z"
+    }
+  ],
+  "notifications": [
+    {
+      "id": "notif1",
+      "userId": "u2",
+      "type": "push",
+      "title": "Đơn hàng đã xác nhận",
+      "message": "Nhà hàng đang chuẩn bị món ăn cho bạn",
+      "is_read": false,
+      "sent_at": "2025-11-03T10:35:00.000Z"
+    }
+  ],
+  "sessions": [
+    {
+      "id": "sess1",
+      "userId": "u2",
+      "refresh_token": "refresh_token_sample_12345",
+      "expires_at": "2025-12-03T00:00:00.000Z",
+      "is_revoked": false,
+      "created_at": "2025-11-03T00:00:00.000Z"
+    }
+  ],
   "promotions": [
     {
       "id": "p1",
@@ -537,9 +596,7 @@
       "status": "active",
       "restaurantId": "r1",
       "createdBy": "restaurant",
-      "applicableRestaurants": [
-        "r1"
-      ],
+      "applicableRestaurants": ["r1"],
       "usageLimit": 1000,
       "usedCount": 0,
       "id": "04zETdz"

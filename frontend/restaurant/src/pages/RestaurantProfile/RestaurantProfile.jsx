@@ -60,7 +60,7 @@ const RestaurantProfile = () => {
     try {
       const user = authService.getCurrentUser();
       if (!user || !user.restaurantId) {
-        alert("❌ Restaurant ID not found!");
+        alert(" Restaurant ID not found!");
         return;
       }
 
@@ -70,11 +70,11 @@ const RestaurantProfile = () => {
         setEditing(false);
         alert("✅ Restaurant information updated successfully!");
       } else {
-        alert(`❌ Failed to update: ${result.message}`);
+        alert(` Failed to update: ${result.message}`);
       }
     } catch (error) {
       console.error("Error saving restaurant:", error);
-      alert("❌ An error occurred while saving!");
+      alert(" An error occurred while saving!");
     } finally {
       setLoading(false);
     }

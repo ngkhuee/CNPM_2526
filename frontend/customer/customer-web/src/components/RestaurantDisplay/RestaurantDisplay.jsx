@@ -3,6 +3,7 @@ import { StoreContext } from "../../Context/StoreContext";
 import { RestaurantContext } from "../../Context/RestaurantContext";
 import "./RestaurantDisplay.css";
 import RestaurantItem from "../RestaurantItem/RestaurantItem";
+import { MdRestaurant } from "react-icons/md";
 
 const RestaurantDisplay = ({
   filterBy = "category",
@@ -102,7 +103,13 @@ const RestaurantDisplay = ({
             key={item._id}
             image={item.image} //  ảnh đại diện restaurant
             name={item.restaurant}
-            desc={`🍴 ${item.category} • Opened: ${item.openedAt}`}
+            desc={
+              <span
+                style={{ display: "flex", alignItems: "center", gap: "4px" }}
+              >
+                <MdRestaurant /> {item.category} • Opened: {item.openedAt}
+              </span>
+            }
           />
         ))}
       </div>

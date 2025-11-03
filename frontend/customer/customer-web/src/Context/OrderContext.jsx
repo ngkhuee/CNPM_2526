@@ -9,10 +9,27 @@ export const OrderProvider = ({ children }) => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // Fetch user orders when user changes
+  // Fetch user orders when user changes + auto-polling every 5s
   useEffect(() => {
     if (user) {
-      fetchUserOrders();
+      // Check if token exists before fetching
+      const token = localStorage.getItem("token");
+      if (token) {
+        fetchUserOrders();
+
+        // Setup polling interval for real-time updates
+        const interval = setInterval(() => {
+          fetchUserOrders();
+        }, 5000); // Poll every 5 seconds
+
+        console.log("OrderContext: Polling enabled (5s interval)");
+
+        // Cleanup
+        return () => {
+          clearInterval(interval);
+          console.log("OrderContext: Polling stopped");
+        };
+      }
     } else {
       setOrders([]);
     }
@@ -22,12 +39,23 @@ export const OrderProvider = ({ children }) => {
   const fetchUserOrders = async () => {
     if (!user) return;
 
+    // Double check token exists
+    const token = localStorage.getItem("token");
+    if (!token) {
+      console.warn("No token found, skipping order fetch");
+      return;
+    }
+
     try {
       setLoading(true);
       const userOrders = await orderService.getByUser(user.id);
       setOrders(userOrders);
     } catch (error) {
       console.error("Error fetching orders:", error);
+      // If 401, clear orders
+      if (error.message.includes("token")) {
+        setOrders([]);
+      }
     } finally {
       setLoading(false);
     }

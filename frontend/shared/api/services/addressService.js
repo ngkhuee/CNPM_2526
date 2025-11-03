@@ -1,0 +1,69 @@
+import apiClient from "../config/apiClient";
+import { ENDPOINTS } from "../config/endpoints";
+
+export const addressService = {
+  async getByUser(userId) {
+    try {
+      return await apiClient.get(ENDPOINTS.ADDRESSES.BY_USER(userId));
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  async getById(id) {
+    try {
+      return await apiClient.get(ENDPOINTS.ADDRESSES.BY_ID(id));
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  async create(addressData) {
+    try {
+      const newAddress = {
+        ...addressData,
+        is_default: addressData.is_default || false,
+        created_at: new Date().toISOString(),
+      };
+      return await apiClient.post(ENDPOINTS.ADDRESSES.BASE, newAddress);
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  async update(id, addressData) {
+    try {
+      return await apiClient.patch(ENDPOINTS.ADDRESSES.BY_ID(id), {
+        ...addressData,
+        updated_at: new Date().toISOString(),
+      });
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  async delete(id) {
+    try {
+      return await apiClient.delete(ENDPOINTS.ADDRESSES.BY_ID(id));
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  async setDefault(userId, addressId) {
+    try {
+      // Unset all default addresses for user
+      const addresses = await this.getByUser(userId);
+      for (const addr of addresses) {
+        if (addr.is_default && addr.id !== addressId) {
+          await this.update(addr.id, { is_default: false });
+        }
+      }
+
+      // Set new default
+      return await this.update(addressId, { is_default: true });
+    } catch (error) {
+      throw error;
+    }
+  },
+};

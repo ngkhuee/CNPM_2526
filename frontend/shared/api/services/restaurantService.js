@@ -66,9 +66,9 @@ export const restaurantService = {
         image: response.images?.[0] || response.image,
         banner: response.images?.[1] || response.banner,
         ownerUserId: response.owner_user_id,
-        ownerEmail: response.ownerEmail, // Legacy support
-        ownerPhone: response.ownerPhone, // Legacy support
-        reviewCount: response.reviewCount || 0, // Legacy support
+        ownerEmail: response.ownerEmail,
+        ownerPhone: response.ownerPhone,
+        reviewCount: response.reviewCount || 0,
         status: response.status || (response.is_open ? "active" : "inactive"),
         openedAt: response.openedAt,
         createdAt: response.created_at || response.createdAt,

@@ -69,7 +69,7 @@ const Add = () => {
         });
         setImage(null);
       } else {
-        toast.error(`❌ Failed to add: ${result.message}`);
+        toast.error(` Failed to add: ${result.message}`);
       }
 
       setLoading(false);

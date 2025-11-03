@@ -19,23 +19,29 @@ const StoreContextProvider = (props) => {
 
   // Fetch data on mount
   useEffect(() => {
-    // Load user from localStorage
-    const savedUser = authService.getCurrentUser();
-    const savedToken = localStorage.getItem("token");
+    const initializeAuth = async () => {
+      // Load token FIRST, then user (order matters!)
+      const savedToken = localStorage.getItem("token");
+      const savedUser = authService.getCurrentUser();
 
-    if (savedUser && savedToken) {
-      setUser(savedUser);
-      setToken(savedToken);
-    }
+      if (savedToken && savedUser) {
+        // Set both immediately in sequence
+        setToken(savedToken);
+        setUser(savedUser);
 
-    // Fetch initial data
+        // Load cart after auth is set
+        if (savedUser.id) {
+          await loadCart(savedUser.id);
+        }
+      }
+    };
+
+    // Fetch initial data (these don't need auth)
     fetchFoods();
     fetchRestaurants();
 
-    // Load cart if user logged in
-    if (savedUser) {
-      loadCart(savedUser.id);
-    }
+    // Initialize auth state
+    initializeAuth();
   }, []);
 
   // Fetch foods from API
@@ -203,6 +209,19 @@ const StoreContextProvider = (props) => {
     return Object.values(cartItems).reduce((sum, qty) => sum + qty, 0);
   };
 
+  // Clear cart after checkout
+  const clearCart = async () => {
+    if (!user) return;
+
+    try {
+      await cartService.clear(user.id);
+      setCartItems({});
+      console.log("✅ Cart cleared successfully");
+    } catch (error) {
+      console.error("Error clearing cart:", error);
+    }
+  };
+
   const contextValue = {
     food_list,
     restaurant_list,
@@ -212,10 +231,12 @@ const StoreContextProvider = (props) => {
     removeFromCart,
     getTotalCartAmount,
     getCartCount,
+    clearCart,
     token,
     setToken,
     setCartItems,
     user,
+    setUser,
     login,
     logout,
     loading,

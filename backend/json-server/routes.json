@@ -1,7 +1,5 @@
 {
   "/api/*": "/$1",
-  "/auth/login": "/login",
-  "/auth/register": "/register",
   "/restaurants/:id/menu": "/menus?restaurant_id=:id",
   "/menu/:id": "/menus/:id"
 }

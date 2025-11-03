@@ -3,10 +3,11 @@ import "./LoginPopup.css";
 import { StoreContext } from "../../Context/StoreContext";
 import { useNavigate } from "react-router-dom";
 import { authService } from "@api/services";
+import { MdClose } from "react-icons/md";
 
 const LoginPopup = ({ setShowLogin }) => {
-  const { login } = useContext(StoreContext);
-  const [currState, setCurrState] = useState("Sign Up");
+  const { setUser, setToken, cartItems } = useContext(StoreContext);
+  const [currState, setCurrState] = useState("Login"); // Default to Login
   const [data, setData] = useState({ name: "", email: "", password: "" });
   const [agree, setAgree] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -45,19 +46,28 @@ const LoginPopup = ({ setShowLogin }) => {
         const response = await authService.login(data.email, data.password);
 
         if (response.success) {
-          login(response.user);
+          // IMPORTANT: Token đã được lưu trong authService.login()
+          // Set token trong context TRƯỚC user để tránh race condition
+          setToken(response.token);
 
+          // Small delay để đảm bảo token đã được lưu hoàn toàn
+          await new Promise((resolve) => setTimeout(resolve, 100));
+
+          // Bây giờ mới set user (trigger OrderContext fetch)
+          setUser(response.user);
+
+          // Route based on role
           if (response.user.role === "admin") {
             window.location.href = "http://localhost:3001/admin";
           } else if (response.user.role === "restaurant") {
             navigate("/restaurant/dashboard");
           } else {
-            alert(`Logged in as ${response.user.name}`);
+            alert(`Đăng nhập thành công! Xin chào ${response.user.name}`);
           }
 
           setShowLogin(false);
         } else {
-          alert("Email or password incorrect!");
+          alert("Email hoặc mật khẩu không đúng!");
         }
       }
     } catch (error) {
@@ -74,9 +84,14 @@ const LoginPopup = ({ setShowLogin }) => {
           <h2>{currState}</h2>
           <span
             onClick={() => setShowLogin(false)}
-            style={{ cursor: "pointer" }}
+            style={{
+              cursor: "pointer",
+              fontSize: "24px",
+              display: "flex",
+              alignItems: "center",
+            }}
           >
-            ✖
+            <MdClose />
           </span>
         </div>
 

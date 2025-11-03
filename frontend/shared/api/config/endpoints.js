@@ -60,5 +60,33 @@ export const ENDPOINTS = {
     BASE: "/reviews",
     BY_FOOD: (foodId) => `/reviews?foodId=${foodId}`,
     BY_USER: (userId) => `/reviews?userId=${userId}`,
+    BY_RESTAURANT: (restaurantId) => `/reviews?restaurantId=${restaurantId}`,
+  },
+
+  PAYMENTS: {
+    BASE: "/payments",
+    BY_ID: (id) => `/payments/${id}`,
+    BY_ORDER: (orderId) => `/payments?orderId=${orderId}`,
+    PROCESS: "/payments/process",
+    CALLBACK: "/payments/callback",
+  },
+
+  ADDRESSES: {
+    BASE: "/user_addresses",
+    BY_USER: (userId) => `/user_addresses?userId=${userId}`,
+    BY_ID: (id) => `/user_addresses/${id}`,
+  },
+
+  NOTIFICATIONS: {
+    BASE: "/notifications",
+    BY_USER: (userId) => `/notifications?userId=${userId}`,
+    BY_ID: (id) => `/notifications/${id}`,
+    MARK_READ: (id) => `/notifications/${id}`,
+  },
+
+  SESSIONS: {
+    BASE: "/sessions",
+    BY_USER: (userId) => `/sessions?userId=${userId}`,
+    REVOKE: (id) => `/sessions/${id}`,
   },
 };

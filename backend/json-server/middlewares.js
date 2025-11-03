@@ -26,6 +26,8 @@ const validateToken = (req, res, next) => {
     "/restaurants",
     "/categories",
     "/promotions",
+    "/orders", // Allow GET orders without auth (for tracking)
+    "/menus",
   ];
 
   // Allow GET requests to public endpoints

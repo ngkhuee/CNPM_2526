@@ -4,6 +4,7 @@ import { assets } from "../../assets/assets";
 import { StoreContext } from "../../Context/StoreContext";
 import FoodDetailPopup from "../FoodDetailPopup/FoodDetailPopup";
 import { getImageUrl } from "@utils/imageHelper";
+import { MdStorefront } from "react-icons/md";
 
 const FoodItem = ({ image, name, price, desc, id, restaurant }) => {
   const [showPopup, setShowPopup] = useState(false);
@@ -57,10 +58,13 @@ const FoodItem = ({ image, name, price, desc, id, restaurant }) => {
           <p>{name}</p> <img src={assets.rating_starts} alt="" />
         </div>
         <p className="food-item-desc">{desc}</p>
-        <p className="food-item-price">
-          {(price).toLocaleString("vi-VN")}đ
+        <p className="food-item-price">{price.toLocaleString("vi-VN")}đ</p>
+        <p
+          className="food-item-restaurant"
+          style={{ display: "flex", alignItems: "center", gap: "4px" }}
+        >
+          <MdStorefront /> {restaurant}
         </p>
-        <p className="food-item-restaurant">🏪 {restaurant}</p>
       </div>
       {showPopup && (
         <FoodDetailPopup

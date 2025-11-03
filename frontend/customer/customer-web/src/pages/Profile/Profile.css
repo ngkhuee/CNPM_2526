@@ -1,0 +1,237 @@
+.profile-page {
+  max-width: 900px;
+  margin: 50px auto;
+  padding: 20px;
+}
+
+.profile-page h1 {
+  margin-bottom: 30px;
+  color: #333;
+}
+
+.profile-section {
+  background: white;
+  border-radius: 8px;
+  padding: 25px;
+  margin-bottom: 30px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.profile-section h2 {
+  margin-bottom: 20px;
+  color: #555;
+  font-size: 20px;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.section-header button {
+  padding: 8px 16px;
+  background: tomato;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.profile-form .form-group {
+  margin-bottom: 20px;
+}
+
+.profile-form label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #555;
+}
+
+.profile-form input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 14px;
+}
+
+.profile-form input:disabled {
+  background: #f5f5f5;
+  cursor: not-allowed;
+}
+
+.profile-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.profile-actions button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.profile-actions button:first-child {
+  background: tomato;
+  color: white;
+}
+
+.profile-actions button:last-child {
+  background: #ddd;
+  color: #555;
+}
+
+.profile-actions button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Address Form */
+.address-form {
+  background: #f9f9f9;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.address-form .form-group {
+  margin-bottom: 15px;
+}
+
+.gps-btn {
+  width: 100%;
+  padding: 10px;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-bottom: 15px;
+}
+
+.form-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.form-actions button {
+  flex: 1;
+  padding: 10px;
+  background: tomato;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.form-actions button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Addresses List */
+.addresses-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.address-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px;
+  background: #f9f9f9;
+  border-radius: 8px;
+  border: 2px solid #eee;
+}
+
+.address-content {
+  flex: 1;
+}
+
+.address-line {
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 5px;
+}
+
+.address-detail {
+  color: #666;
+  font-size: 14px;
+  margin-bottom: 5px;
+}
+
+.address-gps {
+  color: #999;
+  font-size: 12px;
+  margin-top: 5px;
+}
+
+.default-badge {
+  display: inline-block;
+  padding: 3px 8px;
+  background: #28a745;
+  color: white;
+  border-radius: 3px;
+  font-size: 12px;
+  margin-top: 5px;
+}
+
+.address-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.address-actions button {
+  padding: 8px 15px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.address-actions button:first-child {
+  background: #007bff;
+  color: white;
+}
+
+.address-actions .delete-btn {
+  background: #dc3545;
+  color: white;
+}
+
+.address-actions button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+  .profile-page {
+    padding: 10px;
+    margin: 20px auto;
+  }
+
+  .address-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .address-actions {
+    margin-top: 10px;
+    width: 100%;
+  }
+
+  .address-actions button {
+    flex: 1;
+  }
+}

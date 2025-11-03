@@ -153,7 +153,7 @@ const Promotions = () => {
     const user = authService.getCurrentUser();
 
     if (!user || !user.restaurantId) {
-      alert("❌ Restaurant ID not found!");
+      alert(" Restaurant ID not found!");
       return;
     }
 
