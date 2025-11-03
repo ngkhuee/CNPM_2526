@@ -1,21 +1,40 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import "./List.css";
 import { assets } from "../../assets/assets";
 import { getImageUrl } from "@utils/imageHelper";
+import { FoodContext } from "../../Context/FoodContext";
+import { CategoryContext } from "../../Context/CategoryContext";
+import { authService } from "@api/services";
+import { MdEdit, MdDelete, MdLocalOffer, MdAdd } from "react-icons/md";
 
-const List = ({ foods, setFoods }) => {
+const List = () => {
+  const { foodList, deleteFood, updateFood, loading } = useContext(FoodContext);
+  const { categories: restaurantCategories } = useContext(CategoryContext);
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("All");
   const [showEditModal, setShowEditModal] = useState(false);
   const [editFood, setEditFood] = useState({
     id: null,
     name: "",
-    category: "",
+    categoryId: "",
     price: "",
     restaurantName: "",
     image: "",
   });
+
+  // Get current restaurant's foods only
+  const user = authService.getCurrentUser();
+  const restaurantFoods = foodList.filter(
+    (food) => food.restaurantId === user?.restaurantId
+  );
+
+  // Debug logging
+  console.log("🍔 List.jsx Debug:");
+  console.log("- Total foodList:", foodList.length);
+  console.log("- Current user restaurantId:", user?.restaurantId);
+  console.log("- Restaurant foods:", restaurantFoods.length);
+  console.log("- Sample food:", restaurantFoods[0]);
 
   const getImageSrc = (food) => {
     // Nếu ảnh là base64 (do người dùng upload mới)
@@ -35,15 +54,6 @@ const List = ({ foods, setFoods }) => {
 
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const storedFoods = JSON.parse(localStorage.getItem("foods") || "[]");
-    setFoods(storedFoods);
-  }, [setFoods]);
-
-  const updateFoods = (newFoods) => {
-    setFoods(newFoods);
-    localStorage.setItem("foods", JSON.stringify(newFoods));
-  };
   const handleOpenEditModal = (food) => {
     setEditFood(food); // điền sẵn dữ liệu
     setShowEditModal(true);
@@ -53,17 +63,41 @@ const List = ({ foods, setFoods }) => {
     setEditFood({
       id: null,
       name: "",
-      category: "",
+      categoryId: "",
       price: "",
       restaurantName: "",
       image: "",
     });
     setShowEditModal(false);
   };
-  const handleEditSubmit = (e) => {
+
+  const handleEditSubmit = async (e) => {
     e.preventDefault();
-    updateFoods(foods.map((f) => (f.id === editFood.id ? editFood : f)));
-    handleCloseEditModal();
+
+    // Validation: Bắt buộc phải chọn category
+    if (!editFood.categoryId && !editFood.category) {
+      alert("⚠️ Please select a category!");
+      return;
+    }
+
+    // Prepare clean update payload
+    const updateData = {
+      name: editFood.name,
+      description: editFood.description,
+      price: Number(editFood.price),
+      category: editFood.category,
+      categoryId: editFood.categoryId,
+      image: editFood.image,
+      isAvailable: editFood.isAvailable !== false,
+    };
+
+    const result = await updateFood(editFood.id, updateData);
+    if (result.success) {
+      alert("✅ Food updated successfully!");
+      handleCloseEditModal();
+    } else {
+      alert(`❌ Failed to update: ${result.message}`);
+    }
   };
   // const handleImageChange = (file) => {
   //   if (file) {
@@ -81,7 +115,16 @@ const List = ({ foods, setFoods }) => {
     }
   };
 
-  const removeFood = (id) => updateFoods(foods.filter((f) => f.id !== id));
+  const handleRemoveFood = async (id) => {
+    if (window.confirm("Are you sure you want to delete this food?")) {
+      const result = await deleteFood(id);
+      if (result.success) {
+        alert("Food deleted successfully!");
+      } else {
+        alert(`Failed to delete: ${result.message}`);
+      }
+    }
+  };
 
   const formatVND = (value) =>
     new Intl.NumberFormat("vi-VN", {
@@ -89,24 +132,43 @@ const List = ({ foods, setFoods }) => {
       currency: "VND",
     }).format(value || 0);
 
-  const categories = [
-    "All",
-    ...new Set(foods.map((f) => f.category || "Uncategorized")),
-  ];
+  const getCategoryName = (food) => {
+    // Nếu có categoryId, tìm trong restaurantCategories
+    if (food.categoryId) {
+      const category = restaurantCategories.find(
+        (c) => c.id === food.categoryId
+      );
+      return category ? category.name : "Uncategorized";
+    }
+    // Nếu chỉ có category (string), return trực tiếp
+    return food.category || "Uncategorized";
+  };
 
-  const filteredFoods = foods.filter((item) => {
+  const filteredFoods = restaurantFoods.filter((item) => {
     const matchName = item.name.toLowerCase().includes(search.toLowerCase());
+    // Filter theo category string hoặc categoryId
+    const itemCategory = item.categoryId || item.category;
     const matchCategory =
-      categoryFilter === "All" || item.category === categoryFilter;
+      categoryFilter === "All" ||
+      itemCategory === categoryFilter ||
+      (!itemCategory && categoryFilter === "Uncategorized"); // Hiển thị food không có category
     return matchName && matchCategory;
   });
+
+  if (loading) {
+    return (
+      <div className="main-content">
+        <div className="loading">Loading foods...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="main-content">
       <div className="list-header">
         <h2>All Foods List</h2>
         <button className="add-btn" onClick={() => navigate("/add")}>
-          + Add New Food
+          <MdAdd /> Add New Food
         </button>
       </div>
 
@@ -121,11 +183,35 @@ const List = ({ foods, setFoods }) => {
           value={categoryFilter}
           onChange={(e) => setCategoryFilter(e.target.value)}
         >
-          {categories.map((cat, idx) => (
-            <option key={idx} value={cat}>
-              {cat}
+          <option value="All">All Categories</option>
+          {/* Hiển thị categories từ restaurantCategories (nếu có) */}
+          {restaurantCategories.map((cat) => (
+            <option key={cat.id} value={cat.id}>
+              {cat.name}
             </option>
           ))}
+          {/* Thêm categories từ food items (string) nếu chưa có trong restaurantCategories */}
+          {[
+            ...new Set(restaurantFoods.map((f) => f.category).filter(Boolean)),
+          ].map((cat) => {
+            // Chỉ hiển thị nếu chưa có trong restaurantCategories
+            if (
+              !restaurantCategories.find(
+                (rc) => rc.name === cat || rc.id === cat
+              )
+            ) {
+              return (
+                <option key={cat} value={cat}>
+                  {cat}
+                </option>
+              );
+            }
+            return null;
+          })}
+          {/* Hiển thị Uncategorized nếu có food không có category */}
+          {restaurantFoods.some((f) => !f.category && !f.categoryId) && (
+            <option value="Uncategorized">Uncategorized</option>
+          )}
         </select>
       </div>
 
@@ -142,21 +228,23 @@ const List = ({ foods, setFoods }) => {
               </div>
               <div className="food-info">
                 <h4>{food.name}</h4>
-                <p>{food.restaurantName}</p>
-                <p className="food-price">🏷️{formatVND(food.price)}</p>
+                <p className="food-category">{getCategoryName(food)}</p>
+                <div className="price-container">
+                  <p className="food-price"><MdLocalOffer /> {formatVND(food.price)}</p>
+                </div>
               </div>
               <div className="card-actions">
                 <button
                   className="edit-btn"
                   onClick={() => handleOpenEditModal(food)}
                 >
-                  ✏️ Edit
+                  <MdEdit /> Edit
                 </button>
                 <button
                   className="remove-btn"
-                  onClick={() => removeFood(food.id)}
+                  onClick={() => handleRemoveFood(food.id)}
                 >
-                  Remove
+                  <MdDelete /> Remove
                 </button>
               </div>
             </div>
@@ -182,14 +270,45 @@ const List = ({ foods, setFoods }) => {
                 />
               </label>
               <label>
-                Category:
-                <input
-                  type="text"
-                  value={editFood.category}
+                Category <span style={{ color: "red" }}>*</span>:
+                <select
+                  value={editFood.categoryId || editFood.category}
                   onChange={(e) =>
-                    setEditFood({ ...editFood, category: e.target.value })
+                    setEditFood({
+                      ...editFood,
+                      categoryId: e.target.value,
+                      category: e.target.value,
+                    })
                   }
-                />
+                  required
+                >
+                  <option value="">-- Select a category (Required) --</option>
+                  {/* Categories từ restaurantCategories */}
+                  {restaurantCategories.map((cat) => (
+                    <option key={cat.id} value={cat.id}>
+                      {cat.name}
+                    </option>
+                  ))}
+                  {/* Categories từ food items (string) */}
+                  {[
+                    ...new Set(
+                      restaurantFoods.map((f) => f.category).filter(Boolean)
+                    ),
+                  ].map((cat) => {
+                    if (
+                      !restaurantCategories.find(
+                        (rc) => rc.name === cat || rc.id === cat
+                      )
+                    ) {
+                      return (
+                        <option key={cat} value={cat}>
+                          {cat}
+                        </option>
+                      );
+                    }
+                    return null;
+                  })}
+                </select>
               </label>
               <label>
                 Price:

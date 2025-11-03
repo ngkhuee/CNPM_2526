@@ -4,13 +4,23 @@
   margin: auto;
   background: #fff;
   border-radius: 10px;
-  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
 .restaurant-profile h2 {
   text-align: center;
   color: #333;
   margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-size: 24px;
+}
+
+.restaurant-profile h2 svg {
+  color: #ff9800;
+  font-size: 28px;
 }
 
 .banner-section {
@@ -19,8 +29,8 @@
 }
 
 .restaurant-banner {
-  width: 100%; 
-  height: auto; 
+  width: 100%;
+  height: auto;
   object-fit: cover;
   border-radius: 10px;
 }
@@ -29,12 +39,24 @@
   position: absolute;
   bottom: 15px;
   right: 15px;
-  background: #fff;
-  padding: 6px 12px;
-  border-radius: 5px;
+}
+
+.upload-banner-btn label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 6px;
   font-size: 14px;
   cursor: pointer;
-  border: 1px solid #ccc;
+  transition: all 0.3s ease;
+}
+
+.upload-banner-btn label:hover {
+  background: rgba(0, 0, 0, 0.85);
+  transform: scale(1.05);
 }
 
 .profile-container {
@@ -59,10 +81,26 @@
 
 .upload-logo-btn {
   display: inline-block;
-  margin-top: 10px;
+  margin-top: 12px;
+}
+
+.upload-logo-btn label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: #007bff;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 6px;
   font-size: 14px;
-  color: #007bff;
   cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.upload-logo-btn label:hover {
+  background: #0056b3;
+  transform: scale(1.05);
 }
 
 .right {
@@ -72,61 +110,138 @@
 .right form {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 15px;
 }
 
-label {
+/* Form group styling */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-group label {
   font-weight: 600;
   color: #444;
+  font-size: 14px;
 }
 
-input[type="text"],
-input[type="email"],
-input[type="tel"],
-input[type="time"],
-textarea {
+.form-group input,
+.form-group textarea {
   width: 100%;
-  padding: 8px;
-  border: 1px solid #ccc;
+  padding: 10px 12px;
+  border: 1px solid #ddd;
   border-radius: 6px;
-  margin-top: 4px;
+  font-size: 14px;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #007bff;
+}
+
+.form-group input:disabled {
+  background-color: #f5f5f5;
+  cursor: not-allowed;
 }
 
 textarea {
   resize: vertical;
+  min-height: 80px;
 }
 
-.time-row {
+.location-row {
   display: flex;
   gap: 15px;
 }
 
-.button-group {
-  margin-top: 15px;
-  display: flex;
-  gap: 10px;
+.location-row .form-group {
+  flex: 1;
 }
 
-.edit-btn, .save-btn, .cancel-btn {
-  padding: 8px 14px;
+/* Readonly info section */
+.readonly-info {
+  background: #f8f9fa;
+  padding: 15px;
+  border-radius: 8px;
+  margin: 10px 0;
+}
+
+.readonly-info p {
+  margin: 8px 0;
+  color: #555;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+}
+
+.readonly-info strong {
+  color: #333;
+  margin-right: 8px;
+}
+
+.button-group {
+  margin-top: 20px;
+  display: flex;
+  gap: 12px;
+}
+
+.edit-btn,
+.save-btn,
+.cancel-btn {
+  padding: 10px 20px;
   border: none;
   border-radius: 6px;
   cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .edit-btn {
-  background: #007bff;
+  background: #ff9800;
   color: white;
+}
+
+.edit-btn:hover {
+  background: #f57c00;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(255, 152, 0, 0.3);
 }
 
 .save-btn {
-  background: #28a745;
+  background: #4caf50;
   color: white;
 }
 
+.save-btn:hover:not(:disabled) {
+  background: #388e3c;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(76, 175, 80, 0.3);
+}
+
 .cancel-btn {
-  background: #dc3545;
+  background: #f44336;
   color: white;
+}
+
+.cancel-btn:hover:not(:disabled) {
+  background: #d32f2f;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(244, 67, 54, 0.3);
+}
+
+.edit-btn:disabled,
+.save-btn:disabled,
+.cancel-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 .main-content {
   margin-left: 240px;
@@ -142,7 +257,7 @@ textarea {
   background: #fff;
   border-radius: 10px;
   padding: 24px;
-  box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
 }
 
 .banner-section {
@@ -163,7 +278,7 @@ textarea {
   position: absolute;
   bottom: 10px;
   right: 10px;
-  background-color: rgba(0,0,0,0.6);
+  background-color: rgba(0, 0, 0, 0.6);
   color: white;
   padding: 6px 12px;
   border-radius: 6px;
@@ -235,7 +350,9 @@ textarea {
   gap: 10px;
 }
 
-.save-btn, .cancel-btn, .edit-btn {
+.save-btn,
+.cancel-btn,
+.edit-btn {
   padding: 10px 20px;
   border: none;
   border-radius: 6px;

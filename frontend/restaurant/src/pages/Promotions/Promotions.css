@@ -1,8 +1,8 @@
 .promotions-page {
   padding: 30px;
-  background-color: #f9f9f9;
+  background-color: #f7f9fb;
   min-height: 100vh;
-  font-family: 'Outfit', sans-serif;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   color: #333;
 }
 
@@ -10,51 +10,89 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 25px;
+  margin-bottom: 30px;
+  background: white;
+  padding: 20px 25px;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.promotions-header h2 {
+  margin: 0;
+  font-size: 28px;
+  color: #2c3e50;
+  font-weight: 600;
 }
 
 .add-btn {
-  background-color: #ff9800;
+  background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
   border: none;
   color: white;
-  padding: 10px 18px;
-  border-radius: 6px;
+  padding: 12px 24px;
+  border-radius: 8px;
   cursor: pointer;
-  font-weight: 500;
-  transition: background 0.3s, transform 0.2s;
+  font-weight: 600;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s;
+  box-shadow: 0 4px 12px rgba(255, 152, 0, 0.3);
 }
 
-.add-btn:hover {
-  background-color: #e68a00;
+.add-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #f57c00 0%, #e65100 100%);
   transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(255, 152, 0, 0.4);
 }
 
+.add-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
 
 .promotions-table {
   width: 100%;
   border-collapse: collapse;
   background: white;
-  border-radius: 8px;
+  border-radius: 10px;
   overflow: hidden;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
 }
 
 .promotions-table th,
 .promotions-table td {
-  padding: 12px 15px;
-  border-bottom: 1px solid #eee;
+  padding: 16px 20px;
+  border-bottom: 1px solid #f0f0f0;
   text-align: left;
+  font-size: 14px;
 }
 
 .promotions-table th {
-  background-color: #fafafa;
+  color: black;
   font-weight: 600;
-  color: #555;
+  text-transform: uppercase;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+}
+
+.promotions-table tbody tr {
+  transition: all 0.3s;
 }
 
 .promotions-table tbody tr:hover {
-  background-color: #f1f1f1;
-  transition: background 0.3s;
+  background-color: #f8f9fa;
+  transform: scale(1.01);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.promotions-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.promotions-table td strong {
+  color: #ff9800;
+  font-weight: 700;
 }
 
 .edit-btn,
@@ -62,65 +100,79 @@
   background: none;
   border: none;
   cursor: pointer;
-  font-size: 18px;
-  margin-right: 8px;
-  transition: transform 0.2s;
+  font-size: 20px;
+  padding: 8px;
+  margin-right: 6px;
+  border-radius: 6px;
+  transition: all 0.2s;
+  color: #666;
 }
 
 .edit-btn:hover {
+  background-color: #e3f2fd;
   color: #2196f3;
-  transform: scale(1.1);
-}
-
-.delete-btn {
-  color: #ff5252;
+  transform: scale(1.15);
 }
 
 .delete-btn:hover {
-  color: #d32f2f;
-  transform: scale(1.1);
+  background-color: #ffebee;
+  color: #f44336;
+  transform: scale(1.15);
 }
 
-/* Status labels */
-.status {
-  padding: 4px 10px;
-  border-radius: 12px;
-  font-size: 14px;
-  font-weight: 500;
-  color: white;
+/* Status badge (readonly) */
+.status-badge {
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
   display: inline-block;
+  color: white;
 }
 
-.status.active {
-  background-color: #4caf50;
+.status-badge.active {
+  background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
 }
 
-.status.upcoming {
-  background-color: #ff9800;
+.status-badge.upcoming {
+  background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+  box-shadow: 0 2px 8px rgba(255, 152, 0, 0.3);
 }
 
-.status.expired {
-  background-color: #9e9e9e;
+.status-badge.expired {
+  background: linear-gradient(135deg, #9e9e9e 0%, #757575 100%);
+  box-shadow: 0 2px 8px rgba(158, 158, 158, 0.3);
 }
 .status-select {
-  padding: 4px 10px;
-  border-radius: 12px;
-  border: 1px solid #ccc;
-  font-weight: 500;
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: none;
+  font-weight: 600;
   color: #fff;
-  background-color: #4caf50; /* default active */
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.3s;
 }
 
 .status-select.active {
-  background-color: #4caf50;
+  background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
 }
 
 .status-select.upcoming {
-  background-color: #ff9800;
+  background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+  box-shadow: 0 2px 8px rgba(255, 152, 0, 0.3);
 }
 
 .status-select.expired {
-  background-color: #9e9e9e;
+  background: linear-gradient(135deg, #9e9e9e 0%, #757575 100%);
+  box-shadow: 0 2px 8px rgba(158, 158, 158, 0.3);
+}
+
+.status-select:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 /* Modal overlay */
 .modal-overlay {
@@ -129,7 +181,7 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0,0,0,0.5);
+  background-color: rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -139,72 +191,129 @@
 /* Modal content */
 .modal-content {
   background: #fff;
-  padding: 25px 30px;
-  border-radius: 8px;
-  width: 400px;
+  padding: 30px;
+  border-radius: 12px;
+  width: 500px;
   max-width: 90%;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
   animation: popup 0.3s ease-out;
 }
 
 @keyframes popup {
-  from { transform: scale(0.7); opacity: 0; }
-  to { transform: scale(1); opacity: 1; }
+  from {
+    transform: scale(0.7);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 .modal-content h3 {
-  margin-bottom: 15px;
+  margin-bottom: 20px;
+  font-size: 24px;
+  color: #333;
+  border-bottom: 2px solid #ff9800;
+  padding-bottom: 10px;
 }
 
 .modal-content label {
   display: block;
-  margin-bottom: 10px;
-  font-weight: 500;
+  margin-bottom: 15px;
+  font-weight: 600;
+  color: #555;
+  font-size: 14px;
 }
 
 .modal-content input,
 .modal-content textarea,
 .modal-content select {
   width: 100%;
-  padding: 8px 10px;
-  margin-top: 4px;
-  margin-bottom: 12px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
+  padding: 10px 12px;
+  margin-top: 6px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: inherit;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+}
+
+.modal-content input:focus,
+.modal-content textarea:focus,
+.modal-content select:focus {
+  outline: none;
+  border-color: #ff9800;
+  box-shadow: 0 0 0 3px rgba(255, 152, 0, 0.1);
+}
+
+.modal-content textarea {
+  resize: vertical;
+  min-height: 80px;
+}
+
+/* Info note in modal */
+.info-note {
+  background: #e3f2fd;
+  padding: 12px 15px;
+  border-radius: 8px;
+  margin: 10px 0;
+  border-left: 4px solid #2196f3;
+}
+
+.info-note small {
+  color: #1976d2;
+  font-size: 13px;
+  display: block;
+  line-height: 1.5;
 }
 
 .modal-buttons {
   display: flex;
   justify-content: flex-end;
-  gap: 10px;
+  gap: 12px;
+  margin-top: 25px;
+  padding-top: 20px;
+  border-top: 1px solid #eee;
 }
 
 .submit-btn {
   background-color: #4caf50;
   border: none;
   color: white;
-  padding: 8px 15px;
-  border-radius: 5px;
+  padding: 12px 24px;
+  border-radius: 6px;
   cursor: pointer;
-  transition: background 0.3s;
+  font-weight: 600;
+  font-size: 14px;
+  transition: all 0.3s;
 }
 
 .submit-btn:hover {
   background-color: #43a047;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(76, 175, 80, 0.3);
 }
 
 .cancel-btn {
   background-color: #f44336;
   border: none;
   color: white;
-  padding: 8px 15px;
-  border-radius: 5px;
+  padding: 12px 24px;
+  border-radius: 6px;
   cursor: pointer;
-  transition: background 0.3s;
+  font-weight: 600;
+  font-size: 14px;
+  transition: all 0.3s;
 }
 
 .cancel-btn:hover {
   background-color: #d32f2f;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(244, 67, 54, 0.3);
 }
 .main-content {
   margin-left: 240px;

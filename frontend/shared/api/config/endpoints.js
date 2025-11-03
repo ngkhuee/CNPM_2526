@@ -9,16 +9,25 @@ export const ENDPOINTS = {
   RESTAURANTS: {
     BASE: "/restaurants",
     BY_ID: (id) => `/restaurants/${id}`,
-    FOODS: (id) => `/foods?restaurantId=${id}`,
+    MENU: (id) => `/restaurants/${id}/menu`,
     ORDERS: (id) => `/orders?restaurantId=${id}`,
   },
 
+  MENUS: {
+    BASE: "/menus",
+    BY_ID: (id) => `/menu/${id}`,
+    BY_RESTAURANT: (restaurantId) => `/menus?restaurant_id=${restaurantId}`,
+    BY_CATEGORY: (categoryId) => `/menus?category=${categoryId}`,
+    SEARCH: (query) => `/menus?q=${query}`,
+  },
+
+  // Backward compatibility
   FOODS: {
-    BASE: "/foods",
-    BY_ID: (id) => `/foods/${id}`,
-    BY_RESTAURANT: (restaurantId) => `/foods?restaurantId=${restaurantId}`,
-    BY_CATEGORY: (categoryId) => `/foods?categoryId=${categoryId}`,
-    SEARCH: (query) => `/foods?q=${query}`,
+    BASE: "/menus",
+    BY_ID: (id) => `/menu/${id}`,
+    BY_RESTAURANT: (restaurantId) => `/menus?restaurant_id=${restaurantId}`,
+    BY_CATEGORY: (categoryId) => `/menus?category=${categoryId}`,
+    SEARCH: (query) => `/menus?q=${query}`,
   },
 
   CATEGORIES: {

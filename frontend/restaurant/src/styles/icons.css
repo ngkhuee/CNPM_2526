@@ -1,0 +1,139 @@
+/* Global Icon Styles for React Icons */
+
+/* Icon base styles */
+svg {
+  vertical-align: middle;
+  display: inline-block;
+}
+
+/* Button with icons */
+button svg {
+  margin-right: 6px;
+  font-size: 1.1em;
+  vertical-align: middle;
+}
+
+/* Icon-only buttons (no text) */
+button svg:only-child {
+  margin-right: 0;
+}
+
+/* Add button styles */
+.add-btn svg {
+  font-size: 1.2em;
+  margin-right: 5px;
+}
+
+/* Edit button icons */
+.edit-btn svg {
+  font-size: 1.1em;
+  margin-right: 4px;
+  color: inherit;
+}
+
+/* Delete/Remove button icons */
+.delete-btn svg,
+.remove-btn svg {
+  font-size: 1.1em;
+  margin-right: 4px;
+  color: inherit;
+}
+
+/* Save button icons */
+.save-btn svg {
+  margin-right: 6px;
+  font-size: 1.1em;
+}
+
+/* Cancel button icons */
+.cancel-btn svg {
+  margin-right: 6px;
+  font-size: 1.1em;
+}
+
+/* Icon in text/labels */
+p svg,
+h2 svg,
+h3 svg,
+label svg {
+  margin-right: 8px;
+  vertical-align: middle;
+  color: inherit;
+}
+
+/* Price tag icon */
+.food-price svg {
+  margin-right: 5px;
+  font-size: 1.1em;
+  color: #4caf50;
+}
+
+/* Rating star icon */
+.rating svg,
+.readonly-info svg {
+  color: #ffc107;
+  margin: 0 4px;
+  font-size: 1em;
+}
+
+/* Location icon */
+.restaurant-name svg,
+.restaurant-info svg {
+  color: #f44336;
+  margin-right: 6px;
+  font-size: 1.1em;
+}
+
+/* Loading/hourglass icon */
+button svg.loading {
+  animation: spin 1s linear infinite;
+  margin-right: 6px;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Sidebar menu icons */
+.sidebar-menu a svg {
+  margin-right: 12px;
+  font-size: 1.3em;
+  min-width: 24px;
+  vertical-align: middle;
+}
+
+/* Dashboard stats icons */
+.dashboard-stats svg {
+  margin-right: 8px;
+  font-size: 1.2em;
+}
+
+/* Upload button icons */
+.upload-banner-btn svg,
+.upload-logo-btn svg {
+  margin-right: 6px;
+  font-size: 1.1em;
+}
+
+/* Table action icons */
+table button svg {
+  font-size: 1.2em;
+}
+
+/* Responsive icon sizing */
+@media (max-width: 768px) {
+  button svg {
+    font-size: 1em;
+    margin-right: 4px;
+  }
+
+  .sidebar-menu a svg {
+    font-size: 1.2em;
+    margin-right: 10px;
+  }
+}

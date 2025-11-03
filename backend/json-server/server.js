@@ -27,12 +27,10 @@ server.use((req, res, next) => {
   next();
 });
 
-// Custom routes rewriter
-server.use(
-  jsonServer.rewriter({
-    "/api/*": "/$1",
-  })
-);
+// Custom routes rewriter - Load from routes.json
+const routes = require("./routes.json");
+console.log("Loading custom routes:", routes);
+server.use(jsonServer.rewriter(routes));
 
 // ========== CUSTOM ENDPOINTS ==========
 
@@ -182,14 +180,14 @@ server.use(validateToken);
 server.use(router);
 
 server.listen(PORT, () => {
-  console.log(`\n🚀 JSON Server is running!`);
-  console.log(`📍 Server: http://localhost:${PORT}`);
-  console.log(`📖 Resources:`);
+  console.log(`\nJSON Server is running!`);
+  console.log(`Server: http://localhost:${PORT}`);
+  console.log(`Resources:`);
   console.log(`   - http://localhost:${PORT}/foods`);
   console.log(`   - http://localhost:${PORT}/restaurants`);
   console.log(`   - http://localhost:${PORT}/orders`);
   console.log(`   - http://localhost:${PORT}/accounts`);
-  console.log(`\n🔐 Auth endpoints:`);
+  console.log(`\nAuth endpoints:`);
   console.log(`   - POST http://localhost:${PORT}/auth/login`);
   console.log(`   - POST http://localhost:${PORT}/auth/register`);
   console.log(`\n`);

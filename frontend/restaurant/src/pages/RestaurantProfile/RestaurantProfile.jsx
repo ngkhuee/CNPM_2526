@@ -1,232 +1,355 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import "./RestaurantProfile.css";
 import defaultLogo from "../../assets/default_logo.png";
 import defaultBanner from "../../assets/default_banner.png";
+import { RestaurantContext } from "../../Context/RestaurantContext";
+import { authService } from "@api/services";
+import { getImageUrl } from "@utils/imageHelper";
+import {
+  MdRestaurant,
+  MdCamera,
+  MdSave,
+  MdClose,
+  MdEdit,
+  MdStar,
+} from "react-icons/md";
 
 const RestaurantProfile = () => {
-  const [restaurant, setRestaurant] = useState({
+  const { currentRestaurant, updateRestaurant, fetchRestaurantInfo } =
+    useContext(RestaurantContext);
+  const [editing, setEditing] = useState(false);
+  const [formData, setFormData] = useState({
     name: "",
-    address: "",
-    phone: "",
-    email: "",
-    openTime: "",
-    closeTime: "",
-    description: "",
-    logo: "",
+    location: {
+      address: "",
+      lat: 0,
+      lng: 0,
+    },
+    ownerPhone: "",
+    ownerEmail: "",
+    category: "",
+    image: "",
     banner: "",
   });
+  const [loading, setLoading] = useState(false);
 
-  const [editing, setEditing] = useState(false);
-
-  // Load dữ liệu từ localStorage khi vào trang
-//   useEffect(() => {
-//     const storedData = JSON.parse(localStorage.getItem("restaurantInfo") || "{}");
-//     if (storedData.name) setRestaurant(storedData);
-//   }, []);
-    useEffect(() => {
-    const currentUser = JSON.parse(localStorage.getItem("loggedInRestaurant"));
-    if (currentUser) {
-        const storedData = JSON.parse(localStorage.getItem(`restaurantInfo_${currentUser}`) || "{}");
-        if (storedData.name) setRestaurant(storedData);
+  // Load restaurant data from context
+  useEffect(() => {
+    if (currentRestaurant && !editing) {
+      setFormData({
+        name: currentRestaurant.name || "",
+        location: {
+          address: currentRestaurant.location?.address || "",
+          lat: currentRestaurant.location?.lat || 0,
+          lng: currentRestaurant.location?.lng || 0,
+        },
+        ownerPhone: currentRestaurant.ownerPhone || "",
+        ownerEmail: currentRestaurant.ownerEmail || "",
+        category: currentRestaurant.category || "",
+        image: currentRestaurant.image || "",
+        banner: currentRestaurant.banner || "",
+      });
     }
-    }, []);
+  }, [currentRestaurant, editing]);
 
-
-  // Hàm lưu dữ liệu
-    //   const handleSave = (e) => {
-    //     e.preventDefault();
-    //     localStorage.setItem("restaurantInfo", JSON.stringify(restaurant));
-    //     setEditing(false);
-    //     alert("✅ Restaurant information updated successfully!");
-    //   };
-    const handleSave = (e) => {
+  // Save restaurant data
+  const handleSave = async (e) => {
     e.preventDefault();
-    const currentUser = JSON.parse(localStorage.getItem("loggedInRestaurant"));
-    if (currentUser) {
-        localStorage.setItem(`restaurantInfo_${currentUser}`, JSON.stringify(restaurant));
-    }
-    setEditing(false);
-    alert("✅ Restaurant information updated successfully!");
-    };
+    setLoading(true);
 
+    try {
+      const user = authService.getCurrentUser();
+      if (!user || !user.restaurantId) {
+        alert("❌ Restaurant ID not found!");
+        return;
+      }
+
+      const result = await updateRestaurant(user.restaurantId, formData);
+
+      if (result.success) {
+        setEditing(false);
+        alert("✅ Restaurant information updated successfully!");
+      } else {
+        alert(`❌ Failed to update: ${result.message}`);
+      }
+    } catch (error) {
+      console.error("Error saving restaurant:", error);
+      alert("❌ An error occurred while saving!");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Upload ảnh logo hoặc banner
   const handleImageUpload = (e, type) => {
+    e.preventDefault(); // Prevent form submission
+    e.stopPropagation(); // Stop event bubbling
+
     const file = e.target.files[0];
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setRestaurant((prev) => ({ ...prev, [type]: reader.result }));
+        setFormData((prev) => ({ ...prev, [type]: reader.result }));
       };
       reader.readAsDataURL(file);
     }
   };
 
+  // Handle input change
+  const handleChange = (field, value) => {
+    if (field.includes(".")) {
+      // For nested fields like location.address
+      const [parent, child] = field.split(".");
+      setFormData((prev) => ({
+        ...prev,
+        [parent]: {
+          ...prev[parent],
+          [child]: value,
+        },
+      }));
+    } else {
+      setFormData((prev) => ({ ...prev, [field]: value }));
+    }
+  };
+
+  // Get image source with proper URL
+  const getImageSrc = (imagePath) => {
+    if (!imagePath) return null;
+
+    // If base64 image (newly uploaded)
+    if (imagePath.startsWith("data:image")) {
+      return imagePath;
+    }
+
+    // If already full URL
+    if (imagePath.startsWith("http://") || imagePath.startsWith("https://")) {
+      return imagePath;
+    }
+
+    // If path from backend, use helper
+    const fullUrl = getImageUrl(imagePath);
+    console.log("Image path:", imagePath, "→", fullUrl);
+    return fullUrl;
+  };
   return (
     <div className="main-content">
-        <div className="restaurant-profile">
-        <h2>🏠 Restaurant Profile</h2>
+      <div className="restaurant-profile">
+        <h2>
+          <MdRestaurant /> Restaurant Profile
+        </h2>
 
         {/* BANNER */}
         <div className="banner-section">
-            <img
-            src={restaurant.banner || defaultBanner}
+          <img
+            src={getImageSrc(formData.banner) || defaultBanner}
             alt="banner"
             className="restaurant-banner"
-            />
-            {editing && (
-            <label className="upload-banner-btn">
-                📷 Change Banner
-                <input
+            onError={(e) => {
+              e.target.src = defaultBanner;
+            }}
+          />
+          {editing && (
+            <div className="upload-banner-btn">
+              <label htmlFor="banner-upload">
+                <MdCamera /> Change Banner
+              </label>
+              <input
+                id="banner-upload"
                 type="file"
                 accept="image/*"
                 hidden
                 onChange={(e) => handleImageUpload(e, "banner")}
-                />
-            </label>
-            )}
+              />
+            </div>
+          )}
         </div>
 
         {/* LOGO + INFO */}
         <div className="profile-container">
-            <div className="left">
+          <div className="left">
             <img
-                src={restaurant.logo || defaultLogo}
-                alt="logo"
-                className="restaurant-logo"
+              src={getImageSrc(formData.image) || defaultLogo}
+              alt="logo"
+              className="restaurant-logo"
+              onError={(e) => {
+                e.target.src = defaultLogo;
+              }}
             />
             {editing && (
-                <label className="upload-logo-btn">
-                📸 Change Logo
-                <input
-                    type="file"
-                    accept="image/*"
-                    hidden
-                    onChange={(e) => handleImageUpload(e, "logo")}
-                />
+              <div className="upload-logo-btn">
+                <label htmlFor="logo-upload">
+                  <MdCamera /> Change Logo
                 </label>
+                <input
+                  id="logo-upload"
+                  type="file"
+                  accept="image/*"
+                  hidden
+                  onChange={(e) => handleImageUpload(e, "image")}
+                />
+              </div>
             )}
-            </div>
+          </div>
 
-            <div className="right">
+          <div className="right">
             <form onSubmit={handleSave}>
-                <label>
-                Name:
+              <div className="form-group">
+                <label htmlFor="restaurant-name">Restaurant Name:</label>
                 <input
-                    type="text"
-                    value={restaurant.name}
-                    onChange={(e) =>
-                    setRestaurant({ ...restaurant, name: e.target.value })
-                    }
-                    disabled={!editing}
-                    required
+                  id="restaurant-name"
+                  type="text"
+                  value={formData.name}
+                  onChange={(e) => handleChange("name", e.target.value)}
+                  disabled={!editing}
+                  required
                 />
-                </label>
+              </div>
 
-                <label>
-                Address:
+              <div className="form-group">
+                <label htmlFor="restaurant-address">Address:</label>
                 <input
-                    type="text"
-                    value={restaurant.address}
-                    onChange={(e) =>
-                    setRestaurant({ ...restaurant, address: e.target.value })
-                    }
-                    disabled={!editing}
-                    required
+                  id="restaurant-address"
+                  type="text"
+                  value={formData.location.address}
+                  onChange={(e) =>
+                    handleChange("location.address", e.target.value)
+                  }
+                  disabled={!editing}
+                  required
                 />
-                </label>
+              </div>
 
-                <label>
-                Phone:
+              <div className="form-group">
+                <label htmlFor="restaurant-phone">Phone:</label>
                 <input
-                    type="tel"
-                    value={restaurant.phone}
-                    onChange={(e) =>
-                    setRestaurant({ ...restaurant, phone: e.target.value })
-                    }
-                    disabled={!editing}
-                    required
+                  id="restaurant-phone"
+                  type="tel"
+                  value={formData.ownerPhone}
+                  onChange={(e) => handleChange("ownerPhone", e.target.value)}
+                  disabled={!editing}
+                  required
                 />
-                </label>
+              </div>
 
-                <label>
-                Email:
+              <div className="form-group">
+                <label htmlFor="restaurant-email">Email:</label>
                 <input
-                    type="email"
-                    value={restaurant.email}
-                    onChange={(e) =>
-                    setRestaurant({ ...restaurant, email: e.target.value })
-                    }
-                    disabled={!editing}
-                    required
+                  id="restaurant-email"
+                  type="email"
+                  value={formData.ownerEmail}
+                  onChange={(e) => handleChange("ownerEmail", e.target.value)}
+                  disabled={!editing}
+                  required
                 />
-                </label>
+              </div>
 
-                <div className="time-row">
-                <label>
-                    Opens:
-                    <input
-                    type="time"
-                    value={restaurant.openTime}
+              <div className="form-group">
+                <label htmlFor="restaurant-category">Category:</label>
+                <input
+                  id="restaurant-category"
+                  type="text"
+                  value={formData.category}
+                  onChange={(e) => handleChange("category", e.target.value)}
+                  disabled={!editing}
+                  placeholder="e.g., Pizza, Burger, Chicken"
+                />
+              </div>
+
+              <div className="location-row">
+                <div className="form-group">
+                  <label htmlFor="restaurant-lat">Latitude:</label>
+                  <input
+                    id="restaurant-lat"
+                    type="number"
+                    step="0.000001"
+                    value={formData.location.lat}
                     onChange={(e) =>
-                        setRestaurant({ ...restaurant, openTime: e.target.value })
+                      handleChange("location.lat", parseFloat(e.target.value))
                     }
                     disabled={!editing}
-                    />
-                </label>
-                <label>
-                    Closes:
-                    <input
-                    type="time"
-                    value={restaurant.closeTime}
-                    onChange={(e) =>
-                        setRestaurant({ ...restaurant, closeTime: e.target.value })
-                    }
-                    disabled={!editing}
-                    />
-                </label>
+                  />
                 </div>
-
-                <label>
-                Description:
-                <textarea
-                    value={restaurant.description}
+                <div className="form-group">
+                  <label htmlFor="restaurant-lng">Longitude:</label>
+                  <input
+                    id="restaurant-lng"
+                    type="number"
+                    step="0.000001"
+                    value={formData.location.lng}
                     onChange={(e) =>
-                    setRestaurant({ ...restaurant, description: e.target.value })
+                      handleChange("location.lng", parseFloat(e.target.value))
                     }
                     disabled={!editing}
-                    rows="4"
-                />
-                </label>
+                  />
+                </div>
+              </div>
 
-                <div className="button-group">
+              {currentRestaurant && (
+                <div className="readonly-info">
+                  <p>
+                    <strong>Rating:</strong> <MdStar />{" "}
+                    {currentRestaurant.rating}
+                  </p>
+                  <p>
+                    <strong>Reviews:</strong> {currentRestaurant.reviewCount}
+                  </p>
+                  <p>
+                    <strong>Status:</strong> {currentRestaurant.status}
+                  </p>
+                  <p>
+                    <strong>Opened:</strong>{" "}
+                    {new Date(currentRestaurant.openedAt).toLocaleDateString()}
+                  </p>
+                </div>
+              )}
+
+              <div className="button-group">
                 {editing ? (
-                    <>
-                    <button type="submit" className="save-btn">
-                        💾 Save
-                    </button>
+                  <>
                     <button
-                        type="button"
-                        className="cancel-btn"
-                        onClick={() => setEditing(false)}
+                      type="submit"
+                      className="save-btn"
+                      disabled={loading}
                     >
-                        ❌ Cancel
+                      <MdSave /> {loading ? "Saving..." : "Save"}
                     </button>
-                    </>
-                ) : (
                     <button
+                      type="button"
+                      className="cancel-btn"
+                      onClick={() => {
+                        setEditing(false);
+                        // Reset form to current restaurant data
+                        if (currentRestaurant) {
+                          setFormData({
+                            name: currentRestaurant.name || "",
+                            location: currentRestaurant.location || {},
+                            ownerPhone: currentRestaurant.ownerPhone || "",
+                            ownerEmail: currentRestaurant.ownerEmail || "",
+                            category: currentRestaurant.category || "",
+                            image: currentRestaurant.image || "",
+                            banner: currentRestaurant.banner || "",
+                          });
+                        }
+                      }}
+                      disabled={loading}
+                    >
+                      <MdClose /> Cancel
+                    </button>
+                  </>
+                ) : (
+                  <button
                     type="button"
                     className="edit-btn"
                     onClick={() => setEditing(true)}
-                    >
-                    ✏️ Edit Info
-                    </button>
+                  >
+                    <MdEdit /> Edit Info
+                  </button>
                 )}
-                </div>
+              </div>
             </form>
-            </div>
+          </div>
         </div>
-        </div>
+      </div>
     </div>
   );
 };

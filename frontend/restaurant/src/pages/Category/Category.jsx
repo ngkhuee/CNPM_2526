@@ -1,43 +1,70 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import "./Category.css";
-import { categoryData } from "../../shared/categoryData";
+import { CategoryContext } from "../../Context/CategoryContext";
+import { FoodContext } from "../../Context/FoodContext";
 import { getImageUrl } from "@utils/imageHelper";
+import { MdEdit, MdDelete, MdAdd } from "react-icons/md";
 
 const Category = () => {
-  const [categories, setCategories] = useState([]);
+  const {
+    categories,
+    fetchCategories,
+    addCategory,
+    updateCategory,
+    deleteCategory,
+    loading,
+  } = useContext(CategoryContext);
+  const { foodList } = useContext(FoodContext);
+
+  // Get current restaurant's foods only
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const restaurantFoods = foodList.filter(
+    (food) => food.restaurantId === user?.restaurantId
+  );
+
+  // Debug: Log foodList và categories
+  useEffect(() => {
+    console.log("📊 Category.jsx Debug:");
+    console.log("- User restaurantId:", user.restaurantId);
+    console.log("- Total categories:", categories.length);
+    console.log(
+      "- Categories:",
+      categories.map((c) => ({
+        id: c.id,
+        name: c.name,
+        restaurantId: c.restaurantId,
+      }))
+    );
+    console.log("- Total foodList:", foodList.length);
+    console.log("- Restaurant foods:", restaurantFoods.length);
+    console.log(
+      "- Foods sample:",
+      restaurantFoods.slice(0, 3).map((f) => ({
+        id: f.id,
+        name: f.name,
+        restaurantId: f.restaurantId,
+        category: f.category,
+        categoryId: f.categoryId,
+      }))
+    );
+  }, [categories, foodList]);
+
   const [showModal, setShowModal] = useState(false);
   const [editModal, setEditModal] = useState(false);
   const [currentCategory, setCurrentCategory] = useState({
     name: "",
     description: "",
-    status: "Active",
+    status: "active",
   });
   const [search, setSearch] = useState("");
-  const [foods, setFoods] = useState([]);
   const [showFoodsModal, setShowFoodsModal] = useState(false);
   const [selectedFoods, setSelectedFoods] = useState([]);
-
-  useEffect(() => {
-    const storedFoods = JSON.parse(localStorage.getItem("foods") || "[]");
-    setFoods(storedFoods);
-  }, []);
-
-  useEffect(() => {
-    // 🚀 Bỏ qua localStorage khi dev, luôn lấy dữ liệu mới
-    setCategories(categoryData);
-    localStorage.setItem("categories", JSON.stringify(categoryData));
-  }, []);
-
-  const updateCategories = (newCategories) => {
-    setCategories(newCategories);
-    localStorage.setItem("categories", JSON.stringify(newCategories));
-  };
 
   // Open/Close modal
   const handleOpenModal = () => setShowModal(true);
   const handleCloseModal = () => {
     setShowModal(false);
-    setCurrentCategory({ name: "", description: "", status: "Active" });
+    setCurrentCategory({ name: "", description: "", status: "active" });
   };
 
   const handleOpenEditModal = (category) => {
@@ -46,34 +73,44 @@ const Category = () => {
   };
   const handleCloseEditModal = () => {
     setEditModal(false);
-    setCurrentCategory({ name: "", description: "", status: "Active" });
+    setCurrentCategory({ name: "", description: "", status: "active" });
   };
 
   // Thêm category
-  const handleAddCategory = (e) => {
+  const handleAddCategory = async (e) => {
     e.preventDefault();
-    const nextId = categories.length
-      ? categories[categories.length - 1].id + 1
-      : 1;
-    updateCategories([...categories, { ...currentCategory, id: nextId }]);
-    handleCloseModal();
+    const user = JSON.parse(localStorage.getItem("user") || "{}");
+    const categoryData = {
+      ...currentCategory,
+      restaurantId: user.restaurantId,
+    };
+    const result = await addCategory(categoryData);
+    if (result.success) {
+      handleCloseModal();
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
+      await fetchCategories(user.restaurantId);
+    }
   };
 
   // Chỉnh sửa category
-  const handleEditCategory = (e) => {
+  const handleEditCategory = async (e) => {
     e.preventDefault();
-    updateCategories(
-      categories.map((cat) =>
-        cat.id === currentCategory.id ? currentCategory : cat
-      )
-    );
-    handleCloseEditModal();
+    const result = await updateCategory(currentCategory.id, currentCategory);
+    if (result.success) {
+      handleCloseEditModal();
+      const user = JSON.parse(localStorage.getItem("user") || "{}");
+      await fetchCategories(user.restaurantId);
+    }
   };
 
   // Xóa category
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this category?")) {
-      updateCategories(categories.filter((cat) => cat.id !== id));
+      const result = await deleteCategory(id);
+      if (result.success) {
+        const user = JSON.parse(localStorage.getItem("user") || "{}");
+        await fetchCategories(user.restaurantId);
+      }
     }
   };
 
@@ -82,8 +119,24 @@ const Category = () => {
     cat.name.toLowerCase().includes(search.toLowerCase())
   );
 
-  const handleViewFoods = (categoryName) => {
-    const filtered = foods.filter((f) => f.category === categoryName);
+  const handleViewFoods = (categoryId, categoryName) => {
+    console.log("handleViewFoods Debug:");
+    console.log("- categoryId:", categoryId);
+    console.log("- categoryName:", categoryName);
+    console.log("- Total restaurantFoods:", restaurantFoods.length);
+    console.log("- Sample food:", restaurantFoods[0]);
+
+    // So sánh với cả categoryId VÀ category (string)
+    const filtered = restaurantFoods.filter((f) => {
+      const matchById = f.categoryId === categoryId;
+      const matchByName = f.category === categoryName;
+      console.log(
+        `Food "${f.name}": categoryId=${f.categoryId}, category=${f.category}, matchById=${matchById}, matchByName=${matchByName}`
+      );
+      return matchById || matchByName;
+    });
+
+    console.log("- Filtered foods:", filtered.length);
     setSelectedFoods(filtered);
     setShowFoodsModal(true);
   };
@@ -94,7 +147,7 @@ const Category = () => {
         <div className="category-header">
           <h2>Manage Categories</h2>
           <button className="add-btn" onClick={handleOpenModal}>
-            ➕ Add Category
+            <MdAdd /> Add Category
           </button>
         </div>
 
@@ -126,9 +179,14 @@ const Category = () => {
                   <td>
                     <button
                       className="view-foods-btn"
-                      onClick={() => handleViewFoods(cat.name)}
+                      onClick={() => handleViewFoods(cat.id, cat.name)}
                     >
-                      {foods.filter((f) => f.category === cat.name).length}{" "}
+                      {
+                        restaurantFoods.filter(
+                          (f) =>
+                            f.categoryId === cat.id || f.category === cat.name
+                        ).length
+                      }{" "}
                       items
                     </button>
                   </td>
@@ -142,13 +200,13 @@ const Category = () => {
                       className="edit-btn"
                       onClick={() => handleOpenEditModal(cat)}
                     >
-                      ✏️
+                      <MdEdit />
                     </button>
                     <button
                       className="delete-btn"
                       onClick={() => handleDelete(cat.id)}
                     >
-                      🗑️
+                      <MdDelete />
                     </button>
                   </td>
                 </tr>
@@ -212,7 +270,7 @@ const Category = () => {
                 </label>
                 <div className="modal-buttons">
                   <button type="submit" className="submit-btn">
-                    Add
+                    {loading ? "Adding..." : "Add"}
                   </button>
                   <button
                     type="button"
@@ -276,7 +334,7 @@ const Category = () => {
                 </label>
                 <div className="modal-buttons">
                   <button type="submit" className="submit-btn">
-                    Save
+                    {loading ? "Saving..." : "Save"}
                   </button>
                   <button
                     type="button"

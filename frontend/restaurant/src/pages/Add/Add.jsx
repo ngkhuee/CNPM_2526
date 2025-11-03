@@ -1,142 +1,201 @@
-import React, { useState, useEffect } from 'react'
-import './Add.css'
-import { assets } from '../../assets/assets'
-import { toast } from 'react-toastify'
+import React, { useState, useEffect, useContext } from "react";
+import "./Add.css";
+import { assets } from "../../assets/assets";
+import { toast } from "react-toastify";
+import { FoodContext } from "../../Context/FoodContext";
+import { RestaurantContext } from "../../Context/RestaurantContext";
+import { CategoryContext } from "../../Context/CategoryContext";
+import { authService } from "@api/services";
+import { MdLocationOn, MdHourglassEmpty } from "react-icons/md";
 
-const Add = ({ foods, setFoods, restaurants }) => {
+const Add = () => {
+  const { addFood } = useContext(FoodContext);
+  const { currentRestaurant } = useContext(RestaurantContext);
+  const { categories } = useContext(CategoryContext);
   const [data, setData] = useState({
     name: "",
     description: "",
     price: "",
-    category: "Pizza"
-  })
-  const [image, setImage] = useState(null)
-  // const [selectedRestaurant, setSelectedRestaurant] = useState(restaurants[0] || "")
+    categoryId: "",
+  });
+  const [image, setImage] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-  // Load từ localStorage khi mount
-  useEffect(() => {
-    const storedFoods = JSON.parse(localStorage.getItem('foods') || '[]')
-    setFoods(storedFoods)
-  }, [setFoods])
+  const onSubmitHandler = async (event) => {
+    event.preventDefault();
 
-  // const onSubmitHandler = (event) => {
-  //   event.preventDefault()
-  //   const newFood = {
-  //     id: Date.now(),
-  //     ...data,
-  //     price: Number(data.price),
-  //     image: image ? URL.createObjectURL(image) : null,
-  //     // restaurantName: selectedRestaurant,
-  //     active: true
-  //   }
-  //   const updatedFoods = [...foods, newFood]
-  //   setFoods(updatedFoods)
-  //   localStorage.setItem('foods', JSON.stringify(updatedFoods))
-  //   toast.success("✅ Product added successfully!")
+    if (!image) {
+      toast.error("Please upload an image");
+      return;
+    }
 
-  //   setData({ name: "", description: "", price: "", category: "Pizza" })
-  //   setImage(null)
-  // }
+    if (!data.categoryId) {
+      toast.error("Please select a category!");
+      return;
+    }
 
-  const onSubmitHandler = (event) => {
-  event.preventDefault();
+    const user = authService.getCurrentUser();
+    if (!user || !user.restaurantId) {
+      toast.error("Restaurant ID not found!");
+      return;
+    }
 
-  if (!image) {
-    toast.error("Please upload an image");
-    return;
-  }
+    setLoading(true);
 
-  const reader = new FileReader();
-    reader.onloadend = () => {
-      const newFood = {
-        id: Date.now(),
-        ...data,
+    const reader = new FileReader();
+    reader.onloadend = async () => {
+      const newFoodData = {
+        name: data.name,
+        description: data.description,
         price: Number(data.price),
-        image: reader.result, // ✅ lưu dạng base64 thay vì URL tạm
-        active: true
+        categoryId: data.categoryId,
+        restaurantId: user.restaurantId,
+        image: reader.result, // base64 image
+        isAvailable: true,
+        isFeatured: false,
+        preparationTime: 20, // default value
       };
 
-      const updatedFoods = [...foods, newFood];
-      setFoods(updatedFoods);
-      localStorage.setItem('foods', JSON.stringify(updatedFoods));
-      toast.success("✅ Product added successfully!");
+      const result = await addFood(newFoodData);
 
-      setData({ name: "", description: "", price: "", category: "Pizza" });
-      setImage(null);
+      if (result.success) {
+        toast.success("✅ Product added successfully!");
+        // Reset form
+        setData({
+          name: "",
+          description: "",
+          price: "",
+          categoryId: categories.length > 0 ? categories[0].id : "",
+        });
+        setImage(null);
+      } else {
+        toast.error(`❌ Failed to add: ${result.message}`);
+      }
+
+      setLoading(false);
     };
 
-    reader.readAsDataURL(image); // đọc ảnh ra base64
+    reader.readAsDataURL(image);
   };
 
   const onChangeHandler = (event) => {
-    const { name, value } = event.target
-    setData(prev => ({ ...prev, [name]: value }))
-  }
+    const { name, value } = event.target;
+    setData((prev) => ({ ...prev, [name]: value }));
+  };
 
   const formatVND = (value) => {
-    if (!value) return ""
-    return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value)
-  }
+    if (!value) return "";
+    return new Intl.NumberFormat("vi-VN", {
+      style: "currency",
+      currency: "VND",
+    }).format(value);
+  };
 
   return (
-    <div className='add'>
-      <h2 className='add-title'>Add New Product</h2>
-      <form className='add-form' onSubmit={onSubmitHandler}>
-        <div className='add-left'>
-          <p className='label'>Product Image</p>
-          <label htmlFor="image" className='upload-box'>
-            <img src={image ? URL.createObjectURL(image) : assets.upload_area} alt="upload" />
+    <div className="add">
+      <h2 className="add-title">Add New Product</h2>
+      <form className="add-form" onSubmit={onSubmitHandler}>
+        <div className="add-left">
+          <p className="label">Product Image</p>
+          <label htmlFor="image" className="upload-box">
+            <img
+              src={image ? URL.createObjectURL(image) : assets.upload_area}
+              alt="upload"
+            />
             <span>Click to upload</span>
           </label>
-          <input 
-            type="file" 
-            id="image" 
-            hidden 
+          <input
+            type="file"
+            id="image"
+            hidden
             accept="image/*"
-            onChange={(e) => setImage(e.target.files[0])} 
-            required 
+            onChange={(e) => setImage(e.target.files[0])}
+            required
           />
         </div>
 
-        <div className='add-right'>
-          {/* <p className='label'>Select Restaurant</p>
-          <select value={selectedRestaurant} onChange={(e) => setSelectedRestaurant(e.target.value)}>
-            {restaurants.map((res, idx) => (
-              <option key={idx} value={res}>{res}</option>
-            ))}
-          </select> */}
+        <div className="add-right">
+          {currentRestaurant && (
+            <div className="restaurant-info">
+              <p className="label">Restaurant</p>
+              <p className="restaurant-name">
+                <MdLocationOn /> {currentRestaurant.name}
+              </p>
+            </div>
+          )}
 
-          <p className='label'>Product Name</p>
-          <input type="text" name='name' value={data.name} onChange={onChangeHandler} placeholder="Enter product name" required />
+          <p className="label">Product Name</p>
+          <input
+            type="text"
+            name="name"
+            value={data.name}
+            onChange={onChangeHandler}
+            placeholder="Enter product name"
+            required
+            disabled={loading}
+          />
 
-          <p className='label'>Description</p>
-          <textarea name='description' value={data.description} onChange={onChangeHandler} rows={4} placeholder="Write product description" required />
+          <p className="label">Description</p>
+          <textarea
+            name="description"
+            value={data.description}
+            onChange={onChangeHandler}
+            rows={4}
+            placeholder="Write product description"
+            required
+            disabled={loading}
+          />
 
-          <div className='add-bottom'>
-            <div className='category-box'>
-              <p className='label'>Category</p>
-              <select name='category' onChange={onChangeHandler} value={data.category}>
-                <option>Pizza</option>
-                <option>Pasta</option>
-                <option>Chicken</option>
-                <option>Wrap</option>
-                <option>Burger</option>
-                <option>Drink</option>
+          <div className="add-bottom">
+            <div className="category-box">
+              <p className="label">
+                Category <span style={{ color: "red" }}>*</span>
+              </p>
+              <select
+                name="categoryId"
+                onChange={onChangeHandler}
+                value={data.categoryId}
+                disabled={loading}
+                required
+              >
+                <option value="">-- Select a category (Required) --</option>
+                {categories.map((cat) => (
+                  <option key={cat.id} value={cat.id}>
+                    {cat.name}
+                  </option>
+                ))}
               </select>
             </div>
 
-            <div className='price-box'>
-              <p className='label'>Price</p>
-              <input type="number" name='price' value={data.price} onChange={onChangeHandler} placeholder="20000" />
-              {data.price && <p className='price-preview'>{formatVND(data.price)}</p>}
+            <div className="price-box">
+              <p className="label">Price</p>
+              <input
+                type="number"
+                name="price"
+                value={data.price}
+                onChange={onChangeHandler}
+                placeholder="20000"
+                disabled={loading}
+              />
+              {data.price && (
+                <p className="price-preview">{formatVND(data.price)}</p>
+              )}
             </div>
           </div>
 
-          <button type='submit' className='add-btn'>Add Product</button>
+          <button type="submit" className="add-btn" disabled={loading}>
+            {loading ? (
+              <>
+                <MdHourglassEmpty /> Adding...
+              </>
+            ) : (
+              "Add Product"
+            )}
+          </button>
         </div>
       </form>
     </div>
-  )
-}
+  );
+};
 
-export default Add
+export default Add;

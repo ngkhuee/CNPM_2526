@@ -9,10 +9,19 @@ export const FoodProvider = ({ children }) => {
   const [foodList, setFoodList] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // Fetch foods on mount
+  // Fetch foods on mount (only if user is logged in)
   useEffect(() => {
-    fetchFoods();
-  }, []);
+    const user = JSON.parse(localStorage.getItem("user") || "{}");
+    // Only fetch for restaurant accounts with valid restaurantId
+    if (
+      user.role === "restaurant" &&
+      user.restaurantId &&
+      /^r\d+$/.test(user.restaurantId)
+    ) {
+      fetchFoods(user.restaurantId);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Run only once
 
   // Fetch all foods from API
   const fetchFoods = async (restaurantId = null) => {

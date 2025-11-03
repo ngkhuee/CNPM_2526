@@ -1,35 +1,70 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import './Login.css';
-import login_bg from '../../assets/login_bg.png';
-
-const restaurants = [
-  { username: 'lotteria', password: '123456', name: 'Lotteria' },
-  { username: '4p', password: '123456', name: '4Ps' },
-  // Thêm nhà hàng khác nếu cần
-];
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import "./Login.css";
+import login_bg from "../../assets/login_bg.png";
+import { authService } from "@api/services";
 
 const Login = ({ setCurrentUser }) => {
-    const navigate = useNavigate();
-    const [username, setUsername] = useState('');
-    const [password, setPassword] = useState('');
-    const [error, setError] = useState('');
-    
+  const navigate = useNavigate();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        const user = restaurants.find(
-        (r) => r.username.toLowerCase() === username.toLowerCase() && r.password === password
-        );
+  // Clear any corrupted localStorage data on mount (run only once)
+  useEffect(() => {
+    const user = authService.getCurrentUser();
+    if (
+      user &&
+      (!user.role || !user.restaurantId || user.role !== "restaurant")
+    ) {
+      console.warn("Detected corrupted user data in localStorage, clearing...");
+      authService.logout();
+      if (setCurrentUser) {
+        setCurrentUser(null);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Run only once on mount
 
-        if (user) {
-        setCurrentUser(user.name); // cập nhật state ở App.jsx
-        localStorage.setItem('loggedInRestaurant', JSON.stringify(user.name)); // lưu localStorage
-        navigate('/dashboard'); // chuyển đến dashboard
-        } else {
-        setError('Username hoặc password sai!');
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+
+    try {
+      const response = await authService.login(email, password);
+
+      if (response.success && response.user) {
+        // Kiểm tra role phải là restaurant
+        if (response.user.role !== "restaurant") {
+          setError("This account is not a restaurant account!");
+          authService.logout();
+          return;
         }
-    };
+
+        // Kiểm tra có restaurantId không
+        if (!response.user.restaurantId) {
+          setError("Restaurant ID not found!");
+          authService.logout();
+          return;
+        }
+
+        // Lưu user info vào App state
+        setCurrentUser(response.user);
+
+        // Navigate to dashboard
+        navigate("/dashboard");
+      } else {
+        setError(response.message || "Login failed!");
+      }
+    } catch (err) {
+      console.error("Login error:", err);
+      setError(err.message || "An error occurred. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     // <div className="login-page">
@@ -54,15 +89,35 @@ const Login = ({ setCurrentUser }) => {
     //   </form>
     // </div>
     <div className="login-page" style={{ backgroundImage: `url(${login_bg})` }}>
-    <form className="login-form" onSubmit={handleSubmit}>
+      <form className="login-form" onSubmit={handleSubmit}>
         <h2>Restaurant Login</h2>
         {error && <p className="error">{error}</p>}
-        <input type="text" placeholder="Username" value={username} onChange={(e) => setUsername(e.target.value)} required />
-        <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required />
-        <button type="submit">Log in</button>
-    </form>
-    </div>
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+          disabled={loading}
+        />
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+          disabled={loading}
+        />
+        <button type="submit" disabled={loading}>
+          {loading ? "Logging in..." : "Log in"}
+        </button>
 
+        {/* <div className="demo-credentials">
+          <p>Demo accounts:</p>
+          <small>restaurant1@yummy.com / 123</small>
+        </div> */}
+      </form>
+    </div>
   );
 };
 

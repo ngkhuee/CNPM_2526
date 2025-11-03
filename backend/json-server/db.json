@@ -1,385 +1,391 @@
 {
   "restaurants": [
     {
-      "id": "r1",
       "name": "Belga Pizza",
+      "location": {
+        "address": "123 Nguyễn Huệ, Q.1, TP.HCM",
+        "lat": 10.776,
+        "lng": 106.7
+      },
+      "ownerPhone": "0901234567",
+      "ownerEmail": "belga@pizza.com",
       "category": "Pizza",
       "image": "/images/restaurants/menu_1.png",
       "banner": "/images/restaurants/banner_1.png",
-      "location": {
-        "lat": 10.776,
-        "lng": 106.7,
-        "address": "123 Nguyễn Huệ, Q.1, TP.HCM"
-      },
-      "ownerEmail": "belga@pizza.com",
-      "ownerPhone": "0901234567",
-      "openedAt": "2018-05-20",
-      "rating": 4.5,
-      "reviewCount": 125,
-      "status": "active",
-      "createdAt": "2018-05-20T00:00:00.000Z"
+      "id": "r1"
     },
     {
       "id": "r2",
       "name": "Lotteria",
-      "category": "Chicken",
-      "image": "/images/restaurants/menu_2.png",
-      "banner": "/images/restaurants/banner_2.png",
       "location": {
         "lat": 10.8,
         "lng": 106.71,
         "address": "456 Lê Lợi, Q.1, TP.HCM"
       },
-      "ownerEmail": "contact@lotteria.com",
-      "ownerPhone": "0902345678",
-      "openedAt": "2015-09-01",
+      "category": "Chicken",
       "rating": 4.2,
-      "reviewCount": 89,
-      "status": "active",
-      "createdAt": "2015-09-01T00:00:00.000Z"
+      "is_open": true,
+      "images": [
+        "/images/restaurants/menu_2.png",
+        "/images/restaurants/banner_2.png"
+      ],
+      "owner_user_id": "u3",
+      "created_at": "2015-09-01T00:00:00.000Z"
     },
     {
       "id": "r3",
       "name": "Pizza 4P's",
-      "category": "Pizza",
-      "image": "/images/restaurants/menu_3.png",
-      "banner": "/images/restaurants/banner_3.png",
       "location": {
         "lat": 10.77,
         "lng": 106.68,
         "address": "789 Pasteur, Q.1, TP.HCM"
       },
-      "ownerEmail": "info@pizza4ps.com",
-      "ownerPhone": "0903456789",
-      "openedAt": "2021-11-15",
+      "category": "Pizza",
       "rating": 4.8,
-      "reviewCount": 234,
-      "status": "active",
-      "createdAt": "2021-11-15T00:00:00.000Z"
+      "is_open": true,
+      "images": [
+        "/images/restaurants/menu_3.png",
+        "/images/restaurants/banner_3.png"
+      ],
+      "owner_user_id": "u4",
+      "created_at": "2021-11-15T00:00:00.000Z"
     },
     {
       "id": "r4",
       "name": "Texas Chicken",
-      "category": "Wrap",
-      "image": "/images/restaurants/menu_4.png",
-      "banner": "/images/restaurants/banner_4.png",
       "location": {
         "lat": 10.774,
         "lng": 106.705,
         "address": "101 Hai Bà Trưng, Q.1, TP.HCM"
       },
-      "ownerEmail": "texas@chicken.com",
-      "ownerPhone": "0904567890",
-      "openedAt": "2010-01-01",
-      "rating": 4.0,
-      "reviewCount": 67,
-      "status": "active",
-      "createdAt": "2010-01-01T00:00:00.000Z"
+      "category": "Wrap",
+      "rating": 4,
+      "is_open": true,
+      "images": [
+        "/images/restaurants/menu_4.png",
+        "/images/restaurants/banner_4.png"
+      ],
+      "owner_user_id": "u5",
+      "created_at": "2010-01-01T00:00:00.000Z"
     },
     {
       "id": "r5",
       "name": "Today With You",
-      "category": "Pasta",
-      "image": "/images/restaurants/menu_5.png",
-      "banner": "/images/restaurants/banner_5.png",
       "location": {
         "lat": 10.779,
         "lng": 106.701,
         "address": "202 Trần Hưng Đạo, Q.1, TP.HCM"
       },
-      "ownerEmail": "hello@todaywithyou.com",
-      "ownerPhone": "0905678901",
-      "openedAt": "2025-10-01",
+      "category": "Pasta",
       "rating": 4.6,
-      "reviewCount": 45,
-      "status": "active",
-      "createdAt": "2025-10-01T00:00:00.000Z"
+      "is_open": true,
+      "images": [
+        "/images/restaurants/menu_5.png",
+        "/images/restaurants/banner_5.png"
+      ],
+      "owner_user_id": "u6",
+      "created_at": "2025-10-01T00:00:00.000Z"
     },
     {
       "id": "r6",
       "name": "Burger King",
-      "category": "Burger",
-      "image": "/images/restaurants/menu_6.png",
-      "banner": "/images/restaurants/banner_6.png",
       "location": {
         "lat": 10.778,
         "lng": 106.702,
         "address": "303 Nguyễn Thị Minh Khai, Q.3, TP.HCM"
       },
-      "ownerEmail": "support@burgerking.com",
-      "ownerPhone": "0906789012",
-      "openedAt": "2022-01-01",
+      "category": "Burger",
       "rating": 4.3,
-      "reviewCount": 156,
-      "status": "active",
-      "createdAt": "2022-01-01T00:00:00.000Z"
+      "is_open": true,
+      "images": [
+        "/images/restaurants/menu_6.png",
+        "/images/restaurants/banner_6.png"
+      ],
+      "owner_user_id": "u7",
+      "created_at": "2022-01-01T00:00:00.000Z"
     }
   ],
-
   "categories": [
     {
       "id": "c1",
       "name": "Pizza",
-      "slug": "pizza",
       "description": "Italian traditional pizza with various toppings",
-      "image": "/images/categories/pizza.png",
-      "status": "active"
+      "status": "active",
+      "restaurantId": "r3"
     },
     {
       "id": "c2",
-      "name": "Burger",
-      "slug": "burger",
-      "description": "American style burgers with premium ingredients",
-      "image": "/images/categories/burger.png",
-      "status": "active"
+      "name": "Pasta",
+      "description": "Italian pasta with authentic sauces",
+      "status": "active",
+      "restaurantId": "r3"
     },
     {
       "id": "c3",
-      "name": "Chicken",
-      "slug": "chicken",
-      "description": "Korean fried chicken and chicken dishes",
-      "image": "/images/categories/chicken.png",
-      "status": "active"
+      "name": "Appetizers",
+      "description": "Starters and appetizers",
+      "status": "active",
+      "restaurantId": "r3"
     },
     {
       "id": "c4",
-      "name": "Pasta",
-      "slug": "pasta",
-      "description": "Italian pasta with authentic sauces",
-      "image": "/images/categories/pasta.png",
-      "status": "active"
+      "name": "Desserts",
+      "description": "Sweet treats and desserts",
+      "status": "active",
+      "restaurantId": "r3"
     },
     {
       "id": "c5",
-      "name": "Wrap",
-      "slug": "wrap",
-      "description": "Healthy wraps and sandwiches",
-      "image": "/images/categories/wrap.png",
-      "status": "active"
-    },
-    {
-      "id": "c6",
       "name": "Drinks",
-      "slug": "drinks",
-      "description": "Refreshing drinks and beverages",
-      "image": "/images/categories/drinks.png",
-      "status": "active"
+      "description": "Beverages and drinks",
+      "status": "active",
+      "restaurantId": "r3"
+    },
+    {
+      "name": "Salad",
+      "description": "salad...",
+      "status": "active",
+      "restaurantId": "r1",
+      "id": "NxqTswu"
     }
   ],
-
-  "foods": [
+  "menus": [
     {
-      "id": "f1",
-      "name": "Pizza 4 Formaggi",
-      "restaurantId": "r1",
-      "categoryId": "c1",
-      "price": 300000,
-      "originalPrice": 350000,
-      "image": "/images/foods/food_1.png",
-      "description": "Mozzarella, Gouda, Gorgonzola, Parmigiano Reggiano, tomato sauce, basil",
-      "ingredients": ["Mozzarella", "Gouda", "Gorgonzola", "Parmigiano"],
-      "isAvailable": true,
-      "isFeatured": true,
-      "preparationTime": 20,
-      "createdAt": "2024-01-01T00:00:00.000Z"
+      "id": 1,
+      "restaurant_id": "r1",
+      "item_name": "Greek Salad",
+      "price": 120000,
+      "description": "Fresh vegetables with feta cheese and olive oil",
+      "image_url": "/images/foods/food_1.png",
+      "is_available": true,
+      "category": "Salad",
+      "created_at": "2024-01-01T00:00:00.000Z"
     },
     {
-      "id": "f2",
-      "name": "Pizza Chèvre Chaud",
-      "restaurantId": "r1",
-      "categoryId": "c1",
-      "price": 260000,
-      "originalPrice": 280000,
-      "image": "/images/foods/food_2.png",
-      "description": "Tomato, Mozzarella, Goat Cheese, Honey, Walnuts",
-      "ingredients": [
-        "Tomato",
-        "Mozzarella",
-        "Goat Cheese",
-        "Honey",
-        "Walnuts"
-      ],
-      "isAvailable": true,
-      "isFeatured": false,
-      "preparationTime": 18,
-      "createdAt": "2024-01-01T00:00:00.000Z"
-    },
-    {
-      "id": "f3",
-      "name": "Double whopper jr.",
-      "restaurantId": "r2",
-      "categoryId": "c2",
-      "price": 91000,
-      "originalPrice": 91000,
-      "image": "/images/foods/food_3.png",
-      "description": "Two beef Whopper grilled with cheese and special sauce",
-      "ingredients": ["Beef", "Cheese", "Lettuce", "Tomato", "Special Sauce"],
-      "isAvailable": true,
-      "isFeatured": true,
-      "preparationTime": 15,
-      "createdAt": "2024-01-01T00:00:00.000Z"
-    },
-    {
-      "id": "f4",
-      "name": "K-Chicken Set",
-      "restaurantId": "r2",
-      "categoryId": "c3",
+      "id": 2,
+      "restaurant_id": "r1",
+      "item_name": "Veg Salad",
       "price": 95000,
-      "originalPrice": 95000,
-      "image": "/images/foods/food_4.png",
-      "description": "Juicy chicken burger with cheese and crispy coating",
-      "ingredients": ["Chicken", "Cheese", "Lettuce", "Mayo"],
-      "isAvailable": true,
-      "isFeatured": false,
-      "preparationTime": 12,
-      "createdAt": "2024-01-01T00:00:00.000Z"
+      "description": "Mixed fresh vegetables with house dressing",
+      "image_url": "/images/foods/food_2.png",
+      "is_available": true,
+      "category": "Salad",
+      "created_at": "2024-01-01T00:00:00.000Z"
     },
     {
-      "id": "f5",
-      "name": "Pizza Spicy Garlic Shrimp",
-      "restaurantId": "r3",
-      "categoryId": "c1",
+      "id": 3,
+      "restaurant_id": "r1",
+      "item_name": "Clover Salad",
+      "price": 110000,
+      "description": "Garden fresh salad with special herbs",
+      "image_url": "/images/foods/food_3.png",
+      "is_available": true,
+      "category": "Salad",
+      "created_at": "2024-01-01T00:00:00.000Z"
+    },
+    {
+      "id": 4,
+      "restaurant_id": "r1",
+      "item_name": "Chicken Salad",
+      "price": 145000,
+      "description": "Grilled chicken with fresh greens",
+      "image_url": "/images/foods/food_4.png",
+      "is_available": true,
+      "category": "Salad",
+      "created_at": "2024-01-01T00:00:00.000Z"
+    },
+    {
+      "id": 5,
+      "restaurant_id": "r2",
+      "item_name": "Fried Chicken Wings",
+      "price": 89000,
+      "description": "Crispy fried chicken wings with special sauce",
+      "image_url": "/images/foods/food_7.png",
+      "is_available": true,
+      "category": "Chicken",
+      "created_at": "2024-01-01T00:00:00.000Z"
+    },
+    {
+      "id": 6,
+      "restaurant_id": "r2",
+      "item_name": "Chicken Burger",
+      "price": 69000,
+      "description": "Juicy chicken patty with fresh vegetables",
+      "image_url": "/images/foods/food_8.png",
+      "is_available": true,
+      "category": "Burger",
+      "created_at": "2024-01-01T00:00:00.000Z"
+    },
+    {
+      "id": 7,
+      "restaurant_id": "r2",
+      "item_name": "Chicken Combo",
+      "price": 129000,
+      "description": "Complete meal with fried chicken, fries and drink",
+      "image_url": "/images/foods/food_9.png",
+      "is_available": true,
+      "category": "Combo",
+      "created_at": "2024-01-01T00:00:00.000Z"
+    },
+    {
+      "id": 8,
+      "restaurant_id": "r2",
+      "item_name": "Spicy Chicken Set",
+      "price": 149000,
+      "description": "Spicy fried chicken with sides",
+      "image_url": "/images/foods/food_10.png",
+      "is_available": true,
+      "category": "Combo",
+      "created_at": "2024-01-01T00:00:00.000Z"
+    },
+    {
+      "id": 9,
+      "restaurant_id": "r3",
+      "item_name": "Pizza Spicy Garlic Shrimp",
       "price": 254000,
-      "originalPrice": 280000,
-      "image": "/images/foods/food_5.png",
       "description": "Spicy garlic shrimp with mozzarella and fresh herbs",
-      "ingredients": ["Shrimp", "Garlic", "Mozzarella", "Chili", "Herbs"],
-      "isAvailable": true,
-      "isFeatured": true,
-      "preparationTime": 22,
-      "createdAt": "2024-01-01T00:00:00.000Z"
+      "image_url": "/images/foods/food_5.png",
+      "is_available": true,
+      "category": "Pizza",
+      "created_at": "2024-01-01T00:00:00.000Z"
     },
     {
-      "id": "f6",
-      "name": "Pizza Burrata Parma Ham",
-      "restaurantId": "r3",
-      "categoryId": "c1",
+      "id": 10,
+      "restaurant_id": "r3",
+      "item_name": "Pizza Burrata Parma Ham",
       "price": 298000,
-      "originalPrice": 320000,
-      "image": "/images/foods/food_6.png",
       "description": "Fresh burrata with parma ham and cherry tomatoes",
-      "ingredients": ["Burrata", "Parma Ham", "Cherry Tomatoes", "Arugula"],
-      "isAvailable": true,
-      "isFeatured": true,
-      "preparationTime": 20,
-      "createdAt": "2024-01-01T00:00:00.000Z"
+      "image_url": "/images/foods/food_6.png",
+      "is_available": true,
+      "category": "Pizza",
+      "created_at": "2024-01-01T00:00:00.000Z"
     },
     {
-      "id": "f7",
-      "name": "Mexicana wrap (Spicy)",
-      "restaurantId": "r4",
-      "categoryId": "c5",
-      "price": 69000,
-      "originalPrice": 69000,
-      "image": "/images/foods/food_7.png",
-      "description": "Signature crispy fried chicken in spicy mexican wrap",
-      "ingredients": ["Chicken", "Tortilla", "Salsa", "Lettuce", "Cheese"],
-      "isAvailable": true,
-      "isFeatured": false,
-      "preparationTime": 10,
-      "createdAt": "2024-01-01T00:00:00.000Z"
-    },
-    {
-      "id": "f8",
-      "name": "5pcs Chicken",
-      "restaurantId": "r4",
-      "categoryId": "c3",
+      "id": 11,
+      "restaurant_id": "r3",
+      "item_name": "Margherita Pizza",
       "price": 189000,
-      "originalPrice": 189000,
-      "image": "/images/foods/food_8.png",
-      "description": "Golden crispy chicken nuggets with special coating",
-      "ingredients": ["Chicken", "Crispy Coating", "Spices"],
-      "isAvailable": true,
-      "isFeatured": false,
-      "preparationTime": 15,
-      "createdAt": "2024-01-01T00:00:00.000Z"
+      "description": "Classic pizza with tomato, mozzarella and basil",
+      "image_url": "/images/foods/food_11.png",
+      "is_available": true,
+      "category": "Pizza",
+      "created_at": "2024-01-01T00:00:00.000Z"
     },
     {
-      "id": "f9",
-      "name": "Chicken Rose",
-      "restaurantId": "r5",
-      "categoryId": "c4",
-      "price": 290000,
-      "originalPrice": 310000,
-      "image": "/images/foods/food_9.png",
-      "description": "Fettuccine pasta with grilled chicken in rose cream sauce",
-      "ingredients": [
-        "Fettuccine",
-        "Chicken",
-        "Tomato Sauce",
-        "Cream",
-        "Herbs"
-      ],
-      "isAvailable": true,
-      "isFeatured": true,
-      "preparationTime": 25,
-      "createdAt": "2024-01-01T00:00:00.000Z"
+      "id": 12,
+      "restaurant_id": "r3",
+      "item_name": "Pepperoni Pizza",
+      "price": 215000,
+      "description": "Pizza with pepperoni and extra cheese",
+      "image_url": "/images/foods/food_12.png",
+      "is_available": true,
+      "category": "Pizza",
+      "created_at": "2024-01-01T00:00:00.000Z"
     },
     {
-      "id": "f10",
-      "name": "PESCE",
-      "restaurantId": "r5",
-      "categoryId": "c4",
-      "price": 450000,
-      "originalPrice": 480000,
-      "image": "/images/foods/food_10.png",
-      "description": "Seafood pasta with shrimps, squid, octopus, mussels, and clams in tomato sauce",
-      "ingredients": [
-        "Shrimps",
-        "Squid",
-        "Octopus",
-        "Mussels",
-        "Clams",
-        "Tomato Sauce",
-        "Pepperoncino"
-      ],
-      "isAvailable": true,
-      "isFeatured": true,
-      "preparationTime": 30,
-      "createdAt": "2024-01-01T00:00:00.000Z"
+      "id": 13,
+      "restaurant_id": "r4",
+      "item_name": "Texas Fried Chicken",
+      "price": 95000,
+      "description": "Signature crispy fried chicken",
+      "image_url": "/images/foods/food_13.png",
+      "is_available": true,
+      "category": "Chicken",
+      "created_at": "2024-01-01T00:00:00.000Z"
     },
     {
-      "id": "f11",
-      "name": "Extreme cheese burger jr",
-      "restaurantId": "r6",
-      "categoryId": "c2",
-      "price": 69000,
-      "originalPrice": 69000,
-      "image": "/images/foods/food_11.png",
-      "description": "Cheesy beef burger with extra cheese layers",
-      "ingredients": [
-        "Beef",
-        "Extra Cheese",
-        "Lettuce",
-        "Tomato",
-        "Special Sauce"
-      ],
-      "isAvailable": true,
-      "isFeatured": false,
-      "preparationTime": 12,
-      "createdAt": "2024-01-01T00:00:00.000Z"
+      "id": 14,
+      "restaurant_id": "r4",
+      "item_name": "Chicken Wrap",
+      "price": 79000,
+      "description": "Grilled chicken wrap with fresh vegetables",
+      "image_url": "/images/foods/food_14.png",
+      "is_available": true,
+      "category": "Wrap",
+      "created_at": "2024-01-01T00:00:00.000Z"
     },
     {
-      "id": "f12",
-      "name": "combo chicken bbq 3pcs",
-      "restaurantId": "r6",
-      "categoryId": "c3",
+      "id": 15,
+      "restaurant_id": "r4",
+      "item_name": "Family Pack",
+      "price": 299000,
+      "description": "8 pieces of chicken with 4 sides",
+      "image_url": "/images/foods/food_15.png",
+      "is_available": true,
+      "category": "Combo",
+      "created_at": "2024-01-01T00:00:00.000Z"
+    },
+    {
+      "id": 16,
+      "restaurant_id": "r5",
+      "item_name": "Carbonara Pasta",
+      "price": 135000,
+      "description": "Creamy pasta with bacon and parmesan",
+      "image_url": "/images/foods/food_16.png",
+      "is_available": true,
+      "category": "Pasta",
+      "created_at": "2024-01-01T00:00:00.000Z"
+    },
+    {
+      "id": 17,
+      "restaurant_id": "r5",
+      "item_name": "Bolognese Pasta",
       "price": 125000,
-      "originalPrice": 125000,
-      "image": "/images/foods/food_12.png",
-      "description": "3pcs crispy chicken with BBQ sauce, fries and drink",
-      "ingredients": ["Chicken", "BBQ Sauce", "Fries", "Soft Drink"],
-      "isAvailable": true,
-      "isFeatured": false,
-      "preparationTime": 15,
-      "createdAt": "2024-01-01T00:00:00.000Z"
+      "description": "Pasta with rich meat sauce",
+      "image_url": "/images/foods/food_17.png",
+      "is_available": true,
+      "category": "Pasta",
+      "created_at": "2024-01-01T00:00:00.000Z"
+    },
+    {
+      "id": 18,
+      "restaurant_id": "r5",
+      "item_name": "Seafood Pasta",
+      "price": 165000,
+      "description": "Pasta with mixed seafood",
+      "image_url": "/images/foods/food_18.png",
+      "is_available": true,
+      "category": "Pasta",
+      "created_at": "2024-01-01T00:00:00.000Z"
+    },
+    {
+      "id": 19,
+      "restaurant_id": "r6",
+      "item_name": "Whopper Burger",
+      "price": 89000,
+      "description": "Signature flame-grilled burger",
+      "image_url": "/images/foods/food_19.png",
+      "is_available": true,
+      "category": "Burger",
+      "created_at": "2024-01-01T00:00:00.000Z"
+    },
+    {
+      "id": 20,
+      "restaurant_id": "r6",
+      "item_name": "Cheese Burger",
+      "price": 75000,
+      "description": "Classic burger with cheese",
+      "image_url": "/images/foods/food_20.png",
+      "is_available": true,
+      "category": "Burger",
+      "created_at": "2024-01-01T00:00:00.000Z"
+    },
+    {
+      "id": 21,
+      "restaurant_id": "r6",
+      "item_name": "Double Whopper",
+      "price": 129000,
+      "description": "Double beef patty with all the fixings",
+      "image_url": "/images/foods/food_21.png",
+      "is_available": true,
+      "category": "Burger",
+      "created_at": "2024-01-01T00:00:00.000Z"
     }
   ],
-
   "accounts": [
     {
       "id": "u1",
-      "email": "admin@tomato.com",
+      "email": "admin@yummy.com",
       "password": "123456",
       "role": "admin",
       "name": "Admin User",
@@ -390,7 +396,7 @@
     },
     {
       "id": "u2",
-      "email": "user1@tomato.com",
+      "email": "user1@yummy.com",
       "password": "123456",
       "role": "customer",
       "name": "Customer User",
@@ -412,22 +418,79 @@
     },
     {
       "id": "u3",
-      "email": "restaurant1@tomato.com",
+      "email": "lotteria@yummy.com",
       "password": "123",
       "role": "restaurant",
-      "name": "Belga Pizza Owner",
+      "name": "Lotteria Manager",
+      "restaurantId": "r2",
+      "phone": "0902345678",
+      "avatar": "/images/avatars/restaurant.png",
+      "status": "active",
+      "createdAt": "2015-09-01T00:00:00.000Z"
+    },
+    {
+      "id": "u4",
+      "email": "pizza4ps@yummy.com",
+      "password": "123",
+      "role": "restaurant",
+      "name": "Pizza 4P's Manager",
+      "restaurantId": "r3",
+      "phone": "0903456789",
+      "avatar": "/images/avatars/restaurant.png",
+      "status": "active",
+      "createdAt": "2021-11-15T00:00:00.000Z"
+    },
+    {
+      "id": "u5",
+      "email": "texaschicken@yummy.com",
+      "password": "123",
+      "role": "restaurant",
+      "name": "Texas Chicken Manager",
+      "restaurantId": "r4",
+      "phone": "0904567890",
+      "avatar": "/images/avatars/restaurant.png",
+      "status": "active",
+      "createdAt": "2010-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "u6",
+      "email": "todaywithyou@yummy.com",
+      "password": "123",
+      "role": "restaurant",
+      "name": "Today With You Manager",
+      "restaurantId": "r5",
+      "phone": "0905678901",
+      "avatar": "/images/avatars/restaurant.png",
+      "status": "active",
+      "createdAt": "2025-10-01T00:00:00.000Z"
+    },
+    {
+      "id": "u7",
+      "email": "burgerking@yummy.com",
+      "password": "123",
+      "role": "restaurant",
+      "name": "Burger King Manager",
+      "restaurantId": "r6",
+      "phone": "0906789012",
+      "avatar": "/images/avatars/restaurant.png",
+      "status": "active",
+      "createdAt": "2022-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "u8",
+      "email": "belgapizza@yummy.com",
+      "password": "123",
+      "role": "restaurant",
+      "name": "Belga Pizza Manager",
       "restaurantId": "r1",
-      "phone": "0901234567",
+      "phone": "0907890123",
       "avatar": "/images/avatars/restaurant.png",
       "status": "active",
       "createdAt": "2018-05-20T00:00:00.000Z"
     }
   ],
-
   "orders": [],
-
   "carts": [],
-
   "promotions": [
     {
       "id": "p1",
@@ -460,8 +523,27 @@
       "usedCount": 8,
       "applicableRestaurants": [],
       "status": "active"
+    },
+    {
+      "code": "TESTTT",
+      "name": "TEST sale",
+      "description": "test voucher",
+      "type": "percentage",
+      "value": 20,
+      "minOrderValue": 0,
+      "maxDiscount": 0,
+      "startDate": "2025-11-03T00:00:00.000Z",
+      "endDate": "2025-12-03T00:00:00.000Z",
+      "status": "active",
+      "restaurantId": "r1",
+      "createdBy": "restaurant",
+      "applicableRestaurants": [
+        "r1"
+      ],
+      "usageLimit": 1000,
+      "usedCount": 0,
+      "id": "04zETdz"
     }
   ],
-
   "reviews": []
 }
