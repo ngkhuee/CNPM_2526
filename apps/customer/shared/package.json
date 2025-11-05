@@ -1,0 +1,13 @@
+{
+  "name": "customer-shared",
+  "version": "1.0.0",
+  "main": "src/index.js",
+  "dependencies": {
+    "shared-services": "*",
+    "shared-utils": "*",
+    "shared-constants": "*"
+  },
+  "peerDependencies": {
+    "react": ">=18.2.0"
+  }
+}

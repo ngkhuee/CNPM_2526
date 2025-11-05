@@ -1,0 +1,26 @@
+{
+  "name": "mock-backend",
+  "version": "1.0.0",
+  "description": "Mock API Backend for Food Delivery System",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "keywords": [
+    "json-server",
+    "api",
+    "mock"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "json-server": "^0.17.4",
+    "jsonwebtoken": "^9.0.2",
+    "dotenv": "^16.3.1",
+    "cors": "^2.8.5"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.2"
+  }
+}
