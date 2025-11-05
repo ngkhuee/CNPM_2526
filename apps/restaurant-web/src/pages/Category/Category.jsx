@@ -24,33 +24,6 @@ const Category = () => {
     (food) => food.restaurantId === currentUser?.restaurantId
   );
 
-  // Debug: Log foodList và categories
-  useEffect(() => {
-    console.log("📊 Category.jsx Debug:");
-    console.log("- User restaurantId:", currentUser?.restaurantId);
-    console.log("- Total categories:", categories.length);
-    console.log(
-      "- Categories:",
-      categories.map((c) => ({
-        id: c.id,
-        name: c.name,
-        restaurantId: c.restaurantId,
-      }))
-    );
-    console.log("- Total foodList:", foodList.length);
-    console.log("- Restaurant foods:", restaurantFoods.length);
-    console.log(
-      "- Foods sample:",
-      restaurantFoods.slice(0, 3).map((f) => ({
-        id: f.id,
-        name: f.name,
-        restaurantId: f.restaurantId,
-        category: f.category,
-        categoryId: f.categoryId,
-      }))
-    );
-  }, [categories, foodList]);
-
   const [showModal, setShowModal] = useState(false);
   const [editModal, setEditModal] = useState(false);
   const [currentCategory, setCurrentCategory] = useState({
@@ -116,9 +89,9 @@ const Category = () => {
     }
   };
 
-  // Filter categories
-  const filteredCategories = categories.filter((cat) =>
-    cat.name.toLowerCase().includes(search.toLowerCase())
+  // Filter categories - Add safe check
+  const filteredCategories = (categories || []).filter((cat) =>
+    cat.name?.toLowerCase().includes(search.toLowerCase())
   );
 
   const handleViewFoods = (categoryId, categoryName) => {
@@ -197,7 +170,7 @@ const Category = () => {
                       {cat.status}
                     </span>
                   </td>
-                  <td>
+                  <td className="action-btn">
                     <button
                       className="edit-btn"
                       onClick={() => handleOpenEditModal(cat)}

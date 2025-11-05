@@ -57,6 +57,13 @@ const RestaurantProfile = () => {
   // Save restaurant data
   const handleSave = async (e) => {
     e.preventDefault();
+
+    // IMPORTANT: Only save if we're in editing mode
+    if (!editing) {
+      console.warn("Save called but not in editing mode!");
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -83,10 +90,8 @@ const RestaurantProfile = () => {
 
   // Upload ảnh logo hoặc banner
   const handleImageUpload = (e, type) => {
-    e.preventDefault(); // Prevent form submission
-    e.stopPropagation(); // Stop event bubbling
-
-    const file = e.target.files[0];
+    // Don't prevent default here - this is file input onChange, not form submit
+    const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -193,7 +198,15 @@ const RestaurantProfile = () => {
           </div>
 
           <div className="right">
-            <form onSubmit={handleSave}>
+            <form
+              onSubmit={handleSave}
+              onKeyDown={(e) => {
+                // Prevent Enter key from submitting form when not in editing mode
+                if (e.key === "Enter" && !editing) {
+                  e.preventDefault();
+                }
+              }}
+            >
               <div className="form-group">
                 <label htmlFor="restaurant-name">Restaurant Name:</label>
                 <input
@@ -244,47 +257,6 @@ const RestaurantProfile = () => {
                 />
               </div>
 
-              <div className="form-group">
-                <label htmlFor="restaurant-category">Category:</label>
-                <input
-                  id="restaurant-category"
-                  type="text"
-                  value={formData.category}
-                  onChange={(e) => handleChange("category", e.target.value)}
-                  disabled={!editing}
-                  placeholder="e.g., Pizza, Burger, Chicken"
-                />
-              </div>
-
-              <div className="location-row">
-                <div className="form-group">
-                  <label htmlFor="restaurant-lat">Latitude:</label>
-                  <input
-                    id="restaurant-lat"
-                    type="number"
-                    step="0.000001"
-                    value={formData.location.lat}
-                    onChange={(e) =>
-                      handleChange("location.lat", parseFloat(e.target.value))
-                    }
-                    disabled={!editing}
-                  />
-                </div>
-                <div className="form-group">
-                  <label htmlFor="restaurant-lng">Longitude:</label>
-                  <input
-                    id="restaurant-lng"
-                    type="number"
-                    step="0.000001"
-                    value={formData.location.lng}
-                    onChange={(e) =>
-                      handleChange("location.lng", parseFloat(e.target.value))
-                    }
-                    disabled={!editing}
-                  />
-                </div>
-              </div>
-
               {currentRestaurant && (
                 <div className="readonly-info">
                   <p>
@@ -317,7 +289,9 @@ const RestaurantProfile = () => {
                     <button
                       type="button"
                       className="cancel-btn"
-                      onClick={() => {
+                      onClick={(e) => {
+                        e.preventDefault(); // Prevent form submission
+                        e.stopPropagation(); // Stop event bubbling
                         setEditing(false);
                         // Reset form to current restaurant data
                         if (currentRestaurant) {
@@ -341,7 +315,11 @@ const RestaurantProfile = () => {
                   <button
                     type="button"
                     className="edit-btn"
-                    onClick={() => setEditing(true)}
+                    onClick={(e) => {
+                      e.preventDefault(); // Prevent any default behavior
+                      e.stopPropagation(); // Stop event bubbling
+                      setEditing(true);
+                    }}
                   >
                     <MdEdit /> Edit Info
                   </button>

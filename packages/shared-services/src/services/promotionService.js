@@ -1,5 +1,55 @@
 import apiClient from "../config/apiClient";
 
+// Helper to map snake_case fields from backend to camelCase for frontend
+const mapPromotionToFrontend = (promo) => {
+  if (!promo) return null;
+
+  return {
+    id: promo.id,
+    code: promo.code,
+    name: promo.name,
+    description: promo.description,
+    type: promo.type,
+    value: promo.value,
+    minOrderValue: promo.min_order_value,
+    maxDiscount: promo.max_discount,
+    startDate: promo.start_date,
+    endDate: promo.end_date,
+    usageLimit: promo.usage_limit,
+    usedCount: promo.used_count,
+    scope: promo.scope,
+    restaurantId: promo.restaurant_id,
+    status: promo.status,
+    createdAt: promo.created_at,
+    updatedAt: promo.updated_at,
+    createdBy: promo.created_by || promo.scope,
+    applicableRestaurants: promo.restaurant_id ? [promo.restaurant_id] : [],
+  };
+};
+
+// Helper to map camelCase fields from frontend to snake_case for backend
+const mapPromotionToBackend = (promo) => {
+  const payload = {};
+
+  if (promo.code) payload.code = promo.code;
+  if (promo.name) payload.name = promo.name;
+  if (promo.description) payload.description = promo.description;
+  if (promo.type) payload.type = promo.type;
+  if (promo.value !== undefined) payload.value = promo.value;
+  if (promo.minOrderValue !== undefined)
+    payload.min_order_value = promo.minOrderValue;
+  if (promo.maxDiscount !== undefined) payload.max_discount = promo.maxDiscount;
+  if (promo.startDate) payload.start_date = promo.startDate;
+  if (promo.endDate) payload.end_date = promo.endDate;
+  if (promo.usageLimit !== undefined) payload.usage_limit = promo.usageLimit;
+  if (promo.usedCount !== undefined) payload.used_count = promo.usedCount;
+  if (promo.scope) payload.scope = promo.scope;
+  if (promo.restaurantId) payload.restaurant_id = promo.restaurantId;
+  if (promo.status) payload.status = promo.status;
+
+  return payload;
+};
+
 const promotionService = {
   /**
    * Get all promotions (with optional filter)
@@ -10,7 +60,8 @@ const promotionService = {
     try {
       const url = status ? `/promotions?status=${status}` : "/promotions";
       const response = await apiClient.get(url);
-      return response;
+      // apiClient already returns response.data
+      return response.map(mapPromotionToFrontend);
     } catch (error) {
       console.error("Error fetching promotions:", error);
       throw error;
@@ -27,7 +78,9 @@ const promotionService = {
       const response = await apiClient.get(
         `/promotions?code=${code.toUpperCase()}&status=active`
       );
-      return response.data[0] || null;
+      // apiClient already returns response.data (array)
+      const promo = response[0] || null;
+      return promo ? mapPromotionToFrontend(promo) : null;
     } catch (error) {
       console.error("Error fetching promotion by code:", error);
       throw error;
@@ -135,7 +188,8 @@ const promotionService = {
   async getById(id) {
     try {
       const response = await apiClient.get(`/promotions/${id}`);
-      return response.data;
+      // apiClient already returns response.data
+      return mapPromotionToFrontend(response);
     } catch (error) {
       console.error("Error fetching promotion:", error);
       throw error;
@@ -149,10 +203,12 @@ const promotionService = {
    */
   async getByRestaurant(restaurantId) {
     try {
+      // Query with backend field name (restaurant_id)
       const response = await apiClient.get(
-        `/promotions?status=active&applicableRestaurants_like=${restaurantId}`
+        `/promotions?status=active&restaurant_id=${restaurantId}`
       );
-      return response.data;
+      // apiClient already returns response.data
+      return response.map(mapPromotionToFrontend);
     } catch (error) {
       console.error("Error fetching restaurant promotions:", error);
       throw error;
@@ -166,8 +222,16 @@ const promotionService = {
    */
   async create(promotionData) {
     try {
-      const response = await apiClient.post("/promotions", promotionData);
-      return response.data;
+      // Map frontend camelCase to backend snake_case
+      const payload = mapPromotionToBackend(promotionData);
+
+      // Add timestamps
+      payload.created_at = new Date().toISOString();
+      payload.updated_at = new Date().toISOString();
+
+      const response = await apiClient.post("/promotions", payload);
+      // apiClient already returns response.data
+      return mapPromotionToFrontend(response);
     } catch (error) {
       console.error("Error creating promotion:", error);
       throw error;
@@ -182,8 +246,13 @@ const promotionService = {
    */
   async update(id, updates) {
     try {
-      const response = await apiClient.patch(`/promotions/${id}`, updates);
-      return response.data;
+      // Map frontend camelCase to backend snake_case
+      const payload = mapPromotionToBackend(updates);
+      payload.updated_at = new Date().toISOString();
+
+      const response = await apiClient.patch(`/promotions/${id}`, payload);
+      // apiClient already returns response.data
+      return mapPromotionToFrontend(response);
     } catch (error) {
       console.error("Error updating promotion:", error);
       throw error;

@@ -135,10 +135,39 @@ export const restaurantService = {
 
   async update(id, restaurantData) {
     try {
-      return await apiClient.put(
-        ENDPOINTS.RESTAURANTS.BY_ID(id),
-        restaurantData
+      // Map frontend (camelCase) to backend (snake_case)
+      const payload = {
+        name: restaurantData.name,
+        description: restaurantData.description,
+        address: restaurantData.location?.address || restaurantData.address,
+        latitude: restaurantData.location?.lat || restaurantData.latitude,
+        longitude: restaurantData.location?.lng || restaurantData.longitude,
+        phone: restaurantData.ownerPhone || restaurantData.phone,
+        email: restaurantData.ownerEmail || restaurantData.email,
+        primary_category: restaurantData.category,
+        image: restaurantData.image,
+        banner_image: restaurantData.banner || restaurantData.banner_image,
+        opening_hours:
+          restaurantData.openingHours || restaurantData.opening_hours,
+        is_open: restaurantData.isOpen,
+        status: restaurantData.status,
+        delivery_time_minutes: restaurantData.deliveryTime,
+        min_order_amount: restaurantData.minOrderAmount,
+        updated_at: new Date().toISOString(),
+      };
+
+      // Remove undefined values
+      Object.keys(payload).forEach(
+        (key) => payload[key] === undefined && delete payload[key]
       );
+
+      const response = await apiClient.patch(
+        ENDPOINTS.RESTAURANTS.BY_ID(id),
+        payload
+      );
+
+      // Return mapped response
+      return this.getById(id);
     } catch (error) {
       throw error;
     }

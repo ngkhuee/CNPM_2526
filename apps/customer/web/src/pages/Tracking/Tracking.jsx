@@ -85,6 +85,21 @@ const Tracking = () => {
       {/* Order information */}
       <div className="tracking-info">
         <h2>Đơn hàng #{order.id || order._id}</h2>
+
+        {/* Restaurant info */}
+        {(order.restaurantName ||
+          order.restaurant?.name ||
+          order.restaurantId) && (
+          <p
+            style={{ color: "#ff6b35", fontWeight: "600", marginBottom: "8px" }}
+          >
+            <span>🍽️ Nhà hàng:</span>{" "}
+            {order.restaurantName ||
+              order.restaurant?.name ||
+              `Restaurant ID: ${order.restaurantId}`}
+          </p>
+        )}
+
         <p>
           Trạng thái:
           <span className={`status ${order.status}`}>

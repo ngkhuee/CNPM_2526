@@ -1,5 +1,37 @@
 import apiClient from "../config/apiClient";
 
+// Helper to map snake_case fields from backend to camelCase for frontend
+const mapCategoryToFrontend = (category) => {
+  if (!category) return null;
+
+  return {
+    id: category.id,
+    restaurantId: category.restaurant_id,
+    name: category.name,
+    description: category.description,
+    displayOrder: category.display_order,
+    status: category.status,
+    createdAt: category.created_at,
+    updatedAt: category.updated_at,
+  };
+};
+
+// Helper to map camelCase fields from frontend to snake_case for backend
+const mapCategoryToBackend = (category) => {
+  const payload = {
+    name: category.name,
+    description: category.description,
+    status: category.status || "active",
+  };
+
+  // Only include if provided
+  if (category.restaurantId) payload.restaurant_id = category.restaurantId;
+  if (category.displayOrder !== undefined)
+    payload.display_order = category.displayOrder;
+
+  return payload;
+};
+
 const categoryService = {
   /**
    * Get all active categories
@@ -8,7 +40,8 @@ const categoryService = {
   async getAll() {
     try {
       const response = await apiClient.get("/categories?status=active");
-      return response.data;
+      // apiClient already returns response.data
+      return response.map(mapCategoryToFrontend);
     } catch (error) {
       console.error("Error fetching categories:", error);
       throw error;
@@ -23,7 +56,8 @@ const categoryService = {
   async getById(id) {
     try {
       const response = await apiClient.get(`/categories/${id}`);
-      return response.data;
+      // apiClient already returns response.data
+      return mapCategoryToFrontend(response);
     } catch (error) {
       console.error("Error fetching category:", error);
       throw error;
@@ -37,10 +71,12 @@ const categoryService = {
    */
   async getByRestaurant(restaurantId) {
     try {
+      // Query with backend field name (restaurant_id)
       const response = await apiClient.get(
-        `/categories?restaurantId=${restaurantId}&status=active`
+        `/categories?restaurant_id=${restaurantId}&status=active`
       );
-      return response.data;
+      // apiClient already returns response.data
+      return response.map(mapCategoryToFrontend);
     } catch (error) {
       console.error("Error fetching restaurant categories:", error);
       throw error;
@@ -54,8 +90,16 @@ const categoryService = {
    */
   async create(categoryData) {
     try {
-      const response = await apiClient.post("/categories", categoryData);
-      return response.data;
+      // Map frontend camelCase to backend snake_case
+      const payload = mapCategoryToBackend(categoryData);
+
+      // Add timestamps
+      payload.created_at = new Date().toISOString();
+      payload.updated_at = new Date().toISOString();
+
+      const response = await apiClient.post("/categories", payload);
+      // apiClient already returns response.data
+      return mapCategoryToFrontend(response);
     } catch (error) {
       console.error("Error creating category:", error);
       throw error;
@@ -70,8 +114,13 @@ const categoryService = {
    */
   async update(id, updates) {
     try {
-      const response = await apiClient.patch(`/categories/${id}`, updates);
-      return response.data;
+      // Map frontend camelCase to backend snake_case
+      const payload = mapCategoryToBackend(updates);
+      payload.updated_at = new Date().toISOString();
+
+      const response = await apiClient.patch(`/categories/${id}`, payload);
+      // apiClient already returns response.data
+      return mapCategoryToFrontend(response);
     } catch (error) {
       console.error("Error updating category:", error);
       throw error;

@@ -88,6 +88,25 @@ const MyOrders = () => {
         orders.map((order) => (
           <div key={order.id || order._id} className="order-card">
             <h3>Order #{order.id || order._id}</h3>
+
+            {/* Restaurant info */}
+            {(order.restaurantName ||
+              order.restaurant?.name ||
+              order.restaurantId) && (
+              <p
+                style={{
+                  color: "#ff6b35",
+                  fontWeight: "600",
+                  marginBottom: "8px",
+                }}
+              >
+                <b>🍽️ Nhà hàng:</b>{" "}
+                {order.restaurantName ||
+                  order.restaurant?.name ||
+                  `Restaurant ID: ${order.restaurantId}`}
+              </p>
+            )}
+
             <p>
               <b>Trạng thái:</b> {order.status}
             </p>

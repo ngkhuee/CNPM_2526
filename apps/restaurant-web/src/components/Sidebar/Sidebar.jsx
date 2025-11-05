@@ -10,7 +10,6 @@ import {
   MdShoppingCart,
   MdCardGiftcard,
   MdCategory,
-  MdLocalShipping,
   MdRestaurant,
   MdLogout,
 } from "react-icons/md";
@@ -64,12 +63,6 @@ const Sidebar = () => {
             className={({ isActive }) => (isActive ? "active" : "")}
           >
             <MdCardGiftcard /> Promotions
-          </NavLink>
-          <NavLink
-            to="/order-status"
-            className={({ isActive }) => (isActive ? "active" : "")}
-          >
-            <MdLocalShipping /> Order Status
           </NavLink>
           <NavLink
             to="/restaurant-info"

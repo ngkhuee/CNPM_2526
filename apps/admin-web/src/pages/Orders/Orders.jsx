@@ -135,10 +135,12 @@ const Orders = () => {
                   </div>
                 </td>
                 <td className="order-total">
-                  {formatCurrency(order.total_amount)}
+                  {formatCurrency(order.totalAmount || order.total_amount)}
                 </td>
                 <td>
-                  <span className="payment-method">{order.payment_method}</span>
+                  <span className="payment-method">
+                    {order.paymentMethod || order.payment_method}
+                  </span>
                 </td>
                 <td>
                   <span
@@ -148,26 +150,29 @@ const Orders = () => {
                   </span>
                 </td>
                 <td>
-                  {order.drone_id ? (
+                  {order.droneId || order.drone_id ? (
                     <button
                       className="btn-drone-link"
                       onClick={() =>
                         navigate("/admin/delivery", {
-                          state: { droneId: order.drone_id },
+                          state: { droneId: order.droneId || order.drone_id },
                         })
                       }
                     >
-                      {order.drone_id}
+                      {order.droneId || order.drone_id}
                     </button>
                   ) : (
                     <span className="no-drone">—</span>
                   )}
                 </td>
                 <td className="order-time">
-                  {new Date(order.created_at).toLocaleString("vi-VN", {
-                    dateStyle: "short",
-                    timeStyle: "short",
-                  })}
+                  {new Date(order.createdAt || order.created_at).toLocaleString(
+                    "vi-VN",
+                    {
+                      dateStyle: "short",
+                      timeStyle: "short",
+                    }
+                  )}
                 </td>
                 <td>
                   <button

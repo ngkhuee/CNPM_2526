@@ -10,8 +10,40 @@ export const authService = {
       });
 
       if (response.success && response.token) {
+        // Map snake_case fields to camelCase for frontend
+        const user = response.user;
+
+        // Map restaurant_id → restaurantId
+        if (user.restaurant_id) {
+          user.restaurantId = user.restaurant_id;
+          delete user.restaurant_id;
+        }
+
+        // Map full_name → fullName
+        if (user.full_name) {
+          user.fullName = user.full_name;
+          delete user.full_name;
+        }
+
+        // Map roles array → role string for compatibility
+        if (user.roles && Array.isArray(user.roles)) {
+          // Convert roles array to single role string
+          if (user.roles.includes("restaurant_owner")) {
+            user.role = "restaurant";
+          } else if (user.roles.includes("admin")) {
+            user.role = "admin";
+          } else if (user.roles.includes("customer")) {
+            user.role = "customer";
+          } else {
+            user.role = user.roles[0]; // fallback to first role
+          }
+        }
+
         localStorage.setItem("token", response.token);
-        localStorage.setItem("user", JSON.stringify(response.user));
+        localStorage.setItem("user", JSON.stringify(user));
+
+        // Return with mapped user
+        response.user = user;
       }
 
       return response;
@@ -25,8 +57,40 @@ export const authService = {
       const response = await apiClient.post(ENDPOINTS.AUTH.REGISTER, userData);
 
       if (response.success && response.token) {
+        // Map snake_case fields to camelCase for frontend
+        const user = response.user;
+
+        // Map restaurant_id → restaurantId
+        if (user.restaurant_id) {
+          user.restaurantId = user.restaurant_id;
+          delete user.restaurant_id;
+        }
+
+        // Map full_name → fullName
+        if (user.full_name) {
+          user.fullName = user.full_name;
+          delete user.full_name;
+        }
+
+        // Map roles array → role string for compatibility
+        if (user.roles && Array.isArray(user.roles)) {
+          // Convert roles array to single role string
+          if (user.roles.includes("restaurant_owner")) {
+            user.role = "restaurant";
+          } else if (user.roles.includes("admin")) {
+            user.role = "admin";
+          } else if (user.roles.includes("customer")) {
+            user.role = "customer";
+          } else {
+            user.role = user.roles[0]; // fallback to first role
+          }
+        }
+
         localStorage.setItem("token", response.token);
-        localStorage.setItem("user", JSON.stringify(response.user));
+        localStorage.setItem("user", JSON.stringify(user));
+
+        // Return with mapped user
+        response.user = user;
       }
 
       return response;

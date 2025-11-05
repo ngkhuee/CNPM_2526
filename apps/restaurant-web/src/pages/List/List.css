@@ -3,9 +3,9 @@
   flex: 1;
   width: 100%;
   background-color: #f7f9fb;
-  padding: 24px;
+  padding: 32px;
   overflow-y: auto;
-  min-height: calc(100vh - 60px); /* trừ chiều cao navbar nếu có */
+  min-height: calc(100vh - 60px);
   box-sizing: border-box;
 }
 
@@ -14,30 +14,38 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 32px;
 }
 
 .list-header h2 {
-  font-size: 24px;
+  font-size: 28px;
   font-weight: 600;
-  color: #333;
+  color: #1a1a1a;
+  margin: 0;
 }
 
 .add-btn {
-  background-color: #4caf50;
+  background: #ff6b35;
   color: #fff;
   border: none;
-  padding: 10px 18px;
+  padding: 10px 20px;
   border-radius: 6px;
   cursor: pointer;
   font-size: 14px;
   font-weight: 500;
-  transition: background-color 0.2s ease, transform 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
 }
 
 .add-btn:hover {
-  background-color: #43a047;
-  transform: translateY(-2px);
+  background: #e55a28;
+  transform: translateY(-1px);
+}
+
+.add-btn svg {
+  font-size: 18px;
 }
 
 /* Bộ lọc */
@@ -50,104 +58,139 @@
   flex-wrap: wrap;
 }
 
-.list-filters input[type='text'],
+.list-filters input[type="text"],
 .list-filters select {
-  padding: 8px 12px;
+  padding: 10px 16px;
   font-size: 14px;
-  border: 1px solid #ccc;
+  border: 1px solid #e0e0e0;
   border-radius: 6px;
   outline: none;
-  height: 38px;
-  min-width: 180px;
+  background: white;
+  min-width: 200px;
 }
 
-.list-filters input[type='text']:focus,
+.list-filters input[type="text"]:focus,
 .list-filters select:focus {
-  border-color: #4caf50;
-  box-shadow: 0 0 5px rgba(76, 175, 80, 0.3);
+  border-color: #ff6b35;
+  box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
 }
 
 /* Danh sách thẻ món ăn */
 .cards-wrapper {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 20px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 24px;
 }
 
 .food-card {
   display: flex;
   flex-direction: column;
-  width: 250px;
-  border: 1px solid #ddd;
-  border-radius: 10px;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
   background-color: #fff;
-  transition: box-shadow 0.2s;
+  transition: all 0.3s ease;
+  overflow: hidden;
 }
 
 .food-card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  transform: translateY(-4px);
 }
 
 .food-img-wrapper {
   width: 100%;
-  height: 160px;
+  height: 200px;
   overflow: hidden;
-  border-radius: 10px 10px 0 0;
+  background: #f5f5f5;
 }
 
 .food-img-wrapper img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.food-card:hover .food-img-wrapper img {
+  transform: scale(1.05);
 }
 
 .food-info {
-  padding: 10px 12px;
+  padding: 16px;
+  flex: 1;
 }
 
 .food-info h4 {
-  margin: 0 0 4px 0;
-  font-size: 16px;
+  margin: 0 0 8px 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1a1a1a;
 }
 
-.food-info p {
-  margin: 2px 0;
-  font-size: 14px;
-  color: #555;
+.food-category {
+  font-size: 13px;
+  color: #6c757d;
+  margin: 0 0 12px 0;
 }
 .price-container {
-  text-align: right;
-}
-.food-price {
-  font-weight: 700;
-  background: #f3e6ef; 
-  padding: 4px 10px;
-  border-radius: 8px;
-  display: inline-block;
-  margin-left: auto;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  margin-bottom: 12px;
 }
 
+.food-price {
+  font-weight: 600;
+  font-size: 20px;
+  color: #ff6b35;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.food-price svg {
+  font-size: 18px;
+}
 
 .card-actions {
   display: flex;
+  gap: 8px;
+  padding: 0 16px 16px;
+  border-top: 1px solid #f0f0f0;
+  padding-top: 12px;
+}
+
+.edit-btn,
+.remove-btn {
+  flex: 1;
+  border: none;
+  border-radius: 6px;
+  padding: 10px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
   justify-content: center;
-  padding-bottom: 10px;
+  gap: 6px;
+  transition: all 0.2s;
+}
+
+.edit-btn {
+  background-color: #0dcaf0;
+  color: white;
+}
+
+.edit-btn:hover {
+  background-color: #0bb5d6;
+  transform: translateY(-1px);
 }
 
 .remove-btn {
-  background-color: #f44336;
+  background-color: #dc3545;
   color: #fff;
-  border: none;
-  border-radius: 6px;
-  padding: 5px 10px;
-  cursor: pointer;
-  font-size: 13px;
-  transition: background-color 0.2s;
 }
 
 .remove-btn:hover {
-  background-color: #e53935;
+  background-color: #c82333;
+  transform: translateY(-1px);
 }
 
 /* Trạng thái trống */

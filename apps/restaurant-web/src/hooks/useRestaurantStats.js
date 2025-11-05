@@ -33,7 +33,7 @@ export const useRestaurantStats = () => {
     // Calculate revenue from completed orders
     const revenue = restaurantOrders
       .filter((o) => o.status === "delivered")
-      .reduce((sum, order) => sum + (order.total || 0), 0);
+      .reduce((sum, order) => sum + (order.totalAmount || 0), 0);
 
     // Generate chart data (last 7 days)
     const last7Days = generateLast7DaysData(restaurantOrders);
@@ -67,7 +67,7 @@ const generateLast7DaysData = (orders) => {
 
     const dayRevenue = dayOrders
       .filter((o) => o.status === "delivered")
-      .reduce((sum, order) => sum + (order.total || 0), 0);
+      .reduce((sum, order) => sum + (order.totalAmount || 0), 0);
 
     last7Days.push({
       date: dateStr,

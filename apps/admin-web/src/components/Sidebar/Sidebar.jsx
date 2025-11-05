@@ -32,7 +32,7 @@ const Sidebar = () => {
           <h3>Admin Panel</h3>
         </div>
 
-        {/* Menu admin - KHÔNG CÓ food management */}
+        {/* Menu admin */}
         <NavLink
           to="/admin"
           end
@@ -51,7 +51,17 @@ const Sidebar = () => {
           }
         >
           <MdShoppingCart size={24} />
-          <p>All Orders</p>
+          <p>Orders</p>
+        </NavLink>
+
+        <NavLink
+          to="/admin/users"
+          className={({ isActive }) =>
+            isActive ? "sidebar-option active" : "sidebar-option"
+          }
+        >
+          <MdPerson size={24} />
+          <p>Users</p>
         </NavLink>
 
         <NavLink
@@ -72,16 +82,6 @@ const Sidebar = () => {
         >
           <MdLocalShipping size={24} />
           <p>Delivery Drones</p>
-        </NavLink>
-
-        <NavLink
-          to="/admin/users"
-          className={({ isActive }) =>
-            isActive ? "sidebar-option active" : "sidebar-option"
-          }
-        >
-          <MdPerson size={24} />
-          <p>Users</p>
         </NavLink>
 
         <NavLink
@@ -107,7 +107,7 @@ const Sidebar = () => {
           <p>Settings</p>
         </NavLink>
 
-        <button onClick={handleLogout} className="sidebar-option logout-btn">
+        <button onClick={handleLogout} className="logout-btn">
           <MdLogout size={24} />
           <p>Logout</p>
         </button>
