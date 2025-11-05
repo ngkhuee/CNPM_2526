@@ -1,16 +1,16 @@
 import React, { useContext, useState } from "react";
 import "./FoodItem.css";
 import { assets } from "../../assets/assets";
-import { StoreContext } from "../../Context/StoreContext";
+import { CartContext } from "customer-shared";
 import FoodDetailPopup from "../FoodDetailPopup/FoodDetailPopup";
 import { getImageUrl } from "@utils/imageHelper";
+import { formatCurrency } from "shared-utils";
 import { MdStorefront } from "react-icons/md";
 
 const FoodItem = ({ image, name, price, desc, id, restaurant }) => {
   const [showPopup, setShowPopup] = useState(false);
 
-  const { cartItems, addToCart, removeFromCart, url } =
-    useContext(StoreContext);
+  const { cartItems, addToCart, removeFromCart } = useContext(CartContext);
 
   const food = { id, image, name, price, description: desc };
   const imageUrl = getImageUrl(image); // Build full URL from backend path
@@ -58,7 +58,7 @@ const FoodItem = ({ image, name, price, desc, id, restaurant }) => {
           <p>{name}</p> <img src={assets.rating_starts} alt="" />
         </div>
         <p className="food-item-desc">{desc}</p>
-        <p className="food-item-price">{price.toLocaleString("vi-VN")}đ</p>
+        <p className="food-item-price">{formatCurrency(price)}</p>
         <p
           className="food-item-restaurant"
           style={{ display: "flex", alignItems: "center", gap: "4px" }}

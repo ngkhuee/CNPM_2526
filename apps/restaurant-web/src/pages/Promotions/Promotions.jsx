@@ -3,7 +3,8 @@ import "./Promotions.css";
 import { MdEdit, MdDelete, MdAdd } from "react-icons/md";
 import { PromotionContext } from "../../Context/PromotionContext";
 import { RestaurantContext } from "../../Context/RestaurantContext";
-import { authService } from "@api/services";
+import { AuthContext } from "../../Context/AuthContext";
+import { formatCurrency } from "shared-utils";
 
 const Promotions = () => {
   const {
@@ -15,6 +16,7 @@ const Promotions = () => {
     loading,
   } = useContext(PromotionContext);
   const { currentRestaurant } = useContext(RestaurantContext);
+  const { currentUser } = useContext(AuthContext);
   const [restaurantPromotions, setRestaurantPromotions] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [newPromo, setNewPromo] = useState({
@@ -46,12 +48,11 @@ const Promotions = () => {
 
   // Load restaurant promotions
   useEffect(() => {
-    const user = authService.getCurrentUser();
-    if (user && user.restaurantId) {
-      const promos = getRestaurantPromotions(user.restaurantId);
+    if (currentUser && currentUser.restaurantId) {
+      const promos = getRestaurantPromotions(currentUser.restaurantId);
       setRestaurantPromotions(promos);
     }
-  }, [getRestaurantPromotions]);
+  }, [getRestaurantPromotions, currentUser]);
 
   // Modal handlers
   const handleOpenModal = () => setShowModal(true);
@@ -150,9 +151,7 @@ const Promotions = () => {
       return;
     }
 
-    const user = authService.getCurrentUser();
-
-    if (!user || !user.restaurantId) {
+    if (!currentUser || !currentUser.restaurantId) {
       alert(" Restaurant ID not found!");
       return;
     }
@@ -171,9 +170,9 @@ const Promotions = () => {
       startDate: new Date(newPromo.startDate).toISOString(),
       endDate: new Date(newPromo.endDate).toISOString(),
       status: status,
-      restaurantId: user.restaurantId,
+      restaurantId: currentUser.restaurantId,
       createdBy: "restaurant",
-      applicableRestaurants: [user.restaurantId],
+      applicableRestaurants: [currentUser.restaurantId],
       usageLimit: 1000,
       usedCount: 0,
     };
@@ -182,7 +181,7 @@ const Promotions = () => {
     if (result.success) {
       // Fetch fresh data from backend
       await fetchPromotions();
-      const promos = getRestaurantPromotions(user.restaurantId);
+      const promos = getRestaurantPromotions(currentUser.restaurantId);
       setRestaurantPromotions(promos);
       handleCloseModal();
     }
@@ -194,9 +193,10 @@ const Promotions = () => {
     if (promo) {
       await updatePromotion(id, { ...promo, status: newStatus });
       await fetchPromotions();
-      const user = authService.getCurrentUser();
-      const promos = getRestaurantPromotions(user.restaurantId);
-      setRestaurantPromotions(promos);
+      if (currentUser?.restaurantId) {
+        const promos = getRestaurantPromotions(currentUser.restaurantId);
+        setRestaurantPromotions(promos);
+      }
     }
   };
 
@@ -246,9 +246,10 @@ const Promotions = () => {
     const result = await updatePromotion(editPromo.id, updatedData);
     if (result.success) {
       await fetchPromotions();
-      const user = authService.getCurrentUser();
-      const promos = getRestaurantPromotions(user.restaurantId);
-      setRestaurantPromotions(promos);
+      if (currentUser?.restaurantId) {
+        const promos = getRestaurantPromotions(currentUser.restaurantId);
+        setRestaurantPromotions(promos);
+      }
       handleCloseEditModal();
     }
   };
@@ -259,9 +260,10 @@ const Promotions = () => {
       const result = await deletePromotion(id);
       if (result.success) {
         await fetchPromotions();
-        const user = authService.getCurrentUser();
-        const promos = getRestaurantPromotions(user.restaurantId);
-        setRestaurantPromotions(promos);
+        if (currentUser?.restaurantId) {
+          const promos = getRestaurantPromotions(currentUser.restaurantId);
+          setRestaurantPromotions(promos);
+        }
       }
     }
   };
@@ -319,7 +321,7 @@ const Promotions = () => {
                   <td>
                     {promo.type === "percentage"
                       ? `${promo.value}%`
-                      : `${promo.value.toLocaleString()}₫`}
+                      : formatCurrency(promo.value)}
                   </td>
                   <td>
                     {promo.startDate

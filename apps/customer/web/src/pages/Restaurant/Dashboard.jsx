@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
-import { RestaurantContext } from "../../Context/RestaurantContext";
+import { RestaurantContext } from "customer-shared";
 
 const Dashboard = () => {
   const { partners, restaurantId } = useContext(RestaurantContext); // get from context

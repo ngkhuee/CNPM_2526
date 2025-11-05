@@ -3,12 +3,21 @@ import { useContext } from "react";
 import "./List.css";
 import { FoodContext } from "../../Context/FoodContext";
 import { getImageUrl } from "@utils/imageHelper";
+import { formatCurrency } from "shared-utils";
+import { toast } from "react-toastify";
 
 const List = () => {
-  const { foodList, setFoodList } = useContext(FoodContext);
+  const { foodList, deleteFood } = useContext(FoodContext);
 
-  const removeFood = (foodId) => {
-    setFoodList((prev) => prev.filter((item) => item._id !== foodId));
+  const removeFood = async (foodId) => {
+    if (window.confirm("Are you sure you want to delete this food item?")) {
+      const result = await deleteFood(foodId);
+      if (result.success) {
+        toast.success("Food deleted successfully!");
+      } else {
+        toast.error("Failed to delete food");
+      }
+    }
   };
 
   return (
@@ -28,12 +37,7 @@ const List = () => {
             <img src={getImageUrl(item.image)} alt={item.name} />
             <p>{item.name}</p>
             <p>{item.category}</p>
-            <p>
-              {new Intl.NumberFormat("vi-VN", {
-                style: "currency",
-                currency: "VND",
-              }).format(item.price)}
-            </p>
+            <p>{formatCurrency(item.price)}</p>
             <p className="cursor" onClick={() => removeFood(item._id)}>
               x
             </p>

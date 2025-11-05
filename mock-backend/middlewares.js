@@ -28,12 +28,20 @@ const validateToken = (req, res, next) => {
     "/promotions",
     "/orders", // Allow GET orders without auth (for tracking)
     "/menus",
+    "/users", // Admin can view all users
+    "/drones", // Admin can view drones
+    "/settings", // View system settings
+    "/addresses",
+    "/payments",
+    "/notifications",
+    "/reviews",
   ];
 
   // Allow GET requests to public endpoints
+  const requestPath = req.path || req.url.split("?")[0];
   if (
     req.method === "GET" &&
-    publicRoutes.some((route) => req.path.startsWith(route))
+    publicRoutes.some((route) => requestPath.startsWith(route))
   ) {
     return next();
   }
@@ -70,7 +78,7 @@ const validateToken = (req, res, next) => {
 // Log requests
 const logger = (req, res, next) => {
   const timestamp = new Date().toISOString();
-  console.log(`[${timestamp}] ${req.method} ${req.url}`);
+  console.log(`[${timestamp}] ${req.method} ${req.url} - Path: ${req.path}`);
   next();
 };
 

@@ -3,7 +3,7 @@ export const ENDPOINTS = {
     LOGIN: "/auth/login",
     REGISTER: "/auth/register",
     LOGOUT: "/auth/logout",
-    ME: "/accounts",
+    ME: "/users",
   },
 
   RESTAURANTS: {
@@ -72,9 +72,9 @@ export const ENDPOINTS = {
   },
 
   ADDRESSES: {
-    BASE: "/user_addresses",
-    BY_USER: (userId) => `/user_addresses?userId=${userId}`,
-    BY_ID: (id) => `/user_addresses/${id}`,
+    BASE: "/addresses",
+    BY_USER: (userId) => `/addresses?user_id=${userId}`,
+    BY_ID: (id) => `/addresses/${id}`,
   },
 
   NOTIFICATIONS: {
@@ -88,5 +88,19 @@ export const ENDPOINTS = {
     BASE: "/sessions",
     BY_USER: (userId) => `/sessions?userId=${userId}`,
     REVOKE: (id) => `/sessions/${id}`,
+  },
+
+  DRONES: {
+    BASE: "/drones",
+    BY_ID: (id) => `/drones/${id}`,
+    BY_STATUS: (status) => `/drones?status=${status}`,
+    AVAILABLE: "/drones?status=available",
+  },
+
+  SETTINGS: {
+    BASE: "/settings",
+    BY_KEY: (key) => `/settings?key=${key}`,
+    BY_CATEGORY: (category) => `/settings?category=${category}`,
+    DELIVERY_FEE: "/settings?key=delivery_fee",
   },
 };

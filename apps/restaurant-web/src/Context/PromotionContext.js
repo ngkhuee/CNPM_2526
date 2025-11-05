@@ -1,5 +1,6 @@
 import React, { createContext, useState, useEffect } from "react";
 import { toast } from "react-toastify";
+import { promotionService } from "@api/services";
 
 export const PromotionContext = createContext();
 
@@ -7,25 +8,11 @@ export const PromotionProvider = ({ children }) => {
   const [promotions, setPromotions] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const API_URL = "http://localhost:4000";
-
-  // Get auth token
-  const getAuthHeaders = () => {
-    const token = localStorage.getItem("token");
-    return {
-      "Content-Type": "application/json",
-      Authorization: token ? `Bearer ${token}` : "",
-    };
-  };
-
-  // Fetch all promotions from backend
+  // Fetch all promotions from backend using promotionService
   const fetchPromotions = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`${API_URL}/promotions`, {
-        headers: getAuthHeaders(),
-      });
-      const data = await response.json();
+      const data = await promotionService.getAll();
       setPromotions(data);
     } catch (error) {
       console.error("Error fetching promotions:", error);
@@ -39,21 +26,10 @@ export const PromotionProvider = ({ children }) => {
   const addPromotion = async (promotionData) => {
     setLoading(true);
     try {
-      const response = await fetch(`${API_URL}/promotions`, {
-        method: "POST",
-        headers: getAuthHeaders(),
-        body: JSON.stringify(promotionData),
-      });
-
-      if (response.ok) {
-        const newPromotion = await response.json();
-        setPromotions((prev) => [...prev, newPromotion]);
-        toast.success("Promotion created successfully!");
-        return { success: true, data: newPromotion };
-      } else {
-        toast.error("Failed to create promotion");
-        return { success: false };
-      }
+      const newPromotion = await promotionService.create(promotionData);
+      setPromotions((prev) => [...prev, newPromotion]);
+      toast.success("Promotion created successfully!");
+      return { success: true, data: newPromotion };
     } catch (error) {
       console.error("Error adding promotion:", error);
       toast.error("Error creating promotion");
@@ -67,23 +43,12 @@ export const PromotionProvider = ({ children }) => {
   const updatePromotion = async (id, updatedData) => {
     setLoading(true);
     try {
-      const response = await fetch(`${API_URL}/promotions/${id}`, {
-        method: "PUT",
-        headers: getAuthHeaders(),
-        body: JSON.stringify(updatedData),
-      });
-
-      if (response.ok) {
-        const updated = await response.json();
-        setPromotions((prev) =>
-          prev.map((promo) => (promo.id === id ? updated : promo))
-        );
-        toast.success("Promotion updated successfully!");
-        return { success: true, data: updated };
-      } else {
-        toast.error("Failed to update promotion");
-        return { success: false };
-      }
+      const updated = await promotionService.update(id, updatedData);
+      setPromotions((prev) =>
+        prev.map((promo) => (promo.id === id ? updated : promo))
+      );
+      toast.success("Promotion updated successfully!");
+      return { success: true, data: updated };
     } catch (error) {
       console.error("Error updating promotion:", error);
       toast.error("Error updating promotion");
@@ -97,19 +62,10 @@ export const PromotionProvider = ({ children }) => {
   const deletePromotion = async (id) => {
     setLoading(true);
     try {
-      const response = await fetch(`${API_URL}/promotions/${id}`, {
-        method: "DELETE",
-        headers: getAuthHeaders(),
-      });
-
-      if (response.ok) {
-        setPromotions((prev) => prev.filter((promo) => promo.id !== id));
-        toast.success("Promotion deleted successfully!");
-        return { success: true };
-      } else {
-        toast.error("Failed to delete promotion");
-        return { success: false };
-      }
+      await promotionService.delete(id);
+      setPromotions((prev) => prev.filter((promo) => promo.id !== id));
+      toast.success("Promotion deleted successfully!");
+      return { success: true };
     } catch (error) {
       console.error("Error deleting promotion:", error);
       toast.error("Error deleting promotion");

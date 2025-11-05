@@ -1,13 +1,19 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import "./CheckOutInfo.css";
-import { StoreContext } from "../../Context/StoreContext";
-import { OrderContext } from "../../Context/OrderContext";
+import {
+  AuthContext,
+  CartContext,
+  StoreContext,
+  OrderContext,
+} from "customer-shared";
+import { formatCurrency } from "shared-utils";
 import { useNavigate } from "react-router-dom";
 import { MdLocationOn, MdCheckCircle, MdError } from "react-icons/md";
 
 const CheckoutInfo = () => {
-  const { cartItems, food_list, getTotalCartAmount, clearCart, user } =
-    useContext(StoreContext);
+  const { user } = useContext(AuthContext);
+  const { cartItems, getTotalCartAmount, clearCart } = useContext(CartContext);
+  const { food_list } = useContext(StoreContext);
   const { addOrder } = useContext(OrderContext);
   const [customer, setCustomer] = useState({
     name: "",
@@ -188,8 +194,7 @@ const CheckoutInfo = () => {
                 <div key={i} className="order-item">
                   <span>{item.name}</span>
                   <span>
-                    {cartItems[item._id]} x {item.price.toLocaleString("vi-VN")}
-                    đ
+                    {cartItems[item._id]} x {formatCurrency(item.price)}
                   </span>
                 </div>
               ))
@@ -199,7 +204,7 @@ const CheckoutInfo = () => {
         <div className="order-total">
           <h3>Tổng cộng:</h3>
           <p className="total-amount">
-            {getTotalCartAmount().toLocaleString("vi-VN")}đ
+            {formatCurrency(getTotalCartAmount(food_list))}
           </p>
         </div>
       </div>

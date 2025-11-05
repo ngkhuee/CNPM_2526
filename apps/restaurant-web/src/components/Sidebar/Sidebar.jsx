@@ -2,7 +2,7 @@ import React, { useContext } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
 import "./Sidebar.css";
 import logo from "../../assets/logo.png";
-import { authService } from "@api/services";
+import { AuthContext } from "../../Context/AuthContext";
 import { RestaurantContext } from "../../Context/RestaurantContext";
 import {
   MdDashboard,
@@ -15,20 +15,13 @@ import {
   MdLogout,
 } from "react-icons/md";
 
-const Sidebar = ({ onLogout }) => {
+const Sidebar = () => {
   const navigate = useNavigate();
+  const { logout } = useContext(AuthContext);
   const { currentRestaurant } = useContext(RestaurantContext);
 
   const handleLogout = () => {
-    // Clear authentication
-    authService.logout();
-
-    // Call parent logout handler if provided
-    if (onLogout) {
-      onLogout();
-    }
-
-    // Navigate to login
+    logout();
     navigate("/login");
   };
   return (

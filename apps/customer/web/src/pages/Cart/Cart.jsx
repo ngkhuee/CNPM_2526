@@ -1,34 +1,37 @@
 import React, { useContext, useState } from "react";
 import "./Cart.css";
-import { StoreContext } from "../../Context/StoreContext";
-import { OrderContext } from "../../Context/OrderContext";
+import {
+  AuthContext,
+  CartContext,
+  StoreContext,
+  OrderContext,
+  calculateCartTotals,
+  usePromotions,
+  useSettings,
+} from "customer-shared";
+import { formatCurrency } from "shared-utils";
 import { useNavigate } from "react-router-dom";
 
 const Cart = () => {
-  const {
-    cartItems,
-    food_list,
-    removeFromCart,
-    getTotalCartAmount,
-    url,
-    user,
-    setCartItems,
-  } = useContext(StoreContext);
+  const { user } = useContext(AuthContext);
+  const { cartItems, removeFromCart, getTotalCartAmount, setCartItems } =
+    useContext(CartContext);
+  const { food_list } = useContext(StoreContext);
   const { addOrder } = useContext(OrderContext);
   const navigate = useNavigate();
 
-  const promoCodes = [
-    { code: "SALE10", discount: 10 },
-    { code: "SALE20", discount: 20 },
-  ];
+  // Use custom hooks
+  const { promotions, loading: loadingPromos } = usePromotions();
+  const { deliveryFee: deliveryFeeValue } = useSettings();
+
   const [appliedPromo, setAppliedPromo] = useState(null);
 
-  const subtotal = getTotalCartAmount();
-  const discountAmount = appliedPromo
-    ? (subtotal * appliedPromo.discount) / 100
-    : 0;
-  const deliveryFee = subtotal === 0 ? 0 : 15000;
-  const total = subtotal - discountAmount + deliveryFee;
+  const subtotal = getTotalCartAmount(food_list);
+  const { discountAmount, deliveryFee, total } = calculateCartTotals(
+    subtotal,
+    appliedPromo,
+    deliveryFeeValue
+  );
 
   const handleCheckout = () => {
     if (!user) {
@@ -78,12 +81,9 @@ const Cart = () => {
                 <div className="cart-items-title cart-items-item">
                   <img src={item.image} alt="" />
                   <p>{item.name}</p>
-                  <p>{item.price.toLocaleString("vi-VN")}đ</p>
+                  <p>{formatCurrency(item.price)}</p>
                   <div>{cartItems[item._id]}</div>
-                  <p>
-                    {(item.price * cartItems[item._id]).toLocaleString("vi-VN")}
-                    đ
-                  </p>
+                  <p>{formatCurrency(item.price * cartItems[item._id])}</p>
                   <p
                     className="cart-items-remove-icon"
                     onClick={() => removeFromCart(item._id)}
@@ -105,23 +105,23 @@ const Cart = () => {
           <div>
             <div className="cart-total-details">
               <p>Subtotal</p>
-              <p>{subtotal.toLocaleString("vi-VN")}đ</p>
+              <p>{formatCurrency(subtotal)}</p>
             </div>
             {appliedPromo && (
               <div className="cart-total-details">
                 <p>Discount ({appliedPromo.code})</p>
-                <p>-{discountAmount.toLocaleString("vi-VN")}đ</p>
+                <p>-{formatCurrency(discountAmount)}</p>
               </div>
             )}
             <hr />
             <div className="cart-total-details">
               <p>Delivery Fee</p>
-              <p>{deliveryFee.toLocaleString("vi-VN")}đ</p>
+              <p>{formatCurrency(deliveryFee)}</p>
             </div>
             <hr />
             <div className="cart-total-details">
               <b>Total</b>
-              <b>{total.toLocaleString("vi-VN")}đ</b>
+              <b>{formatCurrency(total)}</b>
             </div>
           </div>
           <button onClick={() => navigate("/checkout-info")}>
@@ -131,30 +131,37 @@ const Cart = () => {
 
         <div className="cart-promocode">
           <h2>Promo Code</h2>
-          <div className="promo-list">
-            {promoCodes.map((promo, i) => (
-              <div key={i} className="promo-item">
-                <span>
-                  {promo.code} - Giảm {promo.discount}%
-                </span>
-                {appliedPromo && appliedPromo.code === promo.code ? (
-                  <button
-                    className="remove-btn"
-                    onClick={() => setAppliedPromo(null)}
-                  >
-                    Remove
-                  </button>
-                ) : (
-                  <button
-                    className="apply-btn"
-                    onClick={() => setAppliedPromo(promo)}
-                  >
-                    Apply
-                  </button>
-                )}
-              </div>
-            ))}
-          </div>
+          {loadingPromos ? (
+            <p>Đang tải mã khuyến mãi...</p>
+          ) : (
+            <div className="promo-list">
+              {promotions.map((promo) => (
+                <div key={promo.id} className="promo-item">
+                  <span>
+                    {promo.code} -{" "}
+                    {promo.type === "fixed"
+                      ? `Giảm ${formatCurrency(promo.value)}`
+                      : `Giảm ${promo.value}%`}
+                  </span>
+                  {appliedPromo && appliedPromo.id === promo.id ? (
+                    <button
+                      className="remove-btn"
+                      onClick={() => setAppliedPromo(null)}
+                    >
+                      Remove
+                    </button>
+                  ) : (
+                    <button
+                      className="apply-btn"
+                      onClick={() => setAppliedPromo(promo)}
+                    >
+                      Apply
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>

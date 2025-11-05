@@ -3,7 +3,7 @@ import "./RestaurantProfile.css";
 import defaultLogo from "../../assets/default_logo.png";
 import defaultBanner from "../../assets/default_banner.png";
 import { RestaurantContext } from "../../Context/RestaurantContext";
-import { authService } from "@api/services";
+import { AuthContext } from "../../Context/AuthContext";
 import { getImageUrl } from "@utils/imageHelper";
 import {
   MdRestaurant,
@@ -52,19 +52,20 @@ const RestaurantProfile = () => {
     }
   }, [currentRestaurant, editing]);
 
+  const { currentUser } = useContext(AuthContext);
+
   // Save restaurant data
   const handleSave = async (e) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      const user = authService.getCurrentUser();
-      if (!user || !user.restaurantId) {
+      if (!currentUser || !currentUser.restaurantId) {
         alert(" Restaurant ID not found!");
         return;
       }
 
-      const result = await updateRestaurant(user.restaurantId, formData);
+      const result = await updateRestaurant(currentUser.restaurantId, formData);
 
       if (result.success) {
         setEditing(false);

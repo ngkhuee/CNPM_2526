@@ -10,30 +10,36 @@ export const restaurantService = {
       });
       // Map backend to frontend
       return response.map((restaurant) => ({
-        id: restaurant.id || restaurant.restaurant_id,
-        _id: restaurant.id || restaurant.restaurant_id,
-        restaurantId: restaurant.id || restaurant.restaurant_id,
+        id: restaurant.id,
+        _id: restaurant.id,
+        restaurantId: restaurant.id,
         name: restaurant.name,
-        location: restaurant.location,
-        category: restaurant.category,
-        rating: restaurant.rating,
-        isOpen:
-          restaurant.is_open !== undefined
-            ? restaurant.is_open
-            : restaurant.status === "active",
-        images:
-          restaurant.images ||
-          [restaurant.image, restaurant.banner].filter(Boolean),
-        image: restaurant.images?.[0] || restaurant.image,
-        banner: restaurant.images?.[1] || restaurant.banner,
-        ownerUserId: restaurant.owner_user_id,
-        ownerEmail: restaurant.ownerEmail,
-        ownerPhone: restaurant.ownerPhone,
-        reviewCount: restaurant.reviewCount || 0,
-        status:
-          restaurant.status || (restaurant.is_open ? "active" : "inactive"),
-        openedAt: restaurant.openedAt,
-        createdAt: restaurant.created_at || restaurant.createdAt,
+        description: restaurant.description,
+        address: restaurant.address,
+        location: {
+          lat: restaurant.latitude,
+          lng: restaurant.longitude,
+          address: restaurant.address,
+        },
+        category: restaurant.primary_category,
+        rating: restaurant.rating || 0,
+        isOpen: restaurant.is_open !== undefined ? restaurant.is_open : true,
+        images: [restaurant.image, restaurant.banner_image].filter(Boolean),
+        image: restaurant.image,
+        banner: restaurant.banner_image,
+        ownerUserId: restaurant.owner_id,
+        ownerId: restaurant.owner_id,
+        ownerEmail: restaurant.email,
+        ownerPhone: restaurant.phone,
+        phone: restaurant.phone,
+        email: restaurant.email,
+        reviewCount: restaurant.total_reviews || 0,
+        status: restaurant.status || "active",
+        deliveryTime: restaurant.delivery_time_minutes,
+        minOrderAmount: restaurant.min_order_amount,
+        openingHours: restaurant.opening_hours,
+        createdAt: restaurant.created_at,
+        updatedAt: restaurant.updated_at,
       }));
     } catch (error) {
       throw error;
@@ -48,30 +54,37 @@ export const restaurantService = {
       const response = await apiClient.get(ENDPOINTS.RESTAURANTS.BY_ID(id));
       console.log("Raw response:", response);
       // Map backend to frontend
-      // JSON Server requires 'id' field, but support 'restaurant_id' for backward compatibility
       return {
-        id: response.id || response.restaurant_id,
-        _id: response.id || response.restaurant_id,
-        restaurantId: response.id || response.restaurant_id,
+        id: response.id,
+        _id: response.id,
+        restaurantId: response.id,
         name: response.name,
-        location: response.location,
-        category: response.category,
-        rating: response.rating,
-        isOpen:
-          response.is_open !== undefined
-            ? response.is_open
-            : response.status === "active",
-        images:
-          response.images || [response.image, response.banner].filter(Boolean),
-        image: response.images?.[0] || response.image,
-        banner: response.images?.[1] || response.banner,
-        ownerUserId: response.owner_user_id,
-        ownerEmail: response.ownerEmail,
-        ownerPhone: response.ownerPhone,
-        reviewCount: response.reviewCount || 0,
-        status: response.status || (response.is_open ? "active" : "inactive"),
-        openedAt: response.openedAt,
-        createdAt: response.created_at || response.createdAt,
+        description: response.description,
+        address: response.address,
+        location: {
+          lat: response.latitude,
+          lng: response.longitude,
+          address: response.address,
+        },
+        category: response.primary_category,
+        rating: response.rating || 0,
+        isOpen: response.is_open !== undefined ? response.is_open : true,
+        images: [response.image, response.banner_image].filter(Boolean),
+        image: response.image,
+        banner: response.banner_image,
+        ownerUserId: response.owner_id,
+        ownerId: response.owner_id,
+        ownerEmail: response.email,
+        ownerPhone: response.phone,
+        phone: response.phone,
+        email: response.email,
+        reviewCount: response.total_reviews || 0,
+        status: response.status || "active",
+        deliveryTime: response.delivery_time_minutes,
+        minOrderAmount: response.min_order_amount,
+        openingHours: response.opening_hours,
+        createdAt: response.created_at,
+        updatedAt: response.updated_at,
       };
     } catch (error) {
       throw error;

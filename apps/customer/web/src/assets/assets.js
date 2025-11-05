@@ -42,41 +42,5 @@ export const assets = {
   parcel_icon,
 };
 
-// ⚠️ TODO: Fetch menu_list/categories from API instead of hardcoded
-// For now using backend image URLs
-const API_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:4000";
-
-export const menu_list = [
-  {
-    menu_name: "Belga Pizza",
-    menu_image: `${API_URL}/images/restaurants/menu_1.png`,
-  },
-  {
-    menu_name: "Lotteria",
-    menu_image: `${API_URL}/images/restaurants/menu_2.png`,
-  },
-  {
-    menu_name: "Pizza 4P's",
-    menu_image: `${API_URL}/images/restaurants/menu_3.png`,
-  },
-  {
-    menu_name: "Texas Chicken",
-    menu_image: `${API_URL}/images/restaurants/menu_4.png`,
-  },
-  {
-    menu_name: "Today With You",
-    menu_image: `${API_URL}/images/restaurants/menu_5.png`,
-  },
-  {
-    menu_name: "Burger King",
-    menu_image: `${API_URL}/images/restaurants/menu_6.png`,
-  },
-  // {
-  //     menu_name: "Burger King",
-  //     menu_image: menu_7
-  // },
-  // {
-  //     menu_name: "Noodles",
-  //     menu_image: menu_8
-  // }
-];
+// ✅ menu_list/categories now fetched from API via restaurantService
+// See ExploreMenu component for usage

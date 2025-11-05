@@ -9,26 +9,13 @@ export const OrderProvider = ({ children }) => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // Fetch user orders when user changes + auto-polling every 5s
+  // Fetch user orders when user changes (no auto-refresh)
   useEffect(() => {
     if (user) {
       // Check if token exists before fetching
       const token = localStorage.getItem("token");
       if (token) {
         fetchUserOrders();
-
-        // Setup polling interval for real-time updates
-        const interval = setInterval(() => {
-          fetchUserOrders();
-        }, 5000); // Poll every 5 seconds
-
-        console.log("OrderContext: Polling enabled (5s interval)");
-
-        // Cleanup
-        return () => {
-          clearInterval(interval);
-          console.log("OrderContext: Polling stopped");
-        };
       }
     } else {
       setOrders([]);

@@ -39,7 +39,7 @@ server.post("/auth/login", (req, res) => {
   const { email, password } = req.body;
   const db = router.db;
 
-  const user = db.get("accounts").find({ email, password }).value();
+  const user = db.get("users").find({ email, password }).value();
 
   if (user) {
     const token = generateToken(user);
@@ -65,7 +65,7 @@ server.post("/auth/register", (req, res) => {
   const db = router.db;
 
   // Check if email exists
-  const existingUser = db.get("accounts").find({ email }).value();
+  const existingUser = db.get("users").find({ email }).value();
 
   if (existingUser) {
     return res.status(400).json({
@@ -86,7 +86,7 @@ server.post("/auth/register", (req, res) => {
     createdAt: new Date().toISOString(),
   };
 
-  db.get("accounts").push(newUser).write();
+  db.get("users").push(newUser).write();
 
   const token = generateToken(newUser);
   const { password: _, ...userWithoutPassword } = newUser;
@@ -182,11 +182,6 @@ server.use(router);
 server.listen(PORT, () => {
   console.log(`\nJSON Server is running!`);
   console.log(`Server: http://localhost:${PORT}`);
-  console.log(`Resources:`);
-  console.log(`   - http://localhost:${PORT}/foods`);
-  console.log(`   - http://localhost:${PORT}/restaurants`);
-  console.log(`   - http://localhost:${PORT}/orders`);
-  console.log(`   - http://localhost:${PORT}/accounts`);
   console.log(`\nAuth endpoints:`);
   console.log(`   - POST http://localhost:${PORT}/auth/login`);
   console.log(`   - POST http://localhost:${PORT}/auth/register`);

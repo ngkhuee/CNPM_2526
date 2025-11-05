@@ -5,12 +5,13 @@ import { assets } from "../../assets/assets";
 import { getImageUrl } from "@utils/imageHelper";
 import { FoodContext } from "../../Context/FoodContext";
 import { CategoryContext } from "../../Context/CategoryContext";
-import { authService } from "@api/services";
+import { AuthContext } from "../../Context/AuthContext";
 import { MdEdit, MdDelete, MdLocalOffer, MdAdd } from "react-icons/md";
 
 const List = () => {
   const { foodList, deleteFood, updateFood, loading } = useContext(FoodContext);
   const { categories: restaurantCategories } = useContext(CategoryContext);
+  const { currentUser } = useContext(AuthContext);
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("All");
   const [showEditModal, setShowEditModal] = useState(false);
@@ -24,15 +25,14 @@ const List = () => {
   });
 
   // Get current restaurant's foods only
-  const user = authService.getCurrentUser();
   const restaurantFoods = foodList.filter(
-    (food) => food.restaurantId === user?.restaurantId
+    (food) => food.restaurantId === currentUser?.restaurantId
   );
 
   // Debug logging
   console.log("🍔 List.jsx Debug:");
   console.log("- Total foodList:", foodList.length);
-  console.log("- Current user restaurantId:", user?.restaurantId);
+  console.log("- Current user restaurantId:", currentUser?.restaurantId);
   console.log("- Restaurant foods:", restaurantFoods.length);
   console.log("- Sample food:", restaurantFoods[0]);
 

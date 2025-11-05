@@ -1,31 +1,17 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import "./Login.css";
 import login_bg from "../../assets/login_bg.png";
 import { authService } from "@api/services";
+import { AuthContext } from "../../Context/AuthContext";
 
-const Login = ({ setCurrentUser }) => {
+const Login = () => {
   const navigate = useNavigate();
+  const { login } = useContext(AuthContext);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-
-  // Clear any corrupted localStorage data on mount (run only once)
-  useEffect(() => {
-    const user = authService.getCurrentUser();
-    if (
-      user &&
-      (!user.role || !user.restaurantId || user.role !== "restaurant")
-    ) {
-      console.warn("Detected corrupted user data in localStorage, clearing...");
-      authService.logout();
-      if (setCurrentUser) {
-        setCurrentUser(null);
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Run only once on mount
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -50,8 +36,8 @@ const Login = ({ setCurrentUser }) => {
           return;
         }
 
-        // Lưu user info vào App state
-        setCurrentUser(response.user);
+        // Lưu user info vào AuthContext
+        login(response.user);
 
         // Navigate to dashboard
         navigate("/dashboard");
@@ -111,11 +97,6 @@ const Login = ({ setCurrentUser }) => {
         <button type="submit" disabled={loading}>
           {loading ? "Logging in..." : "Log in"}
         </button>
-
-        {/* <div className="demo-credentials">
-          <p>Demo accounts:</p>
-          <small>restaurant1@yummy.com / 123</small>
-        </div> */}
       </form>
     </div>
   );

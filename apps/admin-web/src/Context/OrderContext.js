@@ -8,17 +8,9 @@ export const OrderProvider = ({ children }) => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // Fetch all orders on mount (Admin sees all orders)
+  // Fetch all orders on mount (Admin sees all orders) - No auto-refresh
   useEffect(() => {
     fetchOrders();
-  }, []);
-
-  // Auto-refresh orders every 30 seconds
-  useEffect(() => {
-    const interval = setInterval(() => {
-      fetchOrders();
-    }, 30000);
-    return () => clearInterval(interval);
   }, []);
 
   // Fetch all orders from API

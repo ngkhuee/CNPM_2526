@@ -1,12 +1,12 @@
 import React, { useContext } from "react";
-import { RestaurantContext } from "../../Context/RestaurantContext";
+import { RestaurantContext } from "customer-shared";
 
 const MenuList = ({ restaurantId }) => {
   const { partners } = useContext(RestaurantContext);
 
   if (!restaurantId) return <p>Please select a restaurant first</p>;
 
-  const restaurant = partners.find(p => p._id === restaurantId);
+  const restaurant = partners.find((p) => p._id === restaurantId);
   const menu = restaurant?.menu || [];
 
   return (

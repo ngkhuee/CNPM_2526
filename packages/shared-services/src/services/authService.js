@@ -49,4 +49,35 @@ export const authService = {
   isAuthenticated() {
     return !!localStorage.getItem("token");
   },
+
+  // Admin: Get all users
+  async getAllUsers() {
+    try {
+      // Add timestamp to prevent caching
+      const response = await apiClient.get(`/users?_t=${Date.now()}`);
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Admin: Update user status
+  async updateUserStatus(userId, status) {
+    try {
+      const response = await apiClient.patch(`/users/${userId}`, { status });
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  // Admin: Delete user
+  async deleteUser(userId) {
+    try {
+      const response = await apiClient.delete(`/users/${userId}`);
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  },
 };

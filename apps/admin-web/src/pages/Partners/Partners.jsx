@@ -1,42 +1,31 @@
-import React, { useState, useEffect } from "react";
-import { restaurantService } from "@api/services";
+import React, { useState } from "react";
+import { useRestaurantManagement } from "../../hooks/useRestaurantManagement";
 import { getImageUrl } from "@utils/imageHelper";
 import "./Partners.css";
 
 const Partners = () => {
-  const [partners, setPartners] = useState([]);
+  const { restaurants, loading, updateRestaurant, deleteRestaurant, refresh } =
+    useRestaurantManagement();
   const [editingPartner, setEditingPartner] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [formData, setFormData] = useState({ name: "", category: "" });
-  const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    fetchPartners();
-  }, []);
+  // Map restaurants to partners format
+  const partners = restaurants.map((r) => ({
+    id: r.id,
+    name: r.name,
+    email: r.ownerEmail || r.owner_email || "example@email.com",
+    image: r.image || r.images?.[0] || "/default-restaurant.png",
+  }));
 
-  const fetchPartners = async () => {
-    try {
-      setLoading(true);
-      const restaurants = await restaurantService.getAll();
-      const data = restaurants.map((r) => ({
-        id: r.id,
-        name: r.name,
-        email: r.ownerEmail || "example@email.com",
-        category: r.category,
-        openedAt: r.openedAt,
-        image: r.image,
-      }));
-      setPartners(data);
-    } catch (error) {
-      console.error("Error fetching partners:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     if (window.confirm("Bạn có chắc muốn xóa đối tác này?")) {
-      setPartners((prev) => prev.filter((p) => p.id !== id));
+      const result = await deleteRestaurant(id);
+      if (result.success) {
+        alert("Đã xóa đối tác thành công!");
+      } else {
+        alert("Lỗi: " + result.message);
+      }
     }
   };
 
@@ -46,12 +35,15 @@ const Partners = () => {
     setModalOpen(true);
   };
 
-  const handleSave = () => {
-    setPartners((prev) =>
-      prev.map((p) => (p.id === editingPartner.id ? { ...p, ...formData } : p))
-    );
-    setModalOpen(false);
-    setEditingPartner(null);
+  const handleSave = async () => {
+    const result = await updateRestaurant(editingPartner.id, formData);
+    if (result.success) {
+      alert("Cập nhật thành công!");
+      setModalOpen(false);
+      setEditingPartner(null);
+    } else {
+      alert("Lỗi: " + result.message);
+    }
   };
 
   return (
@@ -60,10 +52,7 @@ const Partners = () => {
       <table className="partners-table">
         <thead>
           <tr>
-            <th>Image</th>
             <th>Name</th>
-            <th>Category</th>
-            <th>Opened At</th>
             <th>Email</th>
             <th>Actions</th>
           </tr>
@@ -72,15 +61,17 @@ const Partners = () => {
           {partners.map((p) => (
             <tr key={p.id}>
               <td>
-                <img
-                  src={getImageUrl(p.image)}
-                  alt={p.name}
-                  className="partner-img"
-                />
+                <div
+                  style={{ display: "flex", alignItems: "center", gap: "12px" }}
+                >
+                  <img
+                    src={getImageUrl(p.image)}
+                    alt={p.name}
+                    className="partner-img"
+                  />
+                  <span style={{ fontWeight: "500" }}>{p.name}</span>
+                </div>
               </td>
-              <td>{p.name}</td>
-              <td>{p.category}</td>
-              <td>{p.openedAt}</td>
               <td>{p.email}</td>
               <td>
                 <button className="btn-edit" onClick={() => handleEdit(p)}>

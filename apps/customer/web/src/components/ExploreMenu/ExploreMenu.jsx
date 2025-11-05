@@ -1,21 +1,28 @@
-import React, { useContext } from 'react'
-import './ExploreMenu.css'
-import { assets, menu_list } from '../../assets/assets';
-import { StoreContext } from '../../Context/StoreContext'
-/*
- const ExploreMenu = ({category,setCategory}) => {
-  const {menu_list} = useContext(StoreContext);
-*/
-  const ExploreMenu = ({ selected, setSelected }) => {
-  const { food_list } = useContext(StoreContext);
-  // Lấy danh sách restaurants có trong food_list
-  const restaurants = ["All", ...Array.from(new Set(food_list.map(f => f.restaurant)))];
+import React, { useContext, useMemo } from "react";
+import "./ExploreMenu.css";
+import { StoreContext } from "customer-shared";
+
+const ExploreMenu = ({ selected, setSelected }) => {
+  const { restaurant_list, loading } = useContext(StoreContext);
+
+  // Transform restaurant data for display
+  const restaurants = useMemo(() => {
+    return restaurant_list.map((r) => ({
+      name: r.name,
+      image: r.images?.[0] || r.image || "/default-restaurant.png",
+    }));
+  }, [restaurant_list]);
 
   return (
-    <div className='explore-menu' id='explore-menu'>
+    <div className="explore-menu" id="explore-menu">
       <h1>Explore New Restaurants</h1>
-      <p className='explore-menu-text'>Choose from a wide selection of restaurants, each offering unique flavors and dining styles. Our mission is to satisfy your cravings and elevate your food journey, one memorable restaurant experience at a time.</p>
-      
+      <p className="explore-menu-text">
+        Choose from a wide selection of restaurants, each offering unique
+        flavors and dining styles. Our mission is to satisfy your cravings and
+        elevate your food journey, one memorable restaurant experience at a
+        time.
+      </p>
+
       {/* <div className="explore-menu-list">
         {menu_list.slice(0,6).map((item,index)=>{
             return (
@@ -28,21 +35,29 @@ import { StoreContext } from '../../Context/StoreContext'
       </div> */}
 
       <div className="explore-menu-list">
-      {menu_list.map((item, index) => (
-        <div
-          key={index}
-          className={`explore-menu-list-item ${selected === item.menu_name ? "active" : ""}`}
-          onClick={() => setSelected(prev => prev === item.menu_name ? "All" : item.menu_name)}
-        >
-          <img src={item.menu_image} alt={item.menu_name} />
-          <p>{item.menu_name}</p>
-        </div>
-      ))}
-    </div>
-      
+        {loading ? (
+          <p>Đang tải nhà hàng...</p>
+        ) : (
+          restaurants.map((restaurant, index) => (
+            <div
+              key={index}
+              className={`explore-menu-list-item ${selected === restaurant.name ? "active" : ""}`}
+              onClick={() =>
+                setSelected((prev) =>
+                  prev === restaurant.name ? "All" : restaurant.name
+                )
+              }
+            >
+              <img src={restaurant.image} alt={restaurant.name} />
+              <p>{restaurant.name}</p>
+            </div>
+          ))
+        )}
+      </div>
+
       <hr />
     </div>
-  )
-}
+  );
+};
 
-export default ExploreMenu
+export default ExploreMenu;

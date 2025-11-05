@@ -2,7 +2,9 @@ import React, { useState, useEffect, useContext } from "react";
 import "./Category.css";
 import { CategoryContext } from "../../Context/CategoryContext";
 import { FoodContext } from "../../Context/FoodContext";
+import { AuthContext } from "../../Context/AuthContext";
 import { getImageUrl } from "@utils/imageHelper";
+import { formatCurrency } from "shared-utils";
 import { MdEdit, MdDelete, MdAdd } from "react-icons/md";
 
 const Category = () => {
@@ -15,17 +17,17 @@ const Category = () => {
     loading,
   } = useContext(CategoryContext);
   const { foodList } = useContext(FoodContext);
+  const { currentUser } = useContext(AuthContext);
 
   // Get current restaurant's foods only
-  const user = JSON.parse(localStorage.getItem("user") || "{}");
   const restaurantFoods = foodList.filter(
-    (food) => food.restaurantId === user?.restaurantId
+    (food) => food.restaurantId === currentUser?.restaurantId
   );
 
   // Debug: Log foodList và categories
   useEffect(() => {
     console.log("📊 Category.jsx Debug:");
-    console.log("- User restaurantId:", user.restaurantId);
+    console.log("- User restaurantId:", currentUser?.restaurantId);
     console.log("- Total categories:", categories.length);
     console.log(
       "- Categories:",
@@ -79,16 +81,16 @@ const Category = () => {
   // Thêm category
   const handleAddCategory = async (e) => {
     e.preventDefault();
-    const user = JSON.parse(localStorage.getItem("user") || "{}");
+    if (!currentUser?.restaurantId) return;
+
     const categoryData = {
       ...currentCategory,
-      restaurantId: user.restaurantId,
+      restaurantId: currentUser.restaurantId,
     };
     const result = await addCategory(categoryData);
     if (result.success) {
       handleCloseModal();
-      const user = JSON.parse(localStorage.getItem("user") || "{}");
-      await fetchCategories(user.restaurantId);
+      await fetchCategories(currentUser.restaurantId);
     }
   };
 
@@ -98,8 +100,9 @@ const Category = () => {
     const result = await updateCategory(currentCategory.id, currentCategory);
     if (result.success) {
       handleCloseEditModal();
-      const user = JSON.parse(localStorage.getItem("user") || "{}");
-      await fetchCategories(user.restaurantId);
+      if (currentUser?.restaurantId) {
+        await fetchCategories(currentUser.restaurantId);
+      }
     }
   };
 
@@ -107,9 +110,8 @@ const Category = () => {
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this category?")) {
       const result = await deleteCategory(id);
-      if (result.success) {
-        const user = JSON.parse(localStorage.getItem("user") || "{}");
-        await fetchCategories(user.restaurantId);
+      if (result.success && currentUser?.restaurantId) {
+        await fetchCategories(currentUser.restaurantId);
       }
     }
   };
@@ -362,7 +364,7 @@ const Category = () => {
                       <img src={getImageUrl(food.image)} alt={food.name} />
                       <div>
                         <strong>{food.name}</strong>
-                        <p>{food.price.toLocaleString()}₫</p>
+                        <p>{formatCurrency(food.price)}</p>
                       </div>
                     </li>
                   ))}

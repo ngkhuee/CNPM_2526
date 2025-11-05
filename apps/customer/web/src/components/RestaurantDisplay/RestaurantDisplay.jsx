@@ -1,6 +1,5 @@
 import React, { useContext, useState, useEffect } from "react";
-import { StoreContext } from "../../Context/StoreContext";
-import { RestaurantContext } from "../../Context/RestaurantContext";
+import { StoreContext, RestaurantContext } from "customer-shared";
 import "./RestaurantDisplay.css";
 import RestaurantItem from "../RestaurantItem/RestaurantItem";
 import { MdRestaurant } from "react-icons/md";

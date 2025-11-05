@@ -1,96 +1,196 @@
-import React, { useContext } from 'react'
-import { useNavigate } from 'react-router-dom';
-import './Orders.css'
-import { assets } from '../../assets/assets';
-import { OrderContext } from '../../Context/OrderContext';
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { orderService } from "shared-services";
+import { formatCurrency } from "shared-utils";
+import "./Orders.css";
 
 const Orders = () => {
-  const { orders, updateOrderStatus } = useContext(OrderContext);
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState("all");
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    fetchOrders();
+  }, []);
+
+  const fetchOrders = async () => {
+    try {
+      setLoading(true);
+      const response = await orderService.getAll();
+      setOrders(response || []);
+    } catch (error) {
+      console.error("Error fetching orders:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleStatusChange = async (orderId, newStatus) => {
+    try {
+      await orderService.updateStatus(orderId, newStatus);
+      await fetchOrders();
+    } catch (error) {
+      alert("Failed to update order status");
+    }
+  };
+
+  const getStatusBadgeClass = (status) => {
+    const statusMap = {
+      pending: "status-pending",
+      confirmed: "status-confirmed",
+      preparing: "status-preparing",
+      ready: "status-ready",
+      delivering: "status-delivering",
+      delivered: "status-delivered",
+      cancelled: "status-cancelled",
+    };
+    return statusMap[status] || "status-default";
+  };
+
+  const filteredOrders = orders.filter((order) => {
+    if (filter === "all") return true;
+    return order.status === filter;
+  });
+
+  if (loading) {
+    return <div className="orders-page">Loading...</div>;
+  }
 
   return (
-    <div>
-      <h2>All Orders</h2>
-      {orders.map(o => (
-        <div key={o._id}>
-          <p>User: {o.user}</p>
-          <p>Items: {o.items.join(", ")}</p>
-          <p>Status: {o.status}</p>
-          <button onClick={() => updateOrderStatus(o._id, "completed")}>Complete</button>
+    <div className="orders-page">
+      <div className="orders-header">
+        <h2>Order Management</h2>
+        <div className="orders-filter">
+          <button
+            className={filter === "all" ? "active" : ""}
+            onClick={() => setFilter("all")}
+          >
+            All ({orders.length})
+          </button>
+          <button
+            className={filter === "pending" ? "active" : ""}
+            onClick={() => setFilter("pending")}
+          >
+            Pending ({orders.filter((o) => o.status === "pending").length})
+          </button>
+          <button
+            className={filter === "delivering" ? "active" : ""}
+            onClick={() => setFilter("delivering")}
+          >
+            Delivering ({orders.filter((o) => o.status === "delivering").length}
+            )
+          </button>
+          <button
+            className={filter === "delivered" ? "active" : ""}
+            onClick={() => setFilter("delivered")}
+          >
+            Delivered ({orders.filter((o) => o.status === "delivered").length})
+          </button>
         </div>
-      ))}
+      </div>
+
+      <div className="orders-table-container">
+        <table className="orders-table">
+          <thead>
+            <tr>
+              <th>Order ID</th>
+              <th>Customer</th>
+              <th>Items</th>
+              <th>Total</th>
+              <th>Payment</th>
+              <th>Status</th>
+              <th>Drone</th>
+              <th>Time</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredOrders.map((order) => (
+              <tr key={order.id}>
+                <td className="order-id">#{order.id}</td>
+                <td>
+                  <div className="customer-info">
+                    <span className="customer-id">{order.user_id}</span>
+                  </div>
+                </td>
+                <td>
+                  <div className="items-info">
+                    {order.items?.slice(0, 2).map((item, idx) => (
+                      <div key={idx} className="item-row">
+                        {item.name} x{item.quantity}
+                      </div>
+                    ))}
+                    {order.items?.length > 2 && (
+                      <span className="more-items">
+                        +{order.items.length - 2} more
+                      </span>
+                    )}
+                  </div>
+                </td>
+                <td className="order-total">
+                  {formatCurrency(order.total_amount)}
+                </td>
+                <td>
+                  <span className="payment-method">{order.payment_method}</span>
+                </td>
+                <td>
+                  <span
+                    className={`status-badge ${getStatusBadgeClass(order.status)}`}
+                  >
+                    {order.status}
+                  </span>
+                </td>
+                <td>
+                  {order.drone_id ? (
+                    <button
+                      className="btn-drone-link"
+                      onClick={() =>
+                        navigate("/admin/delivery", {
+                          state: { droneId: order.drone_id },
+                        })
+                      }
+                    >
+                      {order.drone_id}
+                    </button>
+                  ) : (
+                    <span className="no-drone">—</span>
+                  )}
+                </td>
+                <td className="order-time">
+                  {new Date(order.created_at).toLocaleString("vi-VN", {
+                    dateStyle: "short",
+                    timeStyle: "short",
+                  })}
+                </td>
+                <td>
+                  <select
+                    className="status-select"
+                    value={order.status}
+                    onChange={(e) =>
+                      handleStatusChange(order.id, e.target.value)
+                    }
+                  >
+                    <option value="pending">Pending</option>
+                    <option value="confirmed">Confirmed</option>
+                    <option value="preparing">Preparing</option>
+                    <option value="ready">Ready</option>
+                    <option value="delivering">Delivering</option>
+                    <option value="delivered">Delivered</option>
+                    <option value="cancelled">Cancelled</option>
+                  </select>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {filteredOrders.length === 0 && (
+        <div className="no-data">No orders found</div>
+      )}
     </div>
   );
 };
-// const Orders = () => {
-//   const { orders, setOrders } = useContext(OrderContext);
-//   const navigate = useNavigate();
-
-//   const goToDrone = (order) => {
-//     if (!order.drone) return;
-//     navigate('/admin/delivery', { state: { drone: order.drone, order } });
-//   };
-
-//   const statusHandler = (event, orderId) => {
-//     const newStatus = event.target.value;
-//     setOrders(prev =>
-//       prev.map(order =>
-//         order._id === orderId ? { ...order, status: newStatus } : order
-//       )
-//     );
-//   };
-
-//   return (
-//     <div className='order-page'>
-//       <h2>Order Management</h2>
-//       <div className="order-list">
-//         {orders.map((order) => (
-//           <div key={order._id} className='order-item'>
-//             {/* Icon */}
-//             <img src={assets.parcel_icon} alt="" />
-
-//             {/* Thông tin chi tiết */}
-//             <div className='order-info'>
-//               <p className='order-item-food'>
-//                 <strong>Items:</strong> {order.items.map((item, i) =>
-//                   i === order.items.length - 1
-//                     ? `${item.name} x ${item.quantity}`
-//                     : `${item.name} x ${item.quantity}, `
-//                 )}
-//               </p>
-//               <p className='order-item-restaurant'>
-//                 <strong>Restaurant:</strong> {order.restaurantName || 'N/A'}
-//               </p>
-//               <p className='order-item-name'>
-//                 <strong>Customer:</strong> {order.address.firstName} {order.address.lastName}
-//               </p>
-//               <div className='order-item-address'>
-//                 <p>{order.address.street}, {order.address.city}</p>
-//                 <p>{order.address.state}, {order.address.country}, {order.address.zipcode}</p>
-//                 <p><strong>Phone:</strong> {order.address.phone}</p>
-//               </div>
-//             </div>
-
-//             {/* Trạng thái và tổng tiền */}
-//             <div className='order-actions'>
-//               <p className='order-amount'>{order.amount.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</p>
-//               <select
-//                 onChange={(e) => statusHandler(e, order._id)}
-//                 value={order.status}
-//                 className={`status-${order.status.replace(/\s/g,'')}`}
-//               >
-//                 <option value="Food Processing">Food Processing</option>
-//                 <option value="Out for delivery">Out for delivery</option>
-//                 <option value="Delivered">Delivered</option>
-//               </select>
-//               {order.drone && (
-//                 <button className='btn-drone' onClick={() => goToDrone(order)}>Drone</button>
-//               )}
-//             </div>
-//           </div>
-//         ))}
-//       </div>
-//     </div>
-//   )
-// }
 
 export default Orders;

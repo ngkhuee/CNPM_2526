@@ -25,4 +25,5 @@ export const assets = {
   login_bg,
 };
 
-export const url = "https://tomato-food-del-backend-p1ni.onrender.com";
+// ✅ API URL now configured via environment variable
+// See packages/shared-services/src/config/apiClient.js

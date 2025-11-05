@@ -1,6 +1,5 @@
 import React, { useContext, useState, useEffect } from "react";
-import { StoreContext } from "../../Context/StoreContext";
-import { addressService } from "@api/services";
+import { StoreContext, useAddresses } from "customer-shared";
 import "./Profile.css";
 import {
   MdLocationOn,
@@ -12,13 +11,20 @@ import {
 
 const Profile = () => {
   const { user, setUser } = useContext(StoreContext);
+  const {
+    addresses,
+    loading: addressLoading,
+    addAddress: addAddressHook,
+    deleteAddress: deleteAddressHook,
+    setDefaultAddress,
+  } = useAddresses(user?.id);
+
   const [editing, setEditing] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     phone: "",
   });
-  const [addresses, setAddresses] = useState([]);
   const [showAddressForm, setShowAddressForm] = useState(false);
   const [newAddress, setNewAddress] = useState({
     address_line: "",
@@ -36,19 +42,8 @@ const Profile = () => {
         email: user.email || "",
         phone: user.phone || "",
       });
-      fetchAddresses();
     }
   }, [user]);
-
-  const fetchAddresses = async () => {
-    if (!user) return;
-    try {
-      const userAddresses = await addressService.getByUser(user.id);
-      setAddresses(userAddresses);
-    } catch (error) {
-      console.error("Error fetching addresses:", error);
-    }
-  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -109,24 +104,22 @@ const Profile = () => {
 
     try {
       setLoading(true);
-      await addressService.create({
-        userId: user.id,
-        ...newAddress,
-      });
+      const result = await addAddressHook(newAddress);
 
-      // Refresh addresses list
-      await fetchAddresses();
-
-      // Reset form
-      setNewAddress({
-        address_line: "",
-        city: "TP.HCM",
-        district: "",
-        lat: null,
-        lng: null,
-      });
-      setShowAddressForm(false);
-      alert("Thêm địa chỉ thành công!");
+      if (result.success) {
+        // Reset form
+        setNewAddress({
+          address_line: "",
+          city: "TP.HCM",
+          district: "",
+          lat: null,
+          lng: null,
+        });
+        setShowAddressForm(false);
+        alert("Thêm địa chỉ thành công!");
+      } else {
+        alert(`Lỗi thêm địa chỉ: ${result.message}`);
+      }
     } catch (error) {
       console.error("Error adding address:", error);
       alert("Lỗi thêm địa chỉ");
@@ -140,9 +133,12 @@ const Profile = () => {
 
     try {
       setLoading(true);
-      await addressService.delete(addressId);
-      await fetchAddresses();
-      alert("Đã xóa địa chỉ");
+      const result = await deleteAddressHook(addressId);
+      if (result.success) {
+        alert("Đã xóa địa chỉ");
+      } else {
+        alert(`Lỗi xóa địa chỉ: ${result.message}`);
+      }
     } catch (error) {
       console.error("Error deleting address:", error);
       alert("Lỗi xóa địa chỉ");
@@ -154,9 +150,12 @@ const Profile = () => {
   const handleSetDefault = async (addressId) => {
     try {
       setLoading(true);
-      await addressService.setDefault(user.id, addressId);
-      await fetchAddresses();
-      alert("Đã đặt làm địa chỉ mặc định");
+      const result = await setDefaultAddress(addressId);
+      if (result.success) {
+        alert("Đã đặt làm địa chỉ mặc định");
+      } else {
+        alert(`Lỗi đặt địa chỉ mặc định: ${result.message}`);
+      }
     } catch (error) {
       console.error("Error setting default:", error);
       alert("Lỗi đặt địa chỉ mặc định");

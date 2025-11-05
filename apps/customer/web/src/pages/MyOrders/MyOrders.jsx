@@ -1,7 +1,7 @@
 import React, { useContext, useState } from "react";
-import { OrderContext } from "../../Context/OrderContext";
+import { OrderContext, AuthContext } from "customer-shared";
 import { reviewService } from "@api/services";
-import { StoreContext } from "../../Context/StoreContext";
+import { formatCurrency } from "shared-utils";
 import "./MyOrders.css";
 import { useNavigate } from "react-router-dom";
 import {
@@ -14,7 +14,7 @@ import {
 
 const MyOrders = () => {
   const { orders } = useContext(OrderContext);
-  const { user } = useContext(StoreContext);
+  const { user } = useContext(AuthContext);
   const navigate = useNavigate();
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
@@ -155,10 +155,8 @@ const MyOrders = () => {
                     <tr key={i}>
                       <td>{item.name}</td>
                       <td>{item.quantity}</td>
-                      <td>{item.price?.toLocaleString("vi-VN")}đ</td>
-                      <td>
-                        {(item.price * item.quantity)?.toLocaleString("vi-VN")}đ
-                      </td>
+                      <td>{formatCurrency(item.price)}</td>
+                      <td>{formatCurrency(item.price * item.quantity)}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -166,7 +164,7 @@ const MyOrders = () => {
             )}
 
             <p className="order-total">
-              <b>Tổng tiền:</b> {order.total_amount?.toLocaleString("vi-VN")}đ
+              <b>Tổng tiền:</b> {formatCurrency(order.total_amount)}
             </p>
             <hr />
           </div>

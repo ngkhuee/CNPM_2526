@@ -3,24 +3,24 @@ import "./Orders.css";
 import { assets } from "../../assets/assets";
 import { OrderContext } from "../../Context/OrderContext";
 import { RestaurantContext } from "../../Context/RestaurantContext";
-import { authService } from "@api/services";
+import { AuthContext } from "../../Context/AuthContext";
 
 const Orders = () => {
   const { orders, updateOrderStatus, fetchRestaurantOrders, loading } =
     useContext(OrderContext);
   const { currentRestaurant } = useContext(RestaurantContext);
-  const user = authService.getCurrentUser();
+  const { currentUser } = useContext(AuthContext);
 
   // Handler để refresh orders thủ công
   const handleRefresh = async () => {
-    if (user?.restaurantId) {
-      await fetchRestaurantOrders(user.restaurantId);
+    if (currentUser?.restaurantId) {
+      await fetchRestaurantOrders(currentUser.restaurantId);
     }
   };
 
   // Filter orders for current restaurant
   const restaurantOrders = orders.filter(
-    (order) => order.restaurantId === user?.restaurantId
+    (order) => order.restaurantId === currentUser?.restaurantId
   );
 
   const statusHandler = async (event, orderId) => {
@@ -74,7 +74,7 @@ const Orders = () => {
                   animation: "pulse 2s infinite",
                 }}
               />
-              Auto-refreshing every 10s
+              Click Refresh to update orders
             </p>
           </div>
           <button

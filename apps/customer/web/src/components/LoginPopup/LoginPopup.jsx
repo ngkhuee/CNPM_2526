@@ -1,13 +1,12 @@
 import React, { useContext, useState } from "react";
 import "./LoginPopup.css";
-import { StoreContext } from "../../Context/StoreContext";
+import { AuthContext } from "customer-shared";
 import { useNavigate } from "react-router-dom";
-import { authService } from "@api/services";
 import { MdClose } from "react-icons/md";
 
 const LoginPopup = ({ setShowLogin }) => {
-  const { setUser, setToken, cartItems } = useContext(StoreContext);
-  const [currState, setCurrState] = useState("Login"); // Default to Login
+  const { login, register } = useContext(AuthContext);
+  const [currState, setCurrState] = useState("Login");
   const [data, setData] = useState({ name: "", email: "", password: "" });
   const [agree, setAgree] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -30,7 +29,7 @@ const LoginPopup = ({ setShowLogin }) => {
 
     try {
       if (currState === "Sign Up") {
-        const response = await authService.register({
+        const response = await register({
           name: data.name,
           email: data.email,
           password: data.password,
@@ -40,34 +39,32 @@ const LoginPopup = ({ setShowLogin }) => {
         if (response.success) {
           alert("Account created! Please login.");
           setCurrState("Login");
+        } else {
+          alert(response.message || "Registration failed");
         }
       } else {
-        // Login
-        const response = await authService.login(data.email, data.password);
+        // Login using AuthContext hook
+        const response = await login(data.email, data.password);
 
         if (response.success) {
-          // IMPORTANT: Token đã được lưu trong authService.login()
-          // Set token trong context TRƯỚC user để tránh race condition
-          setToken(response.token);
-
-          // Small delay để đảm bảo token đã được lưu hoàn toàn
-          await new Promise((resolve) => setTimeout(resolve, 100));
-
-          // Bây giờ mới set user (trigger OrderContext fetch)
-          setUser(response.user);
+          // AuthContext handles token and user state
+          const currentUser = JSON.parse(localStorage.getItem("user"));
 
           // Route based on role
-          if (response.user.role === "admin") {
-            window.location.href = "http://localhost:3001/admin";
-          } else if (response.user.role === "restaurant") {
+          if (currentUser.role === "admin") {
+            // Use environment variable for admin URL
+            const adminUrl =
+              import.meta.env.VITE_ADMIN_URL || "http://localhost:3001/admin";
+            window.location.href = adminUrl;
+          } else if (currentUser.role === "restaurant") {
             navigate("/restaurant/dashboard");
           } else {
-            alert(`Đăng nhập thành công! Xin chào ${response.user.name}`);
+            alert(`Đăng nhập thành công! Xin chào ${currentUser.name}`);
           }
 
           setShowLogin(false);
         } else {
-          alert("Email hoặc mật khẩu không đúng!");
+          alert(response.message || "Email hoặc mật khẩu không đúng!");
         }
       }
     } catch (error) {

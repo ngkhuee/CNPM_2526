@@ -1,8 +1,7 @@
 // src/Context/CategoryContext.js
 import React, { createContext, useState, useEffect } from "react";
 import { toast } from "react-toastify";
-
-const API_URL = "http://localhost:4000";
+import { categoryService } from "@api/services";
 
 export const CategoryContext = createContext();
 
@@ -10,27 +9,13 @@ export const CategoryProvider = ({ children }) => {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // Get auth token
-  const getAuthHeaders = () => {
-    const token = localStorage.getItem("token");
-    return {
-      "Content-Type": "application/json",
-      Authorization: token ? `Bearer ${token}` : "",
-    };
-  };
-
   // Fetch categories for specific restaurant
   const fetchCategories = async (restaurantId = null) => {
     setLoading(true);
     try {
-      let url = `${API_URL}/categories`;
-      if (restaurantId) {
-        url += `?restaurantId=${restaurantId}`;
-      }
-      const response = await fetch(url, {
-        headers: getAuthHeaders(),
-      });
-      const data = await response.json();
+      const data = restaurantId
+        ? await categoryService.getByRestaurant(restaurantId)
+        : await categoryService.getAll();
       setCategories(data);
     } catch (error) {
       console.error("Error fetching categories:", error);
@@ -44,25 +29,14 @@ export const CategoryProvider = ({ children }) => {
   const addCategory = async (categoryData) => {
     setLoading(true);
     try {
-      const response = await fetch(`${API_URL}/categories`, {
-        method: "POST",
-        headers: getAuthHeaders(),
-        body: JSON.stringify(categoryData),
-      });
-
-      if (response.ok) {
-        const newCategory = await response.json();
-        setCategories((prev) => [...prev, newCategory]);
-        toast.success("Category created successfully!");
-        return { success: true, data: newCategory };
-      } else {
-        toast.error("Failed to create category");
-        return { success: false };
-      }
+      const newCategory = await categoryService.create(categoryData);
+      setCategories((prev) => [...prev, newCategory]);
+      toast.success("Category created successfully!");
+      return { success: true, data: newCategory };
     } catch (error) {
       console.error("Error adding category:", error);
       toast.error("Error creating category");
-      return { success: false };
+      return { success: false, error: error.message };
     } finally {
       setLoading(false);
     }
@@ -72,27 +46,16 @@ export const CategoryProvider = ({ children }) => {
   const updateCategory = async (id, updatedData) => {
     setLoading(true);
     try {
-      const response = await fetch(`${API_URL}/categories/${id}`, {
-        method: "PUT",
-        headers: getAuthHeaders(),
-        body: JSON.stringify(updatedData),
-      });
-
-      if (response.ok) {
-        const updated = await response.json();
-        setCategories((prev) =>
-          prev.map((cat) => (cat.id === id ? updated : cat))
-        );
-        toast.success("Category updated successfully!");
-        return { success: true, data: updated };
-      } else {
-        toast.error("Failed to update category");
-        return { success: false };
-      }
+      const updated = await categoryService.update(id, updatedData);
+      setCategories((prev) =>
+        prev.map((cat) => (cat.id === id ? updated : cat))
+      );
+      toast.success("Category updated successfully!");
+      return { success: true, data: updated };
     } catch (error) {
       console.error("Error updating category:", error);
       toast.error("Error updating category");
-      return { success: false };
+      return { success: false, error: error.message };
     } finally {
       setLoading(false);
     }
@@ -102,23 +65,14 @@ export const CategoryProvider = ({ children }) => {
   const deleteCategory = async (id) => {
     setLoading(true);
     try {
-      const response = await fetch(`${API_URL}/categories/${id}`, {
-        method: "DELETE",
-        headers: getAuthHeaders(),
-      });
-
-      if (response.ok) {
-        setCategories((prev) => prev.filter((cat) => cat.id !== id));
-        toast.success("Category deleted successfully!");
-        return { success: true };
-      } else {
-        toast.error("Failed to delete category");
-        return { success: false };
-      }
+      await categoryService.delete(id);
+      setCategories((prev) => prev.filter((cat) => cat.id !== id));
+      toast.success("Category deleted successfully!");
+      return { success: true };
     } catch (error) {
       console.error("Error deleting category:", error);
       toast.error("Error deleting category");
-      return { success: false };
+      return { success: false, error: error.message };
     } finally {
       setLoading(false);
     }

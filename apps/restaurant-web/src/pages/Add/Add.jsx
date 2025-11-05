@@ -5,13 +5,14 @@ import { toast } from "react-toastify";
 import { FoodContext } from "../../Context/FoodContext";
 import { RestaurantContext } from "../../Context/RestaurantContext";
 import { CategoryContext } from "../../Context/CategoryContext";
-import { authService } from "@api/services";
+import { AuthContext } from "../../Context/AuthContext";
 import { MdLocationOn, MdHourglassEmpty } from "react-icons/md";
 
 const Add = () => {
   const { addFood } = useContext(FoodContext);
   const { currentRestaurant } = useContext(RestaurantContext);
   const { categories } = useContext(CategoryContext);
+  const { currentUser } = useContext(AuthContext);
   const [data, setData] = useState({
     name: "",
     description: "",
@@ -34,8 +35,7 @@ const Add = () => {
       return;
     }
 
-    const user = authService.getCurrentUser();
-    if (!user || !user.restaurantId) {
+    if (!currentUser || !currentUser.restaurantId) {
       toast.error("Restaurant ID not found!");
       return;
     }
@@ -49,7 +49,7 @@ const Add = () => {
         description: data.description,
         price: Number(data.price),
         categoryId: data.categoryId,
-        restaurantId: user.restaurantId,
+        restaurantId: currentUser.restaurantId,
         image: reader.result, // base64 image
         isAvailable: true,
         isFeatured: false,

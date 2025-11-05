@@ -1,5 +1,5 @@
 import React, { useContext } from "react";
-import { RestaurantContext } from "../../Context/RestaurantContext";
+import { RestaurantContext } from "customer-shared";
 import "./Partners.css";
 
 const Partners = ({ selectRestaurant }) => {
@@ -9,9 +9,11 @@ const Partners = ({ selectRestaurant }) => {
     <div className="partners-container">
       <h2>Manage Partners</h2>
       <ul className="partners-list">
-        {partners.map(p => (
+        {partners.map((p) => (
           <li key={p._id}>
-            <span>{p.name} - {p.address}</span>
+            <span>
+              {p.name} - {p.address}
+            </span>
             <button onClick={() => selectRestaurant(p._id)}>Manage</button>
           </li>
         ))}

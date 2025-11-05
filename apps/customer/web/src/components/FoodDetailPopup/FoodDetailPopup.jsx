@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { createPortal } from "react-dom";
 import "./FoodDetailPopup.css";
 import { getImageUrl } from "@utils/imageHelper";
+import { formatCurrency } from "shared-utils";
 
 const FoodDetailPopup = ({ food, onClose, addToCart }) => {
   const [quantity, setQuantity] = useState(1);
@@ -34,7 +35,7 @@ const FoodDetailPopup = ({ food, onClose, addToCart }) => {
           <div className="popup-right">
             <h2 className="popup-title">{food.name}</h2>
             <p className="popup-description">{food.description}</p>
-            <p className="popup-price">{food.price.toLocaleString("vi-VN")}đ</p>
+            <p className="popup-price">{formatCurrency(food.price)}</p>
 
             <div className="quantity-control">
               <button onClick={decreaseQty}>−</button>

@@ -1,77 +1,27 @@
-import React, { useContext, useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { OrderContext } from "../../Context/OrderContext";
-import { orderService } from "@api/services";
+import { useOrderTracking } from "customer-shared";
+import { formatCurrency } from "shared-utils";
 import "./Tracking.css";
 import { MdLocalShipping, MdCheckCircle } from "react-icons/md";
 
 const Tracking = () => {
   const { id } = useParams();
-  const { orders } = useContext(OrderContext);
+  const { order, loading } = useOrderTracking(id);
 
-  const [order, setOrder] = useState(null);
   const [dronePosition, setDronePosition] = useState(null);
   const [droneProgress, setDroneProgress] = useState(0);
 
   useEffect(() => {
-    let pollingInterval = null;
+    if (order) {
+      updateDroneProgress(order.status);
 
-    // Fetch order data immediately
-    const loadOrder = async () => {
-      try {
-        const orderData = await orderService.getById(id);
-        if (orderData) {
-          setOrder(orderData);
-          updateDroneProgress(orderData.status);
-
-          // Update GPS position if available
-          if (orderData.current_gps) {
-            setDronePosition(orderData.current_gps);
-          }
-
-          // Only start polling if order is not in final state
-          if (
-            orderData.status !== "delivered" &&
-            orderData.status !== "cancelled"
-          ) {
-            // Polling: Check order status every 5 seconds
-            pollingInterval = setInterval(async () => {
-              try {
-                const updatedOrder = await orderService.getById(id);
-                if (updatedOrder) {
-                  setOrder(updatedOrder);
-                  updateDroneProgress(updatedOrder.status);
-
-                  if (updatedOrder.current_gps) {
-                    setDronePosition(updatedOrder.current_gps);
-                  }
-
-                  // Stop polling if order is completed
-                  if (
-                    updatedOrder.status === "delivered" ||
-                    updatedOrder.status === "cancelled"
-                  ) {
-                    if (pollingInterval) clearInterval(pollingInterval);
-                  }
-                }
-              } catch (error) {
-                console.error("Error polling order status:", error);
-              }
-            }, 5000);
-          }
-        }
-      } catch (error) {
-        console.error("Error loading order:", error);
+      // Update GPS position if available
+      if (order.current_gps) {
+        setDronePosition(order.current_gps);
       }
-    };
-
-    loadOrder();
-
-    // Cleanup interval on unmount
-    return () => {
-      if (pollingInterval) clearInterval(pollingInterval);
-    };
-  }, [id]);
+    }
+  }, [order]);
 
   // Update drone progress based on order status
   const updateDroneProgress = (status) => {
@@ -158,8 +108,7 @@ const Tracking = () => {
             <span>Địa chỉ:</span> {order.customer?.address || "N/A"}
           </p>
           <p>
-            <span>Tổng tiền:</span>{" "}
-            {order.total_amount?.toLocaleString("vi-VN")}đ
+            <span>Tổng tiền:</span> {formatCurrency(order.total_amount)}
           </p>
         </div>
       </div>

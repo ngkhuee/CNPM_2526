@@ -1,6 +1,6 @@
 // src/Context/FoodContext.js
 import React, { createContext, useState, useEffect } from "react";
-import { foodService, restaurantService } from "@api/services";
+import { foodService, authService } from "@api/services";
 
 // Tạo context
 export const FoodContext = createContext();
@@ -11,10 +11,10 @@ export const FoodProvider = ({ children }) => {
 
   // Fetch foods on mount (only if user is logged in)
   useEffect(() => {
-    const user = JSON.parse(localStorage.getItem("user") || "{}");
+    const user = authService.getCurrentUser();
     // Only fetch for restaurant accounts with valid restaurantId
     if (
-      user.role === "restaurant" &&
+      user?.role === "restaurant" &&
       user.restaurantId &&
       /^r\d+$/.test(user.restaurantId)
     ) {
@@ -86,10 +86,9 @@ export const FoodProvider = ({ children }) => {
     return foodList.filter((f) => f.category === categoryId);
   };
 
-  // Tạo object chứa state và methods
+  // Tạo object chứa state và methods (không export setFoodList - chỉ dùng internal)
   const contextValue = {
     foodList,
-    setFoodList,
     fetchFoods,
     addFood,
     updateFood,

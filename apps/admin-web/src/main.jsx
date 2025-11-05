@@ -3,17 +3,17 @@ import ReactDOM from "react-dom/client";
 import App from "./App.jsx";
 import "shared-styles/global.css";
 import { BrowserRouter } from "react-router-dom";
-import { FoodProvider } from "./Context/FoodContext";
+import { AdminAuthProvider } from "./Context/AdminAuthContext";
 import { OrderProvider } from "./Context/OrderContext";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <BrowserRouter>
-      <FoodProvider>
+      <AdminAuthProvider>
         <OrderProvider>
           <App />
         </OrderProvider>
-      </FoodProvider>
+      </AdminAuthProvider>
     </BrowserRouter>
   </React.StrictMode>
 );

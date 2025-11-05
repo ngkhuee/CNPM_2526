@@ -1,60 +1,111 @@
-// src/pages/Dashboard/Dashboard.jsx
-import React, { useState, useEffect } from "react";
+import React, { useContext } from "react";
 import "./Dashboard.css";
-import CardStats from "../../components/DashboardComponents/CardStats";
-import LineChart from "../../components/DashboardComponents/LineChart";
-import BarChart from "../../components/DashboardComponents/BarChart";
+import { CardStats, LineChart, BarChart } from "shared-ui";
+import { SystemStatsContext } from "../../Context/SystemStatsContext";
+import { formatCurrency } from "shared-utils";
 
 const Dashboard = () => {
-  // Mock data
-  const [stats, setStats] = useState({
-    users: 120,
-    orders: 75,
-    revenue: 5400,
-  });
+  const { stats, loading, error, fetchStats } = useContext(SystemStatsContext);
 
-  const [chartData, setChartData] = useState([
-    { date: "2025-10-10", revenue: 500, orders: 10 },
-    { date: "2025-10-11", revenue: 600, orders: 12 },
-    { date: "2025-10-12", revenue: 800, orders: 15 },
-    { date: "2025-10-13", revenue: 900, orders: 20 },
-    { date: "2025-10-14", revenue: 700, orders: 18 },
-  ]);
+  if (loading) {
+    return (
+      <div className="dashboard-page">
+        <h2>Admin Dashboard</h2>
+        <p>Loading statistics...</p>
+      </div>
+    );
+  }
 
-  // Nếu muốn, bạn có thể fetch dữ liệu từ backend ở đây
-  // useEffect(() => {
-  //   fetch("/admin/stats")
-  //     .then(res => res.json())
-  //     .then(data => {
-  //       setStats(data.stats);
-  //       setChartData(data.chart);
-  //     });
-  // }, []);
+  if (error) {
+    return (
+      <div className="dashboard-page">
+        <h2>Admin Dashboard</h2>
+        <p className="error">Error loading stats: {error}</p>
+        <button onClick={fetchStats}>Retry</button>
+      </div>
+    );
+  }
 
   return (
     <div className="dashboard-page">
-      <h2>Admin Dashboard</h2>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: "20px",
+        }}
+      >
+        <h2>Admin Dashboard - System Overview</h2>
+        <button
+          onClick={fetchStats}
+          style={{
+            padding: "10px 20px",
+            backgroundColor: "#3b82f6",
+            color: "white",
+            border: "none",
+            borderRadius: "5px",
+            cursor: "pointer",
+          }}
+        >
+          Refresh Stats
+        </button>
+      </div>
 
       {/* Card thống kê */}
       <div className="cards-container">
-        <CardStats title="Users" value={stats.users} />
-        <CardStats title="Orders" value={stats.orders} />
-        <CardStats 
-        title="Revenue" 
-        value={new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(stats.revenue)} 
+        <CardStats
+          title="Total Users"
+          value={stats.totalUsers}
+          color="primary"
         />
+        <CardStats
+          title="Active Restaurants"
+          value={`${stats.activeRestaurants} / ${stats.totalRestaurants}`}
+          color="success"
+        />
+        <CardStats
+          title="Total Orders"
+          value={stats.totalOrders}
+          color="warning"
+        />
+        <CardStats
+          title="Total Revenue"
+          value={formatCurrency(stats.totalRevenue)}
+          color="success"
+        />
+      </div>
 
+      <div className="cards-container" style={{ marginTop: "20px" }}>
+        <CardStats
+          title="Pending Orders"
+          value={stats.pendingOrders}
+          color="warning"
+        />
+        <CardStats
+          title="Completed Orders"
+          value={stats.completedOrders}
+          color="success"
+        />
       </div>
 
       {/* Biểu đồ */}
       <div className="charts-container">
         <div className="chart-item">
-          <h3>Revenue Over Time</h3>
-          <LineChart data={chartData} />
+          <h3>Revenue Over Time (Last 7 Days)</h3>
+          {stats.revenueOverTime.length > 0 ? (
+            <LineChart data={stats.revenueOverTime} dataKey="revenue" />
+          ) : (
+            <p>No data available</p>
+          )}
         </div>
         <div className="chart-item">
-          <h3>Orders Over Time</h3>
-          <BarChart data={chartData} />
+          <h3>Orders Over Time (Last 7 Days)</h3>
+          {stats.ordersOverTime.length > 0 ? (
+            <BarChart data={stats.ordersOverTime} dataKey="orders" />
+          ) : (
+            <p>No data available</p>
+          )}
         </div>
       </div>
     </div>
