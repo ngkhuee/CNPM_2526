@@ -840,35 +840,35 @@
       "assigned_order_id": null,
       "last_maintenance": "2025-11-01T00:00:00.000Z",
       "created_at": "2025-01-01T00:00:00.000Z",
-      "updated_at": "2025-11-03T09:00:00.000Z"
+      "updated_at": "2025-11-05T13:01:10.613Z"
     },
     {
       "id": "drone2",
       "identifier": "Drone 2",
-      "status": "delivering",
+      "status": "available",
       "battery_level": 65,
-      "latitude": 10.775,
-      "longitude": 106.685,
-      "current_location": "In transit",
+      "latitude": 10.77,
+      "longitude": 106.68,
+      "current_location": "Warehouse HCM",
       "max_weight_kg": 5,
-      "assigned_order_id": "ord1",
+      "assigned_order_id": null,
       "last_maintenance": "2025-10-28T00:00:00.000Z",
       "created_at": "2025-01-01T00:00:00.000Z",
-      "updated_at": "2025-11-03T10:35:00.000Z"
+      "updated_at": "2025-11-05T14:00:00.000Z"
     },
     {
       "id": "drone3",
       "identifier": "Drone 3",
-      "status": "charging",
+      "status": "locked",
       "battery_level": 25,
       "latitude": 10.77,
       "longitude": 106.68,
-      "current_location": "Charging Station",
+      "current_location": "Warehouse HCM",
       "max_weight_kg": 5,
       "assigned_order_id": null,
       "last_maintenance": "2025-10-25T00:00:00.000Z",
       "created_at": "2025-01-01T00:00:00.000Z",
-      "updated_at": "2025-11-03T08:00:00.000Z"
+      "updated_at": "2025-11-05T14:00:00.000Z"
     }
   ],
   "settings": [

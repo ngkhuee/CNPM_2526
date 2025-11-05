@@ -60,7 +60,7 @@ const Dashboard = () => {
           color="primary"
         />
         <CardStats
-          title="Active Restaurants"
+          title="Total Restaurants"
           value={`${stats.activeRestaurants} / ${stats.totalRestaurants}`}
           color="success"
         />

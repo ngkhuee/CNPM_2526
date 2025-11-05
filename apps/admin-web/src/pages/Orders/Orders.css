@@ -200,6 +200,20 @@
   color: #adb5bd;
 }
 
+.btn-view {
+  padding: 6px 8px;
+  background: #ff6b35;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.btn-view:hover {
+  opacity: 0.95;
+  transform: translateY(-1px);
+}
+
 .order-time {
   font-size: 13px;
   color: #6c757d;

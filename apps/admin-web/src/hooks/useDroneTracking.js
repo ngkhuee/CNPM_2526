@@ -24,17 +24,29 @@ export const useDroneTracking = () => {
       const ordersData = await orderService.getAll();
 
       // Map drones with proper field names from db.json
-      const mappedDrones = (dronesData || []).map((drone) => ({
-        id: drone.id,
-        name: drone.identifier,
-        status: drone.status,
-        battery: drone.battery_level || 0,
-        latitude: drone.latitude,
-        longitude: drone.longitude,
-        assignedOrderId: drone.assigned_order_id,
-        maxWeightKg: drone.max_weight_kg,
-        currentLocation: drone.current_location,
-      }));
+      // Also check if assigned order is still active
+      const mappedDrones = (dronesData || []).map((drone) => {
+        const assignedOrder = ordersData.find(
+          (order) => order.id === drone.assigned_order_id
+        );
+
+        // If order is delivered/cancelled, clear assignment
+        const isOrderActive =
+          assignedOrder &&
+          !["delivered", "cancelled"].includes(assignedOrder.status);
+
+        return {
+          id: drone.id,
+          name: drone.identifier,
+          status: drone.status,
+          battery: drone.battery_level || 0,
+          latitude: drone.latitude,
+          longitude: drone.longitude,
+          assignedOrderId: isOrderActive ? drone.assigned_order_id : null,
+          maxWeightKg: drone.max_weight_kg,
+          currentLocation: drone.current_location,
+        };
+      });
       setDrones(mappedDrones);
 
       // Map orders with proper field names

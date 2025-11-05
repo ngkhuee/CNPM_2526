@@ -1,13 +1,162 @@
 import React, { useState } from "react";
 import { useDroneTracking } from "../../hooks/useDroneTracking";
+import { droneService } from "shared-services";
+import { geocodeAddress } from "shared-utils";
+import { Modal } from "shared-ui";
 import "./Delivery.css";
 
 const Delivery = () => {
-  const { drones, orders, loading, getDronesByStatus, getOrdersByStatus } =
-    useDroneTracking();
+  const {
+    drones,
+    orders,
+    loading,
+    getDronesByStatus,
+    getOrdersByStatus,
+    refresh,
+  } = useDroneTracking();
 
   const [droneFilter, setDroneFilter] = useState("all");
   const [orderFilter, setOrderFilter] = useState("all");
+  const [showDroneModal, setShowDroneModal] = useState(false);
+  const [editingDrone, setEditingDrone] = useState(null);
+  const [droneForm, setDroneForm] = useState({
+    identifier: "",
+    address: "",
+    latitude: "",
+    longitude: "",
+  });
+  const [geocoding, setGeocoding] = useState(false);
+  const [showLocation, setShowLocation] = useState(false);
+  const [locationCoords, setLocationCoords] = useState(null);
+
+  const openAddDrone = () => {
+    setEditingDrone(null);
+    setDroneForm({
+      identifier: "",
+      address: "",
+      latitude: "",
+      longitude: "",
+    });
+    setShowDroneModal(true);
+  };
+
+  const openEditDrone = (drone) => {
+    setEditingDrone(drone);
+    setDroneForm({
+      identifier: drone.name || drone.identifier || "",
+      address: "",
+      latitude: drone.latitude || "",
+      longitude: drone.longitude || "",
+    });
+    setShowDroneModal(true);
+  };
+
+  const handleGeocodeAddress = async () => {
+    if (!droneForm.address || droneForm.address.trim() === "") {
+      alert("Please enter an address");
+      return;
+    }
+
+    setGeocoding(true);
+    try {
+      const result = await geocodeAddress(droneForm.address);
+      if (result) {
+        setDroneForm({
+          ...droneForm,
+          latitude: result.lat.toString(),
+          longitude: result.lng.toString(),
+        });
+        alert(`Address found: ${result.display_name}`);
+      } else {
+        alert("Address not found. Please try a different address.");
+      }
+    } catch (error) {
+      console.error("Geocoding error:", error);
+      alert("Failed to geocode address. Please try again.");
+    } finally {
+      setGeocoding(false);
+    }
+  };
+
+  const saveDrone = async () => {
+    try {
+      if (!droneForm.identifier || droneForm.identifier.trim() === "") {
+        alert("Please enter drone name");
+        return;
+      }
+
+      if (editingDrone) {
+        // Only update name when editing
+        await droneService.updateDrone(editingDrone.id, {
+          identifier: droneForm.identifier,
+          updated_at: new Date().toISOString(),
+        });
+      } else {
+        // Create new drone with default location (warehouse)
+        await droneService.createDrone({
+          identifier: droneForm.identifier,
+          status: "available",
+          battery_level: 100,
+          latitude: 10.77,
+          longitude: 106.68,
+          current_location: "Warehouse HCM",
+          max_weight_kg: 5,
+          assigned_order_id: null,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        });
+      }
+      setShowDroneModal(false);
+      await refresh();
+    } catch (err) {
+      console.error("Failed to save drone:", err);
+      alert("Failed to save drone");
+    }
+  };
+
+  const handleDeleteDrone = async (id) => {
+    if (!window.confirm("Delete this drone?")) return;
+    try {
+      await droneService.deleteDrone(id);
+      await refresh();
+    } catch (err) {
+      console.error("Failed to delete drone:", err);
+      alert("Failed to delete drone");
+    }
+  };
+
+  const handleToggleDrone = async (drone) => {
+    // Only allow locking/unlocking when drone is available (not assigned to order)
+    if (drone.assignedOrderId) {
+      alert("Cannot lock/unlock drone while assigned to an order");
+      return;
+    }
+
+    try {
+      const newStatus = drone.status === "available" ? "locked" : "available";
+      await droneService.updateDrone(drone.id, {
+        status: newStatus,
+        updated_at: new Date().toISOString(),
+      });
+      await refresh();
+    } catch (err) {
+      console.error("Failed to toggle drone:", err);
+      alert("Failed to update drone status");
+    }
+  };
+
+  const openLocationModal = (drone) => {
+    setLocationCoords(
+      drone.latitude && drone.longitude
+        ? {
+            lat: drone.latitude,
+            lng: drone.longitude,
+            updated_at: drone.updated_at,
+          }
+        : null
+    );
+    setShowLocation(true);
+  };
 
   if (loading) {
     return (
@@ -23,10 +172,7 @@ const Delivery = () => {
     return getDronesByStatus(droneFilter);
   };
 
-  const getFilteredOrders = () => {
-    if (orderFilter === "all") return orders;
-    return getOrdersByStatus(orderFilter);
-  };
+  // Orders are shown in Orders page. Delivery page focuses on drones.
 
   const getBatteryClass = (battery) => {
     if (battery >= 70) return "battery-high";
@@ -36,14 +182,21 @@ const Delivery = () => {
 
   const getStatusBadgeClass = (status) => {
     const statusMap = {
-      active: "status-active",
-      idle: "status-idle",
-      charging: "status-charging",
-      maintenance: "status-maintenance",
+      available: "status-available",
+      locked: "status-idle",
       delivering: "status-delivering",
-      delivered: "status-delivered",
     };
     return statusMap[status] || "status-default";
+  };
+
+  const getDisplayStatus = (drone) => {
+    if (drone.assignedOrderId) {
+      return "On Delivery";
+    }
+    if (drone.status === "locked") {
+      return "Locked";
+    }
+    return "Available";
   };
 
   return (
@@ -182,15 +335,14 @@ const Delivery = () => {
                   <th>Name</th>
                   <th>Status</th>
                   <th>Battery</th>
-                  <th>Location</th>
                   <th>Assigned Order</th>
-                  <th>Max Weight</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {getFilteredDrones().length === 0 ? (
                   <tr>
-                    <td colSpan="7" className="no-data">
+                    <td colSpan="6" className="no-data">
                       No drones found
                     </td>
                   </tr>
@@ -201,22 +353,19 @@ const Delivery = () => {
                       <td>{drone.name || `Drone ${drone.id}`}</td>
                       <td>
                         <span
-                          className={`status-badge ${getStatusBadgeClass(drone.status)}`}
+                          className={`status-badge ${getStatusBadgeClass(
+                            drone.assignedOrderId ? "delivering" : drone.status
+                          )}`}
                         >
-                          {drone.status}
+                          {getDisplayStatus(drone)}
                         </span>
                       </td>
                       <td>
                         <span
                           className={`battery-indicator ${getBatteryClass(drone.battery)}`}
                         >
-                          {drone.battery}% 
+                          {drone.battery}%
                         </span>
-                      </td>
-                      <td className="location-info">
-                        {drone.latitude && drone.longitude
-                          ? `${drone.latitude.toFixed(4)}, ${drone.longitude.toFixed(4)}`
-                          : "N/A"}
                       </td>
                       <td>
                         {drone.assignedOrderId ? (
@@ -228,88 +377,79 @@ const Delivery = () => {
                         )}
                       </td>
                       <td>
-                        {drone.maxWeightKg ? `${drone.maxWeightKg} kg` : "N/A"}
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <div className="section orders-section">
-          <div className="section-header">
-            <h3>Delivery Orders</h3>
-            <div className="section-filter">
-              <button
-                className={orderFilter === "all" ? "active" : ""}
-                onClick={() => setOrderFilter("all")}
-              >
-                All
-              </button>
-              <button
-                className={orderFilter === "delivering" ? "active" : ""}
-                onClick={() => setOrderFilter("delivering")}
-              >
-                Delivering
-              </button>
-              <button
-                className={orderFilter === "delivered" ? "active" : ""}
-                onClick={() => setOrderFilter("delivered")}
-              >
-                Delivered
-              </button>
-            </div>
-          </div>
-
-          <div className="table-container">
-            <table className="data-table">
-              <thead>
-                <tr>
-                  <th>Order ID</th>
-                  <th>Status</th>
-                  <th>Drone ID</th>
-                  <th>Delivery Location</th>
-                  <th>Restaurant</th>
-                </tr>
-              </thead>
-              <tbody>
-                {getFilteredOrders().length === 0 ? (
-                  <tr>
-                    <td colSpan="5" className="no-data">
-                      No orders found
-                    </td>
-                  </tr>
-                ) : (
-                  getFilteredOrders().map((order) => (
-                    <tr key={order.id}>
-                      <td className="order-id">#{order.id}</td>
-                      <td>
-                        <span
-                          className={`status-badge ${getStatusBadgeClass(order.status)}`}
-                        >
-                          {order.status}
-                        </span>
-                      </td>
-                      <td>
-                        {order.droneId ? (
-                          <span className="drone-link">
-                            Drone {order.droneId}
-                          </span>
-                        ) : (
-                          <span className="no-drone">-</span>
-                        )}
-                      </td>
-                      <td className="location-info">
-                        {order.deliveryLocation
-                          ? `${order.deliveryLocation.lat}, ${order.deliveryLocation.lng}`
-                          : "N/A"}
-                      </td>
-                      <td>
-                        {order.restaurantId
-                          ? `Restaurant #${order.restaurantId}`
-                          : "N/A"}
+                        <div style={{ display: "flex", gap: 8 }}>
+                          <button
+                            className="btn-action btn-view"
+                            onClick={() => openLocationModal(drone)}
+                            title="View location"
+                          >
+                            <svg
+                              width="16"
+                              height="16"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                            >
+                              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                              <circle cx="12" cy="10" r="3" />
+                            </svg>
+                          </button>
+                          <button
+                            className="btn-action btn-edit"
+                            onClick={() => openEditDrone(drone)}
+                            title="Edit"
+                          >
+                            <svg
+                              width="16"
+                              height="16"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                            >
+                              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                            </svg>
+                          </button>
+                          <button
+                            className="btn-action btn-toggle"
+                            onClick={() => handleToggleDrone(drone)}
+                            disabled={drone.assignedOrderId}
+                            title={
+                              drone.assignedOrderId
+                                ? "Cannot lock drone with active order"
+                                : drone.status === "locked"
+                                  ? "Unlock drone"
+                                  : "Lock drone"
+                            }
+                            style={{
+                              opacity: drone.assignedOrderId ? 0.5 : 1,
+                              cursor: drone.assignedOrderId
+                                ? "not-allowed"
+                                : "pointer",
+                            }}
+                          >
+                            {drone.status === "locked" ? "Unlock" : "Lock"}
+                          </button>
+                          <button
+                            className="btn-action btn-delete"
+                            onClick={() => handleDeleteDrone(drone.id)}
+                            title="Delete"
+                          >
+                            <svg
+                              width="16"
+                              height="16"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                            >
+                              <polyline points="3 6 5 6 21 6" />
+                              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                            </svg>
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))
@@ -319,6 +459,136 @@ const Delivery = () => {
           </div>
         </div>
       </div>
+      {/* Drone management modals and controls */}
+      <div style={{ marginTop: 18, display: "flex", gap: 8 }}>
+        <button className="btn-primary" onClick={() => openAddDrone()}>
+          + Add Drone
+        </button>
+      </div>
+
+      <Modal
+        isOpen={showDroneModal}
+        onClose={() => setShowDroneModal(false)}
+        title={editingDrone ? "Edit Drone" : "Add Drone"}
+      >
+        <div className="drone-form">
+          <div className="form-group">
+            <label htmlFor="drone-name">Drone Name *</label>
+            <input
+              id="drone-name"
+              className="form-input"
+              placeholder="Enter drone identifier (e.g., DRONE-001)"
+              value={droneForm.identifier}
+              onChange={(e) =>
+                setDroneForm({ ...droneForm, identifier: e.target.value })
+              }
+            />
+          </div>
+
+          {!editingDrone && (
+            <div
+              className="form-note"
+              style={{
+                padding: "12px",
+                background: "#f8f9fa",
+                borderRadius: "6px",
+                fontSize: "13px",
+                color: "#6c757d",
+              }}
+            >
+              <strong>Note:</strong> New drones will be created at the default
+              warehouse location (Warehouse HCM) with 100% battery and available
+              status.
+            </div>
+          )}
+
+          <div className="form-actions">
+            <button onClick={() => saveDrone()} className="btn-primary">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+                <polyline points="17 21 17 13 7 13 7 21" />
+                <polyline points="7 3 7 8 15 8" />
+              </svg>
+              Save
+            </button>
+            <button
+              onClick={() => setShowDroneModal(false)}
+              className="btn-default"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      </Modal>
+
+      <Modal
+        isOpen={showLocation}
+        onClose={() => setShowLocation(false)}
+        title="Drone Location"
+        width="700px"
+      >
+        <div className="location-modal">
+          {locationCoords ? (
+            <>
+              <div className="location-info-card">
+                <div className="info-row">
+                  <span className="info-label">Latitude:</span>
+                  <span className="info-value">{locationCoords.lat}</span>
+                </div>
+                <div className="info-row">
+                  <span className="info-label">Longitude:</span>
+                  <span className="info-value">{locationCoords.lng}</span>
+                </div>
+                <div className="info-row">
+                  <span className="info-label">Last Updated:</span>
+                  <span className="info-value">
+                    {locationCoords.updated_at
+                      ? new Date(locationCoords.updated_at).toLocaleString()
+                      : "Unknown"}
+                  </span>
+                </div>
+              </div>
+
+              <div className="map-container">
+                <iframe
+                  title="Drone Location Map"
+                  width="100%"
+                  height="400"
+                  frameBorder="0"
+                  scrolling="no"
+                  marginHeight="0"
+                  marginWidth="0"
+                  src={`https://www.openstreetmap.org/export/embed.html?bbox=${locationCoords.lng - 0.01},${locationCoords.lat - 0.01},${locationCoords.lng + 0.01},${locationCoords.lat + 0.01}&layer=mapnik&marker=${locationCoords.lat},${locationCoords.lng}`}
+                  style={{ border: "1px solid #ccc", borderRadius: 8 }}
+                />
+                <div style={{ marginTop: 8, textAlign: "center" }}>
+                  <a
+                    href={`https://www.openstreetmap.org/?mlat=${locationCoords.lat}&mlon=${locationCoords.lng}#map=15/${locationCoords.lat}/${locationCoords.lng}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      color: "#ff6b35",
+                      textDecoration: "none",
+                      fontSize: 14,
+                    }}
+                  >
+                    View on OpenStreetMap →
+                  </a>
+                </div>
+              </div>
+            </>
+          ) : (
+            <p>No location data available</p>
+          )}
+        </div>
+      </Modal>
     </div>
   );
 };

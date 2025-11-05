@@ -115,6 +115,61 @@ export const assignDroneToOrder = async (droneId, orderId) => {
   }
 };
 
+/**
+ * Create a new drone
+ * @param {Object} payload
+ * @returns {Promise<Object>}
+ */
+export const createDrone = async (payload) => {
+  try {
+    const body = {
+      identifier: payload.identifier,
+      status: payload.status || "available",
+      battery_level: payload.battery_level || 100,
+      latitude: payload.latitude || null,
+      longitude: payload.longitude || null,
+      current_location: payload.current_location || null,
+      max_weight_kg: payload.max_weight_kg || null,
+      assigned_order_id: payload.assigned_order_id || null,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+
+    const response = await apiClient.post(ENDPOINTS.DRONES.BASE, body);
+    return response;
+  } catch (error) {
+    console.error("Error creating drone:", error);
+    throw error;
+  }
+};
+
+/**
+ * Update drone
+ */
+export const updateDrone = async (id, payload) => {
+  try {
+    const body = { ...payload, updated_at: new Date().toISOString() };
+    const response = await apiClient.patch(ENDPOINTS.DRONES.BY_ID(id), body);
+    return response;
+  } catch (error) {
+    console.error(`Error updating drone ${id}:`, error);
+    throw error;
+  }
+};
+
+/**
+ * Delete drone
+ */
+export const deleteDrone = async (id) => {
+  try {
+    const response = await apiClient.delete(ENDPOINTS.DRONES.BY_ID(id));
+    return response;
+  } catch (error) {
+    console.error(`Error deleting drone ${id}:`, error);
+    throw error;
+  }
+};
+
 export default {
   getAllDrones,
   getAvailableDrones,
@@ -122,4 +177,7 @@ export default {
   getDroneById,
   updateDroneLocation,
   assignDroneToOrder,
+  createDrone,
+  updateDrone,
+  deleteDrone,
 };

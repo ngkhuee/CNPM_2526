@@ -2,12 +2,15 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { orderService } from "shared-services";
 import { formatCurrency } from "shared-utils";
+import { OrderDetailModal } from "shared-ui";
 import "./Orders.css";
 
 const Orders = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("all");
+  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [detailOpen, setDetailOpen] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -27,12 +30,8 @@ const Orders = () => {
   };
 
   const handleStatusChange = async (orderId, newStatus) => {
-    try {
-      await orderService.updateStatus(orderId, newStatus);
-      await fetchOrders();
-    } catch (error) {
-      alert("Failed to update order status");
-    }
+    // Admin should not change order status from admin panel
+    console.warn("Admin is not allowed to change order status.");
   };
 
   const getStatusBadgeClass = (status) => {
@@ -56,6 +55,11 @@ const Orders = () => {
   if (loading) {
     return <div className="orders-page">Loading...</div>;
   }
+
+  const openOrderDetail = (order) => {
+    setSelectedOrder(order);
+    setDetailOpen(true);
+  };
 
   return (
     <div className="orders-page">
@@ -111,7 +115,9 @@ const Orders = () => {
                 <td className="order-id">#{order.id}</td>
                 <td>
                   <div className="customer-info">
-                    <span className="customer-id">{order.user_id}</span>
+                    <span className="customer-name">
+                      {order.user?.full_name || order.userName || order.user_id}
+                    </span>
                   </div>
                 </td>
                 <td>
@@ -164,21 +170,23 @@ const Orders = () => {
                   })}
                 </td>
                 <td>
-                  <select
-                    className="status-select"
-                    value={order.status}
-                    onChange={(e) =>
-                      handleStatusChange(order.id, e.target.value)
-                    }
+                  <button
+                    className="btn-view"
+                    title="View details"
+                    onClick={() => openOrderDetail(order)}
                   >
-                    <option value="pending">Pending</option>
-                    <option value="confirmed">Confirmed</option>
-                    <option value="preparing">Preparing</option>
-                    <option value="ready">Ready</option>
-                    <option value="delivering">Delivering</option>
-                    <option value="delivered">Delivered</option>
-                    <option value="cancelled">Cancelled</option>
-                  </select>
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
+                      <circle cx="11" cy="11" r="8" />
+                      <path d="m21 21-4.35-4.35" />
+                    </svg>
+                  </button>
                 </td>
               </tr>
             ))}
@@ -189,6 +197,11 @@ const Orders = () => {
       {filteredOrders.length === 0 && (
         <div className="no-data">No orders found</div>
       )}
+      <OrderDetailModal
+        isOpen={detailOpen}
+        onClose={() => setDetailOpen(false)}
+        order={selectedOrder}
+      />
     </div>
   );
 };

@@ -4,7 +4,17 @@ import { ENDPOINTS } from "../config/endpoints";
 export const orderService = {
   async getAll() {
     try {
-      return await apiClient.get(ENDPOINTS.ORDERS.BASE);
+      // Fetch orders and users separately, then merge
+      const [orders, users] = await Promise.all([
+        apiClient.get(ENDPOINTS.ORDERS.BASE),
+        apiClient.get("/users"),
+      ]);
+
+      // Map user data to orders
+      return orders.map((order) => ({
+        ...order,
+        user: users.find((u) => u.id === order.user_id) || null,
+      }));
     } catch (error) {
       throw error;
     }
