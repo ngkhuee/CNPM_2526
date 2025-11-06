@@ -29,12 +29,21 @@ const calculateDistance = (lat1, lng1, lat2, lng2) => {
   return distance;
 };
 
-const ExploreMenu = ({ selected, setSelected, userLocation }) => {
+const ExploreMenu = ({
+  selected,
+  setSelected,
+  userLocation,
+  showOnlyNearby = false,
+}) => {
   const { restaurant_list, loading } = useContext(StoreContext);
 
-  // Define filter options
+  // Define filter options - Only show Top Rated and Best Selling for main section
   const filterOptions = useMemo(() => {
-    const options = [
+    if (showOnlyNearby) {
+      return []; // No filter options for nearby section
+    }
+
+    return [
       { id: "Top Rated", label: "Top Rated", Icon: MdStar },
       {
         id: "Best Selling",
@@ -42,18 +51,7 @@ const ExploreMenu = ({ selected, setSelected, userLocation }) => {
         Icon: MdLocalFireDepartment,
       },
     ];
-
-    // Only show nearby if user has location
-    if (userLocation && userLocation.latitude && userLocation.longitude) {
-      options.push({
-        id: "Nearby",
-        label: "Nearby Restaurants",
-        Icon: MdLocationOn,
-      });
-    }
-
-    return options;
-  }, [userLocation]);
+  }, [showOnlyNearby]);
 
   // Transform and filter restaurant data for display (only for Nearby option)
   const nearbyRestaurants = useMemo(() => {
@@ -92,6 +90,70 @@ const ExploreMenu = ({ selected, setSelected, userLocation }) => {
     });
   }, [restaurant_list, userLocation]);
 
+  // If showing only nearby section
+  if (showOnlyNearby) {
+    if (nearbyRestaurants.length === 0) {
+      return null; // Don't show section if no nearby restaurants
+    }
+
+    return (
+      <div className="explore-menu" style={{ paddingBottom: "20px" }}>
+        <h2
+          style={{
+            fontSize: "28px",
+            marginBottom: "10px",
+            display: "flex",
+            alignItems: "center",
+            gap: "10px",
+          }}
+        >
+          <MdLocationOn size={32} style={{ color: "#ff6b35" }} />
+          Restaurants Near You
+        </h2>
+        <p style={{ color: "#666", marginBottom: "20px" }}>
+          Some restaurants within 5km of your location
+        </p>
+        <div className="explore-menu-list">
+          {nearbyRestaurants.slice(0, 10).map((restaurant) => (
+            <div
+              key={restaurant.id}
+              className="explore-menu-list-item"
+              onClick={() =>
+                (window.location.href = `/restaurant/${restaurant.id}`)
+              }
+              style={{ cursor: "pointer" }}
+            >
+              <img
+                src={restaurant.image}
+                alt={restaurant.name}
+                onError={(e) => {
+                  e.target.src = "/default-restaurant.png";
+                }}
+              />
+              <p>{restaurant.name}</p>
+              <span
+                style={{
+                  fontSize: "12px",
+                  color: "#666",
+                  marginTop: "4px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "4px",
+                }}
+              >
+                <MdLocationOn size={14} />
+                {restaurant.distance.toFixed(1)} km
+              </span>
+            </div>
+          ))}
+        </div>
+        <hr />
+      </div>
+    );
+  }
+
+  // Main "Discover Delicious Food" section
   return (
     <div className="explore-menu" id="explore-menu">
       <h1 style={{ display: "flex", alignItems: "center", gap: "10px" }}>
@@ -99,11 +161,11 @@ const ExploreMenu = ({ selected, setSelected, userLocation }) => {
         Discover Delicious Food
       </h1>
       <p className="explore-menu-text">
-        Explore our curated selection of top-rated dishes, bestsellers, and
-        nearby restaurants. Find your next favorite meal!
+        Explore our curated selection of top-rated dishes and bestsellers. Find
+        your next favorite meal!
       </p>
 
-      {/* Filter Options */}
+      {/* Filter Options - Only Top Rated and Best Selling */}
       <div className="explore-menu-list" style={{ justifyContent: "flex-end" }}>
         {filterOptions.map((option) => {
           const IconComponent = option.Icon;
@@ -111,7 +173,7 @@ const ExploreMenu = ({ selected, setSelected, userLocation }) => {
             <div
               key={option.id}
               className={`explore-menu-list-item ${selected === option.id ? "active" : ""}`}
-              onClick={() => setSelected(option.id)}
+              onClick={() => setSelected && setSelected(option.id)}
               style={{
                 cursor: "pointer",
                 maxWidth: "200px",
@@ -120,7 +182,6 @@ const ExploreMenu = ({ selected, setSelected, userLocation }) => {
               <div
                 style={{
                   display: "inline-flex",
-                  // flexDirection: "row",
                   alignItems: "center",
                   justifyContent: "center",
                   gap: "8px",
@@ -150,61 +211,7 @@ const ExploreMenu = ({ selected, setSelected, userLocation }) => {
         })}
       </div>
 
-      {/* Only show nearby restaurants list if Nearby is selected */}
-      {selected === "Nearby" && nearbyRestaurants.length > 0 && (
-        <>
-          <h2
-            style={{
-              fontSize: "24px",
-              marginTop: "30px",
-              marginBottom: "15px",
-            }}
-          >
-            <MdLocationOn
-              size={28}
-              style={{ verticalAlign: "middle", color: "#ff6b35" }}
-            />{" "}
-            Restaurants Near You
-          </h2>
-          <div className="explore-menu-list">
-            {nearbyRestaurants.map((restaurant) => (
-              <div
-                key={restaurant.id}
-                className="explore-menu-list-item"
-                onClick={() =>
-                  (window.location.href = `/restaurant/${restaurant.id}`)
-                }
-                style={{ cursor: "pointer" }}
-              >
-                <img
-                  src={restaurant.image}
-                  alt={restaurant.name}
-                  onError={(e) => {
-                    e.target.src = "/default-restaurant.png";
-                  }}
-                />
-                <p>{restaurant.name}</p>
-                <span
-                  style={{
-                    fontSize: "12px",
-                    color: "#666",
-                    marginTop: "4px",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: "4px",
-                  }}
-                >
-                  <MdLocationOn size={14} />
-                  {restaurant.distance.toFixed(1)} km
-                </span>
-              </div>
-            ))}
-          </div>
-        </>
-      )}
-
-      <hr />
+      {/* <hr /> */}
     </div>
   );
 };

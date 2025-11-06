@@ -31,23 +31,20 @@ const FoodDisplay = ({
   // Lọc món ăn dựa theo selectedFilter
   let filteredFood = [...food_list];
 
-  // Handle featured filters (Top Rated, Best Selling, Nearby)
+  // Handle featured filters (Top Rated, Best Selling)
   if (filterBy === "featured") {
     if (filterValue === "Top Rated") {
-      // Sort by rating (highest first), limit to top 12
+      // Sort by rating (highest first), limit to top 10
       filteredFood = [...food_list]
         .filter((item) => item.rating && item.rating > 0)
         .sort((a, b) => (b.rating || 0) - (a.rating || 0))
-        .slice(0, 12);
+        .slice(0, 10);
     } else if (filterValue === "Best Selling") {
-      // Sort by sold count (highest first), limit to top 12
+      // Sort by sold count (highest first), limit to top 10
       filteredFood = [...food_list]
         .filter((item) => item.sold && item.sold > 0)
         .sort((a, b) => (b.sold || 0) - (a.sold || 0))
-        .slice(0, 12);
-    } else if (filterValue === "Nearby") {
-      // For nearby, show all foods (restaurants are filtered in ExploreMenu)
-      filteredFood = food_list;
+        .slice(0, 10);
     }
   } else {
     // Original filtering logic

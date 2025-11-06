@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useRestaurantManagement } from "../../hooks/useRestaurantManagement";
+import { authService } from "shared-services";
 import { getImageUrl } from "@utils/imageHelper";
 import "./Partners.css";
 import {
@@ -34,11 +35,25 @@ const Partners = () => {
         "Approve this restaurant? It will be able to start operating."
       )
     ) {
+      // Find restaurant to get owner_id
+      const restaurant = restaurants.find((r) => r.id === id);
+
+      // Update restaurant status
       const result = await updateRestaurant(id, {
         status: "active",
         isOpen: true,
       });
+
       if (result.success) {
+        // Also update user status if owner_id exists
+        if (restaurant?.owner_id) {
+          try {
+            await authService.updateUserStatus(restaurant.owner_id, "active");
+          } catch (err) {
+            console.error("Error updating user status:", err);
+          }
+        }
+
         alert(
           "Restaurant approved successfully! They can now login and start accepting orders."
         );
@@ -55,11 +70,25 @@ const Partners = () => {
         "Block this restaurant? They won't be able to login or receive orders."
       )
     ) {
+      // Find restaurant to get owner_id
+      const restaurant = restaurants.find((r) => r.id === id);
+
+      // Update restaurant status
       const result = await updateRestaurant(id, {
         status: "blocked",
         isOpen: false,
       });
+
       if (result.success) {
+        // Also update user status if owner_id exists
+        if (restaurant?.owner_id) {
+          try {
+            await authService.updateUserStatus(restaurant.owner_id, "blocked");
+          } catch (err) {
+            console.error("Error updating user status:", err);
+          }
+        }
+
         alert("Restaurant blocked successfully!");
         refresh();
       } else {
@@ -74,11 +103,25 @@ const Partners = () => {
         "Unblock this restaurant? They will be able to login and receive orders again."
       )
     ) {
+      // Find restaurant to get owner_id
+      const restaurant = restaurants.find((r) => r.id === id);
+
+      // Update restaurant status
       const result = await updateRestaurant(id, {
         status: "active",
         isOpen: true,
       });
+
       if (result.success) {
+        // Also update user status if owner_id exists
+        if (restaurant?.owner_id) {
+          try {
+            await authService.updateUserStatus(restaurant.owner_id, "active");
+          } catch (err) {
+            console.error("Error updating user status:", err);
+          }
+        }
+
         alert("Restaurant unblocked successfully!");
         refresh();
       } else {

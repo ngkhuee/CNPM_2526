@@ -12,46 +12,67 @@ const StoreContextProvider = (props) => {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // Fetch data on mount
+  // Fetch data on mount - CHỈ GỌI fetchFoods (đã bao gồm restaurants)
   useEffect(() => {
     fetchFoods();
-    fetchRestaurants();
   }, []);
 
-  // Fetch foods from API
+  // Fetch foods from API - ĐỒNG THỜI fetch restaurants và categories
   const fetchFoods = async () => {
     try {
       setLoading(true);
-      const foods = await foodService.getAll();
-      const restaurants = await restaurantService.getAll();
 
-      // Fetch all categories from backend using categoryService
-      const allCategories = await categoryService.getAll();
+      // Fetch all data PARALLEL để tăng performance
+      const [foods, allRestaurants, allCategories] = await Promise.all([
+        foodService.getAll(),
+        restaurantService.getAll(),
+        categoryService.getAll(),
+      ]);
+
+      // Filter only ACTIVE restaurants (approved by admin)
+      const activeRestaurants = allRestaurants.filter(
+        (r) => r.status === "active"
+      );
+
+      console.log(
+        `🏪 Restaurants: ${activeRestaurants.length} active / ${allRestaurants.length} total`
+      );
+
       setCategories(allCategories);
+      setRestaurantList(activeRestaurants);
 
       // Enrich food data with restaurant name and category name
-      const enrichedFoods = foods.map((food, index) => {
-        const restaurant = restaurants.find((r) => r.id === food.restaurantId);
-        const category = allCategories.find((c) => c.id === food.categoryId);
+      // ONLY include foods from ACTIVE restaurants
+      const enrichedFoods = foods
+        .filter((food) => {
+          const restaurant = activeRestaurants.find(
+            (r) => r.id === food.restaurantId
+          );
+          return restaurant !== undefined; // Only include if restaurant is active
+        })
+        .map((food, index) => {
+          const restaurant = activeRestaurants.find(
+            (r) => r.id === food.restaurantId
+          );
+          const category = allCategories.find((c) => c.id === food.categoryId);
 
-        // Generate pseudo-random rating and sold count based on food id
-        // This ensures consistent values for each food item
-        const seed = parseInt(food.id) || index;
-        const rating = 3.5 + (seed % 15) / 10; // Rating between 3.5 and 5.0
-        const sold = 50 + ((seed * 17) % 500); // Sold between 50 and 550
+          // Generate pseudo-random rating and sold count based on food id
+          // This ensures consistent values for each food item
+          const seed = parseInt(food.id) || index;
+          const rating = 3.5 + (seed % 15) / 10; // Rating between 3.5 and 5.0
+          const sold = 50 + ((seed * 17) % 500); // Sold between 50 and 550
 
-        return {
-          ...food,
-          restaurant: restaurant?.name || "Unknown Restaurant",
-          category: category?.name || "Uncategorized",
-          categoryId: food.categoryId, // Keep original categoryId
-          rating: parseFloat(rating.toFixed(1)),
-          sold: sold,
-        };
-      });
+          return {
+            ...food,
+            restaurant: restaurant?.name || "Unknown Restaurant",
+            category: category?.name || "Uncategorized",
+            categoryId: food.categoryId, // Keep original categoryId
+            rating: parseFloat(rating.toFixed(1)),
+            sold: sold,
+          };
+        });
 
       setFoodList(enrichedFoods);
-      setRestaurantList(restaurants);
     } catch (error) {
       console.error("Error fetching foods:", error);
     } finally {
@@ -59,11 +80,15 @@ const StoreContextProvider = (props) => {
     }
   };
 
-  // Fetch restaurants from API
+  // Fetch restaurants from API - RIÊNG BIỆT nếu cần refresh
   const fetchRestaurants = async () => {
     try {
-      const restaurants = await restaurantService.getAll();
-      setRestaurantList(restaurants);
+      const allRestaurants = await restaurantService.getAll();
+      // Filter only ACTIVE restaurants
+      const activeRestaurants = allRestaurants.filter(
+        (r) => r.status === "active"
+      );
+      setRestaurantList(activeRestaurants);
     } catch (error) {
       console.error("Error fetching restaurants:", error);
     }

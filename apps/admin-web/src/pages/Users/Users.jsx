@@ -5,7 +5,7 @@ import "./Users.css";
 const Users = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState("all"); // all, customer, restaurant
+  const [filter, setFilter] = useState("all"); // all, active, blocked
 
   useEffect(() => {
     fetchUsers();
@@ -15,13 +15,11 @@ const Users = () => {
     try {
       setLoading(true);
       const response = await authService.getAllUsers();
-      // Map db.json fields to component expected fields and filter out admins
+      // Map db.json fields and ONLY show customer accounts
       const mappedUsers = (response || [])
         .map((user) => {
           // Get role from roles array
           let role = Array.isArray(user.roles) ? user.roles[0] : user.role;
-          // Map restaurant_owner to restaurant for display
-          if (role === "restaurant_owner") role = "restaurant";
 
           return {
             ...user,
@@ -30,9 +28,9 @@ const Users = () => {
             createdAt: user.created_at || user.createdAt,
           };
         })
-        .filter((user) => user.role !== "admin"); // Don't show admin users
+        .filter((user) => user.role === "customer"); // Only show customer users
 
-      console.log("Fetched users:", mappedUsers); // Debug log
+      console.log("Fetched customer users:", mappedUsers); // Debug log
       setUsers(mappedUsers);
     } catch (error) {
       console.error("Error fetching users:", error);
@@ -68,7 +66,9 @@ const Users = () => {
 
   const filteredUsers = users.filter((user) => {
     if (filter === "all") return true;
-    return user.role === filter;
+    if (filter === "active") return user.status === "active" || !user.status;
+    if (filter === "blocked") return user.status === "blocked";
+    return true;
   });
 
   const getRoleBadgeClass = (role) => {
@@ -91,7 +91,7 @@ const Users = () => {
   return (
     <div className="users-page">
       <div className="users-header">
-        <h2>User Management</h2>
+        <h2>Customer Management</h2>
         <div className="users-filter">
           <button
             className={filter === "all" ? "active" : ""}
@@ -100,17 +100,17 @@ const Users = () => {
             All ({users.length})
           </button>
           <button
-            className={filter === "customer" ? "active" : ""}
-            onClick={() => setFilter("customer")}
+            className={filter === "active" ? "active" : ""}
+            onClick={() => setFilter("active")}
           >
-            Customers ({users.filter((u) => u.role === "customer").length})
+            Active (
+            {users.filter((u) => u.status === "active" || !u.status).length})
           </button>
           <button
-            className={filter === "restaurant" ? "active" : ""}
-            onClick={() => setFilter("restaurant")}
+            className={filter === "blocked" ? "active" : ""}
+            onClick={() => setFilter("blocked")}
           >
-            Restaurant Owners (
-            {users.filter((u) => u.role === "restaurant").length})
+            Blocked ({users.filter((u) => u.status === "blocked").length})
           </button>
         </div>
       </div>
@@ -132,29 +132,7 @@ const Users = () => {
           {filteredUsers.map((user) => (
             <tr key={user.id}>
               <td>{user.id}</td>
-              <td>
-                <div
-                  style={{ display: "flex", alignItems: "center", gap: "10px" }}
-                >
-                  {user.avatar && (
-                    <img
-                      src={`http://localhost:4000${user.avatar.replace(".png", ".svg")}`}
-                      alt={user.name}
-                      className="user-avatar"
-                      onError={(e) => {
-                        // Fallback to default avatar SVG based on role
-                        const roleAvatars = {
-                          admin: "/images/avatars/admin.svg",
-                          customer: "/images/avatars/user.svg",
-                          restaurant: "/images/avatars/restaurant.svg",
-                        };
-                        e.target.src = `http://localhost:4000${roleAvatars[user.role] || roleAvatars.customer}`;
-                      }}
-                    />
-                  )}
-                  <span>{user.name}</span>
-                </div>
-              </td>
+              <td>{user.name}</td>
               <td>{user.email}</td>
               <td>{user.phone || "N/A"}</td>
               <td>

@@ -19,7 +19,7 @@ export const useRestaurantStats = () => {
 
     // Filter orders for current restaurant
     const restaurantOrders = orders.filter(
-      (order) => order.restaurantId === currentUser.restaurantId
+      (order) => order.restaurant_id === currentUser.restaurantId
     );
 
     const totalOrders = restaurantOrders.length;
@@ -30,10 +30,13 @@ export const useRestaurantStats = () => {
       ["pending", "preparing"].includes(o.status)
     ).length;
 
-    // Calculate revenue from completed orders
+    // Calculate revenue from completed orders (use snake_case from db.json)
     const revenue = restaurantOrders
       .filter((o) => o.status === "delivered")
-      .reduce((sum, order) => sum + (order.totalAmount || 0), 0);
+      .reduce(
+        (sum, order) => sum + (order.total_amount || order.totalAmount || 0),
+        0
+      );
 
     // Generate chart data (last 7 days)
     const last7Days = generateLast7DaysData(restaurantOrders);
@@ -61,13 +64,19 @@ const generateLast7DaysData = (orders) => {
     const dateStr = date.toISOString().split("T")[0];
 
     const dayOrders = orders.filter((order) => {
-      const orderDate = new Date(order.createdAt).toISOString().split("T")[0];
+      // Handle both created_at and createdAt
+      const orderDateStr = order.created_at || order.createdAt;
+      if (!orderDateStr) return false;
+      const orderDate = new Date(orderDateStr).toISOString().split("T")[0];
       return orderDate === dateStr;
     });
 
     const dayRevenue = dayOrders
       .filter((o) => o.status === "delivered")
-      .reduce((sum, order) => sum + (order.totalAmount || 0), 0);
+      .reduce(
+        (sum, order) => sum + (order.total_amount || order.totalAmount || 0),
+        0
+      );
 
     last7Days.push({
       date: dateStr,

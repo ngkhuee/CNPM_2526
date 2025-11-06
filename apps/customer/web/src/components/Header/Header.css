@@ -1,26 +1,32 @@
 .header{
     height: 34vw;
-    margin: 30px auto;
-    background: url('/header_img.png') no-repeat;
-    background-size:contain;
+    margin: 0 auto 30px auto;
+    background: url('/header_img.png') no-repeat center center;
+    background-size: cover; /* cho đẹp hơn contain */
     position: relative;
+    border-radius: 20px; /* bo góc ảnh nền */
+    overflow: hidden; /* ẩn phần góc thừa */
+    display: flex;
+    align-items: center; /* căn giữa theo chiều dọc */
+    justify-content: center; /* căn giữa theo chiều ngang */
 }
 .header-contents{
     position: absolute;
     display: flex;
     flex-direction: column;
-    align-items: start;
+    align-items: center;
+    text-align: center; /* căn giữa chữ */
     gap: 1.5vw;
-    max-width: 50%;
-    bottom: 10%;
-    left: 6vw;
+    margin: 0 2vw;
     animation: fadeIn 3s;
 }
+/* Tiêu đề */
 .header-contents h2{
     font-weight:500;
     color: white;
     font-size: max(4.5vw,22px);
 }
+/* Đoạn mô tả */
 .header-contents p{
     color: white;
     font-size: 1vw;
@@ -35,17 +41,20 @@
     border-radius: 50px;
     cursor: pointer;
 }
+.header-contents button:hover {
+  background: #f0f0f0;
+}
 @media (max-width:1050px) {
     .header{
         height: 38vw;
     }
     .header-contents{
-        max-width: 45%;
+        max-width: 80%;
     }
 }
 @media(max-width:750px){
     .header-contents{
-        max-width: 55%;
+        max-width: 90;
     }
     .header-contents p{
        display: none;

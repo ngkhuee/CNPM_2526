@@ -60,8 +60,14 @@ export const orderService = {
         apiClient.get("/addresses"),
       ]);
 
+      console.log(
+        "🔍 OrderService.getAll() - Raw orders from API:",
+        orders.length
+      );
+      console.log("Sample raw order:", orders[0]);
+
       // Map user and restaurant data to orders and convert to frontend format
-      return orders.map((order) => {
+      const mappedOrders = orders.map((order) => {
         const user = users.find((u) => u.id === order.user_id) || null;
         const restaurant =
           restaurants.find((r) => r.id === order.restaurant_id) || null;
@@ -86,6 +92,14 @@ export const orderService = {
 
         return enrichedOrder;
       });
+
+      console.log(
+        "✅ OrderService.getAll() - Mapped orders:",
+        mappedOrders.length
+      );
+      console.log("Sample mapped order:", mappedOrders[0]);
+
+      return mappedOrders;
     } catch (error) {
       throw error;
     }

@@ -248,6 +248,79 @@ server.get("/menus/:id", (req, res) => {
   });
 });
 
+// Restaurant Registration - Public endpoint (không cần auth)
+server.post("/restaurants/register", (req, res) => {
+  const db = router.db;
+  const restaurantData = req.body;
+
+  // Validate required fields
+  if (
+    !restaurantData.name ||
+    !restaurantData.email ||
+    !restaurantData.owner_id
+  ) {
+    return res.status(400).json({
+      success: false,
+      message: "Missing required fields",
+    });
+  }
+
+  // Check if email already exists
+  const existingRestaurant = db
+    .get("restaurants")
+    .find({ email: restaurantData.email })
+    .value();
+
+  if (existingRestaurant) {
+    return res.status(400).json({
+      success: false,
+      message: "Email already registered",
+    });
+  }
+
+  // Add restaurant to database
+  db.get("restaurants").push(restaurantData).write();
+
+  res.status(201).json({
+    success: true,
+    restaurant: restaurantData,
+    message: "Restaurant registered successfully",
+  });
+});
+
+// User Registration for Restaurant Owner - Public endpoint
+server.post("/users/register-owner", (req, res) => {
+  const db = router.db;
+  const userData = req.body;
+
+  // Validate required fields
+  if (!userData.email || !userData.password || !userData.restaurant_id) {
+    return res.status(400).json({
+      success: false,
+      message: "Missing required fields",
+    });
+  }
+
+  // Check if email already exists
+  const existingUser = db.get("users").find({ email: userData.email }).value();
+
+  if (existingUser) {
+    return res.status(400).json({
+      success: false,
+      message: "Email already registered",
+    });
+  }
+
+  // Add user to database
+  db.get("users").push(userData).write();
+
+  res.status(201).json({
+    success: true,
+    user: { ...userData, password: undefined }, // Don't return password
+    message: "User registered successfully",
+  });
+});
+
 // Apply auth middleware (after custom routes)
 server.use(validateToken);
 

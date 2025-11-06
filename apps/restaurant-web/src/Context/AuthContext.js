@@ -13,8 +13,8 @@ export const AuthProvider = ({ children }) => {
     const loadUser = () => {
       const user = authService.getCurrentUser();
       if (user && user.role === "restaurant" && user.restaurantId) {
-        // Validate restaurantId format
-        if (/^r\d+$/.test(user.restaurantId)) {
+        // Validate restaurantId format (r1, r2, r_123456789, etc.)
+        if (/^r[_\d]+$/.test(user.restaurantId)) {
           setCurrentUser(user);
         } else {
           console.warn("Invalid restaurantId format, clearing...");

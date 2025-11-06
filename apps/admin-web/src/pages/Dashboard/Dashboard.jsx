@@ -108,6 +108,168 @@ const Dashboard = () => {
           )}
         </div>
       </div>
+
+      {/* Revenue by Restaurant Table */}
+      <div className="restaurant-revenue-section" style={{ marginTop: "60px" }}>
+        <h3 style={{ marginBottom: "30px" }}>Revenue by Restaurant (Top Performers)</h3>
+        {stats.revenueByRestaurant && stats.revenueByRestaurant.length > 0 ? (
+          <table
+            className="revenue-table"
+            style={{
+              width: "100%",
+              borderCollapse: "collapse",
+              backgroundColor: "white",
+              boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
+              borderRadius: "8px",
+              overflow: "hidden",
+            }}
+          >
+            <thead>
+              <tr
+                style={{
+                  backgroundColor: "#f8f9fa",
+                  borderBottom: "2px solid #dee2e6",
+                }}
+              >
+                <th
+                  style={{
+                    padding: "12px",
+                    textAlign: "left",
+                    fontWeight: "600",
+                  }}
+                >
+                  Rank
+                </th>
+                <th
+                  style={{
+                    padding: "12px",
+                    textAlign: "left",
+                    fontWeight: "600",
+                  }}
+                >
+                  Restaurant
+                </th>
+                <th
+                  style={{
+                    padding: "12px",
+                    textAlign: "right",
+                    fontWeight: "600",
+                  }}
+                >
+                  Orders
+                </th>
+                <th
+                  style={{
+                    padding: "12px",
+                    textAlign: "right",
+                    fontWeight: "600",
+                  }}
+                >
+                  Revenue
+                </th>
+                <th
+                  style={{
+                    padding: "12px",
+                    textAlign: "right",
+                    fontWeight: "600",
+                  }}
+                >
+                  Avg Order
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {stats.revenueByRestaurant.map((restaurant, index) => (
+                <tr
+                  key={restaurant.id}
+                  style={{
+                    borderBottom: "1px solid #e9ecef",
+                    backgroundColor: index < 3 ? "#fff8e1" : "white",
+                  }}
+                >
+                  <td style={{ padding: "12px" }}>
+                    <span
+                      style={{
+                        fontWeight: "bold",
+                        color:
+                          index === 0
+                            ? "#ffd700"
+                            : index === 1
+                              ? "#c0c0c0"
+                              : index === 2
+                                ? "#cd7f32"
+                                : "#666",
+                        fontSize: "18px",
+                      }}
+                    >
+                      #{index + 1}
+                    </span>
+                  </td>
+                  <td style={{ padding: "12px" }}>
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "10px",
+                      }}
+                    >
+                      {restaurant.image && (
+                        <img
+                          src={`http://localhost:4000${restaurant.image}`}
+                          alt={restaurant.name}
+                          style={{
+                            width: "40px",
+                            height: "40px",
+                            borderRadius: "8px",
+                            objectFit: "cover",
+                          }}
+                        />
+                      )}
+                      <span style={{ fontWeight: "500" }}>
+                        {restaurant.name}
+                      </span>
+                    </div>
+                  </td>
+                  <td
+                    style={{
+                      padding: "12px",
+                      textAlign: "right",
+                      color: "#666",
+                    }}
+                  >
+                    {restaurant.orderCount}
+                  </td>
+                  <td
+                    style={{
+                      padding: "12px",
+                      textAlign: "right",
+                      fontWeight: "600",
+                      color: "#10b981",
+                    }}
+                  >
+                    {formatCurrency(restaurant.revenue)}
+                  </td>
+                  <td
+                    style={{
+                      padding: "12px",
+                      textAlign: "right",
+                      color: "#666",
+                    }}
+                  >
+                    {restaurant.orderCount > 0
+                      ? formatCurrency(
+                          restaurant.revenue / restaurant.orderCount
+                        )
+                      : formatCurrency(0)}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ) : (
+          <p>No revenue data available</p>
+        )}
+      </div>
     </div>
   );
 };

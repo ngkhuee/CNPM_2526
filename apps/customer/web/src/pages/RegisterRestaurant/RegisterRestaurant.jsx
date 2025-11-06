@@ -37,6 +37,10 @@ const RegisterRestaurant = () => {
     e.preventDefault();
     setError("");
 
+    // Get API base URL (dùng chung cho toàn bộ function)
+    const API_BASE_URL =
+      import.meta.env.VITE_API_BASE_URL || "http://localhost:4000";
+
     // Validation
     if (
       !formData.restaurantName ||
@@ -77,13 +81,13 @@ const RegisterRestaurant = () => {
     try {
       setLoading(true);
 
-      // Check if email already exists (for both users and restaurants)
-      const usersResponse = await fetch("http://localhost:3000/users");
-      const users = await usersResponse.json();
+      // Check if email already exists using fetch (không cần auth)
+      const [usersResponse, restaurantsResponse] = await Promise.all([
+        fetch(`${API_BASE_URL}/users`),
+        fetch(`${API_BASE_URL}/restaurants`),
+      ]);
 
-      const restaurantsResponse = await fetch(
-        "http://localhost:3000/restaurants"
-      );
+      const users = await usersResponse.json();
       const restaurants = await restaurantsResponse.json();
 
       // Check email in users
@@ -96,9 +100,9 @@ const RegisterRestaurant = () => {
         return;
       }
 
-      // Check email in restaurants (through owner_id)
+      // Check email in restaurants
       const existingRestaurant = restaurants.find(
-        (r) => r.email === formData.email
+        (r) => r.email === formData.email || r.ownerEmail === formData.email
       );
       if (existingRestaurant) {
         setError(
@@ -108,16 +112,19 @@ const RegisterRestaurant = () => {
         return;
       }
 
-      // Create restaurant (status = pending)
+      // Create restaurant and user IDs
       const restaurantId = `r_${Date.now()}`;
       const userId = `u_${Date.now()}`;
 
-      const newRestaurant = {
+      // Prepare restaurant data (backend expects snake_case)
+      const restaurantData = {
         id: restaurantId,
         name: formData.restaurantName,
         owner_id: userId,
         description: formData.description || "No description provided",
         address: formData.address,
+        latitude: 10.762622, // Default coords - should be updated later
+        longitude: 106.660172,
         phone: formData.phone,
         email: formData.email,
         image: "/images/restaurants/default.png",
@@ -142,32 +149,47 @@ const RegisterRestaurant = () => {
         updated_at: new Date().toISOString(),
       };
 
-      const newUser = {
+      // Prepare user data (backend expects snake_case)
+      const userData = {
         id: userId,
         email: formData.email,
-        password: formData.password, // In production, this should be hashed
+        password: formData.password,
         full_name: formData.ownerName,
         phone: formData.phone,
         avatar: "/images/avatars/restaurant_owner.png",
         roles: ["restaurant_owner"],
         restaurant_id: restaurantId,
-        status: "pending", // Same as restaurant status
+        status: "pending",
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       };
 
-      // Create both restaurant and user
-      await fetch("http://localhost:3000/restaurants", {
+      // Create restaurant using PUBLIC endpoint (không cần auth)
+      const restaurantResponse = await fetch(
+        `${API_BASE_URL}/restaurants/register`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(restaurantData),
+        }
+      );
+
+      if (!restaurantResponse.ok) {
+        const errorData = await restaurantResponse.json();
+        throw new Error(errorData.message || "Failed to create restaurant");
+      }
+
+      // Create user account using PUBLIC endpoint (không cần auth)
+      const response = await fetch(`${API_BASE_URL}/users/register-owner`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newRestaurant),
+        body: JSON.stringify(userData),
       });
 
-      await fetch("http://localhost:3000/users", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newUser),
-      });
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to create user account");
+      }
 
       // Show success message
       alert(
