@@ -96,7 +96,7 @@ const List = () => {
 
     const result = await updateFood(editFood.id, updateData);
     if (result.success) {
-      alert("✅ Food updated successfully!");
+      alert("Food updated successfully!");
       handleCloseEditModal();
     } else {
       alert(` Failed to update: ${result.message}`);

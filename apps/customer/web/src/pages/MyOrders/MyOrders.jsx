@@ -396,6 +396,34 @@ const MyOrders = () => {
               )}
             </p>
 
+            {/* Show rejection reason if order was rejected */}
+            {order.status === "rejected" && order.rejection_reason && (
+              <div
+                style={{
+                  background: "#f8d7da",
+                  border: "1px solid #f5c6cb",
+                  borderRadius: "6px",
+                  padding: "12px",
+                  marginTop: "10px",
+                  marginBottom: "10px",
+                }}
+              >
+                <p style={{ margin: 0, color: "#721c24", fontSize: "14px" }}>
+                  <b>❌ Rejection Reason:</b> {order.rejection_reason}
+                </p>
+                <p
+                  style={{
+                    margin: "8px 0 0 0",
+                    color: "#721c24",
+                    fontSize: "13px",
+                    fontStyle: "italic",
+                  }}
+                >
+                  Your payment will be refunded within 3-5 business days.
+                </p>
+              </div>
+            )}
+
             {/* Customer info */}
             {order.customer && (
               <>

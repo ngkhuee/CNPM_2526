@@ -19,6 +19,7 @@ const Orders = () => {
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [rejectingOrder, setRejectingOrder] = useState(null);
   const [rejectReason, setRejectReason] = useState("");
+  const [customReason, setCustomReason] = useState("");
 
   // Check for new paid orders on mount and when orders change
   useEffect(() => {
@@ -68,10 +69,10 @@ const Orders = () => {
           drone_id: randomDrone.id,
         });
 
-        console.log("✅ Drone assigned successfully!");
+        console.log("Drone assigned successfully!");
         alert(`Order confirmed and assigned to ${randomDrone.identifier}!`);
       } else {
-        console.warn("⚠️ No available drones found");
+        console.warn("No available drones found");
         alert("Order confirmed! Warning: No drones available at the moment.");
       }
     } catch (error) {
@@ -91,7 +92,7 @@ const Orders = () => {
       alert("Order is ready for delivery! Drone will start delivery soon...");
 
       // Auto-trigger drone delivery simulation
-      console.log(`🚁 Triggering drone delivery for order ${orderId}`);
+      console.log(`Triggering drone delivery for order ${orderId}`);
       droneSimulation.autoTriggerDelivery(orderId).catch((error) => {
         console.error("Failed to start drone delivery:", error);
       });
@@ -104,26 +105,56 @@ const Orders = () => {
   const openRejectModal = (order) => {
     setRejectingOrder(order);
     setRejectReason("");
+    setCustomReason("");
     setShowRejectModal(true);
   };
 
   const closeRejectModal = () => {
     setRejectingOrder(null);
     setRejectReason("");
+    setCustomReason("");
     setShowRejectModal(false);
   };
 
   const handleRejectOrder = async () => {
-    if (!rejectReason.trim()) {
+    // Validate: either a predefined reason or custom reason must be provided
+    const finalReason = rejectReason === "other" ? customReason : rejectReason;
+
+    if (!finalReason || !finalReason.trim()) {
       alert("Please provide a reason for rejection");
       return;
     }
 
     try {
+      // Check if order has assigned drone and release it
+      if (rejectingOrder.drone_id) {
+        console.log("Releasing drone from rejected order...");
+        try {
+          await droneService.updateDrone(rejectingOrder.drone_id, {
+            status: "available",
+            assigned_order_id: null,
+          });
+          console.log("Drone released successfully");
+        } catch (droneError) {
+          console.error("Failed to release drone:", droneError);
+          // Continue with order rejection even if drone release fails
+        }
+      }
+
+      // Update order status to rejected with reason
       await updateOrderStatus(rejectingOrder.id, "rejected", {
-        rejection_reason: rejectReason,
+        rejection_reason: finalReason,
+        rejected_at: new Date().toISOString(),
+        // TODO: Integrate with payment gateway (Momo/ZaloPay/VNPay) for automatic refund
+        // For now, customer service will handle refund manually based on rejection_reason
       });
-      alert("Order rejected successfully");
+
+      console.log(
+        `Order ${rejectingOrder.id} rejected. Reason: ${finalReason}`
+      );
+      alert(
+        "Order rejected successfully. Customer will be notified and refunded."
+      );
       closeRejectModal();
     } catch (error) {
       console.error("Error rejecting order:", error);
@@ -516,8 +547,9 @@ const Orders = () => {
               {rejectReason === "other" && (
                 <div style={{ marginBottom: "20px" }}>
                   <textarea
+                    value={customReason}
                     placeholder="Please specify the reason..."
-                    onChange={(e) => setRejectReason(e.target.value)}
+                    onChange={(e) => setCustomReason(e.target.value)}
                     style={{
                       width: "100%",
                       padding: "10px",

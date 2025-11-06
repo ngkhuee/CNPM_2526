@@ -117,6 +117,16 @@
       "status": "active",
       "created_at": "2022-01-01T00:00:00.000Z",
       "updated_at": "2022-01-01T00:00:00.000Z"
+    },
+    {
+      "id": "u1762416794526",
+      "email": "test@test.com",
+      "password": "123",
+      "name": "abc test 2",
+      "phone": "",
+      "role": "customer",
+      "status": "active",
+      "createdAt": "2025-11-06T08:13:14.526Z"
     }
   ],
   "addresses": [
@@ -167,6 +177,22 @@
       "is_default": false,
       "created_at": "2025-11-06T04:29:19.811Z",
       "id": "bNTF3WQ"
+    },
+    {
+      "user_id": "u1762416794526",
+      "full_address": "123abc",
+      "address_line": "123abc",
+      "street": "",
+      "ward": "",
+      "district": "",
+      "city": "",
+      "phone": "0902222222",
+      "latitude": 10.7867769,
+      "longitude": 106.7001492,
+      "is_default": true,
+      "created_at": "2025-11-06T08:15:15.916Z",
+      "updated_at": "2025-11-06T08:15:15.916Z",
+      "id": "XoAQJGu"
     }
   ],
   "restaurants": [
@@ -438,6 +464,24 @@
       "created_at": "2025-11-06T07:56:59.627Z",
       "updated_at": "2025-11-06T07:56:59.627Z",
       "id": "jgAHLUt"
+    },
+    {
+      "name": "Chiken",
+      "description": "",
+      "status": "active",
+      "restaurant_id": "r4",
+      "created_at": "2025-11-06T08:18:13.554Z",
+      "updated_at": "2025-11-06T08:18:13.555Z",
+      "id": "rNIb67z"
+    },
+    {
+      "name": "Bread",
+      "description": "",
+      "status": "active",
+      "restaurant_id": "r4",
+      "created_at": "2025-11-06T08:18:25.248Z",
+      "updated_at": "2025-11-06T08:18:25.248Z",
+      "id": "kxtnIHw"
     }
   ],
   "menus": [
@@ -600,7 +644,7 @@
     {
       "id": 13,
       "restaurant_id": "r4",
-      "category_id": null,
+      "category_id": "rNIb67z",
       "name": "Texas Fried Chicken",
       "description": "Signature crispy fried chicken",
       "price": 95000,
@@ -608,12 +652,12 @@
       "is_available": true,
       "preparation_time_minutes": 15,
       "created_at": "2024-01-01T00:00:00.000Z",
-      "updated_at": "2024-01-01T00:00:00.000Z"
+      "updated_at": "2025-11-06T08:18:32.695Z"
     },
     {
       "id": 14,
       "restaurant_id": "r4",
-      "category_id": null,
+      "category_id": "rNIb67z",
       "name": "Chicken Wrap",
       "description": "Grilled chicken wrap with fresh vegetables",
       "price": 79000,
@@ -621,12 +665,12 @@
       "is_available": true,
       "preparation_time_minutes": 10,
       "created_at": "2024-01-01T00:00:00.000Z",
-      "updated_at": "2024-01-01T00:00:00.000Z"
+      "updated_at": "2025-11-06T08:18:42.436Z"
     },
     {
       "id": 15,
       "restaurant_id": "r4",
-      "category_id": null,
+      "category_id": "kxtnIHw",
       "name": "Family Pack",
       "description": "8 pieces of chicken with 4 sides",
       "price": 299000,
@@ -634,7 +678,7 @@
       "is_available": true,
       "preparation_time_minutes": 20,
       "created_at": "2024-01-01T00:00:00.000Z",
-      "updated_at": "2024-01-01T00:00:00.000Z"
+      "updated_at": "2025-11-06T08:19:07.769Z"
     },
     {
       "id": 16,
@@ -786,6 +830,48 @@
       "updated_at": "2025-11-06T06:35:31.539Z",
       "id": "Lc_LFY4",
       "actual_delivery_time": "2025-11-06T06:35:31.539Z"
+    },
+    {
+      "user_id": "u1762416794526",
+      "restaurant_id": "r4",
+      "address_id": "XoAQJGu",
+      "items": [
+        {
+          "menu_id": 13,
+          "name": "Texas Fried Chicken",
+          "quantity": 1,
+          "unit_price": 95000,
+          "subtotal": 95000
+        },
+        {
+          "menu_id": 15,
+          "name": "Family Pack",
+          "quantity": 1,
+          "unit_price": 299000,
+          "subtotal": 299000
+        }
+      ],
+      "subtotal": 394000,
+      "delivery_fee": 0,
+      "discount_amount": 0,
+      "total_amount": 394000,
+      "payment_method": "online",
+      "status": "rejected",
+      "payment_status": "pending",
+      "special_instructions": "",
+      "customer": {
+        "name": "abc test 2",
+        "phone": "0902222222",
+        "address": "123abc"
+      },
+      "dropoff_gps": {
+        "lat": 10.7867769,
+        "lng": 106.7001492
+      },
+      "order_number": "ORD-1762416916052",
+      "created_at": "2025-11-06T08:15:16.052Z",
+      "updated_at": "2025-11-06T08:25:57.158Z",
+      "id": "rty8-9M"
     }
   ],
   "order_tracking": [
@@ -1104,6 +1190,12 @@
       ],
       "updated_at": "2025-11-06T07:59:05.001Z",
       "id": 1
+    },
+    {
+      "user_id": "u1762416794526",
+      "items": [],
+      "updated_at": "2025-11-06T08:15:16.158Z",
+      "id": 2
     }
   ]
 }

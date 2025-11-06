@@ -10,7 +10,7 @@ export const ENDPOINTS = {
     BASE: "/restaurants",
     BY_ID: (id) => `/restaurants/${id}`,
     MENU: (id) => `/restaurants/${id}/menu`,
-    ORDERS: (id) => `/orders?restaurantId=${id}`,
+    ORDERS: (id) => `/orders?restaurant_id=${id}`,
   },
 
   MENUS: {
@@ -38,8 +38,8 @@ export const ENDPOINTS = {
   ORDERS: {
     BASE: "/orders",
     BY_ID: (id) => `/orders/${id}`,
-    BY_USER: (userId) => `/orders?customerId=${userId}`,
-    BY_RESTAURANT: (restaurantId) => `/orders?restaurantId=${restaurantId}`,
+    BY_USER: (userId) => `/orders?user_id=${userId}`,
+    BY_RESTAURANT: (restaurantId) => `/orders?restaurant_id=${restaurantId}`,
   },
 
   CART: {
