@@ -34,7 +34,15 @@ export default defineConfig({
         "../../packages/shared-styles/src"
       ),
       "@api": path.resolve(__dirname, "../../packages/shared-services/src"),
+      "@api/services": path.resolve(
+        __dirname,
+        "../../packages/shared-services/src/services"
+      ),
       "@utils": path.resolve(__dirname, "../../packages/shared-utils/src"),
+      "@utils/imageHelper": path.resolve(
+        __dirname,
+        "../../packages/shared-utils/src/imageHelper.js"
+      ),
     },
   },
   server: {
