@@ -36,6 +36,15 @@ hr {
   min-height: 100vh;
 }
 
+/* Admin content khi không có sidebar (trang login) */
+.admin-content.no-sidebar {
+  margin-left: 0 !important;
+  width: 100% !important;
+  padding: 0 !important;
+  background-color: transparent !important;
+  overflow: visible !important;
+}
+
 .flex-col {
   display: flex;
   flex-direction: column;

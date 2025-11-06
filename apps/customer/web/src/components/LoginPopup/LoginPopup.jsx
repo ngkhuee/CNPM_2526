@@ -20,7 +20,8 @@ const LoginPopup = ({ setShowLogin }) => {
   const onSubmit = async (e) => {
     e.preventDefault();
 
-    if (!agree) {
+    // Chỉ check agree khi Sign Up
+    if (currState === "Sign Up" && !agree) {
       alert("Please agree to the terms");
       return;
     }
@@ -49,6 +50,45 @@ const LoginPopup = ({ setShowLogin }) => {
         if (response.success) {
           // AuthContext handles token and user state
           const currentUser = JSON.parse(localStorage.getItem("user"));
+
+          // ✅ Validate customer status from backend
+          try {
+            const userResponse = await fetch(
+              `http://localhost:3000/users/${currentUser.id}`
+            );
+
+            if (userResponse.ok) {
+              const userData = await userResponse.json();
+
+              // Check if customer account is blocked
+              if (userData.status === "blocked") {
+                alert(
+                  "Your account has been blocked by admin.\n\nPlease contact support for more information."
+                );
+                // Logout and clear data
+                localStorage.removeItem("token");
+                localStorage.removeItem("user");
+                setLoading(false);
+                return;
+              }
+
+              if (userData.status !== "active") {
+                alert("Your account is not active. Please contact support.");
+                // Logout and clear data
+                localStorage.removeItem("token");
+                localStorage.removeItem("user");
+                setLoading(false);
+                return;
+              }
+            }
+          } catch (validationError) {
+            console.error("Status validation error:", validationError);
+            alert("Unable to validate account status. Please try again later.");
+            localStorage.removeItem("token");
+            localStorage.removeItem("user");
+            setLoading(false);
+            return;
+          }
 
           // Close popup first
           setShowLogin(false);
@@ -122,17 +162,24 @@ const LoginPopup = ({ setShowLogin }) => {
           />
         </div>
 
-        <div className="login-popup-condition">
-          <input
-            type="checkbox"
-            checked={agree}
-            onChange={(e) => setAgree(e.target.checked)}
-          />
-          <p>By continuing, I agree to the terms of use & privacy policy.</p>
-        </div>
+        {/* Chỉ hiện checkbox khi Sign Up */}
+        {currState === "Sign Up" && (
+          <div className="login-popup-condition">
+            <input
+              type="checkbox"
+              checked={agree}
+              onChange={(e) => setAgree(e.target.checked)}
+            />
+            <p>By continuing, I agree to the terms of use & privacy policy.</p>
+          </div>
+        )}
 
-        <button type="submit">
-          {currState === "Sign Up" ? "Create Account" : "Login"}
+        <button type="submit" disabled={loading}>
+          {loading
+            ? "Please wait..."
+            : currState === "Sign Up"
+              ? "Create Account"
+              : "Login"}
         </button>
 
         <p>

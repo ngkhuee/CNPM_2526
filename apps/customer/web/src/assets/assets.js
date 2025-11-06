@@ -41,6 +41,3 @@ export const assets = {
   bag_icon,
   parcel_icon,
 };
-
-// ✅ menu_list/categories now fetched from API via restaurantService
-// See ExploreMenu component for usage

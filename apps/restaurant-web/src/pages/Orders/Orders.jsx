@@ -3,7 +3,7 @@ import "./Orders.css";
 import { OrderContext } from "../../Context/OrderContext";
 import { RestaurantContext } from "../../Context/RestaurantContext";
 import { AuthContext } from "../../Context/AuthContext";
-import { MdRefresh, MdVisibility } from "react-icons/md";
+import { MdRefresh, MdVisibility, MdNotifications } from "react-icons/md";
 import { OrderDetailModal } from "shared-ui";
 import { droneSimulation, droneService, orderService } from "shared-services";
 
@@ -254,7 +254,7 @@ const Orders = () => {
               gap: "10px",
             }}
           >
-            <span style={{ fontSize: "24px" }}>🔔</span>
+            <MdNotifications style={{ fontSize: "32px" }} />
             <div>
               <strong>New Order{newOrdersCount > 1 ? "s" : ""}!</strong>
               <p style={{ margin: "5px 0 0 0", fontSize: "14px" }}>

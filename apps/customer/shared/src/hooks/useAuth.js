@@ -8,13 +8,52 @@ export const useAuth = () => {
   const [loading, setLoading] = useState(false);
   const [initialized, setInitialized] = useState(false);
 
-  // Initialize auth state from localStorage
+  // Initialize auth state from localStorage and validate status
   useEffect(() => {
-    const initializeAuth = () => {
+    const initializeAuth = async () => {
       const savedToken = localStorage.getItem("token");
       const savedUser = authService.getCurrentUser();
 
       if (savedToken && savedUser) {
+        // ✅ Validate customer status from backend
+        try {
+          const userResponse = await fetch(
+            `http://localhost:3000/users/${savedUser.id}`
+          );
+
+          if (userResponse.ok) {
+            const userData = await userResponse.json();
+
+            // Check if customer account is blocked or not active
+            if (userData.status === "blocked" || userData.status !== "active") {
+              console.warn(
+                "Customer account is blocked or not active, logging out..."
+              );
+              authService.logout();
+              setToken("");
+              setUser(null);
+              setInitialized(true);
+              return;
+            }
+          } else {
+            console.warn("Cannot validate user status, logging out...");
+            authService.logout();
+            setToken("");
+            setUser(null);
+            setInitialized(true);
+            return;
+          }
+        } catch (error) {
+          console.error("Error validating customer status:", error);
+          // If validation fails, logout for security
+          authService.logout();
+          setToken("");
+          setUser(null);
+          setInitialized(true);
+          return;
+        }
+
+        // All checks passed
         setToken(savedToken);
         setUser(savedUser);
       }

@@ -10,18 +10,22 @@ export const AuthProvider = ({ children }) => {
 
   // Load user from localStorage on mount
   useEffect(() => {
-    const user = authService.getCurrentUser();
-    if (user && user.role === "restaurant" && user.restaurantId) {
-      // Validate restaurantId format
-      if (/^r\d+$/.test(user.restaurantId)) {
-        setCurrentUser(user);
-      } else {
-        console.warn("Invalid user data detected, clearing...");
-        authService.logout();
-        setCurrentUser(null);
+    const loadUser = () => {
+      const user = authService.getCurrentUser();
+      if (user && user.role === "restaurant" && user.restaurantId) {
+        // Validate restaurantId format
+        if (/^r\d+$/.test(user.restaurantId)) {
+          setCurrentUser(user);
+        } else {
+          console.warn("Invalid restaurantId format, clearing...");
+          authService.logout();
+          setCurrentUser(null);
+        }
       }
-    }
-    setLoading(false);
+      setLoading(false);
+    };
+
+    loadUser();
   }, []);
 
   const login = (userData) => {

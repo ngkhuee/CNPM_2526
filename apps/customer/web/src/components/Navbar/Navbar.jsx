@@ -3,6 +3,7 @@ import "./Navbar.css";
 import { assets } from "../../assets/assets";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { AuthContext, CartContext, StoreContext } from "customer-shared";
+import { MdStorefront } from "react-icons/md";
 
 const Navbar = ({ setShowLogin }) => {
   const { user, logout } = useContext(AuthContext);
@@ -35,7 +36,14 @@ const Navbar = ({ setShowLogin }) => {
         >
           Menu
         </NavLink>
-        <a href="#app-download">Mobile App</a>
+        <NavLink
+          to="/register-restaurant"
+          className={({ isActive }) =>
+            isActive ? "active partner-link" : "partner-link"
+          }
+        >
+          <MdStorefront style={{ verticalAlign: "middle" }} /> Become a Partner
+        </NavLink>
         <a href="#footer">Contact Us</a>
       </ul>
 

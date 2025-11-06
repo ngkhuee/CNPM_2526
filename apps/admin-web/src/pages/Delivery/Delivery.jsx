@@ -507,7 +507,7 @@ const Delivery = () => {
             />
           </div>
 
-          {!editingDrone && (
+          {/* {!editingDrone && (
             <div
               className="form-note"
               style={{
@@ -522,7 +522,7 @@ const Delivery = () => {
               warehouse location (Warehouse HCM) with 100% battery and available
               status.
             </div>
-          )}
+          )} */}
 
           <div className="form-actions">
             <button onClick={() => saveDrone()} className="btn-primary">

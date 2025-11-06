@@ -11,6 +11,7 @@ import {
   MdCheckCircle,
   MdError,
   MdRefresh,
+  MdCancel,
 } from "react-icons/md";
 
 const MyOrders = () => {
@@ -66,10 +67,8 @@ const MyOrders = () => {
         prevOrder.status === "pending" &&
         ["preparing", "ready", "in_delivery"].includes(order.status)
       ) {
-        console.log(
-          `🔔 Order #${order.id} confirmed! Redirecting to tracking...`
-        );
-        alert(`Order #${order.id} has been confirmed! 🎉`);
+        console.log(`Order #${order.id} confirmed! Redirecting to tracking...`);
+        alert(`Order #${order.id} has been confirmed!`);
         navigate(`/tracking/${order.id}`);
       }
     });
@@ -175,7 +174,7 @@ const MyOrders = () => {
       // Refresh orders list
       await fetchUserOrders();
     } catch (error) {
-      console.error("❌ Error cancelling order:", error);
+      console.error("Error cancelling order:", error);
       alert("Failed to cancel order. Please try again.");
     }
   };
@@ -409,7 +408,10 @@ const MyOrders = () => {
                 }}
               >
                 <p style={{ margin: 0, color: "#721c24", fontSize: "14px" }}>
-                  <b>❌ Rejection Reason:</b> {order.rejection_reason}
+                  <b>
+                    <MdCancel /> Rejection Reason:
+                  </b>{" "}
+                  {order.rejection_reason}
                 </p>
                 <p
                   style={{

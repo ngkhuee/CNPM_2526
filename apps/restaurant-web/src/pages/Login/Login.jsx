@@ -26,6 +26,7 @@ const Login = () => {
         if (response.user.role !== "restaurant") {
           setError("This account is not a restaurant account!");
           authService.logout();
+          setLoading(false);
           return;
         }
 
@@ -33,10 +34,92 @@ const Login = () => {
         if (!response.user.restaurantId) {
           setError("Restaurant ID not found!");
           authService.logout();
+          setLoading(false);
           return;
         }
 
-        // Lưu user info vào AuthContext
+        // ✅ Validate user status from backend
+        try {
+          const userResponse = await fetch(
+            `http://localhost:3000/users/${response.user.id}`
+          );
+
+          if (userResponse.ok) {
+            const userData = await userResponse.json();
+
+            // Check user account status
+            if (userData.status === "blocked") {
+              setError(
+                "Your account has been blocked by admin.\n\nPlease contact support for more information."
+              );
+              authService.logout();
+              setLoading(false);
+              return;
+            }
+
+            if (userData.status === "pending") {
+              setError(
+                "Your restaurant registration is pending approval.\n\nPlease wait for admin to review and approve your account.\nYou will be notified once approved."
+              );
+              authService.logout();
+              setLoading(false);
+              return;
+            }
+
+            if (userData.status !== "active") {
+              setError("Your account is not active. Please contact support.");
+              authService.logout();
+              setLoading(false);
+              return;
+            }
+          }
+
+          // Check restaurant status
+          const restaurantResponse = await fetch(
+            `http://localhost:3000/restaurants/${response.user.restaurantId}`
+          );
+
+          if (restaurantResponse.ok) {
+            const restaurantData = await restaurantResponse.json();
+
+            if (restaurantData.status === "blocked") {
+              setError(
+                "Your restaurant has been blocked by admin.\n\nPlease contact support for more information."
+              );
+              authService.logout();
+              setLoading(false);
+              return;
+            }
+
+            if (restaurantData.status === "pending") {
+              setError(
+                "Your restaurant registration is pending approval.\n\nPlease wait for admin to review and approve your restaurant.\nYou will be notified once approved."
+              );
+              authService.logout();
+              setLoading(false);
+              return;
+            }
+
+            if (restaurantData.status !== "active") {
+              setError(
+                "Your restaurant is not active. Please contact support."
+              );
+              authService.logout();
+              setLoading(false);
+              return;
+            }
+          }
+        } catch (validationError) {
+          console.error("Status validation error:", validationError);
+          setError(
+            "Unable to validate account status. Please try again later."
+          );
+          authService.logout();
+          setLoading(false);
+          return;
+        }
+
+        // All checks passed - Lưu user info vào AuthContext
         login(response.user);
 
         // Navigate to dashboard

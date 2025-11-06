@@ -45,73 +45,86 @@ const AppContent = () => {
   const { isAuthenticated } = React.useContext(AdminAuthContext);
 
   return (
-    <div className="admin-container">
-      {isAuthenticated && <Sidebar />}
-      <div className="admin-content">
-        <Routes>
-          <Route
-            path="/admin/login"
-            element={isAuthenticated ? <Navigate to="/admin" /> : <Login />}
-          />
+    <>
+      <Routes>
+        {/* Login route - không có admin-container */}
+        <Route
+          path="/admin/login"
+          element={isAuthenticated ? <Navigate to="/admin" /> : <Login />}
+        />
 
-          {/* Protected routes */}
-          <Route
-            path="/admin"
-            element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin/orders"
-            element={
-              <ProtectedRoute>
-                <Orders />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin/partners"
-            element={
-              <ProtectedRoute>
-                <Partners />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin/delivery"
-            element={
-              <ProtectedRoute>
-                <Delivery />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin/users"
-            element={
-              <ProtectedRoute>
-                <Users />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/admin/promotions"
-            element={
-              <ProtectedRoute>
-                <Promotions />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="*"
-            element={
-              <Navigate to={isAuthenticated ? "/admin" : "/admin/login"} />
-            }
-          />
-        </Routes>
-      </div>
-    </div>
+        {/* Protected routes - có admin-container và sidebar */}
+        <Route
+          path="*"
+          element={
+            <div className="admin-container">
+              {isAuthenticated && <Sidebar />}
+              <div className="admin-content">
+                <Routes>
+                  {/* Protected routes */}
+                  <Route
+                    path="/admin"
+                    element={
+                      <ProtectedRoute>
+                        <Dashboard />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/admin/orders"
+                    element={
+                      <ProtectedRoute>
+                        <Orders />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/admin/partners"
+                    element={
+                      <ProtectedRoute>
+                        <Partners />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/admin/delivery"
+                    element={
+                      <ProtectedRoute>
+                        <Delivery />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/admin/users"
+                    element={
+                      <ProtectedRoute>
+                        <Users />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/admin/promotions"
+                    element={
+                      <ProtectedRoute>
+                        <Promotions />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="*"
+                    element={
+                      <Navigate
+                        to={isAuthenticated ? "/admin" : "/admin/login"}
+                      />
+                    }
+                  />
+                </Routes>
+              </div>
+            </div>
+          }
+        />
+      </Routes>
+    </>
   );
 };
 
