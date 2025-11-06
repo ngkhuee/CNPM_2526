@@ -1,0 +1,13 @@
+{
+  "name": "shared-ui",
+  "version": "1.0.0",
+  "main": "src/index.js",
+  "dependencies": {
+    "clsx": "^2.1.0",
+    "recharts": "^2.10.0"
+  },
+  "peerDependencies": {
+    "react": ">=18.2.0",
+    "react-dom": ">=18.2.0"
+  }
+}

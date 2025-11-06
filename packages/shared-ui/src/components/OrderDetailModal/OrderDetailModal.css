@@ -1,0 +1,186 @@
+/* Order Detail Modal - Professional Design */
+.odm-body {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 4px;
+}
+
+.odm-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.odm-half {
+  width: 100%;
+}
+
+.odm-section {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 10px;
+  padding: 18px 20px;
+  transition: box-shadow 0.2s;
+}
+
+.odm-section:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.odm-section h4 {
+  margin: 0 0 14px 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: #1a1a1a;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #ff6b35;
+  display: inline-block;
+}
+
+.odm-section p {
+  margin: 0 0 10px 0;
+  font-size: 14px;
+  color: #495057;
+  line-height: 1.6;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.odm-section p:last-child {
+  margin-bottom: 0;
+}
+
+.odm-section p strong {
+  font-weight: 600;
+  color: #343a40;
+  min-width: 140px;
+}
+
+/* Items List Styling */
+.odm-section ul {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.odm-section li {
+  margin: 0;
+  font-size: 14px;
+  color: #495057;
+  padding: 12px 14px;
+  background: white;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.2s;
+}
+
+.odm-section li:hover {
+  border-color: #ff6b35;
+  transform: translateX(4px);
+}
+
+/* Highlight Important Values */
+.odm-section p .value-highlight {
+  font-weight: 600;
+  color: #ff6b35;
+  font-size: 15px;
+}
+
+/* Status Badge in Modal */
+.odm-status-badge {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: capitalize;
+  background: #e9ecef;
+  color: #495057;
+}
+
+/* Payment Method Badge */
+.odm-payment-badge {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  background: #d4edda;
+  color: #155724;
+}
+
+/* Amount Highlights */
+.odm-amount {
+  font-size: 16px;
+  font-weight: 700;
+  color: #28a745;
+}
+
+.odm-subtotal {
+  color: #6c757d;
+}
+
+.odm-delivery-fee {
+  color: #ff6b35;
+}
+
+.odm-total {
+  font-size: 18px;
+  color: #ff6b35;
+}
+
+/* Scrollbar Styling */
+.odm-body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.odm-body::-webkit-scrollbar-track {
+  background: #f1f3f5;
+  border-radius: 3px;
+}
+
+.odm-body::-webkit-scrollbar-thumb {
+  background: #adb5bd;
+  border-radius: 3px;
+}
+
+.odm-body::-webkit-scrollbar-thumb:hover {
+  background: #868e96;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .odm-row {
+    grid-template-columns: 1fr;
+  }
+
+  .odm-section {
+    padding: 14px 16px;
+  }
+
+  .odm-section h4 {
+    font-size: 14px;
+  }
+
+  .odm-section p,
+  .odm-section li {
+    font-size: 13px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .odm-section p strong {
+    min-width: auto;
+  }
+}
