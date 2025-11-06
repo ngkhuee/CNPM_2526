@@ -39,5 +39,6 @@ export const useOrderTracking = (orderId) => {
     loading,
     error,
     refreshOrder,
+    refetch: fetchOrder, // Alias for compatibility
   };
 };

@@ -106,9 +106,9 @@
 }
 
 .gps-btn {
-  width: 100%;
+  /* width: 100%; */
   padding: 10px;
-  background: #007bff;
+  background: #ff5722;
   color: white;
   border: none;
   border-radius: 5px;

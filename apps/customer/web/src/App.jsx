@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import Home from "./pages/Home/Home";
 import Menu from "./pages/Menu/Menu";
+import RestaurantDetail from "./pages/RestaurantDetail/RestaurantDetail";
 import Footer from "./components/Footer/Footer";
 import Navbar from "./components/Navbar/Navbar";
 import { Route, Routes, useNavigate } from "react-router-dom";
@@ -29,6 +30,7 @@ const App = () => {
           {/* User customer */}
           <Route path="/" element={<Home />} />
           <Route path="/menu" element={<Menu />} />
+          <Route path="/restaurant/:id" element={<RestaurantDetail />} />
           <Route path="/cart" element={<Cart />} />
           <Route path="/order" element={<PlaceOrder />} />
           <Route path="/myorders" element={<MyOrders />} />

@@ -105,14 +105,17 @@ const RestaurantDisplay = ({
           return (
             <RestaurantItem
               key={item._id || item.id}
+              id={item._id || item.id}
               image={item.image}
               name={item.name}
+              rating={item.rating || 0}
+              deliveryTime={item.deliveryTime}
+              isOpen={item.isOpen}
               desc={
                 <span
                   style={{ display: "flex", alignItems: "center", gap: "4px" }}
                 >
-                  <MdRestaurant /> {item.category} • Rating: {item.rating || 0}
-                  ⭐
+                  <MdRestaurant /> {item.category}
                   {distance !== null && (
                     <span
                       style={{

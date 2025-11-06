@@ -1,7 +1,13 @@
 import React, { useContext, useMemo } from "react";
 import "./ExploreMenu.css";
 import { StoreContext } from "customer-shared";
-import { MdRestaurant, MdLocationOn, MdSearchOff } from "react-icons/md";
+import {
+  MdRestaurant,
+  MdLocationOn,
+  MdSearchOff,
+  MdStar,
+  MdLocalFireDepartment,
+} from "react-icons/md";
 import { getImageUrl } from "@utils/imageHelper";
 
 // Calculate distance between two GPS coordinates using Haversine formula
@@ -26,162 +32,158 @@ const calculateDistance = (lat1, lng1, lat2, lng2) => {
 const ExploreMenu = ({ selected, setSelected, userLocation }) => {
   const { restaurant_list, loading } = useContext(StoreContext);
 
-  // Transform and filter restaurant data for display
-  const restaurants = useMemo(() => {
-    let filteredList = restaurant_list;
+  // Define filter options
+  const filterOptions = useMemo(() => {
+    const options = [
+      { id: "Top Rated", label: "Top Rated", Icon: MdStar },
+      {
+        id: "Best Selling",
+        label: "Best Selling",
+        Icon: MdLocalFireDepartment,
+      },
+    ];
 
-    // If user location is available, filter by 5km radius
+    // Only show nearby if user has location
     if (userLocation && userLocation.latitude && userLocation.longitude) {
-      console.log("User location:", userLocation);
-      console.log("Total restaurants:", restaurant_list.length);
-
-      filteredList = restaurant_list
-        .map((r) => {
-          // Calculate distance if restaurant has coordinates
-          // Support both formats: r.location.lat/lng OR r.latitude/longitude
-          const lat = r.location?.lat || r.latitude;
-          const lng = r.location?.lng || r.longitude;
-
-          if (lat && lng) {
-            const distance = calculateDistance(
-              userLocation.latitude,
-              userLocation.longitude,
-              lat,
-              lng
-            );
-            console.log(
-              `${r.name}: ${distance.toFixed(2)} km (lat: ${lat}, lng: ${lng})`
-            );
-            return { ...r, distance };
-          }
-          console.log(`${r.name}: No coordinates available`);
-          return { ...r, distance: null };
-        })
-        .filter((r) => {
-          const isWithin5km = r.distance !== null && r.distance <= 5;
-          if (!isWithin5km && r.distance !== null) {
-            console.log(
-              `${r.name} excluded: ${r.distance.toFixed(2)} km > 5 km`
-            );
-          }
-          return isWithin5km;
-        })
-        .sort((a, b) => a.distance - b.distance); // Sort by distance (nearest first)
-
-      console.log("Restaurants within 5km:", filteredList.length);
+      options.push({
+        id: "Nearby",
+        label: "Nearby Restaurants",
+        Icon: MdLocationOn,
+      });
     }
 
-    const result = filteredList.map((r) => {
+    return options;
+  }, [userLocation]);
+
+  // Transform and filter restaurant data for display (only for Nearby option)
+  const nearbyRestaurants = useMemo(() => {
+    if (!userLocation || !userLocation.latitude || !userLocation.longitude) {
+      return [];
+    }
+
+    let filteredList = restaurant_list
+      .map((r) => {
+        const lat = r.location?.lat || r.latitude;
+        const lng = r.location?.lng || r.longitude;
+
+        if (lat && lng) {
+          const distance = calculateDistance(
+            userLocation.latitude,
+            userLocation.longitude,
+            lat,
+            lng
+          );
+          return { ...r, distance };
+        }
+        return { ...r, distance: null };
+      })
+      .filter((r) => r.distance !== null && r.distance <= 5)
+      .sort((a, b) => a.distance - b.distance);
+
+    return filteredList.map((r) => {
       const imagePath = r.image || r.images?.[0] || "/default-restaurant.png";
-      const imageUrl = getImageUrl(imagePath); // Convert to full URL
-      console.log(
-        `Restaurant: ${r.name}, image path: ${imagePath}, full URL: ${imageUrl}`
-      );
+      const imageUrl = getImageUrl(imagePath);
       return {
         name: r.name,
+        id: r.id || r._id,
         image: imageUrl,
-        distance: r.distance || null,
+        distance: r.distance,
       };
     });
-
-    console.log("Final restaurants to display:", result);
-    return result;
   }, [restaurant_list, userLocation]);
 
   return (
     <div className="explore-menu" id="explore-menu">
       <h1 style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-        {userLocation ? (
-          <>
-            <MdLocationOn size={32} style={{ color: "#ff6b35" }} />
-            Restaurants Near You (Within 5km)
-          </>
-        ) : (
-          <>
-            <MdRestaurant size={32} />
-            Explore New Restaurants
-          </>
-        )}
+        <MdRestaurant size={32} />
+        Discover Delicious Food
       </h1>
       <p className="explore-menu-text">
-        {userLocation
-          ? `We found ${restaurants.length} restaurant${restaurants.length !== 1 ? "s" : ""} near your location. Click on any restaurant to explore their menu!`
-          : "Choose from a wide selection of restaurants, each offering unique flavors and dining styles. Our mission is to satisfy your cravings and elevate your food journey, one memorable restaurant experience at a time."}
+        Explore our curated selection of top-rated dishes, bestsellers, and
+        nearby restaurants. Find your next favorite meal!
       </p>
 
-      {/* Debug info - remove in production */}
-      {userLocation && (
-        <p style={{ fontSize: "12px", color: "#999", marginTop: "-10px" }}>
-          Your location: {userLocation.latitude.toFixed(4)}°N,{" "}
-          {userLocation.longitude.toFixed(4)}°E
-        </p>
-      )}
-
-      {/* <div className="explore-menu-list">
-        {menu_list.slice(0,6).map((item,index)=>{
-            return (
-                <div onClick={()=>setCategory(prev=>prev===item.menu_name?"All":item.menu_name)} key={index} className='explore-menu-list-item'>
-                    <img src={item.menu_image} className={category===item.menu_name?"active":""} alt="" />
-                    <p>{item.menu_name}</p>
-                </div>
-            )
-        })}
-      </div> */}
-
-      <div className="explore-menu-list">
-        {loading ? (
-          <p>Loading restaurants...</p>
-        ) : restaurants.length === 0 ? (
-          <div
-            style={{
-              textAlign: "center",
-              padding: "40px 20px",
-              color: "#666",
-              width: "100%",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              gap: "10px",
-            }}
-          >
-            <MdSearchOff size={48} style={{ color: "#999" }} />
-            <p
+      {/* Filter Options */}
+      <div className="explore-menu-list" style={{ justifyContent: "flex-end" }}>
+        {filterOptions.map((option) => {
+          const IconComponent = option.Icon;
+          return (
+            <div
+              key={option.id}
+              className={`explore-menu-list-item ${selected === option.id ? "active" : ""}`}
+              onClick={() => setSelected(option.id)}
               style={{
-                fontSize: "18px",
-                marginBottom: "10px",
-                fontWeight: "500",
+                cursor: "pointer",
+                maxWidth: "200px",
               }}
             >
-              No restaurants found within 5km
-            </p>
-            <p style={{ fontSize: "14px" }}>
-              Try browsing all restaurants or check back later!
-            </p>
-          </div>
-        ) : (
-          restaurants.map((restaurant, index) => (
-            <div
-              key={index}
-              className={`explore-menu-list-item ${selected === restaurant.name ? "active" : ""}`}
-              onClick={() =>
-                setSelected((prev) =>
-                  prev === restaurant.name ? "All" : restaurant.name
-                )
-              }
-            >
-              <img
-                src={restaurant.image}
-                alt={restaurant.name}
-                onError={(e) => {
-                  console.error(
-                    `Failed to load image for ${restaurant.name}:`,
-                    restaurant.image
-                  );
-                  e.target.src = "/default-restaurant.png";
+              <div
+                style={{
+                  display: "inline-flex",
+                  // flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "8px",
+                  padding: "10px 16px",
+                  background: selected === option.id ? "#ff6b35" : "#f8f9fa",
+                  borderRadius: "12px",
+                  transition: "all 0.3s",
                 }}
-              />
-              <p>{restaurant.name}</p>
-              {restaurant.distance !== null && (
+              >
+                <IconComponent
+                  size={32}
+                  color={selected === option.id ? "#fff" : "#ff6b35"}
+                />
+                <span
+                  style={{
+                    fontWeight: selected === option.id ? "600" : "500",
+                    fontSize: "18px",
+                    color: selected === option.id ? "#fff" : "#2d2d2d",
+                    textAlign: "center",
+                  }}
+                >
+                  {option.label}
+                </span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Only show nearby restaurants list if Nearby is selected */}
+      {selected === "Nearby" && nearbyRestaurants.length > 0 && (
+        <>
+          <h2
+            style={{
+              fontSize: "24px",
+              marginTop: "30px",
+              marginBottom: "15px",
+            }}
+          >
+            <MdLocationOn
+              size={28}
+              style={{ verticalAlign: "middle", color: "#ff6b35" }}
+            />{" "}
+            Restaurants Near You
+          </h2>
+          <div className="explore-menu-list">
+            {nearbyRestaurants.map((restaurant) => (
+              <div
+                key={restaurant.id}
+                className="explore-menu-list-item"
+                onClick={() =>
+                  (window.location.href = `/restaurant/${restaurant.id}`)
+                }
+                style={{ cursor: "pointer" }}
+              >
+                <img
+                  src={restaurant.image}
+                  alt={restaurant.name}
+                  onError={(e) => {
+                    e.target.src = "/default-restaurant.png";
+                  }}
+                />
+                <p>{restaurant.name}</p>
                 <span
                   style={{
                     fontSize: "12px",
@@ -196,11 +198,11 @@ const ExploreMenu = ({ selected, setSelected, userLocation }) => {
                   <MdLocationOn size={14} />
                   {restaurant.distance.toFixed(1)} km
                 </span>
-              )}
-            </div>
-          ))
-        )}
-      </div>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
 
       <hr />
     </div>

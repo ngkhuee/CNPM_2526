@@ -21,9 +21,19 @@ export const addressService = {
   async create(addressData) {
     try {
       const newAddress = {
-        ...addressData,
-        is_default: addressData.is_default || false,
+        user_id: addressData.userId,
+        full_address: addressData.addressLine,
+        address_line: addressData.addressLine,
+        street: addressData.street || "",
+        ward: addressData.ward || "",
+        district: addressData.district || "",
+        city: addressData.city || "",
+        phone: addressData.phone || "",
+        latitude: addressData.lat || null,
+        longitude: addressData.lng || null,
+        is_default: addressData.isDefault || false,
         created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
       };
       return await apiClient.post(ENDPOINTS.ADDRESSES.BASE, newAddress);
     } catch (error) {

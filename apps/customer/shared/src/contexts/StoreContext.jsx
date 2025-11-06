@@ -30,14 +30,23 @@ const StoreContextProvider = (props) => {
       setCategories(allCategories);
 
       // Enrich food data with restaurant name and category name
-      const enrichedFoods = foods.map((food) => {
+      const enrichedFoods = foods.map((food, index) => {
         const restaurant = restaurants.find((r) => r.id === food.restaurantId);
         const category = allCategories.find((c) => c.id === food.categoryId);
+
+        // Generate pseudo-random rating and sold count based on food id
+        // This ensures consistent values for each food item
+        const seed = parseInt(food.id) || index;
+        const rating = 3.5 + (seed % 15) / 10; // Rating between 3.5 and 5.0
+        const sold = 50 + ((seed * 17) % 500); // Sold between 50 and 550
+
         return {
           ...food,
           restaurant: restaurant?.name || "Unknown Restaurant",
           category: category?.name || "Uncategorized",
           categoryId: food.categoryId, // Keep original categoryId
+          rating: parseFloat(rating.toFixed(1)),
+          sold: sold,
         };
       });
 

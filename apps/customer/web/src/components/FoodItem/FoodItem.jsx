@@ -5,9 +5,18 @@ import { CartContext } from "customer-shared";
 import FoodDetailPopup from "../FoodDetailPopup/FoodDetailPopup";
 import { getImageUrl } from "@utils/imageHelper";
 import { formatCurrency } from "shared-utils";
-import { MdStorefront } from "react-icons/md";
+import { MdStorefront, MdStar, MdLocalFireDepartment } from "react-icons/md";
 
-const FoodItem = ({ image, name, price, desc, id, restaurant }) => {
+const FoodItem = ({
+  image,
+  name,
+  price,
+  desc,
+  id,
+  restaurant,
+  rating,
+  sold,
+}) => {
   const [showPopup, setShowPopup] = useState(false);
 
   const { cartItems, addToCart, removeFromCart } = useContext(CartContext);
@@ -55,10 +64,48 @@ const FoodItem = ({ image, name, price, desc, id, restaurant }) => {
       </div>
       <div className="food-item-info">
         <div className="food-item-name-rating">
-          <p>{name}</p> <img src={assets.rating_starts} alt="" />
+          <p>{name}</p>
+          {rating && (
+            <span
+              style={{
+                color: "#ff6b35",
+                fontSize: "14px",
+                fontWeight: "600",
+                display: "flex",
+                alignItems: "center",
+                gap: "4px",
+              }}
+            >
+              <MdStar size={16} />
+              {rating}
+            </span>
+          )}
         </div>
         <p className="food-item-desc">{desc}</p>
-        <p className="food-item-price">{formatCurrency(price)}</p>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginTop: "8px",
+          }}
+        >
+          <p className="food-item-price">{formatCurrency(price)}</p>
+          {sold && (
+            <span
+              style={{
+                fontSize: "12px",
+                color: "#666",
+                display: "flex",
+                alignItems: "center",
+                gap: "4px",
+              }}
+            >
+              <MdLocalFireDepartment size={16} style={{ color: "#ff6b35" }} />
+              {sold} sold
+            </span>
+          )}
+        </div>
         <p
           className="food-item-restaurant"
           style={{ display: "flex", alignItems: "center", gap: "4px" }}

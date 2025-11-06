@@ -2,7 +2,12 @@ import apiClient from "../config/apiClient";
 import { ENDPOINTS } from "../config/endpoints";
 
 // Helper function to map backend order to frontend format
-const mapOrderToFrontend = (order, user = null, restaurant = null) => ({
+const mapOrderToFrontend = (
+  order,
+  user = null,
+  restaurant = null,
+  address = null
+) => ({
   id: order.id,
   _id: order.id,
   userId: order.user_id,
@@ -26,6 +31,22 @@ const mapOrderToFrontend = (order, user = null, restaurant = null) => ({
   restaurant: restaurant,
   restaurantName: restaurant?.name || null,
   restaurant_id: order.restaurant_id,
+  // Customer info (from user and address)
+  customerName: user?.full_name || "N/A",
+  customerPhone: user?.phone || address?.phone || "N/A",
+  customerAddress: address?.full_address || address?.address || "N/A",
+  // GPS coordinates
+  pickup_gps: order.pickup_gps || restaurant?.location || null,
+  dropoff_gps:
+    order.dropoff_gps ||
+    (address?.latitude && address?.longitude
+      ? {
+          lat: address.latitude,
+          lng: address.longitude,
+        }
+      : null),
+  current_gps: order.current_gps || null,
+  drone_id: order.drone_id,
 });
 
 export const orderService = {
@@ -72,12 +93,13 @@ export const orderService = {
 
   async getById(id) {
     try {
-      // Fetch order, user, and restaurant data
+      // Fetch order, user, restaurant, and address data
       const order = await apiClient.get(ENDPOINTS.ORDERS.BY_ID(id));
 
-      // Fetch user and restaurant info if available
+      // Fetch user, restaurant, and address info if available
       let user = null;
       let restaurant = null;
+      let address = null;
 
       try {
         if (order.user_id) {
@@ -97,7 +119,15 @@ export const orderService = {
         console.warn("Could not fetch restaurant:", err);
       }
 
-      return mapOrderToFrontend(order, user, restaurant);
+      try {
+        if (order.address_id) {
+          address = await apiClient.get(`/addresses/${order.address_id}`);
+        }
+      } catch (err) {
+        console.warn("Could not fetch address:", err);
+      }
+
+      return mapOrderToFrontend(order, user, restaurant, address);
     } catch (error) {
       throw error;
     }
@@ -159,20 +189,50 @@ export const orderService = {
 
   async create(orderData) {
     try {
+      // Map items to backend format (menu_id instead of foodId)
+      const backendItems = orderData.items.map((item) => ({
+        menu_id: item.foodId,
+        name: item.name,
+        quantity: item.quantity,
+        unit_price: item.price,
+        subtotal: item.price * item.quantity,
+      }));
+
+      // Map frontend camelCase to backend snake_case
       const newOrder = {
-        ...orderData,
-        orderNumber: `ORD-${Date.now()}`,
+        user_id: orderData.customerId,
+        restaurant_id: orderData.restaurantId,
+        address_id: orderData.addressId,
+        items: backendItems,
+        subtotal: orderData.subtotal,
+        delivery_fee: orderData.deliveryFee || 0,
+        discount_amount: orderData.discountAmount || 0,
+        total_amount: orderData.total_amount,
+        payment_method: orderData.payment_method || "online",
         status: orderData.status || "pending",
-        paymentStatus: orderData.paymentStatus || "pending",
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
+        payment_status: orderData.paymentStatus || "pending",
+        special_instructions: orderData.specialInstructions || "",
+        customer: orderData.customer,
+        dropoff_gps: orderData.dropoff_gps,
+        order_number: `ORD-${Date.now()}`,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
       };
-      return await apiClient.post(ENDPOINTS.ORDERS.BASE, newOrder);
+
+      // Remove undefined values
+      Object.keys(newOrder).forEach(
+        (key) => newOrder[key] === undefined && delete newOrder[key]
+      );
+
+      console.log("📤 Sending order to backend:", newOrder);
+      const response = await apiClient.post(ENDPOINTS.ORDERS.BASE, newOrder);
+      console.log("✅ Backend response:", response);
+      return mapOrderToFrontend(response);
     } catch (error) {
+      console.error("❌ Order creation failed:", error);
       throw error;
     }
   },
-
   async updateStatus(id, status) {
     try {
       const response = await apiClient.patch(ENDPOINTS.ORDERS.BY_ID(id), {

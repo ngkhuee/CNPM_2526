@@ -14,8 +14,13 @@ import { useNavigate } from "react-router-dom";
 
 const Cart = () => {
   const { user } = useContext(AuthContext);
-  const { cartItems, removeFromCart, getTotalCartAmount, setCartItems } =
-    useContext(CartContext);
+  const {
+    cartItems,
+    removeFromCart,
+    getTotalCartAmount,
+    setCartItems,
+    addToCart,
+  } = useContext(CartContext);
   const { food_list } = useContext(StoreContext);
   const { addOrder } = useContext(OrderContext);
   const navigate = useNavigate();
@@ -68,12 +73,17 @@ const Cart = () => {
   // Check if cart is empty
   const isCartEmpty = subtotal === 0;
 
+  // Get cart items in reverse order for numbering
+  const cartItemsList = food_list
+    .filter((item) => cartItems[item._id] > 0)
+    .reverse(); // Reverse so last added appears first
+
   return (
     <div className="cart">
       <div className="cart-items">
         <div className="cart-items-title">
-          <p>Items</p> <p>Title</p> <p>Price</p> <p>Quantity</p> <p>Total</p>{" "}
-          <p>Remove</p>
+          <p>Item #</p> <p>Items</p> <p>Title</p> <p>Price</p> <p>Quantity</p>{" "}
+          <p>Total</p> <p>Remove</p>
         </div>
         <br />
         <hr />
@@ -104,28 +114,36 @@ const Cart = () => {
             </button>
           </div>
         ) : (
-          food_list.map((item, index) => {
-            if (cartItems[item._id] > 0) {
-              return (
-                <div key={index}>
-                  <div className="cart-items-title cart-items-item">
-                    <img src={item.image} alt="" />
-                    <p>{item.name}</p>
-                    <p>{formatCurrency(item.price)}</p>
-                    <div>{cartItems[item._id]}</div>
-                    <p>{formatCurrency(item.price * cartItems[item._id])}</p>
-                    <p
-                      className="cart-items-remove-icon"
-                      onClick={() => removeFromCart(item._id)}
-                    >
-                      x
-                    </p>
+          cartItemsList.map((item, index) => {
+            return (
+              <div key={index}>
+                <div className="cart-items-title cart-items-item">
+                  <p>{index + 1}</p>
+                  <img src={item.image} alt="" />
+                  <p>{item.name}</p>
+                  <p>{formatCurrency(item.price)}</p>
+                  <div className="quantity-controls">
+                    <button onClick={() => removeFromCart(item._id)}>-</button>
+                    <span>{cartItems[item._id]}</span>
+                    <button onClick={() => addToCart(item._id, 1)}>+</button>
                   </div>
-                  <hr />
+                  <p>{formatCurrency(item.price * cartItems[item._id])}</p>
+                  <p
+                    className="cart-items-remove-icon"
+                    onClick={() => {
+                      // Remove all quantity at once
+                      const qty = cartItems[item._id];
+                      for (let i = 0; i < qty; i++) {
+                        removeFromCart(item._id);
+                      }
+                    }}
+                  >
+                    x
+                  </p>
                 </div>
-              );
-            }
-            return null;
+                <hr />
+              </div>
+            );
           })
         )}
       </div>

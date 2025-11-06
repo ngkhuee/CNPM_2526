@@ -7,7 +7,9 @@
       "full_name": "Admin User",
       "phone": "0901111111",
       "avatar": "/images/avatars/admin.png",
-      "roles": ["admin"],
+      "roles": [
+        "admin"
+      ],
       "status": "active",
       "created_at": "2023-01-01T00:00:00.000Z",
       "updated_at": "2023-01-01T00:00:00.000Z"
@@ -19,7 +21,9 @@
       "full_name": "Customer User",
       "phone": "0902222222",
       "avatar": "/images/avatars/user.png",
-      "roles": ["customer"],
+      "roles": [
+        "customer"
+      ],
       "status": "active",
       "created_at": "2023-06-15T00:00:00.000Z",
       "updated_at": "2023-06-15T00:00:00.000Z"
@@ -31,7 +35,9 @@
       "full_name": "Belga Pizza Manager",
       "phone": "0901234567",
       "avatar": "/images/restaurants/menu_1.png",
-      "roles": ["restaurant_owner"],
+      "roles": [
+        "restaurant_owner"
+      ],
       "restaurant_id": "r1",
       "status": "active",
       "created_at": "2020-01-01T00:00:00.000Z",
@@ -44,7 +50,9 @@
       "full_name": "Lotteria Manager",
       "phone": "0902345678",
       "avatar": "/images/restaurants/menu_2.png",
-      "roles": ["restaurant_owner"],
+      "roles": [
+        "restaurant_owner"
+      ],
       "restaurant_id": "r2",
       "status": "active",
       "created_at": "2015-09-01T00:00:00.000Z",
@@ -57,7 +65,9 @@
       "full_name": "Pizza 4P's Manager",
       "phone": "0903456789",
       "avatar": "/images/restaurants/menu_3.png",
-      "roles": ["restaurant_owner"],
+      "roles": [
+        "restaurant_owner"
+      ],
       "restaurant_id": "r3",
       "status": "active",
       "created_at": "2021-11-15T00:00:00.000Z",
@@ -70,7 +80,9 @@
       "full_name": "Texas Chicken Manager",
       "phone": "0904567890",
       "avatar": "/images/restaurants/menu_4.png",
-      "roles": ["restaurant_owner"],
+      "roles": [
+        "restaurant_owner"
+      ],
       "restaurant_id": "r4",
       "status": "active",
       "created_at": "2010-01-01T00:00:00.000Z",
@@ -83,7 +95,9 @@
       "full_name": "Today With You Manager",
       "phone": "0905678901",
       "avatar": "/images/restaurants/menu_5.png",
-      "roles": ["restaurant_owner"],
+      "roles": [
+        "restaurant_owner"
+      ],
       "restaurant_id": "r5",
       "status": "active",
       "created_at": "2025-10-01T00:00:00.000Z",
@@ -96,7 +110,9 @@
       "full_name": "Burger King Manager",
       "phone": "0906789012",
       "avatar": "/images/restaurants/menu_6.png",
-      "roles": ["restaurant_owner"],
+      "roles": [
+        "restaurant_owner"
+      ],
       "restaurant_id": "r6",
       "status": "active",
       "created_at": "2022-01-01T00:00:00.000Z",
@@ -118,6 +134,39 @@
       "is_default": true,
       "created_at": "2023-06-15T00:00:00.000Z",
       "updated_at": "2023-06-15T00:00:00.000Z"
+    },
+    {
+      "user_id": "u2",
+      "address_line": "Công Ty TNHH Magnon Việt Nam, Lầu 7, Hẻm 18A Nguyễn Thị Minh Khai, Khu phố 10, Phường Sài Gòn, Thành phố Thủ Đức, Thành phố Hồ Chí Minh, 71006, Việt Nam",
+      "district": "",
+      "city": "",
+      "lat": 10.7867717,
+      "lng": 106.7001404,
+      "is_default": false,
+      "created_at": "2025-11-06T04:24:47.640Z",
+      "id": "Z-Zk4Cz"
+    },
+    {
+      "user_id": "u2",
+      "address_line": "Công Ty TNHH Magnon Việt Nam, Lầu 7, Hẻm 18A Nguyễn Thị Minh Khai, Khu phố 10, Phường Sài Gòn, Thành phố Thủ Đức, Thành phố Hồ Chí Minh, 71006, Việt Nam",
+      "district": "",
+      "city": "",
+      "lat": 10.7867717,
+      "lng": 106.7001404,
+      "is_default": false,
+      "created_at": "2025-11-06T04:24:52.178Z",
+      "id": "JWKe8Ky"
+    },
+    {
+      "user_id": "u2",
+      "address_line": "Công Ty TNHH Magnon Việt Nam, Lầu 7, Hẻm 18A Nguyễn Thị Minh Khai, Khu phố 10, Phường Sài Gòn, Thành phố Thủ Đức, Thành phố Hồ Chí Minh, 71006, Việt Nam",
+      "district": "",
+      "city": "",
+      "lat": 10.7867737,
+      "lng": 106.7001522,
+      "is_default": false,
+      "created_at": "2025-11-06T04:29:19.811Z",
+      "id": "bNTF3WQ"
     }
   ],
   "restaurants": [
@@ -129,10 +178,14 @@
       "address": "123 Nguyễn Huệ, Q.1, TP.HCM",
       "latitude": 10.776,
       "longitude": 106.7,
+      "location": {
+        "lat": 10.776,
+        "lng": 106.7
+      },
       "phone": "0901234567",
-      "email": "belga@pizza.com",
+      "email": "belga@yummy.com",
       "image": "/images/restaurants/menu_1.png",
-      "banner_image": "/images/restaurants/banner_1.png",
+      "banner_image": "/images/restaurants/menu_1.png",
       "primary_category": "Pizza",
       "rating": 4.5,
       "total_reviews": 0,
@@ -160,10 +213,14 @@
       "address": "456 Lê Lợi, Q.1, TP.HCM",
       "latitude": 10.8,
       "longitude": 106.71,
+      "location": {
+        "lat": 10.8,
+        "lng": 106.71
+      },
       "phone": "0902345678",
       "email": "lotteria@yummy.com",
       "image": "/images/restaurants/menu_2.png",
-      "banner_image": "/images/restaurants/banner_2.png",
+      "banner_image": "/images/restaurants/menu_2.png",
       "primary_category": "Chicken",
       "rating": 4.2,
       "total_reviews": 0,
@@ -191,10 +248,14 @@
       "address": "789 Pasteur, Q.1, TP.HCM",
       "latitude": 10.77,
       "longitude": 106.68,
+      "location": {
+        "lat": 10.77,
+        "lng": 106.68
+      },
       "phone": "0903456789",
       "email": "pizza4ps@yummy.com",
       "image": "/images/restaurants/menu_3.png",
-      "banner_image": "/images/restaurants/banner_3.png",
+      "banner_image": "/images/restaurants/menu_3.png",
       "primary_category": "Pizza",
       "rating": 4.8,
       "total_reviews": 0,
@@ -222,10 +283,14 @@
       "address": "101 Hai Bà Trưng, Q.1, TP.HCM",
       "latitude": 10.774,
       "longitude": 106.705,
+      "location": {
+        "lat": 10.774,
+        "lng": 106.705
+      },
       "phone": "0904567890",
       "email": "texaschicken@yummy.com",
       "image": "/images/restaurants/menu_4.png",
-      "banner_image": "/images/restaurants/banner_4.png",
+      "banner_image": "/images/restaurants/menu_4.png",
       "primary_category": "Chicken",
       "rating": 4,
       "total_reviews": 0,
@@ -253,10 +318,14 @@
       "address": "202 Trần Hưng Đạo, Q.1, TP.HCM",
       "latitude": 10.779,
       "longitude": 106.701,
+      "location": {
+        "lat": 10.779,
+        "lng": 106.701
+      },
       "phone": "0905678901",
       "email": "todaywithyou@yummy.com",
       "image": "/images/restaurants/menu_5.png",
-      "banner_image": "/images/restaurants/banner_5.png",
+      "banner_image": "/images/restaurants/menu_5.png",
       "primary_category": "Pasta",
       "rating": 4.6,
       "total_reviews": 0,
@@ -284,10 +353,14 @@
       "address": "303 Nguyễn Thị Minh Khai, Q.3, TP.HCM",
       "latitude": 10.778,
       "longitude": 106.702,
+      "location": {
+        "lat": 10.778,
+        "lng": 106.702
+      },
       "phone": "0906789012",
       "email": "burgerking@yummy.com",
       "image": "/images/restaurants/menu_6.png",
-      "banner_image": "/images/restaurants/banner_6.png",
+      "banner_image": "/images/restaurants/menu_6.png",
       "primary_category": "Burger",
       "rating": 4.3,
       "total_reviews": 0,
@@ -661,6 +734,49 @@
       "created_at": "2025-11-03T10:00:00.000Z",
       "updated_at": "2025-11-03T10:35:00.000Z",
       "updatedAt": "2025-11-05T11:27:44.017Z"
+    },
+    {
+      "user_id": "u2",
+      "restaurant_id": "r1",
+      "items": [
+        {
+          "menu_id": 2,
+          "name": "Veg Salad",
+          "quantity": 1,
+          "unit_price": 95000,
+          "subtotal": 95000
+        },
+        {
+          "menu_id": 3,
+          "name": "Clover Salad",
+          "quantity": 1,
+          "unit_price": 110000,
+          "subtotal": 110000
+        }
+      ],
+      "subtotal": 205000,
+      "delivery_fee": 0,
+      "discount_amount": 0,
+      "total_amount": 205000,
+      "payment_method": "online",
+      "status": "delivered",
+      "payment_status": "pending",
+      "drone_id": "drone2",
+      "special_instructions": "",
+      "customer": {
+        "name": "abc",
+        "phone": "0902222222",
+        "address": "Công Ty TNHH Magnon Việt Nam, Lầu 7, Hẻm 18A Nguyễn Thị Minh Khai, Khu phố 10, Phường Sài Gòn, Thành phố Thủ Đức, Thành phố Hồ Chí Minh, 71006, Việt Nam"
+      },
+      "dropoff_gps": {
+        "lat": 10.7867737,
+        "lng": 106.7001522
+      },
+      "order_number": "ORD-1762403359896",
+      "created_at": "2025-11-06T04:29:19.896Z",
+      "updated_at": "2025-11-06T06:35:31.539Z",
+      "id": "Lc_LFY4",
+      "actual_delivery_time": "2025-11-06T06:35:31.539Z"
     }
   ],
   "order_tracking": [
@@ -807,7 +923,10 @@
       "battery_level": 85,
       "latitude": 10.77,
       "longitude": 106.68,
-      "current_location": "Warehouse HCM",
+      "current_location": {
+        "lat": 10.77,
+        "lng": 106.68
+      },
       "max_weight_kg": 5,
       "assigned_order_id": null,
       "last_maintenance": "2025-11-01T00:00:00.000Z",
@@ -819,14 +938,17 @@
       "identifier": "Drone 2",
       "status": "available",
       "battery_level": 65,
-      "latitude": 10.77,
-      "longitude": 106.68,
-      "current_location": "Warehouse HCM",
+      "latitude": 10.7867737,
+      "longitude": 106.7001522,
+      "current_location": {
+        "lat": 10.77,
+        "lng": 106.68
+      },
       "max_weight_kg": 5,
       "assigned_order_id": null,
       "last_maintenance": "2025-10-28T00:00:00.000Z",
       "created_at": "2025-01-01T00:00:00.000Z",
-      "updated_at": "2025-11-05T14:00:00.000Z"
+      "updated_at": "2025-11-06T06:35:31.618Z"
     },
     {
       "id": "drone3",
@@ -835,12 +957,66 @@
       "battery_level": 25,
       "latitude": 10.77,
       "longitude": 106.68,
-      "current_location": "Warehouse HCM",
+      "current_location": {
+        "lat": 10.77,
+        "lng": 106.68
+      },
       "max_weight_kg": 5,
       "assigned_order_id": null,
       "last_maintenance": "2025-10-25T00:00:00.000Z",
       "created_at": "2025-01-01T00:00:00.000Z",
       "updated_at": "2025-11-05T14:00:00.000Z"
+    },
+    {
+      "id": "drone4",
+      "identifier": "Drone 4",
+      "status": "available",
+      "battery_level": 90,
+      "latitude": 10.776,
+      "longitude": 106.7,
+      "current_location": {
+        "lat": 10.776,
+        "lng": 106.7
+      },
+      "max_weight_kg": 5,
+      "assigned_order_id": null,
+      "last_maintenance": "2025-11-02T00:00:00.000Z",
+      "created_at": "2025-01-15T00:00:00.000Z",
+      "updated_at": "2025-11-06T00:00:00.000Z"
+    },
+    {
+      "id": "drone5",
+      "identifier": "Drone 5",
+      "status": "available",
+      "battery_level": 78,
+      "latitude": 10.774,
+      "longitude": 106.705,
+      "current_location": {
+        "lat": 10.774,
+        "lng": 106.705
+      },
+      "max_weight_kg": 5,
+      "assigned_order_id": null,
+      "last_maintenance": "2025-10-30T00:00:00.000Z",
+      "created_at": "2025-02-01T00:00:00.000Z",
+      "updated_at": "2025-11-06T00:00:00.000Z"
+    },
+    {
+      "id": "drone6",
+      "identifier": "Drone 6",
+      "status": "charging",
+      "battery_level": 45,
+      "latitude": 10.779,
+      "longitude": 106.701,
+      "current_location": {
+        "lat": 10.779,
+        "lng": 106.701
+      },
+      "max_weight_kg": 5,
+      "assigned_order_id": null,
+      "last_maintenance": "2025-11-03T00:00:00.000Z",
+      "created_at": "2025-03-01T00:00:00.000Z",
+      "updated_at": "2025-11-06T00:00:00.000Z"
     }
   ],
   "settings": [
@@ -885,7 +1061,7 @@
     {
       "user_id": "u2",
       "items": [],
-      "updated_at": "2025-11-05T15:50:07.443Z",
+      "updated_at": "2025-11-06T04:29:20.036Z",
       "id": 1
     }
   ]

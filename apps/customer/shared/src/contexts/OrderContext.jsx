@@ -1,11 +1,11 @@
 import React, { createContext, useState, useEffect, useContext } from "react";
 import { orderService } from "@api/services";
-import { StoreContext } from "./StoreContext";
+import { AuthContext } from "./AuthContext";
 
 export const OrderContext = createContext();
 
 export const OrderProvider = ({ children }) => {
-  const { user } = useContext(StoreContext);
+  const { user } = useContext(AuthContext);
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -51,24 +51,36 @@ export const OrderProvider = ({ children }) => {
   // Create new order
   const addOrder = async (orderData) => {
     if (!user) {
-      throw new Error("User must be logged in to create order");
+      console.error("❌ No user found in OrderContext");
+      return {
+        success: false,
+        message: "User must be logged in to create order",
+      };
     }
 
     try {
       setLoading(true);
+      console.log("📤 OrderContext: Creating order with data:", orderData);
+      console.log("👤 Current user:", user);
+
       const newOrder = await orderService.create({
         ...orderData,
         customerId: user.id,
         status: "pending",
       });
 
+      console.log("✅ OrderContext: Order created successfully:", newOrder);
+
       // Update local state
       setOrders((prev) => [newOrder, ...prev]);
 
       return { success: true, order: newOrder };
     } catch (error) {
-      console.error("Error creating order:", error);
-      return { success: false, message: error.message };
+      console.error("❌ OrderContext: Error creating order:", error);
+      return {
+        success: false,
+        message: error.message || "Unknown error occurred",
+      };
     } finally {
       setLoading(false);
     }
@@ -77,15 +89,17 @@ export const OrderProvider = ({ children }) => {
   // Update order status
   const updateOrderStatus = async (id, status) => {
     try {
-      await orderService.updateStatus(id, status);
+      const updatedOrder = await orderService.updateStatus(id, status);
 
       // Update local state
       setOrders((prev) =>
         prev.map((order) => (order.id === id ? { ...order, status } : order))
       );
+
+      return { success: true, order: updatedOrder };
     } catch (error) {
       console.error("Error updating order status:", error);
-      throw error;
+      return { success: false, message: error.message };
     }
   };
 

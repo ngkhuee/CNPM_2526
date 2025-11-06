@@ -78,11 +78,12 @@ export const OrderProvider = ({ children }) => {
   };
 
   // Update order status
-  const updateOrderStatus = async (orderId, status) => {
+  const updateOrderStatus = async (orderId, status, additionalData = {}) => {
     try {
-      await orderService.updateStatus(orderId, status);
+      const updateData = { status, ...additionalData };
+      await orderService.update(orderId, updateData);
       setOrders((prev) =>
-        prev.map((o) => (o.id === orderId ? { ...o, status } : o))
+        prev.map((o) => (o.id === orderId ? { ...o, ...updateData } : o))
       );
     } catch (error) {
       console.error("Error updating order status:", error);

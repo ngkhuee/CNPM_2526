@@ -4,6 +4,7 @@ import { assets } from "../../assets/assets";
 import FoodItem from "../FoodItem/FoodItem";
 import RestaurantItem from "../RestaurantItem/RestaurantItem";
 import { StoreContext } from "customer-shared";
+import { MdStar, MdLocalFireDepartment, MdRestaurant } from "react-icons/md";
 
 const FoodDisplay = ({
   filterBy = "category",
@@ -15,6 +16,7 @@ const FoodDisplay = ({
   const [selectedFilter, setSelectedFilter] = useState(filterValue);
   // searchTerm dùng để tìm kiếm món ăn
   const [searchTerm, setSearchTerm] = useState("");
+
   // Lấy danh sách filter (danh mục hoặc restaurants)
   const filters = [
     "All",
@@ -25,20 +27,76 @@ const FoodDisplay = ({
   useEffect(() => {
     setSelectedFilter(filterValue);
   }, [filterValue]);
+
   // Lọc món ăn dựa theo selectedFilter
-  const filteredFood = food_list
-    .filter(
+  let filteredFood = [...food_list];
+
+  // Handle featured filters (Top Rated, Best Selling, Nearby)
+  if (filterBy === "featured") {
+    if (filterValue === "Top Rated") {
+      // Sort by rating (highest first), limit to top 12
+      filteredFood = [...food_list]
+        .filter((item) => item.rating && item.rating > 0)
+        .sort((a, b) => (b.rating || 0) - (a.rating || 0))
+        .slice(0, 12);
+    } else if (filterValue === "Best Selling") {
+      // Sort by sold count (highest first), limit to top 12
+      filteredFood = [...food_list]
+        .filter((item) => item.sold && item.sold > 0)
+        .sort((a, b) => (b.sold || 0) - (a.sold || 0))
+        .slice(0, 12);
+    } else if (filterValue === "Nearby") {
+      // For nearby, show all foods (restaurants are filtered in ExploreMenu)
+      filteredFood = food_list;
+    }
+  } else {
+    // Original filtering logic
+    filteredFood = food_list.filter(
       (item) => selectedFilter === "All" || item[filterBy] === selectedFilter
-    )
-    .filter(
-      (item) =>
-        item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.restaurant.toLowerCase().includes(searchTerm.toLowerCase())
     );
+  }
+
+  // Apply search filter
+  filteredFood = filteredFood.filter(
+    (item) =>
+      item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.restaurant.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  // Get display title based on filter
+  const getDisplayTitle = () => {
+    if (filterBy === "featured") {
+      if (filterValue === "Top Rated") {
+        return (
+          <span style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            <MdStar size={28} style={{ color: "#ff6b35" }} />
+            Top Rated Dishes
+          </span>
+        );
+      }
+      if (filterValue === "Best Selling") {
+        return (
+          <span style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            <MdLocalFireDepartment size={28} style={{ color: "#ff6b35" }} />
+            Best Selling Dishes
+          </span>
+        );
+      }
+      if (filterValue === "Nearby") {
+        return (
+          <span style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            <MdRestaurant size={28} style={{ color: "#ff6b35" }} />
+            Available Dishes
+          </span>
+        );
+      }
+    }
+    return "Choose your favorite food";
+  };
 
   return (
     <div className="food-display" id="food-display">
-      <h2 className="restaurant-display-title">Categories</h2>
+      <h2 className="restaurant-display-title">{getDisplayTitle()}</h2>
       {/* Filter bar */}
       {/* {showFilter && (
         <div className='food-filter-bar'>
@@ -91,6 +149,8 @@ const FoodDisplay = ({
               price={item.price}
               id={item._id}
               restaurant={item.restaurant}
+              rating={item.rating}
+              sold={item.sold}
             />
           );
         })}

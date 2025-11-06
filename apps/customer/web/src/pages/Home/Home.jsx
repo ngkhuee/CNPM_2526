@@ -6,10 +6,7 @@ import AppDownload from "../../components/AppDownload/AppDownload";
 import { MdLocationOn, MdRestaurant, MdWarning } from "react-icons/md";
 
 const Home = () => {
-  /*
-const [category,setCategory] = useState("All")
-*/
-  const [selectedRestaurant, setSelectedRestaurant] = useState("All");
+  const [selectedFilter, setSelectedFilter] = useState("Top Rated");
   const [userLocation, setUserLocation] = useState(null);
   const [locationPermissionDenied, setLocationPermissionDenied] =
     useState(false);
@@ -63,7 +60,8 @@ const [category,setCategory] = useState("All")
             color: "#856404",
             padding: "12px 20px",
             margin: "20px auto",
-            maxWidth: "1200px",
+            width: "100%",
+            // maxWidth: "1200px",
             borderRadius: "8px",
             border: "1px solid #ffeaa7",
             display: "flex",
@@ -74,9 +72,9 @@ const [category,setCategory] = useState("All")
         >
           <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
             <MdWarning size={20} />
-            <span>Location access denied. Showing all restaurants.</span>
+            <span>Location access denied.</span>
           </div>
-          <button
+          {/* <button
             onClick={requestLocation}
             style={{
               backgroundColor: "#ff6b35",
@@ -95,7 +93,7 @@ const [category,setCategory] = useState("All")
           >
             <MdLocationOn size={18} />
             View Nearby Restaurants
-          </button>
+          </button> */}
         </div>
       )}
       {userLocation && !showAllRestaurants && (
@@ -139,18 +137,14 @@ const [category,setCategory] = useState("All")
           </button>
         </div>
       )}
-      {/*
-      <ExploreMenu setCategory={setCategory} category={category}/>
-      <FoodDisplay filterBy="category" filterValue={category} showFilter={false} />
-      */}
       <ExploreMenu
-        selected={selectedRestaurant}
-        setSelected={setSelectedRestaurant}
+        selected={selectedFilter}
+        setSelected={setSelectedFilter}
         userLocation={showAllRestaurants ? null : userLocation}
       />
       <FoodDisplay
-        filterBy="restaurant"
-        filterValue={selectedRestaurant}
+        filterBy="featured"
+        filterValue={selectedFilter}
         showFilter={false}
       />
       <AppDownload />

@@ -1,32 +1,195 @@
 .checkout-page {
+  display: grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap: 30px;
+  padding: 40px;
+  /* max-width: 1200px; */
+  margin: 0 auto;
+}
+
+.checkout-left,
+.checkout-right {
   display: flex;
   flex-direction: column;
-  gap: 2rem;
-  padding: 40px;
 }
 
 .checkout-info {
   background: #fff;
   padding: 25px;
   border-radius: 10px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.checkout-info h2 {
+  margin-bottom: 20px;
+  color: #333;
 }
 
 .checkout-info form {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 15px;
+}
+
+.checkout-info label {
+  font-weight: 600;
+  color: #555;
+  margin-bottom: 5px;
+  display: block;
 }
 
 .checkout-info input,
 .checkout-info textarea {
-  padding: 8px;
+  padding: 10px;
   border: 1px solid #ddd;
   border-radius: 6px;
+  font-size: 14px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.checkout-info textarea {
+  max-height: 45px;
+  resize: vertical;
+}
+
+.address-selection {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 10px;
+}
+
+.address-selection label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: normal;
+  cursor: pointer;
+}
+
+.address-selection input[type="radio"] {
+  width: auto;
+  cursor: pointer;
+}
+
+.saved-addresses {
+  margin-bottom: 15px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 10px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.address-card {
+  padding: 10px;
+  cursor: pointer;
+  background: #fff;
+  border-radius: 4px;
+  margin-bottom: 8px;
+  border: 2px solid #eee;
+  transition: all 0.2s ease;
+}
+
+.address-card:hover {
+  border-color: #ff5722;
+}
+
+.address-card.selected {
+  background: #fff3e0;
+  border-color: #ff5722;
+}
+
+.default-badge {
+  margin-left: 8px;
+  color: #4caf50;
+  font-weight: bold;
+}
+
+.address-input-container {
+  display: flex;
+  align-items: stretch; /* Giúp textarea và nút cao bằng nhau */
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.address-input-container textarea {
+  flex: 1;
+  /* min-height: 100px; */
+  resize: none; /* Ngăn kéo resize làm hỏng layout */
+  padding-right: 45px;
+  box-sizing: border-box;
+}
+
+.gps-btn {
+  width: auto;
+  min-width: 45px;
+  height: 45px;
+  padding: 0 12px;
+  align-self: center; /* Giúp nút nằm giữa theo chiều dọc */
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 24px;
+  transition: all 0.2s ease;
+  margin-top: 0; /* ngăn bị đẩy lệch */
+  white-space: nowrap;
+}
+
+.gps-btn:has(.gps-text) {
+  /* When text is present, make button wider */
+  min-width: auto;
+}
+
+.gps-text {
+  font-size: 14px;
+}
+
+.gps-btn:has(svg:only-child) {
+  /* When only icon (CheckCircle), make button square */
+  width: 45px;
+  min-width: 45px;
+  padding: 0;
+  background: #28a745;
+}
+
+.save-address-option {
+  margin-top: 10px;
+}
+
+.save-address-option label {
+  display: flex;
+  align-items: center;
+  font-weight: normal;
+  cursor: pointer;
+  color: #555;
+}
+
+.save-address-option input[type="checkbox"] {
+  width: auto;
+  margin-right: 8px;
+  cursor: pointer;
+}
+
+.gps-btn:hover {
+  background: #d5795d;
+}
+
+.gps-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .confirm-btn {
-  margin-top: 10px;
+  width: 100%;
+  display: block;
+  margin-top: 30px;
   background: #ff5722;
   color: white;
   border: none;
@@ -34,30 +197,106 @@
   border-radius: 6px;
   cursor: pointer;
   font-weight: bold;
+  font-size: 16px;
+  transition: all 0.2s ease;
+}
+
+.confirm-btn:hover {
+  background: #e64a19;
+}
+
+.confirm-btn:disabled {
+  background: rgb(164, 132, 132) a19;
+  cursor: not-allowed;
+  opacity: 0.7;
 }
 
 .checkout-summary {
-  display: flex;
-  justify-content: space-between;
-  gap: 40px;
+  background: #fff;
+  padding: 25px;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-.order-list, .order-total {
-  flex: 1;
-  background: #fff;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+.checkout-summary h3 {
+  margin-bottom: 20px;
+  color: #333;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #f5f5f5;
+}
+
+.order-list {
+  margin-bottom: 20px;
+}
+
+.empty-cart {
+  text-align: center;
+  color: #999;
+  padding: 20px 0;
 }
 
 .order-item {
   display: flex;
   justify-content: space-between;
-  margin: 6px 0;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #f5f5f5;
+}
+
+.order-item:last-child {
+  border-bottom: none;
+}
+
+.order-item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.item-name {
+  font-weight: 500;
+  color: #333;
+}
+
+.item-quantity {
+  font-size: 13px;
+  color: #777;
+}
+
+.item-price {
+  font-weight: 600;
+  color: #ff5722;
+}
+
+.order-total {
+  padding-top: 15px;
+  border-top: 2px solid #f5f5f5;
+}
+
+.total-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.total-row span:first-child {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
 }
 
 .total-amount {
-  font-size: 1.2rem;
+  font-size: 24px;
   color: #ff5722;
   font-weight: bold;
+}
+
+@media (max-width: 100%) {
+  .checkout-page {
+    grid-template-columns: 1fr;
+  }
+
+  .checkout-right {
+    order: -1;
+  }
 }

@@ -169,6 +169,12 @@ const Delivery = () => {
 
   const getFilteredDrones = () => {
     if (droneFilter === "all") return drones;
+    if (droneFilter === "delivering") {
+      // Include both "busy" and "delivering" statuses
+      return drones.filter(
+        (d) => d.status === "busy" || d.status === "delivering"
+      );
+    }
     return getDronesByStatus(droneFilter);
   };
 
@@ -184,17 +190,27 @@ const Delivery = () => {
     const statusMap = {
       available: "status-available",
       locked: "status-idle",
+      busy: "status-delivering",
       delivering: "status-delivering",
+      charging: "status-charging",
     };
     return statusMap[status] || "status-default";
   };
 
   const getDisplayStatus = (drone) => {
-    if (drone.assignedOrderId) {
+    // Check actual status first
+    if (drone.status === "busy" || drone.status === "delivering") {
       return "On Delivery";
+    }
+    if (drone.status === "charging") {
+      return "Charging";
     }
     if (drone.status === "locked") {
       return "Locked";
+    }
+    if (drone.assignedOrderId && drone.status === "available") {
+      // Edge case: assigned but not marked as delivering yet
+      return "Assigned";
     }
     return "Available";
   };
@@ -223,8 +239,14 @@ const Delivery = () => {
           <div className="stat-info">
             <p className="stat-label">Active Drones</p>
             <p className="stat-value">
-              {getDronesByStatus("available").length +
-                getDronesByStatus("delivering").length}
+              {
+                drones.filter(
+                  (d) =>
+                    d.status === "available" ||
+                    d.status === "busy" ||
+                    d.status === "delivering"
+                ).length
+              }
             </p>
           </div>
         </div>

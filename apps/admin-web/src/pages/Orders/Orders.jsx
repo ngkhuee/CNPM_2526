@@ -11,22 +11,43 @@ const Orders = () => {
   const [filter, setFilter] = useState("all");
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [detailOpen, setDetailOpen] = useState(false);
+  const [autoRefresh, setAutoRefresh] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
     fetchOrders();
   }, []);
 
-  const fetchOrders = async () => {
+  // Auto-refresh every 5 seconds
+  useEffect(() => {
+    if (!autoRefresh) return;
+
+    const intervalId = setInterval(() => {
+      console.log("🔄 Auto-refreshing orders...");
+      fetchOrders(true); // Silent refresh
+    }, 5000);
+
+    return () => clearInterval(intervalId);
+  }, [autoRefresh]);
+
+  const fetchOrders = async (silent = false) => {
     try {
-      setLoading(true);
+      if (!silent) setLoading(true);
       const response = await orderService.getAll();
+      console.log("📊 Fetched orders:", response.length, "orders");
       setOrders(response || []);
     } catch (error) {
       console.error("Error fetching orders:", error);
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
+  };
+
+  const handleManualRefresh = async () => {
+    setRefreshing(true);
+    await fetchOrders();
+    setRefreshing(false);
   };
 
   const handleStatusChange = async (orderId, newStatus) => {
@@ -64,7 +85,61 @@ const Orders = () => {
   return (
     <div className="orders-page">
       <div className="orders-header">
-        <h2>Order Management</h2>
+        <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
+          <h2>Order Management</h2>
+          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+            <button
+              onClick={handleManualRefresh}
+              disabled={refreshing}
+              style={{
+                padding: "8px 12px",
+                background: refreshing ? "#9e9e9e" : "#4caf50",
+                color: "white",
+                border: "none",
+                borderRadius: "5px",
+                cursor: refreshing ? "not-allowed" : "pointer",
+                fontSize: "14px",
+                fontWeight: "600",
+                display: "flex",
+                alignItems: "center",
+                gap: "6px",
+              }}
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                style={{
+                  animation: refreshing ? "spin 1s linear infinite" : "none",
+                }}
+              >
+                <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2" />
+              </svg>
+              {refreshing ? "Refreshing..." : "Refresh"}
+            </button>
+            <label
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "6px",
+                fontSize: "14px",
+                cursor: "pointer",
+                userSelect: "none",
+              }}
+            >
+              <input
+                type="checkbox"
+                checked={autoRefresh}
+                onChange={(e) => setAutoRefresh(e.target.checked)}
+                style={{ cursor: "pointer" }}
+              />
+              <span>Auto-refresh (5s)</span>
+            </label>
+          </div>
+        </div>
         <div className="orders-filter">
           <button
             className={filter === "all" ? "active" : ""}

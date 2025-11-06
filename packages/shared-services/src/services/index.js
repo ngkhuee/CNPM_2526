@@ -11,3 +11,4 @@ export { default as promotionService } from "./promotionService";
 export { default as categoryService } from "./categoryService";
 export { default as droneService } from "./droneService";
 export { default as settingsService } from "./settingsService";
+export { default as droneSimulation } from "./droneSimulation";

@@ -93,16 +93,25 @@ export const restaurantService = {
   async getMenu(id) {
     try {
       const response = await apiClient.get(ENDPOINTS.RESTAURANTS.MENU(id));
+
+      // Fetch categories to map category_id to category name
+      const categoriesResponse = await apiClient.get(ENDPOINTS.CATEGORIES.BASE);
+      const categoriesMap = {};
+      categoriesResponse.forEach((cat) => {
+        categoriesMap[cat.id] = cat.name;
+      });
+
       return response.map((menu) => ({
         id: menu.menu_id || menu.id,
         _id: menu.menu_id || menu.id,
-        name: menu.item_name,
+        name: menu.item_name || menu.name,
         restaurantId: menu.restaurant_id,
         price: menu.price,
         description: menu.description,
-        image: menu.image_url,
+        image: menu.image, // Support both image_url and image
         isAvailable: menu.is_available,
-        category: menu.category,
+        category: categoriesMap[menu.category_id] || menu.category || "Other",
+        categoryId: menu.category_id,
         createdAt: menu.created_at,
       }));
     } catch (error) {

@@ -18,6 +18,7 @@ export { useOrderTracking } from "./hooks/useOrderTracking";
 export { useAddresses } from "./hooks/useAddresses";
 export { usePromotions } from "./hooks/usePromotions";
 export { useSettings } from "./hooks/useSettings";
+export { default as useRestaurantDetail } from "./hooks/useRestaurantDetail";
 
 // Export utils (cartHelpers, orderHelpers)
 export * from "./utils/cartHelpers";
