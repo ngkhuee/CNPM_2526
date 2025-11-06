@@ -429,6 +429,15 @@
       "created_at": "2025-11-05T14:31:21.988Z",
       "updated_at": "2025-11-05T14:31:21.988Z",
       "id": "LL5QYAF"
+    },
+    {
+      "name": "Hamburger",
+      "description": "",
+      "status": "active",
+      "restaurant_id": "r1",
+      "created_at": "2025-11-06T07:56:59.627Z",
+      "updated_at": "2025-11-06T07:56:59.627Z",
+      "id": "jgAHLUt"
     }
   ],
   "menus": [
@@ -461,7 +470,7 @@
     {
       "id": 3,
       "restaurant_id": "r1",
-      "category_id": "NxqTswu",
+      "category_id": "jgAHLUt",
       "name": "Clover Salad",
       "description": "Garden fresh salad with special herbs",
       "price": 110000,
@@ -469,12 +478,12 @@
       "is_available": true,
       "preparation_time_minutes": 10,
       "created_at": "2024-01-01T00:00:00.000Z",
-      "updated_at": "2024-01-01T00:00:00.000Z"
+      "updated_at": "2025-11-06T07:57:10.654Z"
     },
     {
       "id": 4,
       "restaurant_id": "r1",
-      "category_id": "NxqTswu",
+      "category_id": "jgAHLUt",
       "name": "Chicken Salad",
       "description": "Grilled chicken with fresh greens",
       "price": 145000,
@@ -482,7 +491,7 @@
       "is_available": true,
       "preparation_time_minutes": 15,
       "created_at": "2024-01-01T00:00:00.000Z",
-      "updated_at": "2024-01-01T00:00:00.000Z"
+      "updated_at": "2025-11-06T07:57:18.404Z"
     },
     {
       "id": 5,
@@ -905,14 +914,41 @@
     {
       "id": "rev1",
       "user_id": "u2",
-      "restaurant_id": "r3",
-      "order_id": null,
+      "food_id": 1,
+      "restaurant_id": "r1",
+      "order_id": "Lc_LFY4",
       "rating": 5,
-      "comment": "Amazing pizza! The burrata was so fresh.",
+      "comment": "Amazing Greek Salad! The feta was so fresh and delicious.",
       "images": [],
-      "restaurant_reply": null,
+      "restaurant_reply": "Thank you so much for your kind words!",
       "created_at": "2025-10-15T00:00:00.000Z",
       "updated_at": "2025-10-15T00:00:00.000Z"
+    },
+    {
+      "id": "rev2",
+      "user_id": "u2",
+      "food_id": 2,
+      "restaurant_id": "r1",
+      "order_id": "Lc_LFY4",
+      "rating": 4,
+      "comment": "Good Veg Salad, fresh vegetables!",
+      "images": [],
+      "restaurant_reply": "ok",
+      "created_at": "2025-11-06T06:47:43.622Z",
+      "updated_at": "2025-11-06T08:01:46.344Z"
+    },
+    {
+      "id": "rev3",
+      "user_id": "u2",
+      "food_id": 5,
+      "restaurant_id": "r2",
+      "order_id": null,
+      "rating": 5,
+      "comment": "Best fried chicken wings ever! Crispy and flavorful.",
+      "images": [],
+      "restaurant_reply": "We're glad you loved it!",
+      "created_at": "2025-10-20T00:00:00.000Z",
+      "updated_at": "2025-10-20T00:00:00.000Z"
     }
   ],
   "drones": [
@@ -1060,8 +1096,13 @@
   "carts": [
     {
       "user_id": "u2",
-      "items": [],
-      "updated_at": "2025-11-06T04:29:20.036Z",
+      "items": [
+        {
+          "foodId": 8,
+          "quantity": 1
+        }
+      ],
+      "updated_at": "2025-11-06T07:59:05.001Z",
       "id": 1
     }
   ]

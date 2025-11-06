@@ -337,9 +337,9 @@ const Promotions = () => {
                     <span
                       className={`status-badge ${promo.status.toLowerCase()}`}
                     >
-                      {promo.status === "active" && "🟢 Active"}
-                      {promo.status === "upcoming" && "🟡 Upcoming"}
-                      {promo.status === "expired" && "⚫ Expired"}
+                      {promo.status === "active" && "Active"}
+                      {promo.status === "upcoming" && "Upcoming"}
+                      {promo.status === "expired" && "Expired"}
                     </span>
                   </td>
                   <td>

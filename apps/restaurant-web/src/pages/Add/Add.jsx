@@ -54,6 +54,8 @@ const Add = () => {
         isAvailable: true,
         isFeatured: false,
         preparationTime: 20, // default value
+        rating: 0, // default rating for new food
+        total_reviews: 0, // default review count
       };
 
       const result = await addFood(newFoodData);

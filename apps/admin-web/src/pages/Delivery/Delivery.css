@@ -41,19 +41,19 @@
 }
 
 .stat-card.active {
-  border-left: 4px solid #17a2b8;
+  /* border-left: 4px solid #17a2b8; */
 }
 
 .stat-card.delivery {
-  border-left: 4px solid #ff6b35;
+  /* border-left: 4px solid #ff6b35; */
 }
 
 .stat-card.total {
-  border-left: 4px solid #28a745;
+  /* border-left: 4px solid #28a745; */
 }
 
 .stat-card.orders {
-  border-left: 4px solid #ffc107;
+  /* border-left: 4px solid #ffc107; */
 }
 
 .stat-icon {

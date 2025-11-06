@@ -19,12 +19,38 @@ const MyOrders = () => {
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
   const [showReviewModal, setShowReviewModal] = useState(false);
-  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [selectedOrderItem, setSelectedOrderItem] = useState(null);
+  const [selectedOrderId, setSelectedOrderId] = useState(null);
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [previousOrders, setPreviousOrders] = useState([]);
   const [activeTab, setActiveTab] = useState("current"); // "current" or "history"
+  const [reviewedFoods, setReviewedFoods] = useState({}); // Track which foods have been reviewed by this user
+
+  // Check which foods have been reviewed by this user
+  React.useEffect(() => {
+    const checkReviewedFoods = async () => {
+      if (!user?.id) return;
+
+      try {
+        const allReviews = await reviewService.getByUser(user.id);
+        const reviewed = {};
+
+        allReviews.forEach((review) => {
+          if (review.food_id) {
+            reviewed[review.food_id] = true;
+          }
+        });
+
+        setReviewedFoods(reviewed);
+      } catch (error) {
+        console.error("Error checking reviewed foods:", error);
+      }
+    };
+
+    checkReviewedFoods();
+  }, [user?.id]);
 
   // Track status changes and auto-redirect to tracking
   React.useEffect(() => {
@@ -52,29 +78,42 @@ const MyOrders = () => {
     setPreviousOrders(orders);
   }, [orders, navigate]);
 
-  const handleOpenReview = (order) => {
-    setSelectedOrder(order);
+  const handleOpenReview = (orderItem, orderId, restaurantId) => {
+    setSelectedOrderItem(orderItem);
+    setSelectedOrderId(orderId);
     setShowReviewModal(true);
     setRating(5);
     setComment("");
   };
 
   const handleSubmitReview = async () => {
-    if (!selectedOrder || !user) return;
+    if (!selectedOrderItem || !user || !selectedOrderId) return;
 
     try {
       setSubmitting(true);
+
+      // Get restaurant ID from the order
+      const order = orders.find((o) => o.id === selectedOrderId);
+
       await reviewService.create({
-        orderId: selectedOrder.id,
-        userId: user.id,
-        restaurantId: selectedOrder.restaurantId,
+        food_id: selectedOrderItem.foodId || selectedOrderItem.id,
+        user_id: user.id,
+        restaurant_id: order?.restaurantId,
+        order_id: selectedOrderId,
         rating,
         comment,
       });
 
       alert("Thank you for your review!");
       setShowReviewModal(false);
-      setSelectedOrder(null);
+      setSelectedOrderItem(null);
+      setSelectedOrderId(null);
+
+      // Mark this food as reviewed
+      setReviewedFoods((prev) => ({
+        ...prev,
+        [selectedOrderItem.foodId || selectedOrderItem.id]: true,
+      }));
     } catch (error) {
       console.error("Error submitting review:", error);
       alert("Error submitting review");
@@ -413,21 +452,6 @@ const MyOrders = () => {
                 </button>
               )}
 
-              {order.status === "delivered" && (
-                <button
-                  className="review-btn"
-                  onClick={() => handleOpenReview(order)}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "8px",
-                    justifyContent: "center",
-                  }}
-                >
-                  <MdStar /> Rate Order
-                </button>
-              )}
-
               {/* Show waiting message for paid orders */}
               {order.status === "paid" && (
                 <p
@@ -451,6 +475,7 @@ const MyOrders = () => {
                     <th>Quantity</th>
                     <th>Price</th>
                     <th>Total</th>
+                    {order.status === "delivered" && <th>Review</th>}
                   </tr>
                 </thead>
                 <tbody>
@@ -467,6 +492,63 @@ const MyOrders = () => {
                             (item.unit_price || item.price || 0) * item.quantity
                         )}
                       </td>
+                      {order.status === "delivered" && (
+                        <td>
+                          {reviewedFoods[item.foodId || item.id] ? (
+                            <button
+                              style={{
+                                background: "#6c757d",
+                                color: "white",
+                                border: "none",
+                                padding: "6px 12px",
+                                borderRadius: "4px",
+                                fontSize: "12px",
+                                cursor: "not-allowed",
+                                opacity: 0.6,
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "4px",
+                              }}
+                              disabled
+                            >
+                              <MdCheckCircle size={14} /> Reviewed
+                            </button>
+                          ) : (
+                            <button
+                              style={{
+                                background: "#ff9800",
+                                color: "white",
+                                border: "none",
+                                padding: "6px 12px",
+                                borderRadius: "4px",
+                                fontSize: "12px",
+                                cursor: "pointer",
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "4px",
+                                transition: "all 0.2s ease",
+                              }}
+                              onClick={() =>
+                                handleOpenReview(
+                                  item,
+                                  order.id,
+                                  order.restaurantId
+                                )
+                              }
+                              onMouseEnter={(e) => {
+                                e.target.style.background = "#f57c00";
+                                e.target.style.transform = "translateY(-1px)";
+                              }}
+                              onMouseLeave={(e) => {
+                                e.target.style.background = "#ff9800";
+                                e.target.style.transform = "translateY(0)";
+                              }}
+                            >
+                              <MdStar size={14} /> Rate
+                            </button>
+                          )}
+                        </td>
+                      )}
                     </tr>
                   ))}
                 </tbody>
@@ -483,14 +565,16 @@ const MyOrders = () => {
       )}
 
       {/* Review Modal */}
-      {showReviewModal && selectedOrder && (
+      {showReviewModal && selectedOrderItem && (
         <div
           className="review-modal-overlay"
           onClick={() => setShowReviewModal(false)}
         >
           <div className="review-modal" onClick={(e) => e.stopPropagation()}>
-            <h3>Rate Order</h3>
-            <p>Order #{selectedOrder.id || selectedOrder._id}</p>
+            <h3>Rate Food</h3>
+            <p style={{ fontSize: "16px", fontWeight: "600", color: "#333" }}>
+              {selectedOrderItem.name}
+            </p>
 
             <div className="rating-section">
               <label>Food Quality:</label>
@@ -518,7 +602,7 @@ const MyOrders = () => {
               <textarea
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
-                placeholder="Share your experience..."
+                placeholder="Share your experience with this dish..."
                 rows="4"
               />
             </div>

@@ -6,7 +6,8 @@ import { getImageUrl } from "@utils/imageHelper";
 import { FoodContext } from "../../Context/FoodContext";
 import { CategoryContext } from "../../Context/CategoryContext";
 import { AuthContext } from "../../Context/AuthContext";
-import { MdEdit, MdDelete, MdLocalOffer, MdAdd } from "react-icons/md";
+import { MdEdit, MdDelete, MdLocalOffer, MdAdd, MdStar } from "react-icons/md";
+import { FoodDetail } from "shared-ui";
 
 const List = () => {
   const { foodList, deleteFood, updateFood, loading } = useContext(FoodContext);
@@ -15,6 +16,8 @@ const List = () => {
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("All");
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showFoodDetail, setShowFoodDetail] = useState(false);
+  const [selectedFood, setSelectedFood] = useState(null);
   const [editFood, setEditFood] = useState({
     id: null,
     name: "",
@@ -227,7 +230,51 @@ const List = () => {
                 )}
               </div>
               <div className="food-info">
-                <h4>{food.name}</h4>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    marginBottom: "8px",
+                  }}
+                >
+                  <h4 style={{ margin: 0 }}>{food.name}</h4>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "4px",
+                      cursor: "pointer",
+                      padding: "4px 8px",
+                      background: "#fff3e0",
+                      borderRadius: "12px",
+                      transition: "all 0.2s ease",
+                    }}
+                    onClick={() => {
+                      setSelectedFood(food);
+                      setShowFoodDetail(true);
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = "#ffe0b2";
+                      e.currentTarget.style.transform = "scale(1.05)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = "#fff3e0";
+                      e.currentTarget.style.transform = "scale(1)";
+                    }}
+                  >
+                    <MdStar size={16} color="#ff9800" />
+                    <span
+                      style={{
+                        fontSize: "14px",
+                        fontWeight: "600",
+                        color: "#ff9800",
+                      }}
+                    >
+                      {(food.rating || 0).toFixed(1)}
+                    </span>
+                  </div>
+                </div>
                 <p className="food-category">{getCategoryName(food)}</p>
                 <div className="price-container">
                   <p className="food-price">
@@ -346,6 +393,20 @@ const List = () => {
             </form>
           </div>
         </div>
+      )}
+
+      {/* Food Detail Modal with Reviews */}
+      {showFoodDetail && selectedFood && (
+        <FoodDetail
+          food={selectedFood}
+          onClose={() => {
+            setShowFoodDetail(false);
+            setSelectedFood(null);
+          }}
+          userRole="restaurant"
+          currentUserId={currentUser?.id}
+          currentRestaurantId={currentUser?.restaurantId}
+        />
       )}
     </div>
   );

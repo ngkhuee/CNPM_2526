@@ -56,9 +56,9 @@ export const ENDPOINTS = {
 
   REVIEWS: {
     BASE: "/reviews",
-    BY_FOOD: (foodId) => `/reviews?foodId=${foodId}`,
-    BY_USER: (userId) => `/reviews?userId=${userId}`,
-    BY_RESTAURANT: (restaurantId) => `/reviews?restaurantId=${restaurantId}`,
+    BY_FOOD: (foodId) => `/reviews?food_id=${foodId}`,
+    BY_USER: (userId) => `/reviews?user_id=${userId}`,
+    BY_RESTAURANT: (restaurantId) => `/reviews?restaurant_id=${restaurantId}`,
   },
 
   PAYMENTS: {

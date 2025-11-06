@@ -149,6 +149,7 @@ const FoodDisplay = ({
               price={item.price}
               id={item._id}
               restaurant={item.restaurant}
+              restaurantId={item.restaurantId}
               rating={item.rating}
               sold={item.sold}
             />

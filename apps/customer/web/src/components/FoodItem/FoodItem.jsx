@@ -1,4 +1,5 @@
 import React, { useContext, useState } from "react";
+import ReactDOM from "react-dom";
 import "./FoodItem.css";
 import { assets } from "../../assets/assets";
 import { CartContext } from "customer-shared";
@@ -16,12 +17,23 @@ const FoodItem = ({
   restaurant,
   rating,
   sold,
+  restaurantId,
 }) => {
   const [showPopup, setShowPopup] = useState(false);
 
   const { cartItems, addToCart, removeFromCart } = useContext(CartContext);
 
-  const food = { id, image, name, price, description: desc };
+  const food = {
+    id,
+    image,
+    name,
+    price,
+    description: desc,
+    rating: rating || 0,
+    restaurant,
+    restaurantId,
+    sold: sold || 0,
+  };
   const imageUrl = getImageUrl(image); // Build full URL from backend path
 
   const openPopup = () => setShowPopup(true);
@@ -113,15 +125,17 @@ const FoodItem = ({
           <MdStorefront /> {restaurant}
         </p>
       </div>
-      {showPopup && (
-        <FoodDetailPopup
-          food={food}
-          onClose={closePopup}
-          addToCart={(itemId, qty) => {
-            addToCart(itemId, qty);
-          }}
-        />
-      )}
+      {showPopup &&
+        ReactDOM.createPortal(
+          <FoodDetailPopup
+            food={food}
+            onClose={closePopup}
+            addToCart={(itemId, qty) => {
+              addToCart(itemId, qty);
+            }}
+          />,
+          document.body
+        )}
     </div>
   );
 };
