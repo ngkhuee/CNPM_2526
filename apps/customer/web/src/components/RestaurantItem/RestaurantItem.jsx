@@ -1,6 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import "../FoodItem/FoodItem.css";
+import "./RestaurantItem.css";
 import { getImageUrl } from "@utils/imageHelper";
 import { MdStar, MdAccessTime } from "react-icons/md";
 
@@ -24,12 +25,12 @@ const RestaurantItem = ({
 
   return (
     <div
-      className="food-item"
+      className="restaurant-item"
       onClick={handleClick}
       style={{ cursor: "pointer" }}
     >
-      <div className="food-item-img-container">
-        <img className="food-item-image" src={imageUrl} alt={name} />
+      <div className="restaurant-item-img-container">
+        <img className="restaurant-item-image" src={imageUrl} alt={name} />
         {!isOpen && (
           <div
             style={{
@@ -40,7 +41,7 @@ const RestaurantItem = ({
               color: "white",
               padding: "4px 10px",
               borderRadius: "4px",
-              fontSize: "12px",
+              fontSize: "14px",
               fontWeight: "600",
             }}
           >
@@ -48,14 +49,14 @@ const RestaurantItem = ({
           </div>
         )}
       </div>
-      <div className="food-item-info">
-        <p className="food-item-name-rating">{name}</p>
+      <div className="restaurant-item-info">
+        <p className="restaurant-item-name-rating">{name}</p>
         {rating > 0 && (
           <div
             style={{
               fontSize: "14px",
               color: "#ff6b35",
-              marginBottom: "5px",
+              margin: "5px 0",
               display: "flex",
               alignItems: "center",
               gap: "6px",
@@ -72,7 +73,7 @@ const RestaurantItem = ({
             )}
           </div>
         )}
-        <p className="food-item-desc">{desc}</p>
+        <p className="restaurant-item-desc">{desc}</p>
       </div>
     </div>
   );

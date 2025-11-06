@@ -40,8 +40,10 @@ const Login = () => {
 
         // ✅ Validate user status from backend
         try {
+          const API_BASE_URL =
+            import.meta.env.VITE_API_BASE_URL || "http://localhost:4000";
           const userResponse = await fetch(
-            `http://localhost:3000/users/${response.user.id}`
+            `${API_BASE_URL}/users/${response.user.id}`
           );
 
           if (userResponse.ok) {
@@ -76,7 +78,7 @@ const Login = () => {
 
           // Check restaurant status
           const restaurantResponse = await fetch(
-            `http://localhost:3000/restaurants/${response.user.restaurantId}`
+            `${API_BASE_URL}/restaurants/${response.user.restaurantId}`
           );
 
           if (restaurantResponse.ok) {

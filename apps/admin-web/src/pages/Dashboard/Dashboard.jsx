@@ -111,7 +111,9 @@ const Dashboard = () => {
 
       {/* Revenue by Restaurant Table */}
       <div className="restaurant-revenue-section" style={{ marginTop: "60px" }}>
-        <h3 style={{ marginBottom: "30px" }}>Revenue by Restaurant (Top Performers)</h3>
+        <h3 style={{ marginBottom: "30px" }}>
+          Revenue by Restaurant (Top Performers)
+        </h3>
         {stats.revenueByRestaurant && stats.revenueByRestaurant.length > 0 ? (
           <table
             className="revenue-table"
@@ -215,7 +217,7 @@ const Dashboard = () => {
                     >
                       {restaurant.image && (
                         <img
-                          src={`http://localhost:4000${restaurant.image}`}
+                          src={`${import.meta.env.VITE_API_BASE_URL || "http://localhost:4000"}${restaurant.image}`}
                           alt={restaurant.name}
                           style={{
                             width: "40px",

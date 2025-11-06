@@ -53,8 +53,10 @@ const LoginPopup = ({ setShowLogin }) => {
 
           // ✅ Validate customer status from backend
           try {
+            const API_BASE_URL =
+              import.meta.env.VITE_API_BASE_URL || "http://localhost:4000";
             const userResponse = await fetch(
-              `http://localhost:3000/users/${currentUser.id}`
+              `${API_BASE_URL}/users/${currentUser.id}`
             );
 
             if (userResponse.ok) {

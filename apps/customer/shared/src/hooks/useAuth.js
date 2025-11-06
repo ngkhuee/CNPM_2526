@@ -17,8 +17,11 @@ export const useAuth = () => {
       if (savedToken && savedUser) {
         // ✅ Validate customer status from backend
         try {
+          // Use environment variable or fallback to localhost
+          const API_BASE_URL =
+            process.env.VITE_API_BASE_URL || "http://localhost:4000";
           const userResponse = await fetch(
-            `http://localhost:3000/users/${savedUser.id}`
+            `${API_BASE_URL}/users/${savedUser.id}`
           );
 
           if (userResponse.ok) {
