@@ -3,11 +3,12 @@ import { useParams } from "react-router-dom";
 import { useOrderTracking } from "customer-shared";
 import { formatCurrency } from "shared-utils";
 import "./Tracking.css";
-import { MdLocalShipping, MdCheckCircle } from "react-icons/md";
+import { MdLocalShipping, MdCheckCircle, MdRefresh } from "react-icons/md";
 
 const Tracking = () => {
   const { id } = useParams();
-  const { order, loading } = useOrderTracking(id);
+  const { order, loading, refetch } = useOrderTracking(id);
+  const [refreshing, setRefreshing] = useState(false);
 
   const [dronePosition, setDronePosition] = useState(null);
   const [droneProgress, setDroneProgress] = useState(0);
@@ -84,7 +85,44 @@ const Tracking = () => {
     <div className="tracking-page">
       {/* Order information */}
       <div className="tracking-info">
-        <h2>Đơn hàng #{order.id || order._id}</h2>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: "15px",
+          }}
+        >
+          <h2>Đơn hàng #{order.id || order._id}</h2>
+          <button
+            onClick={async () => {
+              setRefreshing(true);
+              try {
+                await refetch();
+                alert("Đã cập nhật trạng thái đơn hàng!");
+              } catch (error) {
+                console.error("Refresh error:", error);
+              } finally {
+                setRefreshing(false);
+              }
+            }}
+            disabled={refreshing}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              padding: "8px 12px",
+              background: "#4caf50",
+              color: "white",
+              border: "none",
+              borderRadius: "5px",
+              cursor: refreshing ? "not-allowed" : "pointer",
+              fontSize: "14px",
+            }}
+          >
+            <MdRefresh /> {refreshing ? "Đang tải..." : "Làm mới"}
+          </button>
+        </div>
 
         {/* Restaurant info */}
         {(order.restaurantName ||
@@ -123,7 +161,7 @@ const Tracking = () => {
             <span>Địa chỉ:</span> {order.customer?.address || "N/A"}
           </p>
           <p>
-            <span>Tổng tiền:</span> {formatCurrency(order.total_amount)}
+            <span>Tổng tiền:</span> {formatCurrency(order.totalAmount)}
           </p>
         </div>
       </div>

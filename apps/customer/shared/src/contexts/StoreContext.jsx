@@ -1,14 +1,15 @@
 import { createContext, useEffect, useState } from "react";
-import { foodService, restaurantService } from "@api/services";
+import { foodService, restaurantService, categoryService } from "@api/services";
 
 export const StoreContext = createContext(null);
 
-// StoreContext giờ CHỈ quản lý food_list và restaurant_list (data fetching only)
+// StoreContext CHỈ quản lý food_list và restaurant_list
 // Auth logic -> AuthContext
 // Cart logic -> CartContext
 const StoreContextProvider = (props) => {
   const [food_list, setFoodList] = useState([]);
   const [restaurant_list, setRestaurantList] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(false);
 
   // Fetch data on mount
@@ -24,13 +25,19 @@ const StoreContextProvider = (props) => {
       const foods = await foodService.getAll();
       const restaurants = await restaurantService.getAll();
 
+      // Fetch all categories from backend using categoryService
+      const allCategories = await categoryService.getAll();
+      setCategories(allCategories);
+
       // Enrich food data with restaurant name and category name
       const enrichedFoods = foods.map((food) => {
         const restaurant = restaurants.find((r) => r.id === food.restaurantId);
+        const category = allCategories.find((c) => c.id === food.categoryId);
         return {
           ...food,
           restaurant: restaurant?.name || "Unknown Restaurant",
-          category: food.categoryId,
+          category: category?.name || "Uncategorized",
+          categoryId: food.categoryId, // Keep original categoryId
         };
       });
 
@@ -56,6 +63,7 @@ const StoreContextProvider = (props) => {
   const contextValue = {
     food_list,
     restaurant_list,
+    categories,
     loading,
     fetchFoods,
     fetchRestaurants,

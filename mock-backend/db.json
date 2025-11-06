@@ -7,9 +7,7 @@
       "full_name": "Admin User",
       "phone": "0901111111",
       "avatar": "/images/avatars/admin.png",
-      "roles": [
-        "admin"
-      ],
+      "roles": ["admin"],
       "status": "active",
       "created_at": "2023-01-01T00:00:00.000Z",
       "updated_at": "2023-01-01T00:00:00.000Z"
@@ -21,9 +19,7 @@
       "full_name": "Customer User",
       "phone": "0902222222",
       "avatar": "/images/avatars/user.png",
-      "roles": [
-        "customer"
-      ],
+      "roles": ["customer"],
       "status": "active",
       "created_at": "2023-06-15T00:00:00.000Z",
       "updated_at": "2023-06-15T00:00:00.000Z"
@@ -34,10 +30,8 @@
       "password": "123",
       "full_name": "Belga Pizza Manager",
       "phone": "0901234567",
-      "avatar": "/images/avatars/restaurant.png",
-      "roles": [
-        "restaurant_owner"
-      ],
+      "avatar": "/images/restaurants/menu_1.png",
+      "roles": ["restaurant_owner"],
       "restaurant_id": "r1",
       "status": "active",
       "created_at": "2020-01-01T00:00:00.000Z",
@@ -49,10 +43,8 @@
       "password": "123",
       "full_name": "Lotteria Manager",
       "phone": "0902345678",
-      "avatar": "/images/avatars/restaurant.png",
-      "roles": [
-        "restaurant_owner"
-      ],
+      "avatar": "/images/restaurants/menu_2.png",
+      "roles": ["restaurant_owner"],
       "restaurant_id": "r2",
       "status": "active",
       "created_at": "2015-09-01T00:00:00.000Z",
@@ -64,10 +56,8 @@
       "password": "123",
       "full_name": "Pizza 4P's Manager",
       "phone": "0903456789",
-      "avatar": "/images/avatars/restaurant.png",
-      "roles": [
-        "restaurant_owner"
-      ],
+      "avatar": "/images/restaurants/menu_3.png",
+      "roles": ["restaurant_owner"],
       "restaurant_id": "r3",
       "status": "active",
       "created_at": "2021-11-15T00:00:00.000Z",
@@ -79,10 +69,8 @@
       "password": "123",
       "full_name": "Texas Chicken Manager",
       "phone": "0904567890",
-      "avatar": "/images/avatars/restaurant.png",
-      "roles": [
-        "restaurant_owner"
-      ],
+      "avatar": "/images/restaurants/menu_4.png",
+      "roles": ["restaurant_owner"],
       "restaurant_id": "r4",
       "status": "active",
       "created_at": "2010-01-01T00:00:00.000Z",
@@ -94,10 +82,8 @@
       "password": "123",
       "full_name": "Today With You Manager",
       "phone": "0905678901",
-      "avatar": "/images/avatars/restaurant.png",
-      "roles": [
-        "restaurant_owner"
-      ],
+      "avatar": "/images/restaurants/menu_5.png",
+      "roles": ["restaurant_owner"],
       "restaurant_id": "r5",
       "status": "active",
       "created_at": "2025-10-01T00:00:00.000Z",
@@ -109,10 +95,8 @@
       "password": "123",
       "full_name": "Burger King Manager",
       "phone": "0906789012",
-      "avatar": "/images/avatars/restaurant.png",
-      "roles": [
-        "restaurant_owner"
-      ],
+      "avatar": "/images/restaurants/menu_6.png",
+      "roles": ["restaurant_owner"],
       "restaurant_id": "r6",
       "status": "active",
       "created_at": "2022-01-01T00:00:00.000Z",
@@ -895,6 +879,14 @@
       "type": "string",
       "category": "urls",
       "updated_at": "2025-01-01T00:00:00.000Z"
+    }
+  ],
+  "carts": [
+    {
+      "user_id": "u2",
+      "items": [],
+      "updated_at": "2025-11-05T15:50:07.443Z",
+      "id": 1
     }
   ]
 }

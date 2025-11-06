@@ -123,7 +123,9 @@ export const useCart = (user) => {
       for (const item in cartItems) {
         if (cartItems[item] > 0) {
           let itemInfo = food_list.find(
-            (product) => String(product.id) === String(item)
+            (product) =>
+              String(product.id) === String(item) ||
+              String(product._id) === String(item)
           );
           if (itemInfo) {
             totalAmount += itemInfo.price * cartItems[item];

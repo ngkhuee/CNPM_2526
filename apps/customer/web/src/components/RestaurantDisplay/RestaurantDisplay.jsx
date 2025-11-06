@@ -97,20 +97,41 @@ const RestaurantDisplay = ({
       )}
 
       <div className="food-display-list">
-        {filteredRestaurants.map((item) => (
-          <RestaurantItem
-            key={item._id}
-            image={item.image} //  ảnh đại diện restaurant
-            name={item.restaurant}
-            desc={
-              <span
-                style={{ display: "flex", alignItems: "center", gap: "4px" }}
-              >
-                <MdRestaurant /> {item.category} • Opened: {item.openedAt}
-              </span>
-            }
-          />
-        ))}
+        {filteredRestaurants.map((item) => {
+          const distance =
+            userLocation && item.location
+              ? getDistance(userLocation, item.location)
+              : null;
+          return (
+            <RestaurantItem
+              key={item._id || item.id}
+              image={item.image}
+              name={item.name}
+              desc={
+                <span
+                  style={{ display: "flex", alignItems: "center", gap: "4px" }}
+                >
+                  <MdRestaurant /> {item.category} • Rating: {item.rating || 0}
+                  ⭐
+                  {distance !== null && (
+                    <span
+                      style={{
+                        marginLeft: "8px",
+                        background: "#4caf50",
+                        color: "white",
+                        padding: "2px 8px",
+                        borderRadius: "12px",
+                        fontSize: "12px",
+                      }}
+                    >
+                      {distance.toFixed(1)} km
+                    </span>
+                  )}
+                </span>
+              }
+            />
+          );
+        })}
       </div>
     </div>
   );

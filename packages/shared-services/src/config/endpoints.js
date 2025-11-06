@@ -44,10 +44,8 @@ export const ENDPOINTS = {
 
   CART: {
     BASE: "/carts",
-    BY_USER: (userId) => `/carts?userId=${userId}`,
-    ADD_ITEM: (userId) => `/carts/${userId}/add`,
-    REMOVE_ITEM: (userId, foodId) => `/carts/${userId}/items/${foodId}`,
-    CLEAR: (userId) => `/carts/${userId}/clear`,
+    BY_USER: (userId) => `/carts?user_id=${userId}`,
+    BY_ID: (id) => `/carts/${id}`,
   },
 
   PROMOTIONS: {

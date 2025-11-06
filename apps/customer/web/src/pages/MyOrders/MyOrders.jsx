@@ -10,10 +10,12 @@ import {
   MdStarBorder,
   MdCheckCircle,
   MdError,
+  MdRefresh,
 } from "react-icons/md";
 
 const MyOrders = () => {
-  const { orders } = useContext(OrderContext);
+  const { orders, fetchOrders } = useContext(OrderContext);
+  const [refreshing, setRefreshing] = useState(false);
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
   const [showReviewModal, setShowReviewModal] = useState(false);
@@ -40,7 +42,7 @@ const MyOrders = () => {
         console.log(
           `🔔 Order #${order.id} confirmed! Redirecting to tracking...`
         );
-        alert(`Đơn hàng #${order.id} đã được xác nhận! 🎉`);
+        alert(`Order #${order.id} has been confirmed! 🎉`);
         navigate(`/tracking/${order.id}`);
       }
     });
@@ -69,21 +71,61 @@ const MyOrders = () => {
         comment,
       });
 
-      alert("Cảm ơn bạn đã đánh giá!");
+      alert("Thank you for your review!");
       setShowReviewModal(false);
       setSelectedOrder(null);
     } catch (error) {
       console.error("Error submitting review:", error);
-      alert("Lỗi gửi đánh giá");
+      alert("Error submitting review");
     } finally {
       setSubmitting(false);
     }
   };
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    try {
+      await fetchOrders();
+      alert("Order list updated!");
+    } catch (error) {
+      console.error("Refresh error:", error);
+      alert("Error loading orders");
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
   return (
     <div className="myorders">
-      <h2>My Orders</h2>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
+        <h2>My Orders</h2>
+        <button
+          onClick={handleRefresh}
+          disabled={refreshing}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+            padding: "10px 15px",
+            background: "#4caf50",
+            color: "white",
+            border: "none",
+            borderRadius: "5px",
+            cursor: refreshing ? "not-allowed" : "pointer",
+            fontSize: "14px",
+          }}
+        >
+          <MdRefresh /> {refreshing ? "Đang tải..." : "Làm mới"}
+        </button>
+      </div>
       {orders.length === 0 ? (
-        <p>Bạn chưa có đơn hàng nào.</p>
+        <p>You have no orders yet.</p>
       ) : (
         orders.map((order) => (
           <div key={order.id || order._id} className="order-card">
@@ -100,7 +142,7 @@ const MyOrders = () => {
                   marginBottom: "8px",
                 }}
               >
-                <b>🍽️ Nhà hàng:</b>{" "}
+                <b>🍽️ Restaurant:</b>{" "}
                 {order.restaurantName ||
                   order.restaurant?.name ||
                   `Restaurant ID: ${order.restaurantId}`}
@@ -108,7 +150,7 @@ const MyOrders = () => {
             )}
 
             <p>
-              <b>Trạng thái:</b> {order.status}
+              <b>Status:</b> {order.status}
             </p>
             <p>
               <b>Ngày đặt:</b> {order.createdAt || order.created_at}
@@ -140,7 +182,7 @@ const MyOrders = () => {
                   justifyContent: "center",
                 }}
               >
-                <MdLocationOn /> Theo dõi đơn hàng
+                <MdLocationOn /> Track Order
               </button>
 
               {order.status === "delivered" && (
@@ -154,7 +196,7 @@ const MyOrders = () => {
                     justifyContent: "center",
                   }}
                 >
-                  <MdStar /> Đánh giá
+                  <MdStar /> Rate Order
                 </button>
               )}
             </div>
@@ -163,10 +205,10 @@ const MyOrders = () => {
               <table>
                 <thead>
                   <tr>
-                    <th>Món ăn</th>
-                    <th>Số lượng</th>
-                    <th>Giá</th>
-                    <th>Tổng</th>
+                    <th>Item</th>
+                    <th>Quantity</th>
+                    <th>Price</th>
+                    <th>Total</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -183,7 +225,7 @@ const MyOrders = () => {
             )}
 
             <p className="order-total">
-              <b>Tổng tiền:</b> {formatCurrency(order.total_amount)}
+              <b>Total:</b> {formatCurrency(order.totalAmount)}
             </p>
             <hr />
           </div>
@@ -197,8 +239,8 @@ const MyOrders = () => {
           onClick={() => setShowReviewModal(false)}
         >
           <div className="review-modal" onClick={(e) => e.stopPropagation()}>
-            <h3>Đánh giá đơn hàng</h3>
-            <p>Đơn hàng #{selectedOrder.id || selectedOrder._id}</p>
+            <h3>Rate Order</h3>
+            <p>Order #{selectedOrder.id || selectedOrder._id}</p>
 
             <div className="rating-section">
               <label>Chất lượng món ăn:</label>
@@ -233,9 +275,9 @@ const MyOrders = () => {
 
             <div className="modal-actions">
               <button onClick={handleSubmitReview} disabled={submitting}>
-                {submitting ? "Đang gửi..." : "Gửi đánh giá"}
+                {submitting ? "Submitting..." : "Submit Review"}
               </button>
-              <button onClick={() => setShowReviewModal(false)}>Hủy</button>
+              <button onClick={() => setShowReviewModal(false)}>Cancel</button>
             </div>
           </div>
         </div>

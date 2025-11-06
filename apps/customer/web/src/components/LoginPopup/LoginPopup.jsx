@@ -50,6 +50,9 @@ const LoginPopup = ({ setShowLogin }) => {
           // AuthContext handles token and user state
           const currentUser = JSON.parse(localStorage.getItem("user"));
 
+          // Close popup first
+          setShowLogin(false);
+
           // Route based on role
           if (currentUser.role === "admin") {
             // Use environment variable for admin URL
@@ -61,8 +64,6 @@ const LoginPopup = ({ setShowLogin }) => {
           } else {
             alert(`Đăng nhập thành công! Xin chào ${currentUser.name}`);
           }
-
-          setShowLogin(false);
         } else {
           alert(response.message || "Email hoặc mật khẩu không đúng!");
         }

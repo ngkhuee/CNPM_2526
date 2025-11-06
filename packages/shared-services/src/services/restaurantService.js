@@ -37,7 +37,6 @@ export const restaurantService = {
         status: restaurant.status || "active",
         deliveryTime: restaurant.delivery_time_minutes,
         minOrderAmount: restaurant.min_order_amount,
-        openingHours: restaurant.opening_hours,
         createdAt: restaurant.created_at,
         updatedAt: restaurant.updated_at,
       }));
@@ -82,7 +81,6 @@ export const restaurantService = {
         status: response.status || "active",
         deliveryTime: response.delivery_time_minutes,
         minOrderAmount: response.min_order_amount,
-        openingHours: response.opening_hours,
         createdAt: response.created_at,
         updatedAt: response.updated_at,
       };
@@ -147,8 +145,6 @@ export const restaurantService = {
         primary_category: restaurantData.category,
         image: restaurantData.image,
         banner_image: restaurantData.banner || restaurantData.banner_image,
-        opening_hours:
-          restaurantData.openingHours || restaurantData.opening_hours,
         is_open: restaurantData.isOpen,
         status: restaurantData.status,
         delivery_time_minutes: restaurantData.deliveryTime,
