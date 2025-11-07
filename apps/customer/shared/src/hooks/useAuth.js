@@ -15,13 +15,22 @@ export const useAuth = () => {
       const savedUser = authService.getCurrentUser();
 
       if (savedToken && savedUser) {
-        // ✅ Validate customer status from backend
+        // Set user first to avoid blank screen
+        setToken(savedToken);
+        setUser(savedUser);
+
+        // Validate customer status from backend (non-blocking)
         try {
           // Use environment variable or fallback to localhost
           const API_BASE_URL =
             process.env.VITE_API_BASE_URL || "http://localhost:4000";
           const userResponse = await fetch(
-            `${API_BASE_URL}/users/${savedUser.id}`
+            `${API_BASE_URL}/users/${savedUser.id}`,
+            {
+              headers: {
+                Authorization: `Bearer ${savedToken}`,
+              },
+            }
           );
 
           if (userResponse.ok) {
@@ -39,26 +48,13 @@ export const useAuth = () => {
               return;
             }
           } else {
-            console.warn("Cannot validate user status, logging out...");
-            authService.logout();
-            setToken("");
-            setUser(null);
-            setInitialized(true);
-            return;
+            // Don't logout on network error during initialization
+            console.warn("Cannot validate user status on init, continuing...");
           }
         } catch (error) {
-          console.error("Error validating customer status:", error);
-          // If validation fails, logout for security
-          authService.logout();
-          setToken("");
-          setUser(null);
-          setInitialized(true);
-          return;
+          // Don't logout on network error during initialization
+          console.error("Error validating customer status on init:", error);
         }
-
-        // All checks passed
-        setToken(savedToken);
-        setUser(savedUser);
       }
       setInitialized(true);
     };

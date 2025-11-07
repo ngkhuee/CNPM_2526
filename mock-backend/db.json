@@ -125,7 +125,7 @@
       "name": "abc test 2",
       "phone": "",
       "role": "customer",
-      "status": "active",
+      "status": "blocked",
       "createdAt": "2025-11-06T08:13:14.526Z"
     },
     {
@@ -1228,13 +1228,8 @@
   "carts": [
     {
       "user_id": "u2",
-      "items": [
-        {
-          "foodId": 8,
-          "quantity": 1
-        }
-      ],
-      "updated_at": "2025-11-06T07:59:05.001Z",
+      "items": [],
+      "updated_at": "2025-11-07T01:54:17.023Z",
       "id": 1
     },
     {

@@ -74,7 +74,13 @@ const generateLast7DaysData = (orders) => {
     const dayRevenue = dayOrders
       .filter((o) => o.status === "delivered")
       .reduce(
-        (sum, order) => sum + (order.total_amount || order.totalAmount || 0),
+        (sum, order) =>
+          sum +
+          (order.total_amount ||
+            order.totalAmount ||
+            order.total ||
+            order.amount ||
+            0),
         0
       );
 

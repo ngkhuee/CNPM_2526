@@ -30,21 +30,33 @@ apiClient.interceptors.response.use(
   (response) => response.data,
   (error) => {
     if (error.response?.status === 401) {
-      // Clear auth data
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
+      // List of public endpoints that don't require auth
+      const publicEndpoints = [
+        "/auth/login",
+        "/auth/register",
+        "/foods",
+        "/menus",
+        "/restaurants",
+        "/categories",
+        "/promotions",
+      ];
 
-      // Don't force redirect - let components handle it
-      // This prevents infinite refresh loops
-      console.warn("Unauthorized - Please login");
+      const requestUrl = error.config?.url || "";
+      const isPublicEndpoint = publicEndpoints.some((endpoint) =>
+        requestUrl.includes(endpoint)
+      );
 
-      // Only redirect if not already on login/home page
-      if (
-        window.location.pathname !== "/" &&
-        window.location.pathname !== "/login"
-      ) {
-        // Use React Router navigation instead of hard reload
-        // Components should handle auth state changes
+      // Only clear auth data if NOT a public endpoint
+      if (!isPublicEndpoint) {
+        console.warn("Unauthorized - Clearing auth data");
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+
+        // Don't force redirect - let components handle it
+        // This prevents infinite refresh loops
+        console.warn("Unauthorized - Please login");
+      } else {
+        console.warn("401 on public endpoint, ignoring:", requestUrl);
       }
     }
 

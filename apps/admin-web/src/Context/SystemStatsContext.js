@@ -192,7 +192,12 @@ export const SystemStatsProvider = ({ children }) => {
         .filter((o) => o.status === "delivered")
         .reduce(
           (sum, order) =>
-            sum + (order.total_amount || order.total || order.amount || 0),
+            sum +
+            (order.total_amount ||
+              order.totalAmount ||
+              order.total ||
+              order.amount ||
+              0),
           0
         );
 
