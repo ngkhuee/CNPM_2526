@@ -175,7 +175,7 @@ const Category = () => {
                       className="edit-btn"
                       onClick={() => handleOpenEditModal(cat)}
                     >
-                      <MdEdit />
+                      <MdEdit size={18} />
                     </button>
                     <button
                       className="delete-btn"

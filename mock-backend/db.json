@@ -208,6 +208,38 @@
       "created_at": "2025-11-06T08:15:15.916Z",
       "updated_at": "2025-11-06T08:15:15.916Z",
       "id": "XoAQJGu"
+    },
+    {
+      "user_id": "u2",
+      "full_address": "Hẻm 8 Nguyễn Trãi, Phường Chợ Quán, Thành phố Thủ Đức, Thành phố Hồ Chí Minh, 72760, Việt Nam",
+      "address_line": "Hẻm 8 Nguyễn Trãi, Phường Chợ Quán, Thành phố Thủ Đức, Thành phố Hồ Chí Minh, 72760, Việt Nam",
+      "street": "",
+      "ward": "",
+      "district": "",
+      "city": "",
+      "phone": "0902222222",
+      "latitude": 10.758976,
+      "longitude": 106.6819026,
+      "is_default": false,
+      "created_at": "2025-11-07T01:55:56.238Z",
+      "updated_at": "2025-11-07T01:55:56.238Z",
+      "id": "fCGWrRz"
+    },
+    {
+      "user_id": "u2",
+      "full_address": "Hẻm 8 Nguyễn Trãi, Phường Chợ Quán, Thành phố Thủ Đức, Thành phố Hồ Chí Minh, 72760, Việt Nam",
+      "address_line": "Hẻm 8 Nguyễn Trãi, Phường Chợ Quán, Thành phố Thủ Đức, Thành phố Hồ Chí Minh, 72760, Việt Nam",
+      "street": "",
+      "ward": "",
+      "district": "",
+      "city": "",
+      "phone": "0902222222",
+      "latitude": 10.7589925,
+      "longitude": 106.6819278,
+      "is_default": false,
+      "created_at": "2025-11-07T02:32:18.943Z",
+      "updated_at": "2025-11-07T02:32:18.943Z",
+      "id": "uxwGKL6"
     }
   ],
   "restaurants": [
@@ -528,6 +560,24 @@
       "created_at": "2025-11-06T08:18:25.248Z",
       "updated_at": "2025-11-06T08:18:25.248Z",
       "id": "kxtnIHw"
+    },
+    {
+      "name": "Cake",
+      "description": "",
+      "status": "active",
+      "restaurant_id": "r6",
+      "created_at": "2025-11-07T02:39:12.381Z",
+      "updated_at": "2025-11-07T02:39:12.381Z",
+      "id": "F2NKJis"
+    },
+    {
+      "name": "Salad",
+      "description": "",
+      "status": "active",
+      "restaurant_id": "r6",
+      "created_at": "2025-11-07T02:40:24.717Z",
+      "updated_at": "2025-11-07T02:40:24.717Z",
+      "id": "AgyQjzX"
     }
   ],
   "menus": [
@@ -768,41 +818,41 @@
     {
       "id": 19,
       "restaurant_id": "r6",
-      "category_id": null,
-      "name": "Whopper Burger",
+      "category_id": "F2NKJis",
+      "name": "Blueberry Cake",
       "description": "Signature flame-grilled burger",
       "price": 89000,
       "image": "/images/foods/food_19.png",
       "is_available": true,
       "preparation_time_minutes": 8,
       "created_at": "2024-01-01T00:00:00.000Z",
-      "updated_at": "2024-01-01T00:00:00.000Z"
+      "updated_at": "2025-11-07T02:39:36.294Z"
     },
     {
       "id": 20,
       "restaurant_id": "r6",
-      "category_id": null,
-      "name": "Cheese Burger",
+      "category_id": "F2NKJis",
+      "name": "Cheese Cake",
       "description": "Classic burger with cheese",
       "price": 75000,
       "image": "/images/foods/food_20.png",
       "is_available": true,
       "preparation_time_minutes": 7,
       "created_at": "2024-01-01T00:00:00.000Z",
-      "updated_at": "2024-01-01T00:00:00.000Z"
+      "updated_at": "2025-11-07T02:40:00.206Z"
     },
     {
       "id": 21,
       "restaurant_id": "r6",
-      "category_id": null,
-      "name": "Double Whopper",
+      "category_id": "AgyQjzX",
+      "name": "Vegetable Salad",
       "description": "Double beef patty with all the fixings",
       "price": 129000,
       "image": "/images/foods/food_21.png",
       "is_available": true,
       "preparation_time_minutes": 10,
       "created_at": "2024-01-01T00:00:00.000Z",
-      "updated_at": "2024-01-01T00:00:00.000Z"
+      "updated_at": "2025-11-07T02:40:56.365Z"
     }
   ],
   "orders": [
@@ -918,6 +968,78 @@
       "created_at": "2025-11-06T08:15:16.052Z",
       "updated_at": "2025-11-06T08:25:57.158Z",
       "id": "rty8-9M"
+    },
+    {
+      "user_id": "u2",
+      "restaurant_id": "r4",
+      "address_id": "fCGWrRz",
+      "items": [
+        {
+          "menu_id": 13,
+          "name": "Texas Fried Chicken",
+          "quantity": 1,
+          "unit_price": 95000,
+          "subtotal": 95000
+        }
+      ],
+      "subtotal": 95000,
+      "delivery_fee": 0,
+      "discount_amount": 0,
+      "total_amount": 95000,
+      "payment_method": "online",
+      "status": "ready",
+      "payment_status": "pending",
+      "special_instructions": "",
+      "customer": {
+        "name": "abc",
+        "phone": "0902222222",
+        "address": "Hẻm 8 Nguyễn Trãi, Phường Chợ Quán, Thành phố Thủ Đức, Thành phố Hồ Chí Minh, 72760, Việt Nam"
+      },
+      "dropoff_gps": {
+        "lat": 10.758976,
+        "lng": 106.6819026
+      },
+      "order_number": "ORD-1762480556380",
+      "created_at": "2025-11-07T01:55:56.380Z",
+      "updated_at": "2025-11-07T01:57:43.473Z",
+      "id": "cdNemGJ"
+    },
+    {
+      "user_id": "u2",
+      "restaurant_id": "r6",
+      "address_id": "uxwGKL6",
+      "items": [
+        {
+          "menu_id": 19,
+          "name": "Whopper Burger",
+          "quantity": 1,
+          "unit_price": 89000,
+          "subtotal": 89000
+        }
+      ],
+      "subtotal": 89000,
+      "delivery_fee": 0,
+      "discount_amount": 0,
+      "total_amount": 89000,
+      "payment_method": "online",
+      "status": "delivered",
+      "payment_status": "pending",
+      "special_instructions": "",
+      "customer": {
+        "name": "abc",
+        "phone": "0902222222",
+        "address": "Hẻm 8 Nguyễn Trãi, Phường Chợ Quán, Thành phố Thủ Đức, Thành phố Hồ Chí Minh, 72760, Việt Nam"
+      },
+      "dropoff_gps": {
+        "lat": 10.7589925,
+        "lng": 106.6819278
+      },
+      "order_number": "ORD-1762482739076",
+      "created_at": "2025-11-07T02:32:19.076Z",
+      "updated_at": "2025-11-07T02:35:12.521Z",
+      "id": "Pp7QYVs",
+      "drone_id": "drone2",
+      "actual_delivery_time": "2025-11-07T02:35:12.521Z"
     }
   ],
   "order_tracking": [
@@ -1081,13 +1203,22 @@
       "restaurant_reply": "We're glad you loved it!",
       "created_at": "2025-10-20T00:00:00.000Z",
       "updated_at": "2025-10-20T00:00:00.000Z"
+    },
+    {
+      "user_id": "u2",
+      "restaurant_id": "r6",
+      "order_id": "Pp7QYVs",
+      "rating": 5,
+      "comment": "Delicious meal!",
+      "created_at": "2025-11-07T02:36:58.452Z",
+      "id": "8rvijQL"
     }
   ],
   "drones": [
     {
       "id": "drone1",
       "identifier": "Drone 1",
-      "status": "available",
+      "status": "busy",
       "battery_level": 85,
       "latitude": 10.77,
       "longitude": 106.68,
@@ -1096,18 +1227,18 @@
         "lng": 106.68
       },
       "max_weight_kg": 5,
-      "assigned_order_id": null,
+      "assigned_order_id": "cdNemGJ",
       "last_maintenance": "2025-11-01T00:00:00.000Z",
       "created_at": "2025-01-01T00:00:00.000Z",
-      "updated_at": "2025-11-05T13:01:10.613Z"
+      "updated_at": "2025-11-07T01:57:02.452Z"
     },
     {
       "id": "drone2",
       "identifier": "Drone 2",
       "status": "available",
       "battery_level": 65,
-      "latitude": 10.7867737,
-      "longitude": 106.7001522,
+      "latitude": 10.7589925,
+      "longitude": 106.6819278,
       "current_location": {
         "lat": 10.77,
         "lng": 106.68
@@ -1116,7 +1247,7 @@
       "assigned_order_id": null,
       "last_maintenance": "2025-10-28T00:00:00.000Z",
       "created_at": "2025-01-01T00:00:00.000Z",
-      "updated_at": "2025-11-06T06:35:31.618Z"
+      "updated_at": "2025-11-07T02:35:12.614Z"
     },
     {
       "id": "drone3",
@@ -1229,7 +1360,7 @@
     {
       "user_id": "u2",
       "items": [],
-      "updated_at": "2025-11-07T01:54:17.023Z",
+      "updated_at": "2025-11-07T02:32:19.161Z",
       "id": 1
     },
     {

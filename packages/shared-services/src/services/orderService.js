@@ -261,20 +261,38 @@ export const orderService = {
 
   async update(id, orderData) {
     try {
-      // Map frontend to backend
+      // Map frontend to backend - only include fields that are explicitly provided
       const payload = {
-        status: orderData.status,
-        drone_id: orderData.droneId,
-        special_instructions: orderData.specialInstructions,
-        estimated_delivery_time: orderData.estimatedDeliveryTime,
-        actual_delivery_time: orderData.actualDeliveryTime,
         updated_at: new Date().toISOString(),
       };
 
-      // Remove undefined values
-      Object.keys(payload).forEach(
-        (key) => payload[key] === undefined && delete payload[key]
-      );
+      // Only add fields if they exist in orderData
+      if (orderData.status !== undefined) {
+        payload.status = orderData.status;
+      }
+      if (orderData.droneId !== undefined) {
+        payload.drone_id = orderData.droneId;
+      }
+      if (orderData.drone_id !== undefined) {
+        payload.drone_id = orderData.drone_id;
+      }
+      if (orderData.specialInstructions !== undefined) {
+        payload.special_instructions = orderData.specialInstructions;
+      }
+      if (orderData.estimatedDeliveryTime !== undefined) {
+        payload.estimated_delivery_time = orderData.estimatedDeliveryTime;
+      }
+      if (orderData.actualDeliveryTime !== undefined) {
+        payload.actual_delivery_time = orderData.actualDeliveryTime;
+      }
+      if (orderData.rejection_reason !== undefined) {
+        payload.rejection_reason = orderData.rejection_reason;
+      }
+      if (orderData.rejected_at !== undefined) {
+        payload.rejected_at = orderData.rejected_at;
+      }
+
+      console.log(`📝 Updating order ${id} with payload:`, payload);
 
       const response = await apiClient.patch(
         ENDPOINTS.ORDERS.BY_ID(id),
