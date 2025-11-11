@@ -71,6 +71,9 @@
 }
 .cart-items-remove-icon {
   cursor: pointer;
+  align-items: center;
+  font-size: 22px;
+  color: red;
 }
 .cart-bottom {
   margin-top: 80px;

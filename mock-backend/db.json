@@ -1359,8 +1359,13 @@
   "carts": [
     {
       "user_id": "u2",
-      "items": [],
-      "updated_at": "2025-11-07T02:32:19.161Z",
+      "items": [
+        {
+          "foodId": 19,
+          "quantity": 1
+        }
+      ],
+      "updated_at": "2025-11-07T10:05:27.836Z",
       "id": 1
     },
     {

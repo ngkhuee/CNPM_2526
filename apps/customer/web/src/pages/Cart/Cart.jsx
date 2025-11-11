@@ -82,7 +82,7 @@ const Cart = () => {
     <div className="cart">
       <div className="cart-items">
         <div className="cart-items-title">
-          <p>Item #</p> <p>Items</p> <p>Title</p> <p>Price</p> <p>Quantity</p>{" "}
+          <p>Items</p> <p>Title</p> <p>Price</p> <p>Quantity</p>{" "}
           <p>Total</p> <p>Remove</p>
         </div>
         <br />
@@ -119,7 +119,7 @@ const Cart = () => {
               <div key={index}>
                 <div className="cart-items-title cart-items-item">
                   <p>{index + 1}</p>
-                  <img src={item.image} alt="" />
+                  {/* <img src={item.image} alt="" /> */}
                   <p>{item.name}</p>
                   <p>{formatCurrency(item.price)}</p>
                   <div className="quantity-controls">
