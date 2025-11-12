@@ -1,7 +1,6 @@
 // src/Context/CategoryContext.js
 import React, { createContext, useState, useEffect } from "react";
-import { toast } from "react-toastify";
-import { categoryService } from "@api/services";
+import { categoryService, authService } from "shared-services";
 
 export const CategoryContext = createContext();
 
@@ -9,101 +8,103 @@ export const CategoryProvider = ({ children }) => {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // Fetch categories for specific restaurant
+  // Fetch categories for current restaurant on mount
+  useEffect(() => {
+    const user = authService.getCurrentUser();
+    if (user?.role === "restaurant" && user?.restaurantId && /^r\d+$/.test(user.restaurantId)) {
+      fetchCategories(user.restaurantId);
+    }
+  }, []);
+
+  // Fetch categories
   const fetchCategories = async (restaurantId = null) => {
     setLoading(true);
     try {
       const data = restaurantId
         ? await categoryService.getByRestaurant(restaurantId)
         : await categoryService.getAll();
-      setCategories(data);
+      setCategories(data || []);
+      return { success: true, data };
     } catch (error) {
       console.error("Error fetching categories:", error);
-      toast.error("Failed to load categories");
+      setCategories([]);
+      return { success: false, error: error.message };
     } finally {
       setLoading(false);
     }
   };
 
-  // Add new category
+  // Add category
   const addCategory = async (categoryData) => {
-    setLoading(true);
     try {
-      const newCategory = await categoryService.create(categoryData);
-      setCategories((prev) => [...prev, newCategory]);
-      toast.success("Category created successfully!");
-      return { success: true, data: newCategory };
+      const currentUser = authService.getCurrentUser();
+      if (!currentUser) {
+        return { success: false, message: "User not authenticated" };
+      }
+
+      const payload = {
+        ...categoryData,
+        restaurantId: currentUser.restaurantId,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+
+      const result = await categoryService.create(payload);
+      if (result) {
+        await fetchCategories(currentUser.restaurantId);
+        return { success: true, data: result };
+      }
+      return { success: false, message: "Failed to create category" };
     } catch (error) {
       console.error("Error adding category:", error);
-      toast.error("Error creating category");
-      return { success: false, error: error.message };
-    } finally {
-      setLoading(false);
+      return { success: false, message: error.message };
     }
   };
 
   // Update category
-  const updateCategory = async (id, updatedData) => {
-    setLoading(true);
+  const updateCategory = async (categoryId, categoryData) => {
     try {
-      const updated = await categoryService.update(id, updatedData);
-      setCategories((prev) =>
-        prev.map((cat) => (cat.id === id ? updated : cat))
-      );
-      toast.success("Category updated successfully!");
-      return { success: true, data: updated };
+      const currentUser = authService.getCurrentUser();
+      const payload = {
+        ...categoryData,
+        updated_at: new Date().toISOString(),
+      };
+
+      const result = await categoryService.update(categoryId, payload);
+      if (result) {
+        await fetchCategories(currentUser?.restaurantId);
+        return { success: true, data: result };
+      }
+      return { success: false, message: "Failed to update category" };
     } catch (error) {
       console.error("Error updating category:", error);
-      toast.error("Error updating category");
-      return { success: false, error: error.message };
-    } finally {
-      setLoading(false);
+      return { success: false, message: error.message };
     }
   };
 
   // Delete category
-  const deleteCategory = async (id) => {
-    setLoading(true);
+  const deleteCategory = async (categoryId) => {
     try {
-      await categoryService.delete(id);
-      setCategories((prev) => prev.filter((cat) => cat.id !== id));
-      toast.success("Category deleted successfully!");
-      return { success: true };
+      const currentUser = authService.getCurrentUser();
+      const result = await categoryService.delete(categoryId);
+      if (result) {
+        await fetchCategories(currentUser?.restaurantId);
+        return { success: true };
+      }
+      return { success: false, message: "Failed to delete category" };
     } catch (error) {
       console.error("Error deleting category:", error);
-      toast.error("Error deleting category");
-      return { success: false, error: error.message };
-    } finally {
-      setLoading(false);
+      return { success: false, message: error.message };
     }
   };
-
-  // Get category by ID
-  const getCategoryById = (id) => {
-    return categories.find((cat) => cat.id === id);
-  };
-
-  // Fetch categories on mount (with restaurantId from localStorage)
-  useEffect(() => {
-    const user = JSON.parse(localStorage.getItem("user") || "{}");
-    // Only fetch if user has valid restaurantId and role
-    if (
-      user.role === "restaurant" &&
-      user.restaurantId &&
-      /^r\d+$/.test(user.restaurantId)
-    ) {
-      fetchCategories(user.restaurantId);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Run only once
 
   const contextValue = {
     categories,
+    setCategories,
     fetchCategories,
     addCategory,
     updateCategory,
     deleteCategory,
-    getCategoryById,
     loading,
   };
 

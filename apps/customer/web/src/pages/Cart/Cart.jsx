@@ -9,7 +9,7 @@ import {
   usePromotions,
   useSettings,
 } from "customer-shared";
-import { formatCurrency } from "shared-utils";
+import { formatCurrency, isRestaurantOpen } from "@utils";
 import { useNavigate } from "react-router-dom";
 
 const Cart = () => {
@@ -21,7 +21,7 @@ const Cart = () => {
     setCartItems,
     addToCart,
   } = useContext(CartContext);
-  const { food_list } = useContext(StoreContext);
+  const { food_list, restaurant_list } = useContext(StoreContext);
   const { addOrder } = useContext(OrderContext);
   const navigate = useNavigate();
 
@@ -49,6 +49,24 @@ const Cart = () => {
       return;
     }
 
+    // Check if all restaurants in cart are open
+    const cartFoods = food_list.filter((item) => cartItems[item._id] > 0);
+    const restaurantsInCart = [...new Set(cartFoods.map((f) => f.restaurantId))];
+
+    for (const restaurantId of restaurantsInCart) {
+      const restaurant = restaurant_list.find((r) => r.id === restaurantId);
+      if (!restaurant) {
+        alert("One or more restaurants in your cart are no longer available.");
+        return;
+      }
+
+      if (!isRestaurantOpen(restaurant.opening_hours)) {
+        alert(
+          `${restaurant.name} is currently closed. Please remove items from this restaurant or wait until they reopen.`
+        );
+        return;
+      }
+    }
     const newOrder = {
       id: Date.now(),
       user: user.name,

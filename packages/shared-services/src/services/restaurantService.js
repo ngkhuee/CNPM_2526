@@ -33,6 +33,7 @@ export const restaurantService = {
         ownerPhone: restaurant.phone,
         phone: restaurant.phone,
         email: restaurant.email,
+        opening_hours: restaurant.opening_hours,
         reviewCount: restaurant.total_reviews || 0,
         status: restaurant.status || "active",
         deliveryTime: restaurant.delivery_time_minutes,
@@ -77,6 +78,7 @@ export const restaurantService = {
         ownerPhone: response.phone,
         phone: response.phone,
         email: response.email,
+        opening_hours: response.opening_hours,
         reviewCount: response.total_reviews || 0,
         status: response.status || "active",
         deliveryTime: response.delivery_time_minutes,
@@ -144,6 +146,10 @@ export const restaurantService = {
 
   async update(id, restaurantData) {
     try {
+      console.log("=== restaurantService.update called ===");
+      console.log("id:", id);
+      console.log("restaurantData:", restaurantData);
+
       // Map frontend (camelCase) to backend (snake_case)
       const payload = {
         name: restaurantData.name,
@@ -156,6 +162,7 @@ export const restaurantService = {
         primary_category: restaurantData.category,
         image: restaurantData.image,
         banner_image: restaurantData.banner || restaurantData.banner_image,
+        opening_hours: restaurantData.opening_hours,
         is_open: restaurantData.isOpen,
         status: restaurantData.status,
         delivery_time_minutes: restaurantData.deliveryTime,
@@ -168,14 +175,20 @@ export const restaurantService = {
         (key) => payload[key] === undefined && delete payload[key]
       );
 
+      console.log("payload being sent to API:", payload);
+
       const response = await apiClient.patch(
         ENDPOINTS.RESTAURANTS.BY_ID(id),
         payload
       );
 
+      console.log("PATCH response:", response);
+
       // Return mapped response
       return this.getById(id);
     } catch (error) {
+      console.error("=== Error in restaurantService.update ===");
+      console.error("Error:", error);
       throw error;
     }
   },

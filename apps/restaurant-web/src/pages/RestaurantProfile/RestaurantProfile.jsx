@@ -12,7 +12,18 @@ import {
   MdClose,
   MdEdit,
   MdStar,
+  MdAccessTime,
 } from "react-icons/md";
+
+const DAYS_OF_WEEK = [
+  "monday",
+  "tuesday",
+  "wednesday",
+  "thursday",
+  "friday",
+  "saturday",
+  "sunday",
+];
 
 const RestaurantProfile = () => {
   const { currentRestaurant, updateRestaurant, fetchRestaurantInfo } =
@@ -30,6 +41,15 @@ const RestaurantProfile = () => {
     category: "",
     image: "",
     banner: "",
+    opening_hours: {
+      monday: { open: "09:00", close: "22:00" },
+      tuesday: { open: "09:00", close: "22:00" },
+      wednesday: { open: "09:00", close: "22:00" },
+      thursday: { open: "09:00", close: "22:00" },
+      friday: { open: "09:00", close: "23:00" },
+      saturday: { open: "09:00", close: "23:00" },
+      sunday: { open: "09:00", close: "22:00" },
+    },
   });
   const [loading, setLoading] = useState(false);
 
@@ -48,6 +68,15 @@ const RestaurantProfile = () => {
         category: currentRestaurant.category || "",
         image: currentRestaurant.image || "",
         banner: currentRestaurant.banner || "",
+        opening_hours: currentRestaurant.opening_hours || {
+          monday: { open: "09:00", close: "22:00" },
+          tuesday: { open: "09:00", close: "22:00" },
+          wednesday: { open: "09:00", close: "22:00" },
+          thursday: { open: "09:00", close: "22:00" },
+          friday: { open: "09:00", close: "23:00" },
+          saturday: { open: "09:00", close: "23:00" },
+          sunday: { open: "09:00", close: "22:00" },
+        },
       });
     }
   }, [currentRestaurant, editing]);
@@ -58,17 +87,31 @@ const RestaurantProfile = () => {
   const handleSave = async (e) => {
     e.preventDefault();
 
-    // IMPORTANT: Only save if we're in editing mode
     if (!editing) {
       console.warn("Save called but not in editing mode!");
       return;
+    }
+
+    // Validate opening hours format
+    for (const [day, times] of Object.entries(formData.opening_hours)) {
+      if (times && times.open && times.close) {
+        const timeRegex = /^\d{2}:\d{2}$/;
+        if (!timeRegex.test(times.open) || !timeRegex.test(times.close)) {
+          alert(`Invalid time format for ${day}. Use HH:mm format (e.g., 09:00)`);
+          return;
+        }
+        if (times.open >= times.close) {
+          alert(`Opening time must be earlier than closing time for ${day}`);
+          return;
+        }
+      }
     }
 
     setLoading(true);
 
     try {
       if (!currentUser || !currentUser.restaurantId) {
-        alert(" Restaurant ID not found!");
+        alert("Restaurant ID not found!");
         return;
       }
 
@@ -76,13 +119,13 @@ const RestaurantProfile = () => {
 
       if (result.success) {
         setEditing(false);
-        alert("✅ Restaurant information updated successfully!");
+        alert("Restaurant information updated successfully!");
       } else {
-        alert(` Failed to update: ${result.message}`);
+        alert(`Failed to update: ${result.message}`);
       }
     } catch (error) {
       console.error("Error saving restaurant:", error);
-      alert(" An error occurred while saving!");
+      alert("An error occurred while saving!");
     } finally {
       setLoading(false);
     }
@@ -104,15 +147,31 @@ const RestaurantProfile = () => {
   // Handle input change
   const handleChange = (field, value) => {
     if (field.includes(".")) {
-      // For nested fields like location.address
-      const [parent, child] = field.split(".");
-      setFormData((prev) => ({
-        ...prev,
-        [parent]: {
-          ...prev[parent],
-          [child]: value,
-        },
-      }));
+      const parts = field.split(".");
+      if (parts.length === 3) {
+        // For triple nested like opening_hours.monday.open
+        const [parent, child, grandchild] = parts;
+        setFormData((prev) => ({
+          ...prev,
+          [parent]: {
+            ...prev[parent],
+            [child]: {
+              ...prev[parent][child],
+              [grandchild]: value,
+            },
+          },
+        }));
+      } else {
+        // For double nested like location.address
+        const [parent, child] = parts;
+        setFormData((prev) => ({
+          ...prev,
+          [parent]: {
+            ...prev[parent],
+            [child]: value,
+          },
+        }));
+      }
     } else {
       setFormData((prev) => ({ ...prev, [field]: value }));
     }
@@ -256,6 +315,50 @@ const RestaurantProfile = () => {
                   required
                 />
               </div>
+
+              {editing && (
+                <div className="opening-hours-section">
+                  <div className="section-header">
+                    <MdAccessTime style={{ fontSize: "18px" }} />
+                    <label>Opening Hours</label>
+                  </div>
+                  <div className="hours-grid">
+                    {DAYS_OF_WEEK.map((day) => (
+                      <div key={day} className="hours-input-group">
+                        <label htmlFor={`hours-${day}`} className="day-label">
+                          {day.charAt(0).toUpperCase() + day.slice(1)}
+                        </label>
+                        <div className="time-inputs">
+                          <input
+                            id={`open-${day}`}
+                            type="time"
+                            value={formData.opening_hours[day]?.open || "09:00"}
+                            onChange={(e) =>
+                              handleChange(`opening_hours.${day}.open`, e.target.value)
+                            }
+                            className="hours-input"
+                            title="Opening time (HH:mm)"
+                          />
+                          <span className="time-separator">to</span>
+                          <input
+                            id={`close-${day}`}
+                            type="time"
+                            value={formData.opening_hours[day]?.close || "22:00"}
+                            onChange={(e) =>
+                              handleChange(`opening_hours.${day}.close`, e.target.value)
+                            }
+                            className="hours-input"
+                            title="Closing time (HH:mm)"
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <small style={{ color: "#666", marginTop: "8px", display: "block" }}>
+                    Set opening and closing times separately for each day.
+                  </small>
+                </div>
+              )}
 
               {currentRestaurant && (
                 <div className="readonly-info">

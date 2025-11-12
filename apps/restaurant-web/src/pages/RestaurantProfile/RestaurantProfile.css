@@ -243,6 +243,7 @@ textarea {
   opacity: 0.6;
   cursor: not-allowed;
 }
+
 .main-content {
   margin-left: 240px;
   width: calc(100% - 240px);
@@ -251,6 +252,7 @@ textarea {
   background-color: #f7f9fb;
   min-height: 100vh;
 }
+
 .restaurant-profile {
   max-width: 1000px;
   margin: 0 auto;
@@ -371,4 +373,84 @@ textarea {
 
 .edit-btn {
   background-color: #ff9800;
+}
+
+.opening-hours-section {
+  margin-top: 30px;
+  padding: 20px;
+  background: #f9f9f9;
+  border-radius: 8px;
+  border-left: 4px solid #ff9800;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 15px;
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+}
+
+.hours-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+  margin-bottom: 10px;
+}
+
+.hours-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.day-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #555;
+  text-transform: capitalize;
+}
+
+.time-inputs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.time-inputs .hours-input {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  font-family: monospace;
+  transition: border-color 0.2s;
+}
+
+.time-separator {
+  color: #999;
+  font-weight: 600;
+  min-width: 25px;
+  text-align: center;
+}
+
+.hours-input {
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  font-family: monospace;
+  transition: border-color 0.2s;
+}
+
+.hours-input:focus {
+  outline: none;
+  border-color: #ff9800;
+  box-shadow: 0 0 3px rgba(255, 152, 0, 0.2);
+}
+
+.hours-input::placeholder {
+  color: #bbb;
 }

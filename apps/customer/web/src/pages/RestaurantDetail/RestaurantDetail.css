@@ -203,6 +203,7 @@
   0% {
     transform: rotate(0deg);
   }
+
   100% {
     transform: rotate(360deg);
   }
@@ -280,4 +281,45 @@
   .menu-items-grid {
     grid-template-columns: 1fr;
   }
+}
+
+.restaurant-status .hours-info {
+  display: block;
+  font-size: 11px;
+  font-weight: 400;
+  margin-top: 2px;
+  opacity: 0.9;
+}
+
+.closed-notice {
+  background: #fff3cd;
+  border-left: 4px solid #ffc107;
+  padding: 16px;
+  border-radius: 4px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.closed-notice svg {
+  color: #ff9800;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.notice-content {
+  flex: 1;
+}
+
+.notice-content strong {
+  display: block;
+  color: #856404;
+  margin-bottom: 4px;
+}
+
+.notice-content p {
+  margin: 4px 0;
+  font-size: 13px;
+  color: #856404;
 }

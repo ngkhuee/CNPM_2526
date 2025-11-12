@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { MdStar, MdStarBorder, MdClose, MdReply } from "react-icons/md";
+import { MdStar, MdStarBorder, MdClose, MdReply, MdSend } from "react-icons/md";
 import { reviewService } from "shared-services";
 import { getImageUrl } from "shared-utils";
 import { formatCurrency } from "shared-utils";
@@ -18,6 +18,10 @@ const FoodDetail = ({
   const [replyText, setReplyText] = useState({});
   const [submittingReply, setSubmittingReply] = useState({});
   const [quantity, setQuantity] = useState(1);
+  const [showReviewForm, setShowReviewForm] = useState(false);
+  const [reviewForm, setReviewForm] = useState({ rating: 5, comment: "" });
+  const [submittingReview, setSubmittingReview] = useState(false);
+  const [userHasReviewed, setUserHasReviewed] = useState(false);
 
   useEffect(() => {
     const foodId = food?.id || food?._id;
@@ -38,6 +42,12 @@ const FoodDetail = ({
         (a, b) => new Date(b.created_at) - new Date(a.created_at)
       );
       setReviews(sorted);
+
+      // Check if current user has already reviewed
+      if (currentUserId && userRole === "customer") {
+        const userReview = sorted.find((r) => r.user_id === currentUserId);
+        setUserHasReviewed(!!userReview);
+      }
     } catch (error) {
       console.error("Error fetching reviews:", error);
     } finally {
@@ -66,6 +76,41 @@ const FoodDetail = ({
       alert("Error submitting reply");
     } finally {
       setSubmittingReply({ ...submittingReply, [reviewId]: false });
+    }
+  };
+
+  const handleSubmitReview = async () => {
+    if (!currentUserId) {
+      alert("Please login to submit a review");
+      return;
+    }
+
+    if (reviewForm.comment.trim().length < 10) {
+      alert("Review comment must be at least 10 characters");
+      return;
+    }
+
+    try {
+      setSubmittingReview(true);
+      const foodId = food.id || food._id;
+
+      await reviewService.create({
+        food_id: foodId,
+        user_id: currentUserId,
+        restaurant_id: food.restaurantId || food.restaurant_id,
+        rating: reviewForm.rating,
+        comment: reviewForm.comment.trim(),
+      });
+
+      alert("Thank you for your review!");
+      setReviewForm({ rating: 5, comment: "" });
+      setShowReviewForm(false);
+      await fetchReviews();
+    } catch (error) {
+      console.error("Error submitting review:", error);
+      alert("Error submitting review. Please try again.");
+    } finally {
+      setSubmittingReview(false);
     }
   };
 
@@ -140,7 +185,66 @@ const FoodDetail = ({
 
         {/* Reviews Section */}
         <div className="food-detail-reviews">
-          <h3>Customer Reviews</h3>
+          <div className="reviews-header">
+            <h3>Customer Reviews</h3>
+            {userRole === "customer" && currentUserId && !userHasReviewed && (
+              <button
+                className="submit-review-toggle-btn"
+                onClick={() => setShowReviewForm(!showReviewForm)}
+              >
+                {showReviewForm ? "Cancel" : "Write a Review"}
+              </button>
+            )}
+            {userHasReviewed && (
+              <span className="already-reviewed-badge">You reviewed this</span>
+            )}
+          </div>
+
+          {/* Review Submission Form */}
+          {showReviewForm && userRole === "customer" && (
+            <div className="review-form">
+              <div className="form-group">
+                <label>Rating</label>
+                <div className="star-input">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      className={`star-btn ${star <= reviewForm.rating ? "active" : ""}`}
+                      onClick={() => setReviewForm({ ...reviewForm, rating: star })}
+                      type="button"
+                    >
+                      <MdStar size={28} />
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="review-comment">Your Review</label>
+                <textarea
+                  id="review-comment"
+                  placeholder="Share your experience with this dish... (minimum 10 characters)"
+                  value={reviewForm.comment}
+                  onChange={(e) =>
+                    setReviewForm({ ...reviewForm, comment: e.target.value })
+                  }
+                  rows={4}
+                />
+                <small className="char-count">
+                  {reviewForm.comment.length} characters
+                </small>
+              </div>
+
+              <button
+                className="submit-review-btn"
+                onClick={handleSubmitReview}
+                disabled={submittingReview || reviewForm.comment.length < 10}
+              >
+                <MdSend size={16} />
+                {submittingReview ? "Submitting..." : "Submit Review"}
+              </button>
+            </div>
+          )}
 
           {loading ? (
             <p className="loading-text">Loading reviews...</p>

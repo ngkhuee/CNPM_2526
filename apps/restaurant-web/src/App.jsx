@@ -17,6 +17,8 @@ import { PromotionProvider } from "./Context/PromotionContext";
 import { CategoryProvider } from "./Context/CategoryContext";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { useAuthValidation } from "./hooks/useAuthValidation";
+import { useRestaurantInfo } from "./hooks/useRestaurantInfo";
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
@@ -29,45 +31,16 @@ const ProtectedRoute = ({ children }) => {
   return isAuthenticated ? children : <Navigate to="/login" />;
 };
 
-const App = () => {
-  return (
-    <AuthProvider>
-      <RestaurantProvider>
-        <FoodProvider>
-          <OrderProvider>
-            <PromotionProvider>
-              <CategoryProvider>
-                <AppContent />
-                <ToastContainer
-                  position="top-right"
-                  autoClose={3000}
-                  hideProgressBar={false}
-                  newestOnTop={false}
-                  closeOnClick
-                  rtl={false}
-                  pauseOnFocusLoss
-                  draggable
-                  pauseOnHover
-                  theme="light"
-                />
-              </CategoryProvider>
-            </PromotionProvider>
-          </OrderProvider>
-        </FoodProvider>
-      </RestaurantProvider>
-    </AuthProvider>
-  );
-};
-
+// Component that uses hooks inside provider tree
 const AppContent = () => {
   const { isAuthenticated } = React.useContext(AuthContext);
+  useAuthValidation();
+  useRestaurantInfo();
 
   return (
     <div className="app">
-      {/* Sidebar chỉ hiển thị khi đã login */}
       {isAuthenticated && <Sidebar />}
 
-      {/* Main content */}
       <div className={`app-content ${isAuthenticated ? "with-sidebar" : ""}`}>
         <Routes>
           <Route
@@ -75,7 +48,6 @@ const AppContent = () => {
             element={isAuthenticated ? <Navigate to="/dashboard" /> : <Login />}
           />
 
-          {/* Các route bảo vệ */}
           <Route
             path="/dashboard"
             element={
@@ -133,7 +105,6 @@ const AppContent = () => {
             }
           />
 
-          {/* Route mặc định */}
           <Route
             path="*"
             element={
@@ -143,6 +114,36 @@ const AppContent = () => {
         </Routes>
       </div>
     </div>
+  );
+};
+
+const App = () => {
+  return (
+    <AuthProvider>
+      <RestaurantProvider>
+        <FoodProvider>
+          <OrderProvider>
+            <PromotionProvider>
+              <CategoryProvider>
+                <AppContent />
+                <ToastContainer
+                  position="top-right"
+                  autoClose={3000}
+                  hideProgressBar={false}
+                  newestOnTop={false}
+                  closeOnClick
+                  rtl={false}
+                  pauseOnFocusLoss
+                  draggable
+                  pauseOnHover
+                  theme="light"
+                />
+              </CategoryProvider>
+            </PromotionProvider>
+          </OrderProvider>
+        </FoodProvider>
+      </RestaurantProvider>
+    </AuthProvider>
   );
 };
 

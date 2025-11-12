@@ -1,7 +1,7 @@
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
 
-const SECRET_KEY = process.env.JWT_SECRET || "tomato-secret-key";
+const SECRET_KEY = process.env.JWT_SECRET || "tomato-food-delivery-secret-key";
 
 // Generate JWT token
 const generateToken = (user) => {
@@ -12,7 +12,7 @@ const generateToken = (user) => {
       role: user.role,
     },
     SECRET_KEY,
-    { expiresIn: "24h" }
+    { expiresIn: "7d" }
   );
 };
 
@@ -57,20 +57,27 @@ const validateToken = (req, res, next) => {
   const token = req.headers.authorization?.split(" ")[1];
 
   if (!token) {
+    console.error("No token provided for path:", req.path, "Method:", req.method);
     return res.status(401).json({
       success: false,
       message: "No token provided. Please login.",
     });
   }
 
+  console.log("Token found, verifying... Path:", req.path, "Method:", req.method);
+
   try {
     const decoded = jwt.verify(token, SECRET_KEY);
     req.user = decoded;
     next();
   } catch (error) {
+    console.error("Token verification failed:", error.message);
+    console.error("Token:", token);
+    console.error("Secret key length:", SECRET_KEY.length);
     return res.status(401).json({
       success: false,
       message: "Invalid or expired token",
+      error: error.message,
     });
   }
 };
