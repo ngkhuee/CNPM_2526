@@ -13,14 +13,15 @@
     "leaflet": "^1.9.4",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
+    "react-icons": "^5.5.0",
     "react-leaflet": "^5.0.0",
     "react-router-dom": "^7.9.4",
     "react-toastify": "^11.0.5",
     "recharts": "^3.2.1",
-    "shared-services": "*",
-    "shared-utils": "*",
     "shared-constants": "*",
-    "shared-hooks": "*"
+    "shared-hooks": "*",
+    "shared-services": "*",
+    "shared-utils": "*"
   },
   "devDependencies": {
     "@types/react": "^18.2.55",

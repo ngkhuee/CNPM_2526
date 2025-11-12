@@ -14,7 +14,9 @@ server.use(logger);
 
 // Serve static files (images)
 const express = require("express");
-server.use("/images", express.static("public/images"));
+server.use("/images", express.static("public/images")); 
+// không phải API upload, mà chỉ là phần serve ảnh tĩnh trong backend.
+
 
 // CORS
 server.use((req, res, next) => {
