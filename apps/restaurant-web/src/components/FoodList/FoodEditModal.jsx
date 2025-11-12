@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { uploadService } from "shared-services";
 
 const FoodEditModal = ({ food, isOpen, onClose, onSubmit, categories, restaurantFoods }) => {
     const [editFood, setEditFood] = useState({
@@ -9,6 +10,8 @@ const FoodEditModal = ({ food, isOpen, onClose, onSubmit, categories, restaurant
         description: "",
         image: "",
     });
+    const [uploading, setUploading] = useState(false);
+    const [uploadError, setUploadError] = useState("");
 
     useEffect(() => {
         if (food) {
@@ -16,13 +19,27 @@ const FoodEditModal = ({ food, isOpen, onClose, onSubmit, categories, restaurant
         }
     }, [food]);
 
-    const handleImageChange = (file) => {
-        if (file) {
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setEditFood((prev) => ({ ...prev, image: reader.result }));
-            };
-            reader.readAsDataURL(file);
+    const handleImageChange = async (file) => {
+        if (!file) return;
+
+        setUploading(true);
+        setUploadError("");
+
+        try {
+            // Upload image to server
+            const uploadResult = await uploadService.uploadImage(file, "foods");
+
+            if (uploadResult.success) {
+                // Store the image path from server response
+                setEditFood((prev) => ({ ...prev, image: uploadResult.path }));
+            } else {
+                setUploadError("Failed to upload image");
+            }
+        } catch (error) {
+            console.error("Image upload error:", error);
+            setUploadError(error.message || "Failed to upload image");
+        } finally {
+            setUploading(false);
         }
     };
 
@@ -115,10 +132,13 @@ const FoodEditModal = ({ food, isOpen, onClose, onSubmit, categories, restaurant
                             type="file"
                             accept="image/*"
                             onChange={(e) => handleImageChange(e.target.files[0])}
+                            disabled={uploading}
                         />
+                        {uploading && <span style={{ color: "blue" }}>Uploading...</span>}
+                        {uploadError && <span style={{ color: "red" }}>{uploadError}</span>}
                     </label>
                     <div className="modal-buttons">
-                        <button type="submit" className="submit-btn">
+                        <button type="submit" className="submit-btn" disabled={uploading}>
                             Save
                         </button>
                         <button type="button" className="cancel-btn" onClick={onClose}>
@@ -132,3 +152,4 @@ const FoodEditModal = ({ food, isOpen, onClose, onSubmit, categories, restaurant
 };
 
 export default FoodEditModal;
+

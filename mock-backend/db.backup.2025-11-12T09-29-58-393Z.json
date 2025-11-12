@@ -122,13 +122,11 @@
       "id": "u1762416794526",
       "email": "test@test.com",
       "password": "123",
+      "name": "abc test 2",
       "phone": "",
+      "role": "customer",
       "status": "blocked",
-      "full_name": "abc test 2",
-      "roles": [
-        "customer"
-      ],
-      "created_at": "2025-11-06T08:13:14.526Z"
+      "createdAt": "2025-11-06T08:13:14.526Z"
     },
     {
       "id": "u_1762429153178",
@@ -266,34 +264,13 @@
       "total_reviews": 0,
       "is_open": true,
       "opening_hours": {
-        "monday": {
-          "open": "09:00",
-          "close": "22:00"
-        },
-        "tuesday": {
-          "open": "09:00",
-          "close": "22:00"
-        },
-        "wednesday": {
-          "open": "09:00",
-          "close": "22:00"
-        },
-        "thursday": {
-          "open": "09:00",
-          "close": "22:00"
-        },
-        "friday": {
-          "open": "09:00",
-          "close": "23:00"
-        },
-        "saturday": {
-          "open": "09:00",
-          "close": "23:00"
-        },
-        "sunday": {
-          "open": "09:00",
-          "close": "22:00"
-        }
+        "monday": { "open": "09:00", "close": "22:00" },
+        "tuesday": { "open": "09:00", "close": "22:00" },
+        "wednesday": { "open": "09:00", "close": "22:00" },
+        "thursday": { "open": "09:00", "close": "22:00" },
+        "friday": { "open": "09:00", "close": "23:00" },
+        "saturday": { "open": "09:00", "close": "23:00" },
+        "sunday": { "open": "09:00", "close": "22:00" }
       },
       "delivery_time_minutes": 30,
       "min_order_amount": 50000,
@@ -322,34 +299,13 @@
       "total_reviews": 0,
       "is_open": true,
       "opening_hours": {
-        "monday": {
-          "open": "09:00",
-          "close": "22:00"
-        },
-        "tuesday": {
-          "open": "09:00",
-          "close": "22:00"
-        },
-        "wednesday": {
-          "open": "09:00",
-          "close": "22:00"
-        },
-        "thursday": {
-          "open": "09:00",
-          "close": "22:00"
-        },
-        "friday": {
-          "open": "09:00",
-          "close": "23:00"
-        },
-        "saturday": {
-          "open": "09:00",
-          "close": "23:00"
-        },
-        "sunday": {
-          "open": "09:00",
-          "close": "22:00"
-        }
+        "monday": { "open": "09:00", "close": "22:00" },
+        "tuesday": { "open": "09:00", "close": "22:00" },
+        "wednesday": { "open": "09:00", "close": "22:00" },
+        "thursday": { "open": "09:00", "close": "22:00" },
+        "friday": { "open": "09:00", "close": "23:00" },
+        "saturday": { "open": "09:00", "close": "23:00" },
+        "sunday": { "open": "09:00", "close": "22:00" }
       },
       "delivery_time_minutes": 25,
       "min_order_amount": 40000,
@@ -378,34 +334,13 @@
       "total_reviews": 0,
       "is_open": true,
       "opening_hours": {
-        "monday": {
-          "open": "09:00",
-          "close": "22:00"
-        },
-        "tuesday": {
-          "open": "09:00",
-          "close": "22:00"
-        },
-        "wednesday": {
-          "open": "09:00",
-          "close": "22:00"
-        },
-        "thursday": {
-          "open": "09:00",
-          "close": "22:00"
-        },
-        "friday": {
-          "open": "09:00",
-          "close": "23:00"
-        },
-        "saturday": {
-          "open": "09:00",
-          "close": "23:00"
-        },
-        "sunday": {
-          "open": "09:00",
-          "close": "22:00"
-        }
+        "monday": { "open": "09:00", "close": "22:00" },
+        "tuesday": { "open": "09:00", "close": "22:00" },
+        "wednesday": { "open": "09:00", "close": "22:00" },
+        "thursday": { "open": "09:00", "close": "22:00" },
+        "friday": { "open": "09:00", "close": "23:00" },
+        "saturday": { "open": "09:00", "close": "23:00" },
+        "sunday": { "open": "09:00", "close": "22:00" }
       },
       "delivery_time_minutes": 35,
       "min_order_amount": 100000,
@@ -434,34 +369,13 @@
       "total_reviews": 0,
       "is_open": true,
       "opening_hours": {
-        "monday": {
-          "open": "09:00",
-          "close": "22:00"
-        },
-        "tuesday": {
-          "open": "09:00",
-          "close": "22:00"
-        },
-        "wednesday": {
-          "open": "09:00",
-          "close": "22:00"
-        },
-        "thursday": {
-          "open": "09:00",
-          "close": "22:00"
-        },
-        "friday": {
-          "open": "09:00",
-          "close": "23:00"
-        },
-        "saturday": {
-          "open": "09:00",
-          "close": "23:00"
-        },
-        "sunday": {
-          "open": "09:00",
-          "close": "22:00"
-        }
+        "monday": { "open": "09:00", "close": "22:00" },
+        "tuesday": { "open": "09:00", "close": "22:00" },
+        "wednesday": { "open": "09:00", "close": "22:00" },
+        "thursday": { "open": "09:00", "close": "22:00" },
+        "friday": { "open": "09:00", "close": "23:00" },
+        "saturday": { "open": "09:00", "close": "23:00" },
+        "sunday": { "open": "09:00", "close": "22:00" }
       },
       "delivery_time_minutes": 20,
       "min_order_amount": 50000,
@@ -490,34 +404,13 @@
       "total_reviews": 0,
       "is_open": true,
       "opening_hours": {
-        "monday": {
-          "open": "09:00",
-          "close": "22:00"
-        },
-        "tuesday": {
-          "open": "09:00",
-          "close": "22:00"
-        },
-        "wednesday": {
-          "open": "09:00",
-          "close": "22:00"
-        },
-        "thursday": {
-          "open": "09:00",
-          "close": "22:00"
-        },
-        "friday": {
-          "open": "09:00",
-          "close": "23:00"
-        },
-        "saturday": {
-          "open": "09:00",
-          "close": "23:00"
-        },
-        "sunday": {
-          "open": "09:00",
-          "close": "22:00"
-        }
+        "monday": { "open": "09:00", "close": "22:00" },
+        "tuesday": { "open": "09:00", "close": "22:00" },
+        "wednesday": { "open": "09:00", "close": "22:00" },
+        "thursday": { "open": "09:00", "close": "22:00" },
+        "friday": { "open": "09:00", "close": "23:00" },
+        "saturday": { "open": "09:00", "close": "23:00" },
+        "sunday": { "open": "09:00", "close": "22:00" }
       },
       "delivery_time_minutes": 30,
       "min_order_amount": 80000,
@@ -546,34 +439,13 @@
       "total_reviews": 0,
       "is_open": true,
       "opening_hours": {
-        "monday": {
-          "open": "09:00",
-          "close": "22:00"
-        },
-        "tuesday": {
-          "open": "09:00",
-          "close": "22:00"
-        },
-        "wednesday": {
-          "open": "09:00",
-          "close": "22:00"
-        },
-        "thursday": {
-          "open": "09:00",
-          "close": "22:00"
-        },
-        "friday": {
-          "open": "09:00",
-          "close": "23:00"
-        },
-        "saturday": {
-          "open": "09:00",
-          "close": "23:00"
-        },
-        "sunday": {
-          "open": "09:00",
-          "close": "22:00"
-        }
+        "monday": { "open": "09:00", "close": "22:00" },
+        "tuesday": { "open": "09:00", "close": "22:00" },
+        "wednesday": { "open": "09:00", "close": "22:00" },
+        "thursday": { "open": "09:00", "close": "22:00" },
+        "friday": { "open": "09:00", "close": "23:00" },
+        "saturday": { "open": "09:00", "close": "23:00" },
+        "sunday": { "open": "09:00", "close": "22:00" }
       },
       "delivery_time_minutes": 25,
       "min_order_amount": 60000,
@@ -598,34 +470,13 @@
       "total_reviews": 0,
       "is_open": false,
       "opening_hours": {
-        "monday": {
-          "open": "09:00",
-          "close": "22:00"
-        },
-        "tuesday": {
-          "open": "09:00",
-          "close": "22:00"
-        },
-        "wednesday": {
-          "open": "09:00",
-          "close": "22:00"
-        },
-        "thursday": {
-          "open": "09:00",
-          "close": "22:00"
-        },
-        "friday": {
-          "open": "09:00",
-          "close": "23:00"
-        },
-        "saturday": {
-          "open": "09:00",
-          "close": "23:00"
-        },
-        "sunday": {
-          "open": "09:00",
-          "close": "22:00"
-        }
+        "monday": { "open": "09:00", "close": "22:00" },
+        "tuesday": { "open": "09:00", "close": "22:00" },
+        "wednesday": { "open": "09:00", "close": "22:00" },
+        "thursday": { "open": "09:00", "close": "22:00" },
+        "friday": { "open": "09:00", "close": "23:00" },
+        "saturday": { "open": "09:00", "close": "23:00" },
+        "sunday": { "open": "09:00", "close": "22:00" }
       },
       "delivery_time_minutes": 30,
       "min_order_amount": 50000,
@@ -802,7 +653,7 @@
       "preparation_time_minutes": 12,
       "created_at": "2024-01-01T00:00:00.000Z",
       "updated_at": "2025-11-05T13:57:29.527Z",
-      "rating": 4,
+      "rating": 4.0,
       "sold": 0
     },
     {
@@ -1027,7 +878,7 @@
       "preparation_time_minutes": 7,
       "created_at": "2024-01-01T00:00:00.000Z",
       "updated_at": "2025-11-07T02:40:00.206Z",
-      "rating": 4,
+      "rating": 4.0,
       "sold": 0
     },
     {

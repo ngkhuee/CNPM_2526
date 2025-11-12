@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useFoodManagement } from "./useFoodManagement";
+import { uploadService } from "shared-services";
 
 export const useAddFood = () => {
     const { addFood } = useFoodManagement();
@@ -34,40 +35,43 @@ export const useAddFood = () => {
 
         setLoading(true);
 
-        const reader = new FileReader();
-        reader.onloadend = async () => {
-            try {
-                const newFoodData = {
-                    name: formData.name,
-                    description: formData.description,
-                    price: Number(formData.price),
-                    categoryId: formData.categoryId,
-                    image: reader.result,
-                    isAvailable: true,
-                    isFeatured: false,
-                    preparationTime: 20,
-                    rating: 0,
-                    total_reviews: 0,
-                };
+        try {
+            // Step 1: Upload image to server
+            const uploadResult = await uploadService.uploadImage(image, "foods");
 
-                const result = await addFood(newFoodData);
-
-                if (result.success) {
-                    resetForm();
-                    if (onSuccess) {
-                        onSuccess();
-                    }
-                }
-
-                setLoading(false);
-                return result;
-            } catch (error) {
-                setLoading(false);
-                return { success: false, message: error.message };
+            if (!uploadResult.success) {
+                return { success: false, message: "Image upload failed" };
             }
-        };
 
-        reader.readAsDataURL(image);
+            // Step 2: Create food with uploaded image path
+            const newFoodData = {
+                name: formData.name,
+                description: formData.description,
+                price: Number(formData.price),
+                categoryId: formData.categoryId,
+                image: uploadResult.path, // Use path returned from server
+                isAvailable: true,
+                isFeatured: false,
+                preparationTime: 20,
+                rating: 0,
+                total_reviews: 0,
+            };
+
+            const result = await addFood(newFoodData);
+
+            if (result.success) {
+                resetForm();
+                if (onSuccess) {
+                    onSuccess();
+                }
+            }
+
+            setLoading(false);
+            return result;
+        } catch (error) {
+            setLoading(false);
+            return { success: false, message: error.message };
+        }
     };
 
     const resetForm = () => {

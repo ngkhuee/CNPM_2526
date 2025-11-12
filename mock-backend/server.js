@@ -3,6 +3,9 @@ const server = jsonServer.create();
 const router = jsonServer.router("db.json");
 const middlewares = jsonServer.defaults();
 const { generateToken, validateToken, logger } = require("./middlewares");
+const multer = require("multer");
+const path = require("path");
+const fs = require("fs");
 
 require("dotenv").config();
 const PORT = process.env.PORT || 4000;
@@ -14,7 +17,7 @@ server.use(logger);
 
 // Serve static files (images)
 const express = require("express");
-server.use("/images", express.static("public/images")); 
+server.use("/images", express.static("public/images"));
 // không phải API upload, mà chỉ là phần serve ảnh tĩnh trong backend.
 
 
@@ -26,6 +29,93 @@ server.use((req, res, next) => {
     "Access-Control-Allow-Headers",
     "Origin, X-Requested-With, Content-Type, Accept, Authorization"
   );
+  next();
+});
+
+// ========== MULTER CONFIGURATION ==========
+// Configure storage for file uploads
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const category = req.body.category || "other";
+    const uploadDir = path.join(__dirname, "public/images", category);
+
+    // Create directory if not exists
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+
+    cb(null, uploadDir);
+  },
+  filename: (req, file, cb) => {
+    // Sanitize filename and add timestamp
+    const ext = path.extname(file.originalname);
+    const name = path.basename(file.originalname, ext).replace(/[^a-zA-Z0-9_-]/g, "_");
+    const timestamp = Date.now();
+    cb(null, `${name}_${timestamp}${ext}`);
+  },
+});
+
+// File filter - only allow images
+const fileFilter = (req, file, cb) => {
+  const allowedMimes = ["image/png", "image/jpeg", "image/jpg", "image/webp"];
+
+  if (allowedMimes.includes(file.mimetype)) {
+    cb(null, true);
+  } else {
+    cb(new Error("Only PNG, JPG, JPEG, WebP images are allowed"), false);
+  }
+};
+
+const upload = multer({
+  storage: storage,
+  fileFilter: fileFilter,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
+});
+
+// ========== IMAGE UPLOAD ENDPOINT ==========
+server.post("/upload", upload.single("file"), (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: "No file uploaded",
+      });
+    }
+
+    const category = req.body.category || "other";
+    const imagePath = `/images/${category}/${req.file.filename}`;
+
+    res.json({
+      success: true,
+      message: "File uploaded successfully",
+      filename: req.file.filename,
+      path: imagePath,
+      url: `http://localhost:${PORT}${imagePath}`,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error.message || "Upload failed",
+    });
+  }
+});
+
+// Error handler for multer
+server.use((error, req, res, next) => {
+  if (error instanceof multer.MulterError) {
+    return res.status(400).json({
+      success: false,
+      message: `Upload error: ${error.message}`,
+    });
+  }
+
+  if (error) {
+    return res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+
   next();
 });
 
