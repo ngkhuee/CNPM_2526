@@ -1,8 +1,7 @@
 // src/Context/FoodContext.js
 import React, { createContext, useState, useEffect } from "react";
-import { foodService, authService } from "@api/services";
+import { foodService, authService } from "shared-services";
 
-// Tạo context
 export const FoodContext = createContext();
 
 export const FoodProvider = ({ children }) => {
@@ -12,16 +11,10 @@ export const FoodProvider = ({ children }) => {
   // Fetch foods on mount (only if user is logged in)
   useEffect(() => {
     const user = authService.getCurrentUser();
-    // Only fetch for restaurant accounts with valid restaurantId
-    if (
-      user?.role === "restaurant" &&
-      user.restaurantId &&
-      /^r\d+$/.test(user.restaurantId)
-    ) {
+    if (user?.role === "restaurant" && user?.restaurantId && /^r\d+$/.test(user.restaurantId)) {
       fetchFoods(user.restaurantId);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Run only once
+  }, []);
 
   // Fetch all foods from API
   const fetchFoods = async (restaurantId = null) => {
@@ -31,8 +24,10 @@ export const FoodProvider = ({ children }) => {
         ? await foodService.getByRestaurant(restaurantId)
         : await foodService.getAll();
       setFoodList(foods);
+      return { success: true, data: foods };
     } catch (error) {
       console.error("Error fetching foods:", error);
+      return { success: false, error: error.message };
     } finally {
       setLoading(false);
     }
@@ -41,9 +36,24 @@ export const FoodProvider = ({ children }) => {
   // Add new food
   const addFood = async (foodData) => {
     try {
-      const newFood = await foodService.create(foodData);
-      setFoodList((prev) => [...prev, newFood]);
-      return { success: true, food: newFood };
+      const currentUser = authService.getCurrentUser();
+      if (!currentUser) {
+        return { success: false, message: "User not authenticated" };
+      }
+
+      const payload = {
+        ...foodData,
+        restaurantId: currentUser.restaurantId,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+
+      const result = await foodService.create(payload);
+      if (result) {
+        await fetchFoods(currentUser.restaurantId);
+        return { success: true, data: result };
+      }
+      return { success: false, message: "Failed to create food" };
     } catch (error) {
       console.error("Error adding food:", error);
       return { success: false, message: error.message };
@@ -53,11 +63,18 @@ export const FoodProvider = ({ children }) => {
   // Update food
   const updateFood = async (foodId, foodData) => {
     try {
-      const updatedFood = await foodService.update(foodId, foodData);
-      setFoodList((prev) =>
-        prev.map((f) => (f.id === foodId ? updatedFood : f))
-      );
-      return { success: true, food: updatedFood };
+      const currentUser = authService.getCurrentUser();
+      const payload = {
+        ...foodData,
+        updated_at: new Date().toISOString(),
+      };
+
+      const result = await foodService.update(foodId, payload);
+      if (result) {
+        await fetchFoods(currentUser?.restaurantId);
+        return { success: true, data: result };
+      }
+      return { success: false, message: "Failed to update food" };
     } catch (error) {
       console.error("Error updating food:", error);
       return { success: false, message: error.message };
@@ -67,34 +84,26 @@ export const FoodProvider = ({ children }) => {
   // Delete food
   const deleteFood = async (foodId) => {
     try {
-      await foodService.delete(foodId);
-      setFoodList((prev) => prev.filter((f) => f.id !== foodId));
-      return { success: true };
+      const currentUser = authService.getCurrentUser();
+      const result = await foodService.delete(foodId);
+      if (result) {
+        await fetchFoods(currentUser?.restaurantId);
+        return { success: true };
+      }
+      return { success: false, message: "Failed to delete food" };
     } catch (error) {
       console.error("Error deleting food:", error);
       return { success: false, message: error.message };
     }
   };
 
-  // Get food by ID
-  const getFoodById = (foodId) => {
-    return foodList.find((f) => f.id === foodId);
-  };
-
-  // Get foods by category
-  const getFoodsByCategory = (categoryId) => {
-    return foodList.filter((f) => f.category === categoryId);
-  };
-
-  // Tạo object chứa state và methods (không export setFoodList - chỉ dùng internal)
   const contextValue = {
     foodList,
+    setFoodList,
     fetchFoods,
     addFood,
     updateFood,
     deleteFood,
-    getFoodById,
-    getFoodsByCategory,
     loading,
   };
 

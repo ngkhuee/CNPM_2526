@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { droneService, orderService, authService } from "@api/services";
+import { droneService, orderService, authService } from "shared-services";
 
 /**
  * Custom hook for tracking drones and delivery orders

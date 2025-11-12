@@ -1,6 +1,5 @@
 import React, { createContext, useState, useEffect } from "react";
-import { toast } from "react-toastify";
-import { promotionService } from "@api/services";
+import { promotionService, authService } from "shared-services";
 
 export const PromotionContext = createContext();
 
@@ -8,113 +7,103 @@ export const PromotionProvider = ({ children }) => {
   const [promotions, setPromotions] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // Fetch all promotions from backend using promotionService
-  const fetchPromotions = async () => {
-    setLoading(true);
-    try {
-      const data = await promotionService.getAll();
-      setPromotions(data);
-    } catch (error) {
-      console.error("Error fetching promotions:", error);
-      toast.error("Failed to load promotions");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Add new promotion
-  const addPromotion = async (promotionData) => {
-    setLoading(true);
-    try {
-      const newPromotion = await promotionService.create(promotionData);
-      setPromotions((prev) => [...prev, newPromotion]);
-      toast.success("Promotion created successfully!");
-      return { success: true, data: newPromotion };
-    } catch (error) {
-      console.error("Error adding promotion:", error);
-      toast.error("Error creating promotion");
-      return { success: false };
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Update promotion
-  const updatePromotion = async (id, updatedData) => {
-    setLoading(true);
-    try {
-      const updated = await promotionService.update(id, updatedData);
-      setPromotions((prev) =>
-        prev.map((promo) => (promo.id === id ? updated : promo))
-      );
-      toast.success("Promotion updated successfully!");
-      return { success: true, data: updated };
-    } catch (error) {
-      console.error("Error updating promotion:", error);
-      toast.error("Error updating promotion");
-      return { success: false };
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Delete promotion
-  const deletePromotion = async (id) => {
-    setLoading(true);
-    try {
-      await promotionService.delete(id);
-      setPromotions((prev) => prev.filter((promo) => promo.id !== id));
-      toast.success("Promotion deleted successfully!");
-      return { success: true };
-    } catch (error) {
-      console.error("Error deleting promotion:", error);
-      toast.error("Error deleting promotion");
-      return { success: false };
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Get promotions for a specific restaurant
-  const getRestaurantPromotions = (restaurantId) => {
-    return promotions.filter((promo) => {
-      // Admin promotions (no restaurantId or empty applicableRestaurants)
-      if (!promo.restaurantId) {
-        return false; // Don't show admin promotions in restaurant panel
-      }
-      // Restaurant-specific promotions
-      return promo.restaurantId === restaurantId;
-    });
-  };
-
-  // Get all active promotions for customer (admin + specific restaurant)
-  const getApplicablePromotions = (restaurantId) => {
-    return promotions.filter((promo) => {
-      if (promo.status !== "active") return false;
-
-      // Admin promotions (apply to all)
-      if (!promo.restaurantId || promo.applicableRestaurants?.length === 0) {
-        return true;
-      }
-
-      // Restaurant-specific promotions
-      return promo.restaurantId === restaurantId;
-    });
-  };
-
+  // Fetch all promotions from backend on mount
   useEffect(() => {
     fetchPromotions();
   }, []);
 
+  const fetchPromotions = async () => {
+    setLoading(true);
+    try {
+      const data = await promotionService.getAll();
+      setPromotions(data || []);
+      return { success: true, data };
+    } catch (error) {
+      console.error("Error fetching promotions:", error);
+      setPromotions([]);
+      return { success: false, error: error.message };
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Get promotions for current restaurant
+  const getRestaurantPromotions = (restaurantId) => {
+    if (!restaurantId) return [];
+    return promotions.filter((p) => p.restaurantId === restaurantId || p.applicable_restaurants?.includes(restaurantId));
+  };
+
+  // Add promotion
+  const addPromotion = async (promoData) => {
+    try {
+      const currentUser = authService.getCurrentUser();
+      if (!currentUser) {
+        return { success: false, message: "User not authenticated" };
+      }
+
+      const payload = {
+        ...promoData,
+        restaurantId: currentUser.restaurantId,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+
+      const result = await promotionService.create(payload);
+      if (result) {
+        await fetchPromotions();
+        return { success: true, data: result };
+      }
+      return { success: false, message: "Failed to create promotion" };
+    } catch (error) {
+      console.error("Error adding promotion:", error);
+      return { success: false, message: error.message };
+    }
+  };
+
+  // Update promotion
+  const updatePromotion = async (promoId, promoData) => {
+    try {
+      const payload = {
+        ...promoData,
+        updated_at: new Date().toISOString(),
+      };
+
+      const result = await promotionService.update(promoId, payload);
+      if (result) {
+        await fetchPromotions();
+        return { success: true, data: result };
+      }
+      return { success: false, message: "Failed to update promotion" };
+    } catch (error) {
+      console.error("Error updating promotion:", error);
+      return { success: false, message: error.message };
+    }
+  };
+
+  // Delete promotion
+  const deletePromotion = async (promoId) => {
+    try {
+      const result = await promotionService.delete(promoId);
+      if (result) {
+        await fetchPromotions();
+        return { success: true };
+      }
+      return { success: false, message: "Failed to delete promotion" };
+    } catch (error) {
+      console.error("Error deleting promotion:", error);
+      return { success: false, message: error.message };
+    }
+  };
+
   const contextValue = {
     promotions,
-    loading,
+    setPromotions,
     fetchPromotions,
+    getRestaurantPromotions,
     addPromotion,
     updatePromotion,
     deletePromotion,
-    getRestaurantPromotions,
-    getApplicablePromotions,
+    loading,
   };
 
   return React.createElement(

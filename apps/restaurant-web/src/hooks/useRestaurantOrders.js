@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { orderService, authService } from "@api/services";
+import { orderService, authService } from "shared-services";
 
 /**
  * Custom hook for managing restaurant orders

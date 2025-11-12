@@ -1,6 +1,6 @@
 // src/Context/OrderContext.js
 import React, { createContext, useState, useEffect } from "react";
-import { orderService } from "@api/services";
+import { orderService } from "shared-services";
 
 export const OrderContext = createContext();
 

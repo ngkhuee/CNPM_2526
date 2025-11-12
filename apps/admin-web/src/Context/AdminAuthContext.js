@@ -1,6 +1,6 @@
 // src/Context/AdminAuthContext.js
 import React, { createContext, useState, useEffect } from "react";
-import { authService } from "@api/services";
+import { authService } from "shared-services";
 
 export const AdminAuthContext = createContext();
 

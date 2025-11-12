@@ -6,10 +6,11 @@ import {
   MdStar,
   MdAccessTime,
   MdDeliveryDining,
+  MdWarning,
 } from "react-icons/md";
 import useRestaurantDetail from "customer-shared/hooks/useRestaurantDetail";
 import FoodItem from "../../components/FoodItem/FoodItem";
-import { getImageUrl } from "@utils/imageHelper";
+import { getImageUrl, isRestaurantOpen, getTodayHours } from "@utils";
 import "./RestaurantDetail.css";
 
 const RestaurantDetail = () => {
@@ -53,10 +54,13 @@ const RestaurantDetail = () => {
   }
 
   const bannerUrl = getImageUrl(restaurant.banner || restaurant.image);
+  const isOpen = isRestaurantOpen(restaurant.opening_hours);
+  const todayHours = getTodayHours(restaurant.opening_hours);
+
   console.log("Restaurant data:", restaurant);
   console.log("Banner URL:", bannerUrl);
-  console.log("restaurant.banner:", restaurant.banner);
-  console.log("restaurant.image:", restaurant.image);
+  console.log("Is Open:", isOpen);
+  console.log("Today Hours:", todayHours);
 
   return (
     <div className="restaurant-detail">
@@ -110,11 +114,15 @@ const RestaurantDetail = () => {
             )}
 
             <span
-              className={`restaurant-status ${
-                restaurant.isOpen ? "open" : "closed"
-              }`}
+              className={`restaurant-status ${isOpen ? "open" : "closed"
+                }`}
             >
-              {restaurant.isOpen ? "Open Now" : "Closed"}
+              {isOpen ? "Open Now" : "Closed"}
+              {todayHours && (
+                <span className="hours-info">
+                  {todayHours.open} - {todayHours.close}
+                </span>
+              )}
             </span>
           </div>
 
@@ -126,6 +134,17 @@ const RestaurantDetail = () => {
 
       {/* Menu Section */}
       <div className="restaurant-menu">
+        {!isOpen && (
+          <div className="closed-notice">
+            <MdWarning size={20} />
+            <div className="notice-content">
+              <strong>This restaurant is currently closed</strong>
+              {todayHours && <p>Hours: {todayHours.open} - {todayHours.close}</p>}
+              <p>You can browse the menu, but cannot place an order now.</p>
+            </div>
+          </div>
+        )}
+
         <div className="menu-header">
           <h2 className="menu-title">Menu</h2>
 
@@ -135,9 +154,8 @@ const RestaurantDetail = () => {
               {categories.map((category) => (
                 <button
                   key={category}
-                  className={`category-button ${
-                    selectedCategory === category ? "active" : ""
-                  }`}
+                  className={`category-button ${selectedCategory === category ? "active" : ""
+                    }`}
                   onClick={() => setSelectedCategory(category)}
                 >
                   {category}
@@ -166,6 +184,7 @@ const RestaurantDetail = () => {
                 restaurant={restaurant.name}
                 rating={item.rating}
                 sold={item.sold}
+                isRestaurantOpen={isOpen}
               />
             ))}
           </div>

@@ -1,96 +1,33 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useContext } from "react";
 import "./Add.css";
 import { assets } from "../../assets/assets";
 import { toast } from "react-toastify";
-import { FoodContext } from "../../Context/FoodContext";
-import { RestaurantContext } from "../../Context/RestaurantContext";
 import { CategoryContext } from "../../Context/CategoryContext";
-import { AuthContext } from "../../Context/AuthContext";
+import { RestaurantContext } from "../../Context/RestaurantContext";
 import { MdLocationOn, MdHourglassEmpty } from "react-icons/md";
+import { useAddFood } from "../../hooks/useAddFood";
 
 const Add = () => {
-  const { addFood } = useContext(FoodContext);
   const { currentRestaurant } = useContext(RestaurantContext);
   const { categories } = useContext(CategoryContext);
-  const { currentUser } = useContext(AuthContext);
-  const [data, setData] = useState({
-    name: "",
-    description: "",
-    price: "",
-    categoryId: "",
-  });
-  const [image, setImage] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const {
+    formData,
+    image,
+    loading,
+    handleImageChange,
+    handleInputChange,
+    handleSubmit,
+    formatVND,
+  } = useAddFood();
 
   const onSubmitHandler = async (event) => {
     event.preventDefault();
-
-    if (!image) {
-      toast.error("Please upload an image");
-      return;
+    const result = await handleSubmit(() => {
+      toast.success("Product added successfully!");
+    });
+    if (!result.success) {
+      toast.error(result.message);
     }
-
-    if (!data.categoryId) {
-      toast.error("Please select a category!");
-      return;
-    }
-
-    if (!currentUser || !currentUser.restaurantId) {
-      toast.error("Restaurant ID not found!");
-      return;
-    }
-
-    setLoading(true);
-
-    const reader = new FileReader();
-    reader.onloadend = async () => {
-      const newFoodData = {
-        name: data.name,
-        description: data.description,
-        price: Number(data.price),
-        categoryId: data.categoryId,
-        restaurantId: currentUser.restaurantId,
-        image: reader.result, // base64 image
-        isAvailable: true,
-        isFeatured: false,
-        preparationTime: 20, // default value
-        rating: 0, // default rating for new food
-        total_reviews: 0, // default review count
-      };
-
-      const result = await addFood(newFoodData);
-
-      if (result.success) {
-        toast.success("Product added successfully!");
-        // Reset form
-        setData({
-          name: "",
-          description: "",
-          price: "",
-          categoryId: categories.length > 0 ? categories[0].id : "",
-        });
-        setImage(null);
-      } else {
-        toast.error(` Failed to add: ${result.message}`);
-      }
-
-      setLoading(false);
-    };
-
-    reader.readAsDataURL(image);
-  };
-
-  const onChangeHandler = (event) => {
-    const { name, value } = event.target;
-    setData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const formatVND = (value) => {
-    if (!value) return "";
-    return new Intl.NumberFormat("vi-VN", {
-      style: "currency",
-      currency: "VND",
-    }).format(value);
   };
 
   return (
@@ -111,7 +48,7 @@ const Add = () => {
             id="image"
             hidden
             accept="image/*"
-            onChange={(e) => setImage(e.target.files[0])}
+            onChange={(e) => handleImageChange(e.target.files[0])}
             required
           />
         </div>
@@ -130,8 +67,8 @@ const Add = () => {
           <input
             type="text"
             name="name"
-            value={data.name}
-            onChange={onChangeHandler}
+            value={formData.name}
+            onChange={handleInputChange}
             placeholder="Enter product name"
             required
             disabled={loading}
@@ -140,8 +77,8 @@ const Add = () => {
           <p className="label">Description</p>
           <textarea
             name="description"
-            value={data.description}
-            onChange={onChangeHandler}
+            value={formData.description}
+            onChange={handleInputChange}
             rows={4}
             placeholder="Write product description"
             required
@@ -155,8 +92,8 @@ const Add = () => {
               </p>
               <select
                 name="categoryId"
-                onChange={onChangeHandler}
-                value={data.categoryId}
+                onChange={handleInputChange}
+                value={formData.categoryId}
                 disabled={loading}
                 required
               >
@@ -174,13 +111,13 @@ const Add = () => {
               <input
                 type="number"
                 name="price"
-                value={data.price}
-                onChange={onChangeHandler}
+                value={formData.price}
+                onChange={handleInputChange}
                 placeholder="20000"
                 disabled={loading}
               />
-              {data.price && (
-                <p className="price-preview">{formatVND(data.price)}</p>
+              {formData.price && (
+                <p className="price-preview">{formatVND(formData.price)}</p>
               )}
             </div>
           </div>

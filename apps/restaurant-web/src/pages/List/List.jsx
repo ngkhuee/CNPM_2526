@@ -1,120 +1,63 @@
-import React, { useState, useEffect, useContext } from "react";
+﻿import React, { useState } from "react";
+
 import { useNavigate } from "react-router-dom";
 import "./List.css";
 import { assets } from "../../assets/assets";
-import { getImageUrl } from "@utils/imageHelper";
-import { FoodContext } from "../../Context/FoodContext";
-import { CategoryContext } from "../../Context/CategoryContext";
-import { AuthContext } from "../../Context/AuthContext";
-import { MdEdit, MdDelete, MdLocalOffer, MdAdd, MdStar } from "react-icons/md";
+import { MdAdd } from "react-icons/md";
 import { FoodDetail } from "shared-ui";
+import { useFoodList } from "../../hooks/useFoodList";
+import FoodCard from "../../components/FoodList/FoodCard";
+import FoodFilterBar from "../../components/FoodList/FoodFilterBar";
+import FoodEditModal from "../../components/FoodList/FoodEditModal";
+import { toast } from "react-toastify";
 
 const List = () => {
-  const { foodList, deleteFood, updateFood, loading } = useContext(FoodContext);
-  const { categories: restaurantCategories } = useContext(CategoryContext);
-  const { currentUser } = useContext(AuthContext);
-  const [search, setSearch] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState("All");
+  const navigate = useNavigate();
+  const {
+    search,
+    setSearch,
+    categoryFilter,
+    setCategoryFilter,
+    restaurantFoods,
+    filteredFoods,
+    categories,
+    selectedFood,
+    setSelectedFood,
+    updateFood,
+    deleteFood,
+  } = useFoodList();
+
   const [showEditModal, setShowEditModal] = useState(false);
   const [showFoodDetail, setShowFoodDetail] = useState(false);
-  const [selectedFood, setSelectedFood] = useState(null);
-  const [editFood, setEditFood] = useState({
-    id: null,
-    name: "",
-    categoryId: "",
-    price: "",
-    restaurantName: "",
-    image: "",
-  });
-
-  // Get current restaurant's foods only
-  const restaurantFoods = foodList.filter(
-    (food) => food.restaurantId === currentUser?.restaurantId
-  );
-
-  // Debug logging
-  console.log("🍔 List.jsx Debug:");
-  console.log("- Total foodList:", foodList.length);
-  console.log("- Current user restaurantId:", currentUser?.restaurantId);
-  console.log("- Restaurant foods:", restaurantFoods.length);
-  console.log("- Sample food:", restaurantFoods[0]);
-
-  const getImageSrc = (food) => {
-    // Nếu ảnh là base64 (do người dùng upload mới)
-    if (food.image?.startsWith("data:image")) return food.image;
-
-    // Nếu ảnh là URL online hoặc path từ backend
-    if (food.image?.startsWith("http") || food.image?.startsWith("/images")) {
-      return getImageUrl(food.image);
-    }
-
-    // Nếu ảnh là key trong assets (legacy support)
-    if (assets[food.image]) return assets[food.image];
-
-    // Fallback
-    return "";
-  };
-
-  const navigate = useNavigate();
+  const [editFood, setEditFood] = useState(null);
 
   const handleOpenEditModal = (food) => {
-    setEditFood(food); // điền sẵn dữ liệu
+    setEditFood(food);
     setShowEditModal(true);
   };
 
   const handleCloseEditModal = () => {
-    setEditFood({
-      id: null,
-      name: "",
-      categoryId: "",
-      price: "",
-      restaurantName: "",
-      image: "",
-    });
+    setEditFood(null);
     setShowEditModal(false);
   };
 
-  const handleEditSubmit = async (e) => {
-    e.preventDefault();
-
-    // Validation: Bắt buộc phải chọn category
-    if (!editFood.categoryId && !editFood.category) {
-      alert("⚠️ Please select a category!");
-      return;
-    }
-
-    // Prepare clean update payload
+  const handleEditSubmit = async (editedFood) => {
     const updateData = {
-      name: editFood.name,
-      description: editFood.description,
-      price: Number(editFood.price),
-      category: editFood.category,
-      categoryId: editFood.categoryId,
-      image: editFood.image,
-      isAvailable: editFood.isAvailable !== false,
+      name: editedFood.name,
+      description: editedFood.description,
+      price: Number(editedFood.price),
+      category: editedFood.category,
+      categoryId: editedFood.categoryId,
+      image: editedFood.image,
+      isAvailable: editedFood.isAvailable !== false,
     };
 
-    const result = await updateFood(editFood.id, updateData);
+    const result = await updateFood(editedFood.id, updateData);
     if (result.success) {
-      alert("Food updated successfully!");
+      toast.success("Food updated successfully!");
       handleCloseEditModal();
     } else {
-      alert(` Failed to update: ${result.message}`);
-    }
-  };
-  // const handleImageChange = (file) => {
-  //   if (file) {
-  //     const imageURL = URL.createObjectURL(file); // tạo URL tạm
-  //     setEditFood(prev => ({ ...prev, image: imageURL, file: file }));
-  //   }
-  // };
-  const handleImageChange = (file) => {
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setEditFood((prev) => ({ ...prev, image: reader.result }));
-      };
-      reader.readAsDataURL(file);
+      toast.error("Failed to update: " + result.message);
     }
   };
 
@@ -122,9 +65,9 @@ const List = () => {
     if (window.confirm("Are you sure you want to delete this food?")) {
       const result = await deleteFood(id);
       if (result.success) {
-        alert("Food deleted successfully!");
+        toast.success("Food deleted successfully!");
       } else {
-        alert(`Failed to delete: ${result.message}`);
+        toast.error("Failed to delete: " + result.message);
       }
     }
   };
@@ -135,36 +78,10 @@ const List = () => {
       currency: "VND",
     }).format(value || 0);
 
-  const getCategoryName = (food) => {
-    // Nếu có categoryId, tìm trong restaurantCategories
-    if (food.categoryId) {
-      const category = restaurantCategories.find(
-        (c) => c.id === food.categoryId
-      );
-      return category ? category.name : "Uncategorized";
-    }
-    // Nếu chỉ có category (string), return trực tiếp
-    return food.category || "Uncategorized";
+  const handleViewDetail = (food) => {
+    setSelectedFood(food);
+    setShowFoodDetail(true);
   };
-
-  const filteredFoods = restaurantFoods.filter((item) => {
-    const matchName = item.name.toLowerCase().includes(search.toLowerCase());
-    // Filter theo category string hoặc categoryId
-    const itemCategory = item.categoryId || item.category;
-    const matchCategory =
-      categoryFilter === "All" ||
-      itemCategory === categoryFilter ||
-      (!itemCategory && categoryFilter === "Uncategorized"); // Hiển thị food không có category
-    return matchName && matchCategory;
-  });
-
-  if (loading) {
-    return (
-      <div className="main-content">
-        <div className="loading">Loading foods...</div>
-      </div>
-    );
-  }
 
   return (
     <div className="main-content">
@@ -175,227 +92,43 @@ const List = () => {
         </button>
       </div>
 
-      <div className="list-filters">
-        <input
-          type="text"
-          placeholder="Search by name..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-        <select
-          value={categoryFilter}
-          onChange={(e) => setCategoryFilter(e.target.value)}
-        >
-          <option value="All">All Categories</option>
-          {/* Hiển thị categories từ restaurantCategories (nếu có) */}
-          {restaurantCategories.map((cat) => (
-            <option key={cat.id} value={cat.id}>
-              {cat.name}
-            </option>
-          ))}
-          {/* Thêm categories từ food items (string) nếu chưa có trong restaurantCategories */}
-          {[
-            ...new Set(restaurantFoods.map((f) => f.category).filter(Boolean)),
-          ].map((cat) => {
-            // Chỉ hiển thị nếu chưa có trong restaurantCategories
-            if (
-              !restaurantCategories.find(
-                (rc) => rc.name === cat || rc.id === cat
-              )
-            ) {
-              return (
-                <option key={cat} value={cat}>
-                  {cat}
-                </option>
-              );
-            }
-            return null;
-          })}
-          {/* Hiển thị Uncategorized nếu có food không có category */}
-          {restaurantFoods.some((f) => !f.category && !f.categoryId) && (
-            <option value="Uncategorized">Uncategorized</option>
-          )}
-        </select>
-      </div>
+      <FoodFilterBar
+        search={search}
+        setSearch={setSearch}
+        categoryFilter={categoryFilter}
+        setCategoryFilter={setCategoryFilter}
+        categories={categories}
+        restaurantFoods={restaurantFoods}
+      />
 
       <div className="cards-wrapper">
         {filteredFoods.length > 0 ? (
           filteredFoods.map((food) => (
-            <div className="food-card" key={food.id}>
-              <div className="food-img-wrapper">
-                {getImageSrc(food) ? (
-                  <img src={getImageSrc(food)} alt={food.name} />
-                ) : (
-                  <p>No image</p>
-                )}
-              </div>
-              <div className="food-info">
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "8px",
-                    marginBottom: "8px",
-                  }}
-                >
-                  <h4 style={{ margin: 0 }}>{food.name}</h4>
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "4px",
-                      cursor: "pointer",
-                      padding: "4px 8px",
-                      background: "#fff3e0",
-                      borderRadius: "12px",
-                      transition: "all 0.2s ease",
-                    }}
-                    onClick={() => {
-                      setSelectedFood(food);
-                      setShowFoodDetail(true);
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.background = "#ffe0b2";
-                      e.currentTarget.style.transform = "scale(1.05)";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.background = "#fff3e0";
-                      e.currentTarget.style.transform = "scale(1)";
-                    }}
-                  >
-                    <MdStar size={16} color="#ff9800" />
-                    <span
-                      style={{
-                        fontSize: "14px",
-                        fontWeight: "600",
-                        color: "#ff9800",
-                      }}
-                    >
-                      {(food.rating || 0).toFixed(1)}
-                    </span>
-                  </div>
-                </div>
-                <p className="food-category">{getCategoryName(food)}</p>
-                <div className="price-container">
-                  <p className="food-price">
-                    <MdLocalOffer /> {formatVND(food.price)}
-                  </p>
-                </div>
-              </div>
-              <div className="card-actions">
-                <button
-                  className="edit-btn"
-                  onClick={() => handleOpenEditModal(food)}
-                >
-                  <MdEdit /> Edit
-                </button>
-                <button
-                  className="remove-btn"
-                  onClick={() => handleRemoveFood(food.id)}
-                >
-                  <MdDelete /> Remove
-                </button>
-              </div>
-            </div>
+            <FoodCard
+              key={food.id}
+              food={food}
+              assets={assets}
+              categories={categories}
+              onEdit={handleOpenEditModal}
+              onDelete={handleRemoveFood}
+              onViewDetail={handleViewDetail}
+              onFormatVND={formatVND}
+            />
           ))
         ) : (
           <p className="no-foods">No foods available</p>
         )}
       </div>
-      {showEditModal && (
-        <div className="modal-overlay" onClick={handleCloseEditModal}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <h3>Edit Food</h3>
-            <form onSubmit={handleEditSubmit}>
-              <label>
-                Name:
-                <input
-                  type="text"
-                  value={editFood.name}
-                  onChange={(e) =>
-                    setEditFood({ ...editFood, name: e.target.value })
-                  }
-                  required
-                />
-              </label>
-              <label>
-                Category <span style={{ color: "red" }}>*</span>:
-                <select
-                  value={editFood.categoryId || editFood.category}
-                  onChange={(e) =>
-                    setEditFood({
-                      ...editFood,
-                      categoryId: e.target.value,
-                      category: e.target.value,
-                    })
-                  }
-                  required
-                >
-                  <option value="">-- Select a category (Required) --</option>
-                  {/* Categories từ restaurantCategories */}
-                  {restaurantCategories.map((cat) => (
-                    <option key={cat.id} value={cat.id}>
-                      {cat.name}
-                    </option>
-                  ))}
-                  {/* Categories từ food items (string) */}
-                  {[
-                    ...new Set(
-                      restaurantFoods.map((f) => f.category).filter(Boolean)
-                    ),
-                  ].map((cat) => {
-                    if (
-                      !restaurantCategories.find(
-                        (rc) => rc.name === cat || rc.id === cat
-                      )
-                    ) {
-                      return (
-                        <option key={cat} value={cat}>
-                          {cat}
-                        </option>
-                      );
-                    }
-                    return null;
-                  })}
-                </select>
-              </label>
-              <label>
-                Price:
-                <input
-                  type="number"
-                  value={editFood.price}
-                  onChange={(e) =>
-                    setEditFood({ ...editFood, price: e.target.value })
-                  }
-                  required
-                />
-              </label>
-              <label>
-                Image:
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => handleImageChange(e.target.files[0])}
-                />
-              </label>
-              <div className="modal-buttons">
-                <button type="submit" className="submit-btn">
-                  Save
-                </button>
-                <button
-                  type="button"
-                  className="cancel-btn"
-                  onClick={handleCloseEditModal}
-                >
-                  Cancel
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
 
-      {/* Food Detail Modal with Reviews */}
+      <FoodEditModal
+        food={editFood}
+        isOpen={showEditModal}
+        onClose={handleCloseEditModal}
+        onSubmit={handleEditSubmit}
+        categories={categories}
+        restaurantFoods={restaurantFoods}
+      />
+
       {showFoodDetail && selectedFood && (
         <FoodDetail
           food={selectedFood}
@@ -404,8 +137,6 @@ const List = () => {
             setSelectedFood(null);
           }}
           userRole="restaurant"
-          currentUserId={currentUser?.id}
-          currentRestaurantId={currentUser?.restaurantId}
         />
       )}
     </div>

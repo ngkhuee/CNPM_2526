@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { promotionService, authService } from "@api/services";
+import { promotionService, authService } from "shared-services";
 import { toast } from "react-toastify";
 
 /**

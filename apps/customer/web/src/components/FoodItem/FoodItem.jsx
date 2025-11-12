@@ -18,6 +18,7 @@ const FoodItem = ({
   rating,
   sold,
   restaurantId,
+  isRestaurantOpen = true,
 }) => {
   const [showPopup, setShowPopup] = useState(false);
 
@@ -47,9 +48,14 @@ const FoodItem = ({
           src={imageUrl}
           alt={name}
           onClick={openPopup}
+          style={!isRestaurantOpen ? { opacity: 0.6 } : {}}
         />
 
-        {!cartItems[id] ? (
+        {!isRestaurantOpen ? (
+          <div className="closed-overlay">
+            <span>Restaurant Closed</span>
+          </div>
+        ) : !cartItems[id] ? (
           // Nếu chưa có trong giỏ thì hiện nút thêm
           <img
             className="add"
