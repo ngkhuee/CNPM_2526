@@ -112,6 +112,8 @@ export const restaurantService = {
         isAvailable: menu.is_available,
         category: categoriesMap[menu.category_id] || menu.category || "Other",
         categoryId: menu.category_id,
+        rating: menu.rating || 0, // Rating from menu item
+        sold: menu.sold || 0, // Sold count (calculated from orders in backend)
         createdAt: menu.created_at,
       }));
     } catch (error) {

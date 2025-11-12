@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { promotionService } from "@api/services";
+import { promotionService } from "shared-services";
 
 /**
  * Custom hook for managing promotions in customer app

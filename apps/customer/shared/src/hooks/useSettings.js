@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { settingsService } from "@api/services";
+import { settingsService } from "shared-services";
 
 /**
  * Custom hook for fetching system settings

@@ -257,7 +257,7 @@ const Partners = () => {
                   <td>{r.phone}</td>
                   <td>
                     <span className="rating">
-                      ⭐ {r.rating?.toFixed(1) || "N/A"}
+                      Rating: {r.rating?.toFixed(1) || "N/A"}
                     </span>
                   </td>
                   <td>
@@ -414,7 +414,7 @@ const Partners = () => {
               <div className="detail-row">
                 <strong>Rating:</strong>
                 <span>
-                  ⭐ {viewingPartner.rating?.toFixed(1) || "0.0"} (
+                  Rating: {viewingPartner.rating?.toFixed(1) || "0.0"} (
                   {viewingPartner.total_reviews || 0} reviews)
                 </span>
               </div>

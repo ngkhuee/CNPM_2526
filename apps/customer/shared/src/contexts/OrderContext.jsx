@@ -1,5 +1,5 @@
 import React, { createContext, useState, useEffect, useContext } from "react";
-import { orderService } from "@api/services";
+import { orderService } from "shared-services";
 import { AuthContext } from "./AuthContext";
 
 export const OrderContext = createContext();

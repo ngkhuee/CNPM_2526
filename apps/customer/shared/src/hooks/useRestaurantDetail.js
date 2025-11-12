@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { restaurantService } from "@api/services";
+import { restaurantService } from "shared-services";
 
 /**
  * Custom hook for restaurant detail page
@@ -52,20 +52,9 @@ const useRestaurantDetail = (restaurantId) => {
         setMenuLoading(true);
         const data = await restaurantService.getMenu(restaurantId);
 
-        // Enrich menu items with rating and sold count
-        const enrichedMenu = data.map((item, index) => {
-          const seed = parseInt(item.id) || index;
-          const rating = 3.5 + (seed % 15) / 10;
-          const sold = 50 + ((seed * 17) % 500);
-
-          return {
-            ...item,
-            rating: parseFloat(rating.toFixed(1)),
-            sold: sold,
-          };
-        });
-
-        setMenuItems(enrichedMenu);
+        // Menu items now have rating and sold from backend
+        // No need to enrich with hard-coded values
+        setMenuItems(data);
       } catch (err) {
         console.error("Error fetching menu:", err);
         // Don't set error here, just log it

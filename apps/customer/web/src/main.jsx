@@ -7,6 +7,7 @@ import StoreContextProvider, {
   AuthProvider,
   CartProvider,
   OrderProvider,
+  GeolocationProvider,
 } from "customer-shared";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
@@ -16,7 +17,9 @@ ReactDOM.createRoot(document.getElementById("root")).render(
         <StoreContextProvider>
           <CartProvider>
             <OrderProvider>
-              <App />
+              <GeolocationProvider>
+                <App />
+              </GeolocationProvider>
             </OrderProvider>
           </CartProvider>
         </StoreContextProvider>

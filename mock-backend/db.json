@@ -592,7 +592,9 @@
       "is_available": true,
       "preparation_time_minutes": 10,
       "created_at": "2024-01-01T00:00:00.000Z",
-      "updated_at": "2024-01-01T00:00:00.000Z"
+      "updated_at": "2024-01-01T00:00:00.000Z",
+      "rating": 3.6,
+      "sold": 0
     },
     {
       "id": 2,
@@ -605,7 +607,9 @@
       "is_available": true,
       "preparation_time_minutes": 8,
       "created_at": "2024-01-01T00:00:00.000Z",
-      "updated_at": "2024-01-01T00:00:00.000Z"
+      "updated_at": "2024-01-01T00:00:00.000Z",
+      "rating": 3.7,
+      "sold": 1
     },
     {
       "id": 3,
@@ -618,7 +622,9 @@
       "is_available": true,
       "preparation_time_minutes": 10,
       "created_at": "2024-01-01T00:00:00.000Z",
-      "updated_at": "2025-11-06T07:57:10.654Z"
+      "updated_at": "2025-11-06T07:57:10.654Z",
+      "rating": 3.8,
+      "sold": 1
     },
     {
       "id": 4,
@@ -631,7 +637,9 @@
       "is_available": true,
       "preparation_time_minutes": 15,
       "created_at": "2024-01-01T00:00:00.000Z",
-      "updated_at": "2025-11-06T07:57:18.404Z"
+      "updated_at": "2025-11-06T07:57:18.404Z",
+      "rating": 3.9,
+      "sold": 0
     },
     {
       "id": 5,
@@ -644,7 +652,9 @@
       "is_available": true,
       "preparation_time_minutes": 12,
       "created_at": "2024-01-01T00:00:00.000Z",
-      "updated_at": "2025-11-05T13:57:29.527Z"
+      "updated_at": "2025-11-05T13:57:29.527Z",
+      "rating": 4.0,
+      "sold": 0
     },
     {
       "id": 6,
@@ -657,7 +667,9 @@
       "is_available": true,
       "preparation_time_minutes": 10,
       "created_at": "2024-01-01T00:00:00.000Z",
-      "updated_at": "2025-11-05T13:57:39.348Z"
+      "updated_at": "2025-11-05T13:57:39.348Z",
+      "rating": 4.1,
+      "sold": 0
     },
     {
       "id": 7,
@@ -670,7 +682,9 @@
       "is_available": true,
       "preparation_time_minutes": 15,
       "created_at": "2024-01-01T00:00:00.000Z",
-      "updated_at": "2025-11-05T13:57:46.515Z"
+      "updated_at": "2025-11-05T13:57:46.515Z",
+      "rating": 4.2,
+      "sold": 0
     },
     {
       "id": 8,
@@ -683,7 +697,9 @@
       "is_available": true,
       "preparation_time_minutes": 15,
       "created_at": "2024-01-01T00:00:00.000Z",
-      "updated_at": "2025-11-05T13:57:54.154Z"
+      "updated_at": "2025-11-05T13:57:54.154Z",
+      "rating": 4.3,
+      "sold": 0
     },
     {
       "id": 9,
@@ -696,7 +712,9 @@
       "is_available": true,
       "preparation_time_minutes": 20,
       "created_at": "2024-01-01T00:00:00.000Z",
-      "updated_at": "2024-01-01T00:00:00.000Z"
+      "updated_at": "2024-01-01T00:00:00.000Z",
+      "rating": 4.4,
+      "sold": 1
     },
     {
       "id": 10,
@@ -709,7 +727,9 @@
       "is_available": true,
       "preparation_time_minutes": 22,
       "created_at": "2024-01-01T00:00:00.000Z",
-      "updated_at": "2024-01-01T00:00:00.000Z"
+      "updated_at": "2024-01-01T00:00:00.000Z",
+      "rating": 4.5,
+      "sold": 0
     },
     {
       "id": 11,
@@ -722,7 +742,9 @@
       "is_available": true,
       "preparation_time_minutes": 18,
       "created_at": "2024-01-01T00:00:00.000Z",
-      "updated_at": "2025-11-05T14:32:06.581Z"
+      "updated_at": "2025-11-05T14:32:06.581Z",
+      "rating": 4.6,
+      "sold": 0
     },
     {
       "id": 12,
@@ -735,7 +757,9 @@
       "is_available": true,
       "preparation_time_minutes": 18,
       "created_at": "2024-01-01T00:00:00.000Z",
-      "updated_at": "2024-01-01T00:00:00.000Z"
+      "updated_at": "2024-01-01T00:00:00.000Z",
+      "rating": 4.7,
+      "sold": 0
     },
     {
       "id": 13,
@@ -748,7 +772,9 @@
       "is_available": true,
       "preparation_time_minutes": 15,
       "created_at": "2024-01-01T00:00:00.000Z",
-      "updated_at": "2025-11-06T08:18:32.695Z"
+      "updated_at": "2025-11-06T08:18:32.695Z",
+      "rating": 4.8,
+      "sold": 0
     },
     {
       "id": 14,
@@ -761,7 +787,9 @@
       "is_available": true,
       "preparation_time_minutes": 10,
       "created_at": "2024-01-01T00:00:00.000Z",
-      "updated_at": "2025-11-06T08:18:42.436Z"
+      "updated_at": "2025-11-06T08:18:42.436Z",
+      "rating": 4.9,
+      "sold": 0
     },
     {
       "id": 15,
@@ -774,7 +802,9 @@
       "is_available": true,
       "preparation_time_minutes": 20,
       "created_at": "2024-01-01T00:00:00.000Z",
-      "updated_at": "2025-11-06T08:19:07.769Z"
+      "updated_at": "2025-11-06T08:19:07.769Z",
+      "rating": 3.5,
+      "sold": 0
     },
     {
       "id": 16,
@@ -787,7 +817,9 @@
       "is_available": true,
       "preparation_time_minutes": 12,
       "created_at": "2024-01-01T00:00:00.000Z",
-      "updated_at": "2024-01-01T00:00:00.000Z"
+      "updated_at": "2024-01-01T00:00:00.000Z",
+      "rating": 3.6,
+      "sold": 0
     },
     {
       "id": 17,
@@ -800,7 +832,9 @@
       "is_available": true,
       "preparation_time_minutes": 12,
       "created_at": "2024-01-01T00:00:00.000Z",
-      "updated_at": "2024-01-01T00:00:00.000Z"
+      "updated_at": "2024-01-01T00:00:00.000Z",
+      "rating": 3.7,
+      "sold": 0
     },
     {
       "id": 18,
@@ -813,7 +847,9 @@
       "is_available": true,
       "preparation_time_minutes": 15,
       "created_at": "2024-01-01T00:00:00.000Z",
-      "updated_at": "2024-01-01T00:00:00.000Z"
+      "updated_at": "2024-01-01T00:00:00.000Z",
+      "rating": 3.8,
+      "sold": 0
     },
     {
       "id": 19,
@@ -826,7 +862,9 @@
       "is_available": true,
       "preparation_time_minutes": 8,
       "created_at": "2024-01-01T00:00:00.000Z",
-      "updated_at": "2025-11-07T02:39:36.294Z"
+      "updated_at": "2025-11-07T02:39:36.294Z",
+      "rating": 3.9,
+      "sold": 1
     },
     {
       "id": 20,
@@ -839,7 +877,9 @@
       "is_available": true,
       "preparation_time_minutes": 7,
       "created_at": "2024-01-01T00:00:00.000Z",
-      "updated_at": "2025-11-07T02:40:00.206Z"
+      "updated_at": "2025-11-07T02:40:00.206Z",
+      "rating": 4.0,
+      "sold": 0
     },
     {
       "id": 21,
@@ -852,7 +892,9 @@
       "is_available": true,
       "preparation_time_minutes": 10,
       "created_at": "2024-01-01T00:00:00.000Z",
-      "updated_at": "2025-11-07T02:40:56.365Z"
+      "updated_at": "2025-11-07T02:40:56.365Z",
+      "rating": 4.1,
+      "sold": 0
     }
   ],
   "orders": [

@@ -115,7 +115,7 @@ const Tracking = () => {
     }
 
     const intervalId = setInterval(async () => {
-      console.log("🔄 Auto-refreshing tracking data...");
+      console.log("Auto-refreshing tracking data...");
       try {
         await refetch();
       } catch (error) {
@@ -125,7 +125,7 @@ const Tracking = () => {
 
     // Cleanup interval on unmount
     return () => {
-      console.log("🛑 Stopping auto-refresh");
+      console.log("Stopping auto-refresh");
       clearInterval(intervalId);
     };
   }, [order, autoRefreshEnabled, refetch]);
@@ -162,11 +162,11 @@ const Tracking = () => {
           // Calculate distances
           const totalDistance = Math.sqrt(
             Math.pow(dropoff.lat - pickup.lat, 2) +
-              Math.pow(dropoff.lng - pickup.lng, 2)
+            Math.pow(dropoff.lng - pickup.lng, 2)
           );
           const currentDistance = Math.sqrt(
             Math.pow(current.lat - pickup.lat, 2) +
-              Math.pow(current.lng - pickup.lng, 2)
+            Math.pow(current.lng - pickup.lng, 2)
           );
 
           // Progress from 0.5 to 1.0 during delivery
@@ -288,15 +288,15 @@ const Tracking = () => {
         {(order.restaurantName ||
           order.restaurant?.name ||
           order.restaurantId) && (
-          <p
-            style={{ color: "#ff6b35", fontWeight: "600", marginBottom: "8px" }}
-          >
-            <span>Restaurant:</span>{" "}
-            {order.restaurantName ||
-              order.restaurant?.name ||
-              `Restaurant ID: ${order.restaurantId}`}
-          </p>
-        )}
+            <p
+              style={{ color: "#ff6b35", fontWeight: "600", marginBottom: "8px" }}
+            >
+              <span>Restaurant:</span>{" "}
+              {order.restaurantName ||
+                order.restaurant?.name ||
+                `Restaurant ID: ${order.restaurantId}`}
+            </p>
+          )}
 
         <p style={{ marginBottom: "15px" }}>
           <strong>Status:</strong>{" "}
@@ -311,8 +311,8 @@ const Tracking = () => {
                 order.status === "delivered"
                   ? "#4caf50"
                   : order.status === "delivering" ||
-                      order.status === "picking_up" ||
-                      order.status === "picked_up"
+                    order.status === "picking_up" ||
+                    order.status === "picked_up"
                     ? "#2196f3"
                     : order.status === "preparing" || order.status === "ready"
                       ? "#ff9800"
@@ -490,121 +490,119 @@ const Tracking = () => {
             height="450"
             style={{ border: 0, borderRadius: "8px" }}
             loading="lazy"
-            src={`https://www.openstreetmap.org/export/embed.html?bbox=${
-              dropoffGPS.lng - 0.02
-            },${dropoffGPS.lat - 0.02},${dropoffGPS.lng + 0.02},${
-              dropoffGPS.lat + 0.02
-            }&layer=mapnik&marker=${dropoffGPS.lat},${dropoffGPS.lng}`}
+            src={`https://www.openstreetmap.org/export/embed.html?bbox=${dropoffGPS.lng - 0.02
+              },${dropoffGPS.lat - 0.02},${dropoffGPS.lng + 0.02},${dropoffGPS.lat + 0.02
+              }&layer=mapnik&marker=${dropoffGPS.lat},${dropoffGPS.lng}`}
           />
 
           {/* Drone Marker Overlay - Show during delivery */}
           {["ready", "picking_up", "picked_up", "delivering"].includes(
             order.status
           ) && (
-            <div
-              style={{
-                position: "absolute",
-                top: 0,
-                left: 0,
-                width: "100%",
-                height: "450px",
-                pointerEvents: "none",
-                zIndex: 10,
-              }}
-            >
-              {/* Drone Icon */}
               <div
-                style={{
-                  position: "absolute",
-                  left: `${x}px`,
-                  top: `${y}px`,
-                  transform: "translate(-50%, -50%)",
-                  transition: "all 2s linear",
-                  animation: "drone-pulse 2s infinite",
-                }}
-              >
-                <MdFlight
-                  size={40}
-                  color="#2196f3"
-                  style={{
-                    filter: "drop-shadow(0 4px 8px rgba(33, 150, 243, 0.5))",
-                    transform: "rotate(45deg)",
-                  }}
-                />
-                <div
-                  style={{
-                    position: "absolute",
-                    top: "45px",
-                    left: "50%",
-                    transform: "translateX(-50%)",
-                    background: "rgba(33, 150, 243, 0.9)",
-                    color: "white",
-                    padding: "4px 8px",
-                    borderRadius: "4px",
-                    fontSize: "12px",
-                    fontWeight: "bold",
-                    whiteSpace: "nowrap",
-                    boxShadow: "0 2px 4px rgba(0,0,0,0.3)",
-                  }}
-                >
-                  {order.drone_id || "Drone"}
-                </div>
-              </div>
-
-              {/* Path Line from Restaurant to Customer */}
-              <svg
                 style={{
                   position: "absolute",
                   top: 0,
                   left: 0,
                   width: "100%",
-                  height: "100%",
+                  height: "450px",
+                  pointerEvents: "none",
+                  zIndex: 10,
                 }}
               >
-                <defs>
-                  <marker
-                    id="arrowhead"
-                    markerWidth="10"
-                    markerHeight="10"
-                    refX="5"
-                    refY="5"
-                    orient="auto"
+                {/* Drone Icon */}
+                <div
+                  style={{
+                    position: "absolute",
+                    left: `${x}px`,
+                    top: `${y}px`,
+                    transform: "translate(-50%, -50%)",
+                    transition: "all 2s linear",
+                    animation: "drone-pulse 2s infinite",
+                  }}
+                >
+                  <MdFlight
+                    size={40}
+                    color="#2196f3"
+                    style={{
+                      filter: "drop-shadow(0 4px 8px rgba(33, 150, 243, 0.5))",
+                      transform: "rotate(45deg)",
+                    }}
+                  />
+                  <div
+                    style={{
+                      position: "absolute",
+                      top: "45px",
+                      left: "50%",
+                      transform: "translateX(-50%)",
+                      background: "rgba(33, 150, 243, 0.9)",
+                      color: "white",
+                      padding: "4px 8px",
+                      borderRadius: "4px",
+                      fontSize: "12px",
+                      fontWeight: "bold",
+                      whiteSpace: "nowrap",
+                      boxShadow: "0 2px 4px rgba(0,0,0,0.3)",
+                    }}
                   >
-                    <polygon points="0 0, 10 5, 0 10" fill="#ff6b35" />
-                  </marker>
-                </defs>
-                <line
-                  x1={start.x}
-                  y1={start.y}
-                  x2={end.x}
-                  y2={end.y}
-                  stroke="#ff6b35"
-                  strokeWidth="3"
-                  strokeDasharray="8,4"
-                  markerEnd="url(#arrowhead)"
-                  opacity="0.7"
-                />
-                {/* Restaurant Marker */}
-                <circle
-                  cx={start.x}
-                  cy={start.y}
-                  r="8"
-                  fill="#ff6b35"
-                  stroke="white"
-                  strokeWidth="2"
-                />
-                {/* Customer Marker */}
-                <circle
-                  cx={end.x}
-                  cy={end.y}
-                  r="8"
-                  fill="#4caf50"
-                  stroke="white"
-                  strokeWidth="2"
-                />
-              </svg>
-            </div>
-          )}
+                    {order.drone_id || "Drone"}
+                  </div>
+                </div>
+
+                {/* Path Line from Restaurant to Customer */}
+                <svg
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    width: "100%",
+                    height: "100%",
+                  }}
+                >
+                  <defs>
+                    <marker
+                      id="arrowhead"
+                      markerWidth="10"
+                      markerHeight="10"
+                      refX="5"
+                      refY="5"
+                      orient="auto"
+                    >
+                      <polygon points="0 0, 10 5, 0 10" fill="#ff6b35" />
+                    </marker>
+                  </defs>
+                  <line
+                    x1={start.x}
+                    y1={start.y}
+                    x2={end.x}
+                    y2={end.y}
+                    stroke="#ff6b35"
+                    strokeWidth="3"
+                    strokeDasharray="8,4"
+                    markerEnd="url(#arrowhead)"
+                    opacity="0.7"
+                  />
+                  {/* Restaurant Marker */}
+                  <circle
+                    cx={start.x}
+                    cy={start.y}
+                    r="8"
+                    fill="#ff6b35"
+                    stroke="white"
+                    strokeWidth="2"
+                  />
+                  {/* Customer Marker */}
+                  <circle
+                    cx={end.x}
+                    cy={end.y}
+                    r="8"
+                    fill="#4caf50"
+                    stroke="white"
+                    strokeWidth="2"
+                  />
+                </svg>
+              </div>
+            )}
         </div>
 
         <div className="map-legend">

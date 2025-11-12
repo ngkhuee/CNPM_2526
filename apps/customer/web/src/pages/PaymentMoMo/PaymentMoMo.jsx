@@ -31,7 +31,7 @@ const PaymentMoMo = () => {
   const handlePaymentSuccess = async () => {
     setLoading(true);
     try {
-      console.log("💳 Processing payment for order:", orderId);
+      console.log("Processing payment for order:", orderId);
 
       // Step 1: Update order status to 'paid'
       const result = await updateOrderStatus(orderId, "paid");
@@ -41,7 +41,7 @@ const PaymentMoMo = () => {
         return;
       }
 
-      console.log("✅ Order status updated to 'paid'");
+      console.log("Order status updated to 'paid'");
 
       // Show success message and redirect to tracking
       // Note: Drone will be assigned when restaurant confirms the order
@@ -56,13 +56,13 @@ const PaymentMoMo = () => {
   };
 
   const handlePaymentFailed = () => {
-    console.log("❌ Payment failed for order:", orderId);
+    console.log("Payment failed for order:", orderId);
     setPaymentFailed(true);
     // Order status remains 'pending' - no need to update
   };
 
   const handleRetryPayment = () => {
-    console.log("🔄 Retrying payment for order:", orderId);
+    console.log("Retrying payment for order:", orderId);
     setPaymentFailed(false);
     // Reload the page to reset state
     window.location.reload();
@@ -76,7 +76,7 @@ const PaymentMoMo = () => {
 
     setCancelling(true);
     try {
-      console.log("🚫 Cancelling order:", orderId);
+      console.log("Cancelling order:", orderId);
       await updateOrderStatus(orderId, "cancelled");
       alert("Đơn hàng đã được hủy thành công!");
       navigate("/myorders");

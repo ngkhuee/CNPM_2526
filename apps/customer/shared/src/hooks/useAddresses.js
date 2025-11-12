@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { addressService } from "@api/services";
+import { addressService } from "shared-services";
 
 /**
  * Custom hook for managing user addresses

@@ -6,9 +6,9 @@ import {
   StoreContext,
   OrderContext,
   useAddresses,
+  useCheckout,
 } from "customer-shared";
-import { formatCurrency, reverseGeocode, geocodeAddress } from "shared-utils";
-import { addressService, restaurantService } from "shared-services";
+import { formatCurrency } from "shared-utils";
 import { useNavigate } from "react-router-dom";
 import { MdLocationOn, MdCheckCircle, MdError, MdSave } from "react-icons/md";
 
@@ -18,15 +18,24 @@ const CheckoutInfo = () => {
   const { food_list } = useContext(StoreContext);
   const { addOrder } = useContext(OrderContext);
   const { addresses, loading: loadingAddresses } = useAddresses(user?.id);
+  const {
+    gpsLocation,
+    loadingGPS,
+    loadingSubmit,
+    setGpsLocation,
+    handleGetGPS,
+    processCheckout,
+  } = useCheckout(user);
+  const navigate = useNavigate();
+
   const [customer, setCustomer] = useState({
     name: user?.name || "",
     phone: user?.phone || "",
     address: "",
   });
-  const [useNewAddress, setUseNewAddress] = useState(true); // Toggle between saved vs new
+  const [useNewAddress, setUseNewAddress] = useState(true);
   const [selectedAddressId, setSelectedAddressId] = useState(null);
-  const [saveAddress, setSaveAddress] = useState(false); // Option to save new address
-  const navigate = useNavigate();
+  const [saveAddress, setSaveAddress] = useState(false);
 
   // Auto-fetch GPS on mount if permitted
   useEffect(() => {
@@ -54,9 +63,6 @@ const CheckoutInfo = () => {
     setCustomer({ ...customer, [e.target.name]: e.target.value });
   };
 
-  const [gpsLocation, setGpsLocation] = React.useState(null);
-  const [loadingGPS, setLoadingGPS] = React.useState(false);
-
   const handleSelectSavedAddress = (addr) => {
     setSelectedAddressId(addr.id);
     setCustomer({
@@ -70,50 +76,6 @@ const CheckoutInfo = () => {
     }
   };
 
-  const handleGetGPS = async () => {
-    if (!navigator.geolocation) {
-      alert("Browser does not support GPS");
-      return;
-    }
-
-    setLoadingGPS(true);
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        const { latitude, longitude } = position.coords;
-        setGpsLocation({ lat: latitude, lng: longitude });
-
-        // Convert GPS coordinates to address text
-        try {
-          const result = await reverseGeocode(latitude, longitude);
-          if (result && result.display_name) {
-            setCustomer((prev) => ({
-              ...prev,
-              address: result.display_name,
-            }));
-          } else {
-            setCustomer((prev) => ({
-              ...prev,
-              address: `Lat: ${latitude.toFixed(6)}, Lng: ${longitude.toFixed(6)}`,
-            }));
-          }
-        } catch (error) {
-          console.error("Reverse geocoding error:", error);
-          setCustomer((prev) => ({
-            ...prev,
-            address: `Lat: ${latitude.toFixed(6)}, Lng: ${longitude.toFixed(6)}`,
-          }));
-        }
-
-        setLoadingGPS(false);
-      },
-      (error) => {
-        setLoadingGPS(false);
-        console.error("GPS error:", error);
-        alert("Cannot get GPS location. Please enter address manually.");
-      }
-    );
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!customer.name || !customer.phone || !customer.address) {
@@ -121,163 +83,53 @@ const CheckoutInfo = () => {
       return;
     }
 
-    // If using new address and GPS not obtained, try to geocode the address
-    if (useNewAddress && !gpsLocation) {
-      console.log("🗺️ Geocoding address to get GPS coordinates...");
-      try {
-        const geocodeResult = await geocodeAddress(customer.address);
-        if (geocodeResult) {
-          setGpsLocation({ lat: geocodeResult.lat, lng: geocodeResult.lng });
-          console.log("✅ Geocoded GPS:", geocodeResult);
-        } else {
-          console.warn("⚠️ Could not geocode address, proceeding without GPS");
-        }
-      } catch (error) {
-        console.error("❌ Geocoding error:", error);
-        // Continue without GPS - not critical
-      }
-    }
-
-    // Save new address if requested and get the address_id
-    let addressIdForOrder = selectedAddressId; // Use selected saved address ID if exists
-
-    if (useNewAddress && user) {
-      try {
-        // Always create address in database (either permanent or temporary)
-        console.log(
-          saveAddress
-            ? "💾 Saving new address..."
-            : "📍 Creating temporary address for order..."
-        );
-        const savedAddress = await addressService.create({
-          userId: user.id,
-          addressLine: customer.address,
-          phone: customer.phone,
-          district: "",
-          city: "",
-          lat: gpsLocation?.lat || null,
-          lng: gpsLocation?.lng || null,
-          isDefault: saveAddress && addresses.length === 0, // Set as default only if user wants to save
-        });
-        console.log("✅ Address created successfully:", savedAddress);
-        addressIdForOrder = savedAddress.id; // Use the newly created address ID
-      } catch (error) {
-        console.error("❌ Error creating address:", error);
-        // Continue with order even if save fails
-      }
-    }
-
     // Prepare order items
     const orderItems = food_list
       .filter((item) => cartItems[item._id] > 0)
-      .map((item) => {
-        console.log("🍕 Food item:", {
-          id: item._id,
-          name: item.name,
-          restaurantId: item.restaurantId,
-          price: item.price,
-        });
-
-        return {
-          foodId: item._id,
-          name: item.name,
-          price: item.price,
-          quantity: cartItems[item._id],
-          restaurantId: item.restaurantId,
-        };
-      });
-
-    console.log("📋 Order items prepared:", orderItems);
+      .map((item) => ({
+        foodId: item._id,
+        name: item.name,
+        price: item.price,
+        quantity: cartItems[item._id],
+        restaurantId: item.restaurantId,
+      }));
 
     // Validate that all items have restaurantId
     const itemsWithoutRestaurant = orderItems.filter(
       (item) => !item.restaurantId
     );
     if (itemsWithoutRestaurant.length > 0) {
-      console.error(
-        "❌ Some items missing restaurantId:",
-        itemsWithoutRestaurant
-      );
       alert(
         "Error: Some items are missing restaurant information. Please refresh and try again."
       );
       return;
     }
 
-    // Group by restaurant
-    const groupedByRestaurant = {};
-    orderItems.forEach((item) => {
-      if (!groupedByRestaurant[item.restaurantId]) {
-        groupedByRestaurant[item.restaurantId] = [];
-      }
-      groupedByRestaurant[item.restaurantId].push(item);
-    });
+    // Use the new useCheckout hook to process checkout
+    const checkoutResult = await processCheckout(
+      customer,
+      orderItems,
+      useNewAddress,
+      selectedAddressId,
+      saveAddress,
+      addresses
+    );
 
-    console.log("🏪 Grouped by restaurant:", groupedByRestaurant);
+    if (!checkoutResult.success) {
+      alert(`Checkout error: ${checkoutResult.message}`);
+      return;
+    }
 
     // Create orders for each restaurant
     try {
       let lastOrderId = null;
 
-      for (const [restaurantId, items] of Object.entries(groupedByRestaurant)) {
-        // Calculate total for this restaurant's items
-        const total = items.reduce(
-          (sum, it) => sum + it.price * it.quantity,
-          0
-        );
-
-        // Fetch restaurant data to get pickup location
-        let pickupGPS = null;
-        try {
-          const restaurant = await restaurantService.getById(restaurantId);
-          if (restaurant && restaurant.location) {
-            pickupGPS = restaurant.location;
-            console.log("📍 Restaurant location:", restaurant.name, pickupGPS);
-          }
-        } catch (error) {
-          console.warn("⚠️ Could not fetch restaurant location:", error);
-        }
-
-        const orderData = {
-          customerId: user?.id || "guest",
-          restaurantId: restaurantId,
-          addressId: addressIdForOrder || null, // Link to address table
-          items: items,
-          customer: {
-            name: customer.name,
-            phone: customer.phone,
-            address: customer.address,
-          },
-          pickup_gps: pickupGPS, // Restaurant location for drone pickup
-          dropoff_gps: gpsLocation || null, // Customer location for delivery
-          total_amount: total,
-          subtotal: total,
-          deliveryFee: 0,
-          discountAmount: 0,
-          status: "pending",
-          payment_method: "online",
-        };
-
-        console.log(
-          "📦 Creating order for restaurant:",
-          restaurantId,
-          orderData
-        );
-
-        let result;
-        try {
-          result = await addOrder(orderData);
-          console.log("🔍 addOrder result:", result);
-        } catch (err) {
-          console.error("❌ Exception in addOrder:", err);
-          alert(`Order creation exception: ${err.message}`);
-          return;
-        }
+      for (const orderData of checkoutResult.orders) {
+        const result = await addOrder(orderData);
 
         if (!result || !result.success) {
-          console.error("❌ Order creation failed:", result);
           alert(
-            `Order creation error: ${result?.message || "Unknown error. Check console for details."}`
+            `Order creation error: ${result?.message || "Unknown error"}`
           );
           return;
         }
@@ -286,7 +138,7 @@ const CheckoutInfo = () => {
         lastOrderId = result.order?.id || result.order?._id;
       }
 
-      // Reset cart (both frontend and backend)
+      // Reset cart
       await clearCart();
 
       // Redirect to MoMo payment page
@@ -441,7 +293,7 @@ const CheckoutInfo = () => {
 
           <div className="order-list">
             {food_list.filter((item) => cartItems[item._id] > 0).length ===
-            0 ? (
+              0 ? (
               <p className="empty-cart">No items yet.</p>
             ) : (
               food_list

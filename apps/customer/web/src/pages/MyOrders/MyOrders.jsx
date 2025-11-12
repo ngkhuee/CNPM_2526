@@ -1,6 +1,16 @@
 import React, { useContext, useState } from "react";
-import { OrderContext, AuthContext } from "customer-shared";
-import { reviewService, orderService, droneService } from "shared-services";
+import {
+  OrderContext,
+  AuthContext,
+  useOrderActions,
+  useReview,
+  useOrderFiltering,
+  getStatusBadgeStyle,
+} from "customer-shared";
+import {
+  canCancelOrder,
+  canReviewOrder,
+} from "customer-shared";
 import { formatCurrency } from "shared-utils";
 import "./MyOrders.css";
 import { useNavigate } from "react-router-dom";
@@ -19,63 +29,31 @@ const MyOrders = () => {
   const [refreshing, setRefreshing] = useState(false);
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
+
+  // Use new hooks for business logic
+  const { cancelOrder } = useOrderActions();
+  const { submitReview, getReviewedFoodIds } = useReview();
+  const { currentOrders, historyOrders } = useOrderFiltering(orders);
+
+  // Review state
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [selectedOrderItem, setSelectedOrderItem] = useState(null);
   const [selectedOrderId, setSelectedOrderId] = useState(null);
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const [previousOrders, setPreviousOrders] = useState([]);
-  const [activeTab, setActiveTab] = useState("current"); // "current" or "history"
-  const [reviewedFoods, setReviewedFoods] = useState({}); // Track which foods have been reviewed by this user
+  const [reviewedFoods, setReviewedFoods] = useState({});
+  const [activeTab, setActiveTab] = useState("current");
 
   // Check which foods have been reviewed by this user
   React.useEffect(() => {
-    const checkReviewedFoods = async () => {
+    const checkReviewed = async () => {
       if (!user?.id) return;
-
-      try {
-        const allReviews = await reviewService.getByUser(user.id);
-        const reviewed = {};
-
-        allReviews.forEach((review) => {
-          if (review.food_id) {
-            reviewed[review.food_id] = true;
-          }
-        });
-
-        setReviewedFoods(reviewed);
-      } catch (error) {
-        console.error("Error checking reviewed foods:", error);
-      }
+      const reviewed = await getReviewedFoodIds(user.id);
+      setReviewedFoods(reviewed);
     };
-
-    checkReviewedFoods();
-  }, [user?.id]);
-
-  // Track status changes and auto-redirect to tracking
-  React.useEffect(() => {
-    if (orders.length === 0) return;
-
-    // Check each order for status change
-    orders.forEach((order) => {
-      const prevOrder = previousOrders.find((o) => o.id === order.id);
-
-      // If status changed from pending → preparing/ready/in_delivery
-      if (
-        prevOrder &&
-        prevOrder.status === "pending" &&
-        ["preparing", "ready", "in_delivery"].includes(order.status)
-      ) {
-        console.log(`Order #${order.id} confirmed! Redirecting to tracking...`);
-        alert(`Order #${order.id} has been confirmed!`);
-        navigate(`/tracking/${order.id}`);
-      }
-    });
-
-    // Update previous orders state
-    setPreviousOrders(orders);
-  }, [orders, navigate]);
+    checkReviewed();
+  }, [user?.id, getReviewedFoodIds]);
 
   const handleOpenReview = (orderItem, orderId, restaurantId) => {
     setSelectedOrderItem(orderItem);
@@ -91,28 +69,31 @@ const MyOrders = () => {
     try {
       setSubmitting(true);
 
-      // Get restaurant ID from the order
       const order = orders.find((o) => o.id === selectedOrderId);
 
-      await reviewService.create({
-        food_id: selectedOrderItem.foodId || selectedOrderItem.id,
-        user_id: user.id,
-        restaurant_id: order?.restaurantId,
-        order_id: selectedOrderId,
+      const result = await submitReview({
+        foodId: selectedOrderItem.foodId || selectedOrderItem.id,
+        userId: user.id,
+        restaurantId: order?.restaurantId,
+        orderId: selectedOrderId,
         rating,
         comment,
       });
 
-      alert("Thank you for your review!");
-      setShowReviewModal(false);
-      setSelectedOrderItem(null);
-      setSelectedOrderId(null);
+      if (result.success) {
+        alert(result.message || "Thank you for your review!");
+        setShowReviewModal(false);
+        setSelectedOrderItem(null);
+        setSelectedOrderId(null);
 
-      // Mark this food as reviewed
-      setReviewedFoods((prev) => ({
-        ...prev,
-        [selectedOrderItem.foodId || selectedOrderItem.id]: true,
-      }));
+        // Mark this food as reviewed
+        setReviewedFoods((prev) => ({
+          ...prev,
+          [selectedOrderItem.foodId || selectedOrderItem.id]: true,
+        }));
+      } else {
+        alert(result.message || "Error submitting review");
+      }
     } catch (error) {
       console.error("Error submitting review:", error);
       alert("Error submitting review");
@@ -135,9 +116,7 @@ const MyOrders = () => {
   };
 
   const handleCancelOrder = async (order) => {
-    // Check if order can be cancelled (only paid, confirmed, preparing)
-    const cancellableStatuses = ["paid", "confirmed", "preparing"];
-    if (!cancellableStatuses.includes(order.status)) {
+    if (!canCancelOrder(order)) {
       alert("This order cannot be cancelled at this stage");
       return;
     }
@@ -148,68 +127,22 @@ const MyOrders = () => {
     if (!confirmCancel) return;
 
     try {
-      console.log("🚫 Cancelling order:", order.id);
+      const result = await cancelOrder(order);
 
-      // Step 1: Update order status to cancelled
-      await orderService.updateStatus(order.id, "cancelled");
-
-      // Step 2: If drone was assigned, release it
-      if (order.droneId || order.drone_id) {
-        const droneId = order.droneId || order.drone_id;
-        console.log("🚁 Releasing drone:", droneId);
-        try {
-          await droneService.updateDrone(droneId, {
-            status: "available",
-            assigned_order_id: null,
-          });
-          console.log("✅ Drone released successfully");
-        } catch (error) {
-          console.warn("⚠️ Could not release drone:", error);
-          // Continue anyway - order is cancelled
-        }
+      if (result.success) {
+        alert(result.message || "Order cancelled successfully!");
+        await fetchUserOrders();
+      } else {
+        alert(result.message || "Failed to cancel order. Please try again.");
       }
-
-      alert("Order cancelled successfully!");
-
-      // Refresh orders list
-      await fetchUserOrders();
     } catch (error) {
       console.error("Error cancelling order:", error);
       alert("Failed to cancel order. Please try again.");
     }
   };
 
-  // Split orders into current and history
-  const currentOrders = orders
-    .filter((order) =>
-      [
-        "pending",
-        "paid",
-        "confirmed",
-        "preparing",
-        "ready",
-        "delivering",
-        "picking_up",
-        "picked_up",
-      ].includes(order.status)
-    )
-    .sort(
-      (a, b) =>
-        new Date(b.created_at || b.createdAt) -
-        new Date(a.created_at || a.createdAt)
-    );
-
-  const historyOrders = orders
-    .filter((order) =>
-      ["delivered", "cancelled", "rejected"].includes(order.status)
-    )
-    .sort(
-      (a, b) =>
-        new Date(b.created_at || b.createdAt) -
-        new Date(a.created_at || a.createdAt)
-    );
-
-  const displayOrders = activeTab === "current" ? currentOrders : historyOrders;
+  const displayOrders =
+    activeTab === "current" ? currentOrders : historyOrders;
 
   return (
     <div className="myorders">
@@ -321,71 +254,28 @@ const MyOrders = () => {
               order.restaurant?.name ||
               order.restaurantId ||
               order.restaurant_id) && (
-              <p
-                style={{
-                  color: "#ff6b35",
-                  fontWeight: "600",
-                  marginBottom: "8px",
-                }}
-              >
-                <b>🍽️ Restaurant:</b>{" "}
-                {order.restaurantName ||
-                  order.restaurant?.name ||
-                  `Belga Pizza`}
-              </p>
-            )}
+                <p
+                  style={{
+                    color: "#ff6b35",
+                    fontWeight: "600",
+                    marginBottom: "8px",
+                  }}
+                >
+                  <b>Restaurant:</b>{" "}
+                  {order.restaurantName ||
+                    order.restaurant?.name ||
+                    `Belga Pizza`}
+                </p>
+              )}
 
             <p>
-              <b>📋 Status:</b>{" "}
-              <span
-                style={{
-                  display: "inline-block",
-                  padding: "4px 12px",
-                  borderRadius: "12px",
-                  fontSize: "13px",
-                  fontWeight: "600",
-                  textTransform: "capitalize",
-                  background:
-                    order.status === "delivered"
-                      ? "#d4edda"
-                      : order.status === "cancelled" ||
-                          order.status === "rejected"
-                        ? "#f8d7da"
-                        : order.status === "delivering" ||
-                            order.status === "picking_up" ||
-                            order.status === "picked_up"
-                          ? "#cce5ff"
-                          : order.status === "ready"
-                            ? "#d4edda"
-                            : order.status === "preparing"
-                              ? "#d1ecf1"
-                              : order.status === "confirmed"
-                                ? "#cfe2ff"
-                                : "#fff3cd",
-                  color:
-                    order.status === "delivered"
-                      ? "#155724"
-                      : order.status === "cancelled" ||
-                          order.status === "rejected"
-                        ? "#721c24"
-                        : order.status === "delivering" ||
-                            order.status === "picking_up" ||
-                            order.status === "picked_up"
-                          ? "#004085"
-                          : order.status === "ready"
-                            ? "#155724"
-                            : order.status === "preparing"
-                              ? "#0c5460"
-                              : order.status === "confirmed"
-                                ? "#084298"
-                                : "#856404",
-                }}
-              >
+              <b>Status:</b>{" "}
+              <span style={getStatusBadgeStyle(order.status)}>
                 {order.status}
               </span>
             </p>
             <p>
-              <b>📅 Order Date:</b>{" "}
+              <b>Order Date:</b>{" "}
               {new Date(order.createdAt || order.created_at).toLocaleString(
                 "vi-VN",
                 {
@@ -442,8 +332,8 @@ const MyOrders = () => {
             )}
 
             <div className="order-actions">
-              {/* Only show Track button if order is confirmed or later */}
-              {!["paid", "pending"].includes(order.status) && (
+              {/* Only show Track button if order can be tracked */}
+              {order.status !== "paid" && order.status !== "pending" && (
                 <button
                   className="track-btn"
                   onClick={() => navigate(`/tracking/${order.id || order._id}`)}
@@ -459,7 +349,7 @@ const MyOrders = () => {
               )}
 
               {/* Cancel button for orders that can be cancelled */}
-              {["paid", "confirmed", "preparing"].includes(order.status) && (
+              {canCancelOrder(order) && (
                 <button
                   className="cancel-btn"
                   onClick={() => handleCancelOrder(order)}
@@ -505,7 +395,7 @@ const MyOrders = () => {
                     <th>Quantity</th>
                     <th>Price</th>
                     <th>Total</th>
-                    {order.status === "delivered" && <th>Review</th>}
+                    {canReviewOrder(order) && <th>Review</th>}
                   </tr>
                 </thead>
                 <tbody>
@@ -519,10 +409,10 @@ const MyOrders = () => {
                       <td>
                         {formatCurrency(
                           item.subtotal ||
-                            (item.unit_price || item.price || 0) * item.quantity
+                          (item.unit_price || item.price || 0) * item.quantity
                         )}
                       </td>
-                      {order.status === "delivered" && (
+                      {canReviewOrder(order.status) && (
                         <td>
                           {reviewedFoods[item.foodId || item.id] ? (
                             <button
