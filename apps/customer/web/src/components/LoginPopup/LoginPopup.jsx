@@ -104,7 +104,8 @@ const LoginPopup = ({ setShowLogin }) => {
           } else if (currentUser.role === "restaurant") {
             navigate("/restaurant/dashboard");
           } else {
-            alert(`Đăng nhập thành công! Xin chào ${currentUser.name}`);
+            // đổi tên biến full_name -> name = "User1"
+            alert(`Đăng nhập thành công! Xin chào ${currentUser.name || currentUser.email}`);
           }
         } else {
           alert(response.message || "Email hoặc mật khẩu không đúng!");
