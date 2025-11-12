@@ -61,7 +61,7 @@ const Add = () => {
       const result = await addFood(newFoodData);
 
       if (result.success) {
-        toast.success("✅ Product added successfully!");
+        toast.success("Product added successfully!");
         // Reset form
         setData({
           name: "",
