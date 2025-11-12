@@ -9,6 +9,7 @@ import Promotions from "./pages/Promotions/Promotions";
 import Category from "./pages/Category/Category";
 import RestaurantProfile from "./pages/RestaurantProfile/RestaurantProfile";
 import Login from "./pages/Login/Login";
+import Reviews from "./pages/Reviews/Reviews";
 import { AuthProvider, AuthContext } from "./Context/AuthContext";
 import { RestaurantProvider } from "./Context/RestaurantContext";
 import { FoodProvider } from "./Context/FoodContext";
@@ -101,6 +102,15 @@ const AppContent = () => {
             element={
               <ProtectedRoute>
                 <RestaurantProfile />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/reviews"
+            element={
+              <ProtectedRoute>
+                <Reviews />
               </ProtectedRoute>
             }
           />

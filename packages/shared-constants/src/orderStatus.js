@@ -18,22 +18,22 @@ export const ORDER_STATUS = {
 };
 
 export const ORDER_STATUS_LABELS = {
-  [ORDER_STATUS.PENDING]: "Chờ thanh toán",
-  [ORDER_STATUS.PAYMENT_PROCESSING]: "Đang thanh toán",
-  [ORDER_STATUS.PAYMENT_FAILED]: "Thanh toán thất bại",
-  [ORDER_STATUS.PAID]: "Đã thanh toán",
-  [ORDER_STATUS.CONFIRMED]: "Đã xác nhận",
-  [ORDER_STATUS.REJECTED]: "Đã từ chối",
-  [ORDER_STATUS.PREPARING]: "Đang chuẩn bị",
-  [ORDER_STATUS.READY]: "Sẵn sàng",
-  [ORDER_STATUS.DRONE_ASSIGNED]: "Đã gán drone",
-  [ORDER_STATUS.PICKING_UP]: "Đang lấy món",
-  [ORDER_STATUS.PICKED_UP]: "Đã lấy món",
-  [ORDER_STATUS.DELIVERING]: "Đang giao",
-  [ORDER_STATUS.DELIVERED]: "Đã giao",
-  [ORDER_STATUS.CANCELLED]: "Đã hủy",
-  [ORDER_STATUS.REFUNDING]: "Đang hoàn tiền",
-  [ORDER_STATUS.REFUNDED]: "Đã hoàn tiền",
+  [ORDER_STATUS.PENDING]: "Pending Payment",
+  [ORDER_STATUS.PAYMENT_PROCESSING]: "Processing Payment",
+  [ORDER_STATUS.PAYMENT_FAILED]: "Payment Failed",
+  [ORDER_STATUS.PAID]: "Paid",
+  [ORDER_STATUS.CONFIRMED]: "Confirmed",
+  [ORDER_STATUS.REJECTED]: "Rejected",
+  [ORDER_STATUS.PREPARING]: "Preparing",
+  [ORDER_STATUS.READY]: "Ready",
+  [ORDER_STATUS.DRONE_ASSIGNED]: "Drone Assigned",
+  [ORDER_STATUS.PICKING_UP]: "Picking Up",
+  [ORDER_STATUS.PICKED_UP]: "Picked Up",
+  [ORDER_STATUS.DELIVERING]: "Delivering",
+  [ORDER_STATUS.DELIVERED]: "Delivered",
+  [ORDER_STATUS.CANCELLED]: "Cancelled",
+  [ORDER_STATUS.REFUNDING]: "Refunding",
+  [ORDER_STATUS.REFUNDED]: "Refunded",
 };
 
 export const ORDER_STATUS_COLORS = {

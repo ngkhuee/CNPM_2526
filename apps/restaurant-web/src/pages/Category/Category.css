@@ -351,7 +351,7 @@
 .main-content {
   margin-left: 240px;
   width: calc(100% - 240px);
-  padding: 20px;
+  padding: 32px;
   box-sizing: border-box;
   background-color: #f7f9fb;
   min-height: 100vh;

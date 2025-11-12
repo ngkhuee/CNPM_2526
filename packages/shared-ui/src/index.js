@@ -8,5 +8,9 @@ export { LoadingSpinner } from "./components/LoadingSpinner";
 export { OrderDetailModal } from "./components/OrderDetailModal";
 export { default as FoodDetail } from "./components/FoodDetail/FoodDetail";
 
+// Review Components
+export { default as ReviewCard } from "./components/ReviewCard/ReviewCard";
+export { default as ReplyModal } from "./components/ReviewModal/ReplyModal";
+
 // Chart Components
 export { CardStats, LineChart, BarChart } from "./components/Charts";

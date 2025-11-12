@@ -15,10 +15,25 @@ export const useReview = () => {
             const { foodId, userId, restaurantId, orderId, rating, comment } =
                 reviewData;
 
-            if (!foodId || !userId) {
+            // Strict validation
+            if (!foodId || !userId || !orderId) {
                 return {
                     success: false,
-                    message: "Missing required review data",
+                    message: "Missing required fields: foodId, userId, orderId",
+                };
+            }
+
+            if (rating < 1 || rating > 5) {
+                return {
+                    success: false,
+                    message: "Rating must be between 1 and 5",
+                };
+            }
+
+            if (!comment || comment.trim().length === 0) {
+                return {
+                    success: false,
+                    message: "Comment cannot be empty",
                 };
             }
 
@@ -29,7 +44,7 @@ export const useReview = () => {
                     restaurant_id: restaurantId,
                     order_id: orderId,
                     rating,
-                    comment,
+                    comment: comment.trim(),
                 });
 
                 console.log("✅ Review submitted successfully:", review);

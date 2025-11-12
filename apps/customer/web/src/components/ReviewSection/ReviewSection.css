@@ -1,0 +1,133 @@
+/* ReviewList Container */
+.review-list-container {
+    background: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    margin-top: 30px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Header */
+.review-list-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #f5f5f5;
+    padding-bottom: 15px;
+}
+
+.review-list-header h3 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 600;
+    color: #333;
+}
+
+.review-stats {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    color: #666;
+}
+
+.avg-rating {
+    font-size: 16px;
+    font-weight: 600;
+    color: #ffc107;
+}
+
+.total-reviews {
+    color: #999;
+}
+
+/* Loading State */
+.review-list-loading {
+    padding: 40px;
+    text-align: center;
+    color: #999;
+    font-size: 14px;
+}
+
+/* Error State */
+.review-list-error {
+    padding: 20px;
+    background: #fee;
+    border: 1px solid #fcc;
+    border-radius: 4px;
+    color: #c33;
+    font-size: 14px;
+}
+
+/* Empty State */
+.review-list-empty {
+    padding: 40px;
+    text-align: center;
+    background: #f9f9f9;
+    border-radius: 4px;
+    color: #999;
+}
+
+.review-list-empty p {
+    margin: 0;
+    font-size: 14px;
+}
+
+/* Review List */
+.review-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+/* Footer */
+.review-list-footer {
+    margin-top: 20px;
+    text-align: center;
+    color: #999;
+    font-size: 12px;
+    font-style: italic;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .review-list-container {
+        padding: 15px;
+        margin-top: 20px;
+    }
+
+    .review-list-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .review-list-header h3 {
+        font-size: 18px;
+    }
+
+    .review-stats {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .review-list-container {
+        padding: 12px;
+        margin-top: 15px;
+        border-radius: 6px;
+    }
+
+    .review-list-header h3 {
+        font-size: 16px;
+    }
+
+    .avg-rating {
+        font-size: 14px;
+    }
+
+    .review-list {
+        gap: 12px;
+    }
+}

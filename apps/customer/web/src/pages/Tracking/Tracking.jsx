@@ -712,7 +712,7 @@ const Tracking = () => {
                 textAlign: "center",
               }}
             >
-              Tự động xác nhận sau 5 phút nếu không bấm nút
+              Automatic confirmation in 5 minutes if you don't click the button
             </p>
           )}
         </div>

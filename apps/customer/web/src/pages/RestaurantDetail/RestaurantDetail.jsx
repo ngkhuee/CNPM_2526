@@ -10,6 +10,7 @@ import {
 } from "react-icons/md";
 import useRestaurantDetail from "customer-shared/hooks/useRestaurantDetail";
 import FoodItem from "../../components/FoodItem/FoodItem";
+import RestaurantReviews from "../../components/ReviewSection/RestaurantReviews";
 import { getImageUrl, isRestaurantOpen, getTodayHours } from "@utils";
 import "./RestaurantDetail.css";
 
@@ -197,6 +198,14 @@ const RestaurantDetail = () => {
             </p>
           </div>
         )}
+      </div>
+
+      {/* Reviews Section */}
+      <div className="restaurant-reviews">
+        <RestaurantReviews
+          restaurantId={restaurant.id || restaurant._id}
+          maxReviews={5}
+        />
       </div>
     </div>
   );

@@ -1430,31 +1430,9 @@
       "rating": 4,
       "comment": "Good Veg Salad, fresh vegetables!",
       "images": [],
-      "restaurant_reply": "ok",
+      "restaurant_reply": null,
       "created_at": "2025-11-06T06:47:43.622Z",
       "updated_at": "2025-11-06T08:01:46.344Z"
-    },
-    {
-      "id": "rev3",
-      "user_id": "u2",
-      "food_id": 5,
-      "restaurant_id": "r2",
-      "order_id": null,
-      "rating": 5,
-      "comment": "Best fried chicken wings ever! Crispy and flavorful.",
-      "images": [],
-      "restaurant_reply": "We're glad you loved it!",
-      "created_at": "2025-10-20T00:00:00.000Z",
-      "updated_at": "2025-10-20T00:00:00.000Z"
-    },
-    {
-      "user_id": "u2",
-      "restaurant_id": "r6",
-      "order_id": "Pp7QYVs",
-      "rating": 5,
-      "comment": "Delicious meal!",
-      "created_at": "2025-11-07T02:36:58.452Z",
-      "id": "8rvijQL"
     }
   ],
   "drones": [

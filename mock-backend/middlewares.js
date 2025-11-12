@@ -18,31 +18,42 @@ const generateToken = (user) => {
 
 // Validate JWT token
 const validateToken = (req, res, next) => {
-  // Public routes - không cần auth
-  const publicRoutes = [
-    "/auth/login",
-    "/auth/register",
+  // Public routes - GET only (without auth)
+  const publicGetRoutes = [
     "/foods",
     "/restaurants",
     "/categories",
     "/promotions",
-    "/orders", // Allow GET orders without auth (for tracking)
     "/menus",
-    "/users", // Admin can view all users
-    "/drones", // Admin can view drones
-    "/settings", // View system settings
+    "/drones",
+    "/settings",
     "/addresses",
     "/payments",
     "/notifications",
-    "/reviews",
+    "/reviews", // GET reviews is public
   ];
 
   // Allow GET requests to public endpoints
   const requestPath = req.path || req.url.split("?")[0];
   if (
     req.method === "GET" &&
-    publicRoutes.some((route) => requestPath.startsWith(route))
+    publicGetRoutes.some((route) => requestPath.startsWith(route))
   ) {
+    return next();
+  }
+
+  // Allow GET /orders (for tracking)
+  if (req.method === "GET" && requestPath.startsWith("/orders")) {
+    return next();
+  }
+
+  // Allow GET /users (for view profile)
+  if (req.method === "GET" && requestPath.startsWith("/users")) {
+    return next();
+  }
+
+  // Allow GET /auth/login and POST for register (public)
+  if (req.method === "GET" && requestPath === "/auth/login") {
     return next();
   }
 
@@ -54,6 +65,21 @@ const validateToken = (req, res, next) => {
     return next();
   }
 
+  // Allow POST to /restaurants/register and /users/register-owner (public)
+  if (
+    req.method === "POST" &&
+    (requestPath === "/restaurants/register" ||
+      requestPath === "/users/register-owner")
+  ) {
+    return next();
+  }
+
+  // Allow upload endpoint
+  if (req.method === "POST" && requestPath === "/upload") {
+    return next();
+  }
+
+  // All other POST, PUT, PATCH, DELETE require token
   const token = req.headers.authorization?.split(" ")[1];
 
   if (!token) {

@@ -1,14 +1,28 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect } from "react";
 import "./Dashboard.css";
 import { CardStats, LineChart, BarChart } from "shared-ui";
 import { RestaurantContext } from "../../Context/RestaurantContext";
 import { useRestaurantStats } from "../../hooks/useRestaurantStats";
+import { useRestaurantReviews } from "../../hooks/useRestaurantReviews";
 import { formatCurrency } from "shared-utils";
 import { MdLocationOn, MdStar, MdPhone } from "react-icons/md";
+import { useNavigate } from "react-router-dom";
 
 const Dashboard = () => {
+  const navigate = useNavigate();
   const { currentRestaurant } = useContext(RestaurantContext);
   const stats = useRestaurantStats();
+  const { fetchReviews, getStats: getReviewStats, loading: reviewsLoading } = useRestaurantReviews();
+  const [reviewStats, setReviewStats] = React.useState(null);
+
+  useEffect(() => {
+    const loadReviewStats = async () => {
+      await fetchReviews("all");
+      const stats = getReviewStats();
+      setReviewStats(stats);
+    };
+    loadReviewStats();
+  }, [fetchReviews, getReviewStats]);
 
   return (
     <div className="main-content">
@@ -58,7 +72,37 @@ const Dashboard = () => {
           />
         </div>
 
-        {/* Biểu đồ */}
+        {/* Review Stats Card */}
+        {reviewStats && (
+          <div className="cards-container">
+            <CardStats
+              title="Average Rating"
+              value={`${reviewStats.avgRating}/5`}
+              color="info"
+            />
+            <CardStats
+              title="Total Reviews"
+              value={reviewStats.total}
+              color="primary"
+            />
+            <CardStats
+              title="Pending Replies"
+              value={reviewStats.pending}
+              color="warning"
+              onClick={() => navigate("/reviews?filter=pending")}
+              className="clickable"
+            />
+            <CardStats
+              title="Replied"
+              value={reviewStats.replied}
+              color="success"
+              onClick={() => navigate("/reviews?filter=replied")}
+              className="clickable"
+            />
+          </div>
+        )}
+
+        {/* Charts */}
         <div className="charts-container">
           <div className="chart-item">
             <h3>Revenue Over Time (Last 7 Days)</h3>

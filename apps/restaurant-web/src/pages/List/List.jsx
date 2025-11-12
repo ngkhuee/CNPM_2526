@@ -1,11 +1,13 @@
 ﻿import React, { useState } from "react";
 
 import { useNavigate } from "react-router-dom";
+import { useContext } from "react";
 import "./List.css";
 import { assets } from "../../assets/assets";
 import { MdAdd } from "react-icons/md";
 import { FoodDetail } from "shared-ui";
 import { useFoodList } from "../../hooks/useFoodList";
+import { RestaurantContext } from "../../Context/RestaurantContext";
 import FoodCard from "../../components/FoodList/FoodCard";
 import FoodFilterBar from "../../components/FoodList/FoodFilterBar";
 import FoodEditModal from "../../components/FoodList/FoodEditModal";
@@ -13,6 +15,7 @@ import { toast } from "react-toastify";
 
 const List = () => {
   const navigate = useNavigate();
+  const { currentRestaurant } = useContext(RestaurantContext);
   const {
     search,
     setSearch,
@@ -137,6 +140,7 @@ const List = () => {
             setSelectedFood(null);
           }}
           userRole="restaurant"
+          currentRestaurantId={currentRestaurant?.id || currentRestaurant?._id}
         />
       )}
     </div>

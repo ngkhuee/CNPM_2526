@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { OrderContext } from "customer-shared";
 import { formatCurrency } from "shared-utils";
 import "./PaymentMoMo.css";
-import { MdCheckCircle, MdError, MdPayment } from "react-icons/md";
+import { MdCheckCircle, MdError, MdPayment, MdWarning } from "react-icons/md";
 
 const PaymentMoMo = () => {
   const { orderId } = useParams();
@@ -36,7 +36,7 @@ const PaymentMoMo = () => {
       // Step 1: Update order status to 'paid'
       const result = await updateOrderStatus(orderId, "paid");
       if (!result.success) {
-        alert(`Lỗi cập nhật đơn hàng: ${result.message}`);
+        alert(`Error updating order: ${result.message}`);
         setLoading(false);
         return;
       }
@@ -45,11 +45,11 @@ const PaymentMoMo = () => {
 
       // Show success message and redirect to tracking
       // Note: Drone will be assigned when restaurant confirms the order
-      alert("Thanh toán thành công! Đơn hàng đang chờ nhà hàng xác nhận.");
+      alert("Payment successful! Your order is waiting for restaurant confirmation.");
       navigate(`/tracking/${orderId}`);
     } catch (error) {
       console.error("Payment error:", error);
-      alert("Có lỗi xảy ra khi xử lý thanh toán!");
+      alert("An error occurred while processing payment!");
     } finally {
       setLoading(false);
     }
@@ -70,7 +70,7 @@ const PaymentMoMo = () => {
 
   const handleCancelOrder = async () => {
     const confirmCancel = window.confirm(
-      "Bạn có chắc muốn hủy đơn hàng này?\nĐơn hàng sẽ không thể khôi phục."
+      "Are you sure you want to cancel this order?\nThis action cannot be undone."
     );
     if (!confirmCancel) return;
 
@@ -78,11 +78,11 @@ const PaymentMoMo = () => {
     try {
       console.log("Cancelling order:", orderId);
       await updateOrderStatus(orderId, "cancelled");
-      alert("Đơn hàng đã được hủy thành công!");
+      alert("Order cancelled successfully!");
       navigate("/myorders");
     } catch (error) {
       console.error("Error cancelling order:", error);
-      alert("Lỗi khi hủy đơn hàng. Vui lòng thử lại!");
+      alert("Error cancelling order. Please try again!");
     } finally {
       setCancelling(false);
     }
@@ -91,7 +91,7 @@ const PaymentMoMo = () => {
   if (!order) {
     return (
       <div className="payment-momo-page">
-        <p>Đang tải thông tin đơn hàng...</p>
+        <p>Loading order information...</p>
       </div>
     );
   }
@@ -103,33 +103,33 @@ const PaymentMoMo = () => {
           {paymentFailed ? (
             <>
               <MdError size={60} color="#dc3545" />
-              <h1 style={{ color: "#dc3545" }}>Thanh toán thất bại</h1>
+              <h1 style={{ color: "#dc3545" }}>Payment Failed</h1>
             </>
           ) : (
             <>
               <MdPayment size={60} color="#d82d8b" />
-              <h1>Thanh toán MoMo</h1>
+              <h1>MoMo Payment</h1>
             </>
           )}
-          <p className="order-id">Đơn hàng #{order.id || order._id}</p>
+          <p className="order-id">Order #{order.id || order._id}</p>
         </div>
 
         <div className="payment-details">
-          <h3>Thông tin thanh toán</h3>
+          <h3>Payment Information</h3>
           <div className="detail-row">
-            <span>Tổng tiền:</span>
+            <span>Total Amount:</span>
             <strong>{formatCurrency(order.totalAmount || 0)}</strong>
           </div>
           <div className="detail-row">
-            <span>Phương thức:</span>
-            <strong>Ví MoMo</strong>
+            <span>Payment Method:</span>
+            <strong>MoMo Wallet</strong>
           </div>
           {paymentFailed && (
             <div className="detail-row" style={{ marginTop: "15px" }}>
               <span style={{ color: "#dc3545", fontWeight: "600" }}>
-                ⚠️ Trạng thái:
+                ⚠️ Status:
               </span>
-              <strong style={{ color: "#dc3545" }}>Thanh toán thất bại</strong>
+              <strong style={{ color: "#dc3545" }}>Payment Failed</strong>
             </div>
           )}
         </div>
@@ -148,12 +148,11 @@ const PaymentMoMo = () => {
                 color: "#856404",
               }}
             >
-              <p style={{ margin: 0, fontWeight: "600" }}>
-                ❌ Thanh toán không thành công
+              <p style={{ margin: 0, fontWeight: "600", display: "flex", alignItems: "center", gap: "8px" }}>
+                <MdError /> Payment Failed
               </p>
               <p style={{ margin: "8px 0 0 0", fontSize: "14px" }}>
-                Đơn hàng của bạn vẫn ở trạng thái chờ thanh toán. Bạn có thể thử
-                lại hoặc hủy đơn hàng.
+                Your order is still pending payment. You can retry or cancel the order.
               </p>
             </div>
 
@@ -177,7 +176,7 @@ const PaymentMoMo = () => {
                   justifyContent: "center",
                 }}
               >
-                <MdPayment /> Thử lại thanh toán
+                <MdPayment /> Retry Payment
               </button>
               <button
                 className="btn-cancel-order"
@@ -199,7 +198,7 @@ const PaymentMoMo = () => {
                   justifyContent: "center",
                 }}
               >
-                <MdError /> {cancelling ? "Đang hủy..." : "Hủy đơn hàng"}
+                <MdError /> {cancelling ? "Cancelling..." : "Cancel Order"}
               </button>
             </div>
           </>
@@ -208,9 +207,9 @@ const PaymentMoMo = () => {
           <>
             <div className="payment-instructions">
               <p>
-                <strong>Mô phỏng thanh toán MoMo</strong>
+                <strong>Simulate MoMo Payment</strong>
               </p>
-              <p>Chọn kết quả thanh toán:</p>
+              <p>Select payment result:</p>
             </div>
 
             <div className="payment-actions">
@@ -219,14 +218,14 @@ const PaymentMoMo = () => {
                 onClick={handlePaymentSuccess}
                 disabled={loading}
               >
-                <MdCheckCircle /> Thanh toán thành công
+                <MdCheckCircle /> Payment Successful
               </button>
               <button
                 className="btn-failed"
                 onClick={handlePaymentFailed}
                 disabled={loading}
               >
-                <MdError /> Thanh toán thất bại
+                <MdError /> Payment Failed
               </button>
             </div>
           </>
@@ -234,7 +233,7 @@ const PaymentMoMo = () => {
 
         <div className="payment-footer">
           <button className="btn-back" onClick={() => navigate("/myorders")}>
-            Quay lại đơn hàng
+            Back to Orders
           </button>
         </div>
       </div>

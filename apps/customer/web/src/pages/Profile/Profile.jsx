@@ -129,19 +129,19 @@ const Profile = () => {
   };
 
   const handleDeleteAddress = async (addressId) => {
-    if (!window.confirm("Bạn có chắc muốn xóa địa chỉ này?")) return;
+    if (!window.confirm("Are you sure you want to delete this address?")) return;
 
     try {
       setLoading(true);
       const result = await deleteAddressHook(addressId);
       if (result.success) {
-        alert("Đã xóa địa chỉ");
+        alert("Address deleted successfully");
       } else {
-        alert(`Lỗi xóa địa chỉ: ${result.message}`);
+        alert(`Error deleting address: ${result.message}`);
       }
     } catch (error) {
       console.error("Error deleting address:", error);
-      alert("Lỗi xóa địa chỉ");
+      alert("Error deleting address");
     } finally {
       setLoading(false);
     }
@@ -152,32 +152,32 @@ const Profile = () => {
       setLoading(true);
       const result = await setDefaultAddress(addressId);
       if (result.success) {
-        alert("Đã đặt làm địa chỉ mặc định");
+        alert("Address set as default");
       } else {
-        alert(`Lỗi đặt địa chỉ mặc định: ${result.message}`);
+        alert(`Error setting default address: ${result.message}`);
       }
     } catch (error) {
       console.error("Error setting default:", error);
-      alert("Lỗi đặt địa chỉ mặc định");
+      alert("Error setting default address");
     } finally {
       setLoading(false);
     }
   };
 
   if (!user) {
-    return <div className="profile-page">Vui lòng đăng nhập</div>;
+    return <div className="profile-page">Please login first</div>;
   }
 
   return (
     <div className="profile-page">
-      <h1>Thông tin cá nhân</h1>
+      <h1>Profile</h1>
 
       {/* User Info Section */}
       <div className="profile-section">
-        <h2>Thông tin tài khoản</h2>
+        <h2>Account Information</h2>
         <div className="profile-form">
           <div className="form-group">
-            <label>Họ tên</label>
+            <label>Full Name</label>
             <input
               type="text"
               name="name"
@@ -197,7 +197,7 @@ const Profile = () => {
             />
           </div>
           <div className="form-group">
-            <label>Số điện thoại</label>
+            <label>Phone</label>
             <input
               type="tel"
               name="phone"
@@ -211,12 +211,12 @@ const Profile = () => {
             {editing ? (
               <>
                 <button onClick={handleSaveProfile} disabled={loading}>
-                  {loading ? "Đang lưu..." : "Lưu thay đổi"}
+                  {loading ? "Saving..." : "Save Changes"}
                 </button>
-                <button onClick={() => setEditing(false)}>Hủy</button>
+                <button onClick={() => setEditing(false)}>Cancel</button>
               </>
             ) : (
-              <button onClick={() => setEditing(true)}>Chỉnh sửa</button>
+              <button onClick={() => setEditing(true)}>Edit</button>
             )}
           </div>
         </div>
@@ -225,16 +225,16 @@ const Profile = () => {
       {/* Addresses Section */}
       <div className="profile-section">
         <div className="section-header">
-          <h2>Địa chỉ giao hàng</h2>
+          <h2>Delivery Addresses</h2>
           <button
             onClick={() => setShowAddressForm(!showAddressForm)}
             style={{ display: "flex", alignItems: "center", gap: "8px" }}
           >
             {showAddressForm ? (
-              "Đóng"
+              "Close"
             ) : (
               <>
-                <MdAdd /> Thêm địa chỉ
+                <MdAdd /> Add Address
               </>
             )}
           </button>
@@ -243,27 +243,27 @@ const Profile = () => {
         {showAddressForm && (
           <div className="address-form">
             <div className="form-group">
-              <label>Địa chỉ chi tiết</label>
+              <label>Street Address</label>
               <input
                 type="text"
                 name="address_line"
                 value={newAddress.address_line}
                 onChange={handleAddressInputChange}
-                placeholder="Số nhà, tên đường..."
+                placeholder="House number, street name..."
               />
             </div>
             <div className="form-group">
-              <label>Quận/Huyện</label>
+              <label>District</label>
               <input
                 type="text"
                 name="district"
                 value={newAddress.district}
                 onChange={handleAddressInputChange}
-                placeholder="Quận 1, Quận 2..."
+                placeholder="District 1, District 2..."
               />
             </div>
             <div className="form-group">
-              <label>Thành phố</label>
+              <label>City</label>
               <input
                 type="text"
                 name="city"
@@ -285,18 +285,18 @@ const Profile = () => {
             >
               {newAddress.lat ? (
                 <>
-                  <MdCheckCircle /> Đã lấy GPS
+                  <MdCheckCircle /> GPS Retrieved
                 </>
               ) : (
                 <>
-                  <MdLocationOn /> Lấy vị trí GPS
+                  <MdLocationOn /> Get GPS Location
                 </>
               )}
             </button>
 
             <div className="form-actions">
               <button onClick={handleAddAddress} disabled={loading}>
-                {loading ? "Đang thêm..." : "Thêm địa chỉ"}
+                {loading ? "Adding..." : "Add Address"}
               </button>
             </div>
           </div>
@@ -304,7 +304,7 @@ const Profile = () => {
 
         <div className="addresses-list">
           {addresses.length === 0 ? (
-            <p>Chưa có địa chỉ nào</p>
+            <p>No addresses yet</p>
           ) : (
             addresses.map((addr) => (
               <div key={addr.id} className="address-item">
@@ -319,7 +319,7 @@ const Profile = () => {
                     </p>
                   )}
                   {addr.is_default && (
-                    <span className="default-badge">Mặc định</span>
+                    <span className="default-badge">Default</span>
                   )}
                 </div>
                 <div className="address-actions">
@@ -328,7 +328,7 @@ const Profile = () => {
                       onClick={() => handleSetDefault(addr.id)}
                       disabled={loading}
                     >
-                      Đặt mặc định
+                      Set Default
                     </button>
                   )}
                   <button
@@ -336,7 +336,7 @@ const Profile = () => {
                     disabled={loading}
                     className="delete-btn"
                   >
-                    Xóa
+                    Delete
                   </button>
                 </div>
               </div>

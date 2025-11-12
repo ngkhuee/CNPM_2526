@@ -1,0 +1,153 @@
+.review-card {
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 12px;
+    transition: all 0.2s ease;
+}
+
+.review-card:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border-color: #ff6b35;
+}
+
+.review-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+}
+
+.review-food-name {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+    margin: 0;
+}
+
+.review-rating {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    color: #666;
+}
+
+.review-rating span {
+    display: inline-flex;
+    gap: 2px;
+}
+
+.review-rating-text {
+    margin-left: 4px;
+}
+
+.review-customer-info {
+    font-size: 13px;
+    color: #999;
+    margin-bottom: 10px;
+}
+
+.review-customer-name {
+    font-weight: 500;
+    color: #666;
+}
+
+.review-date {
+    margin-left: 4px;
+}
+
+.review-comment {
+    background: #f9f9f9;
+    border-left: 3px solid #ff6b35;
+    padding: 12px;
+    margin: 12px 0;
+    border-radius: 4px;
+    font-size: 14px;
+    line-height: 1.5;
+    color: #333;
+}
+
+.review-comment p {
+    margin: 0;
+}
+
+.review-reply {
+    background: #e8f5e9;
+    border-left: 3px solid #4caf50;
+    padding: 12px;
+    margin: 12px 0;
+    border-radius: 4px;
+    font-size: 13px;
+}
+
+.reply-label {
+    font-weight: 600;
+    color: #2e7d32;
+    margin-bottom: 6px;
+}
+
+.review-reply p {
+    margin: 0;
+    color: #1b5e20;
+    line-height: 1.4;
+}
+
+.review-card-footer {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid #f0f0f0;
+}
+
+.reply-btn {
+    flex: 1;
+    padding: 10px 16px;
+    background: #ff6b35;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+}
+
+.reply-btn:hover {
+    background: #e55a24;
+    transform: translateY(-1px);
+}
+
+.reply-btn.edit {
+    background: #4caf50;
+}
+
+.reply-btn.edit:hover {
+    background: #45a049;
+}
+
+@media (max-width: 768px) {
+    .review-card {
+        padding: 12px;
+    }
+
+    .review-card-header {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .review-food-name {
+        font-size: 15px;
+    }
+
+    .reply-btn {
+        padding: 8px 12px;
+        font-size: 13px;
+    }
+}
