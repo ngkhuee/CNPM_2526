@@ -54,11 +54,12 @@ const Navbar = ({ setShowLogin }) => {
         </NavLink>
 
         {!user ? (
-          <button onClick={() => setShowLogin(true)}>Sign In</button>
+          <button onClick={() => setShowLogin(true)}>Login</button>
         ) : (
           <div className="navbar-profile">
             <img
-              src={user.avatar || assets.profile_icon}
+              // ảnh user sau khi login
+              src={user.profile_icon || assets.profile_icon}
               alt={user.name || "User"}
             />
             <ul className="navbar-profile-dropdown">
