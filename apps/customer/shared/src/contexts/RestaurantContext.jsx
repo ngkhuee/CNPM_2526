@@ -1,5 +1,5 @@
 import React, { createContext, useState, useEffect } from "react";
-import { restaurantService } from "@api/services";
+import { restaurantService } from "shared-services";
 
 export const RestaurantContext = createContext();
 

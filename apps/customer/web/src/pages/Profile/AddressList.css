@@ -1,0 +1,355 @@
+/* Addresses Table Container */
+.addresses-table-container {
+    width: 100%;
+    margin-top: 20px;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.addresses-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: white;
+    font-size: 14px;
+}
+
+/* Table Head */
+.addresses-table thead {
+    background: linear-gradient(135deg, #f5f5f5, #f9f9f9);
+    border-bottom: 2px solid #ff6b35;
+}
+
+.addresses-table th {
+    padding: 16px 20px;
+    text-align: left;
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+    white-space: nowrap;
+}
+
+.addresses-table .col-number {
+    width: 60px;
+    text-align: center;
+}
+
+.addresses-table .col-address {
+    flex: 1;
+}
+
+.addresses-table .col-actions {
+    width: auto;
+    text-align: right;
+}
+
+/* Table Body */
+.addresses-table tbody tr {
+    border-bottom: 1px solid #e0e0e0;
+    transition: all 0.3s ease;
+}
+
+.addresses-table tbody tr:hover {
+    background-color: #f9f9f9;
+    box-shadow: inset 0 0 0 1px rgba(255, 107, 53, 0.1);
+}
+
+.addresses-table tbody tr.default-row {
+    background: linear-gradient(90deg, #fff8f0, white);
+}
+
+.addresses-table tbody tr.default-row:hover {
+    background: linear-gradient(90deg, #ffe8d8, #f9f9f9);
+}
+
+/* Table Cells */
+.addresses-table td {
+    padding: 16px 20px;
+    color: #333;
+}
+
+.cell-number {
+    text-align: center;
+}
+
+.number-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ff6b35, #ff8555);
+    color: white;
+    font-weight: 600;
+    font-size: 13px;
+}
+
+.cell-address {
+    vertical-align: middle;
+}
+
+.address-info {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.address-main {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.address-line {
+    font-weight: 600;
+    color: #333;
+    font-size: 14px;
+    margin: 0;
+    word-break: break-word;
+    line-height: 1.4;
+}
+
+.address-detail {
+    font-size: 13px;
+    color: #666;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.address-note {
+    font-size: 12px;
+    color: #555;
+    background: #f5f5f5;
+    padding: 6px 10px;
+    border-radius: 4px;
+    border-left: 3px solid #ff6b35;
+}
+
+.address-note strong {
+    color: #333;
+    font-weight: 600;
+}
+
+.address-gps {
+    font-size: 11px;
+    color: #999;
+    font-family: "Courier New", monospace;
+    background: #f9f9f9;
+    padding: 6px 10px;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+    word-break: break-all;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.default-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: #ff6b35;
+    color: white;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    width: fit-content;
+    margin-top: 6px;
+}
+
+.cell-actions {
+    text-align: right;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+}
+
+/* Buttons */
+.btn-action {
+    padding: 8px 14px;
+    border: none;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+}
+
+.btn-action:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.btn-action-default {
+    background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+    color: #1565c0;
+    border: 1px solid #90caf9;
+}
+
+.btn-action-default:hover:not(:disabled) {
+    background: linear-gradient(135deg, #1976d2, #1565c0);
+    color: white;
+    border-color: #1565c0;
+    box-shadow: 0 4px 12px rgba(25, 118, 210, 0.3);
+    transform: translateY(-2px);
+}
+
+.btn-action-delete {
+    background: linear-gradient(135deg, #ffebee, #ffcdd2);
+    color: #c62828;
+    border: 1px solid #ef9a9a;
+}
+
+.btn-action-delete:hover:not(:disabled) {
+    background: linear-gradient(135deg, #d32f2f, #c62828);
+    color: white;
+    border-color: #c62828;
+    box-shadow: 0 4px 12px rgba(198, 40, 40, 0.3);
+    transform: translateY(-2px);
+}
+
+/* Empty State */
+.addresses-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 60px 40px;
+    text-align: center;
+    background: linear-gradient(135deg, #fff8f0, #fffbf7);
+    border: 2px dashed #ff6b35;
+    border-radius: 12px;
+    color: #999;
+}
+
+.addresses-empty p {
+    font-size: 16px;
+    font-weight: 600;
+    color: #666;
+    margin: 0;
+}
+
+.addresses-empty span {
+    font-size: 13px;
+    color: #999;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+
+    .addresses-table th,
+    .addresses-table td {
+        padding: 12px 16px;
+    }
+
+    .btn-action {
+        padding: 6px 12px;
+        font-size: 11px;
+    }
+}
+
+@media (max-width: 768px) {
+    .addresses-table-container {
+        overflow-x: auto;
+    }
+
+    .addresses-table {
+        font-size: 13px;
+    }
+
+    .addresses-table th,
+    .addresses-table td {
+        padding: 12px;
+    }
+
+    .address-line {
+        font-size: 13px;
+    }
+
+    .address-detail {
+        font-size: 12px;
+    }
+
+    .btn-action {
+        padding: 6px 10px;
+        font-size: 11px;
+    }
+
+    .action-buttons {
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .btn-action {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .addresses-empty {
+        padding: 40px 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .addresses-table {
+        font-size: 12px;
+    }
+
+    .addresses-table th,
+    .addresses-table td {
+        padding: 10px 8px;
+    }
+
+    .col-number {
+        width: 50px !important;
+    }
+
+    .number-badge {
+        width: 28px;
+        height: 28px;
+        font-size: 12px;
+    }
+
+    .address-line {
+        font-size: 12px;
+    }
+
+    .address-detail {
+        font-size: 11px;
+    }
+
+    .address-note,
+    .address-gps {
+        font-size: 11px;
+    }
+
+    .btn-action {
+        padding: 5px 8px;
+        font-size: 10px;
+    }
+
+    .addresses-empty {
+        padding: 30px 15px;
+    }
+
+    .addresses-empty p {
+        font-size: 14px;
+    }
+
+    .addresses-empty span {
+        font-size: 12px;
+    }
+}

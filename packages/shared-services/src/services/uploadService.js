@@ -1,5 +1,21 @@
 import apiClient from "../config/apiClient";
 
+// Calculate API_BASE_URL at module level
+const getAPIBaseURL = () => {
+    // Check for Node/React Native environment first (priority for mobile)
+    if (typeof process !== 'undefined' && process.env?.REACT_APP_API_BASE_URL) {
+        return process.env.REACT_APP_API_BASE_URL;
+    }
+    // Check for Vite environment (web)
+    if (typeof import.meta !== 'undefined' && import.meta.env?.VITE_API_BASE_URL) {
+        return import.meta.env.VITE_API_BASE_URL;
+    }
+    // Default
+    return "http://localhost:4000";
+};
+
+const API_BASE_URL = getAPIBaseURL();
+
 /**
  * Upload Service - xử lý file upload
  * Tải ảnh lên server và lưu vào /public/images/[category]/
@@ -20,7 +36,20 @@ const uploadService = {
 
             // Create FormData for multipart upload
             const formData = new FormData();
-            formData.append("file", file);
+
+            // Check if running in React Native (file will have uri property)
+            if (file.uri) {
+                // React Native file format
+                formData.append("file", {
+                    uri: file.uri,
+                    type: file.type || 'image/jpeg',
+                    name: file.fileName || file.name || `upload_${Date.now()}.jpg`,
+                });
+            } else {
+                // Web file format
+                formData.append("file", file);
+            }
+
             formData.append("category", category);
 
             // Upload to backend
@@ -74,9 +103,7 @@ const uploadService = {
         if (imagePath.startsWith("http")) return imagePath;
 
         // If relative path, combine with API base URL
-        const apiBaseUrl =
-            import.meta.env.VITE_API_BASE_URL || "http://localhost:4000";
-        return `${apiBaseUrl}${imagePath}`;
+        return `${API_BASE_URL}${imagePath}`;
     },
 };
 

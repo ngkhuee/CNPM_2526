@@ -248,7 +248,7 @@ const Profile = () => {
 
               {showAddressForm && (
                 <div className="address-form">
-                  <h3>Add New Address</h3>
+                  <h3>Add New Delivery Address</h3>
                   <div className="form-row">
                     <div className="form-group">
                       <label>City/Province</label>
@@ -261,8 +261,6 @@ const Profile = () => {
                       >
                         <option value="">Select city/province</option>
                         <option value="Ho Chi Minh">Ho Chi Minh City</option>
-                        {/* <option value="Hanoi">Hanoi</option>
-                        <option value="Da Nang">Da Nang</option> */}
                       </select>
                     </div>
 
@@ -292,22 +290,29 @@ const Profile = () => {
                   </div>
 
                   <div className="form-group">
-                    <label>Address {newAddress.lat && newAddress.lng && <span style={{ color: '#4caf50', fontWeight: 'bold' }}>(Auto-filled from GPS)</span>}</label>
+                    <label>
+                      Street Address
+                      {newAddress.lat && newAddress.lng && (
+                        <span style={{ color: "#4caf50", fontWeight: "600", marginLeft: "8px" }}>
+                          (GPS-filled)
+                        </span>
+                      )}
+                    </label>
                     <input
                       type="text"
                       value={newAddress.address_line}
                       onChange={(e) => handleAddressInputChange("address_line", e.target.value)}
-                      placeholder="Street address, building number, etc. (or use GPS)"
+                      placeholder="Street address, building number, etc."
                     />
                   </div>
 
                   <div className="form-group">
-                    <label>Note</label>
+                    <label>Note (Optional)</label>
                     <input
                       type="text"
                       value={newAddress.note || ""}
                       onChange={(e) => handleAddressInputChange("note", e.target.value)}
-                      placeholder="Optional note"
+                      placeholder="e.g., Near the park, Gate 2, etc."
                     />
                   </div>
 
@@ -316,22 +321,29 @@ const Profile = () => {
                     onClick={handleGetGPSClick}
                     className="gps-btn"
                   >
-                    {newAddress.lat && newAddress.lng ? "✓ GPS Location Retrieved" : "Get Current GPS Location"}
+                    {newAddress.lat && newAddress.lng
+                      ? "Get Current GPS Location"
+                      : "Get Current GPS Location"}
                   </button>
 
                   <div className="form-group">
-                    <label>
+                    <label style={{ display: "flex", alignItems: "center", gap: "8px", fontWeight: "500" }}>
                       <input
                         type="checkbox"
                         checked={newAddress.isDefault || false}
                         onChange={(e) => handleAddressInputChange("isDefault", e.target.checked)}
+                        style={{ width: "18px", height: "18px", cursor: "pointer" }}
                       />
-                      Set as default address
+                      Set as default delivery address
                     </label>
                   </div>
 
                   <div className="form-actions">
-                    <button onClick={handleAddAddressClick} disabled={addressFormLoading} className="btn-primary">
+                    <button
+                      onClick={handleAddAddressClick}
+                      disabled={addressFormLoading}
+                      className="btn-primary"
+                    >
                       {addressFormLoading ? "Adding..." : "Add Address"}
                     </button>
                   </div>

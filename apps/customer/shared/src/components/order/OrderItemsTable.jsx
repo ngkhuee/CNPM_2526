@@ -7,6 +7,8 @@ const OrderItemsTable = ({
     items,
     orderStatus,
     reviewedFoods,
+    orderId,
+    restaurantId,
     onReviewClick,
 }) => {
     // Check if order can be reviewed (only delivered orders can be reviewed)
@@ -26,70 +28,73 @@ const OrderItemsTable = ({
                 </tr>
             </thead>
             <tbody>
-                {items.map((item, i) => (
-                    <tr key={i}>
-                        <td>{item.name}</td>
-                        <td>{item.quantity}</td>
-                        <td>{formatCurrency(item.unit_price || item.price || 0)}</td>
-                        <td>
-                            {formatCurrency(
-                                item.subtotal ||
-                                (item.unit_price || item.price || 0) * item.quantity
-                            )}
-                        </td>
-                        {canReviewThisOrder && (
+                {items.map((item, i) => {
+                    console.log("OrderItemsTable - Item:", item);
+                    return (
+                        <tr key={i}>
+                            <td>{item.name}</td>
+                            <td>{item.quantity}</td>
+                            <td>{formatCurrency(item.unit_price || item.price || 0)}</td>
                             <td>
-                                {reviewedFoods[item.foodId || item.id] ? (
-                                    <button
-                                        style={{
-                                            background: "#6c757d",
-                                            color: "white",
-                                            border: "none",
-                                            padding: "6px 12px",
-                                            borderRadius: "4px",
-                                            fontSize: "12px",
-                                            cursor: "not-allowed",
-                                            opacity: 0.6,
-                                            display: "flex",
-                                            alignItems: "center",
-                                            gap: "4px",
-                                        }}
-                                        disabled
-                                    >
-                                        <MdCheckCircle size={14} /> Reviewed
-                                    </button>
-                                ) : (
-                                    <button
-                                        style={{
-                                            background: "#ff9800",
-                                            color: "white",
-                                            border: "none",
-                                            padding: "6px 12px",
-                                            borderRadius: "4px",
-                                            fontSize: "12px",
-                                            cursor: "pointer",
-                                            display: "flex",
-                                            alignItems: "center",
-                                            gap: "4px",
-                                            transition: "all 0.2s ease",
-                                        }}
-                                        onClick={() => onReviewClick(item)}
-                                        onMouseEnter={(e) => {
-                                            e.target.style.background = "#f57c00";
-                                            e.target.style.transform = "translateY(-1px)";
-                                        }}
-                                        onMouseLeave={(e) => {
-                                            e.target.style.background = "#ff9800";
-                                            e.target.style.transform = "translateY(0)";
-                                        }}
-                                    >
-                                        <MdStar size={14} /> Rate
-                                    </button>
+                                {formatCurrency(
+                                    item.subtotal ||
+                                    (item.unit_price || item.price || 0) * item.quantity
                                 )}
                             </td>
-                        )}
-                    </tr>
-                ))}
+                            {canReviewThisOrder && (
+                                <td>
+                                    {reviewedFoods[item.foodId] ? (
+                                        <button
+                                            style={{
+                                                background: "#6c757d",
+                                                color: "white",
+                                                border: "none",
+                                                padding: "6px 12px",
+                                                borderRadius: "4px",
+                                                fontSize: "12px",
+                                                cursor: "not-allowed",
+                                                opacity: 0.6,
+                                                display: "flex",
+                                                alignItems: "center",
+                                                gap: "4px",
+                                            }}
+                                            disabled
+                                        >
+                                            <MdCheckCircle size={14} /> Reviewed
+                                        </button>
+                                    ) : (
+                                        <button
+                                            style={{
+                                                background: "#ff9800",
+                                                color: "white",
+                                                border: "none",
+                                                padding: "6px 12px",
+                                                borderRadius: "4px",
+                                                fontSize: "12px",
+                                                cursor: "pointer",
+                                                display: "flex",
+                                                alignItems: "center",
+                                                gap: "4px",
+                                                transition: "all 0.2s ease",
+                                            }}
+                                            onClick={() => onReviewClick(item, orderId)}
+                                            onMouseEnter={(e) => {
+                                                e.target.style.background = "#f57c00";
+                                                e.target.style.transform = "translateY(-1px)";
+                                            }}
+                                            onMouseLeave={(e) => {
+                                                e.target.style.background = "#ff9800";
+                                                e.target.style.transform = "translateY(0)";
+                                            }}
+                                        >
+                                            <MdStar size={14} /> Rate
+                                        </button>
+                                    )}
+                                </td>
+                            )}
+                        </tr>
+                    );
+                })}
             </tbody>
         </table>
     );

@@ -1,38 +1,25 @@
 {
     "expo": {
-        "name": "Drone Food Delivery - Customer",
-        "slug": "drone-food-customer",
+        "name": "Yummy Delivery - Customer",
+        "slug": "yummy-delivery-customer",
         "version": "1.0.0",
         "orientation": "portrait",
-        "icon": "./assets/icon.png",
         "userInterfaceStyle": "light",
-        "splash": {
-            "image": "./assets/splash.png",
-            "resizeMode": "contain",
-            "backgroundColor": "#ffffff"
-        },
         "assetBundlePatterns": [
             "**/*"
         ],
-        "ios": {
-            "supportsTabletMode": true
-        },
         "android": {
+            "package": "com.yummy.customer",
+            "versionCode": 1,
             "adaptiveIcon": {
-                "foregroundImage": "./assets/adaptive-icon.png",
                 "backgroundColor": "#ffffff"
             }
         },
-        "web": {
-            "favicon": "./assets/favicon.png"
+        "ios": {
+            "bundleIdentifier": "com.yummy.customer"
         },
-        "plugins": [
-            [
-                "expo-location",
-                {
-                    "locationAlwaysAndWhenInUsePermissions": "Allow Drone Food Delivery to access your location to track your order"
-                }
-            ]
-        ]
+        "web": {
+            "imageOptimization": false
+        }
     }
 }

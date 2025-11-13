@@ -14,7 +14,10 @@ const mapOrderToFrontend = (
   restaurantId: order.restaurant_id,
   addressId: order.address_id,
   droneId: order.drone_id,
-  items: order.items || [],
+  items: (order.items || []).map((item) => ({
+    ...item,
+    foodId: item.foodId || item.menu_id || item.id,
+  })),
   subtotal: order.subtotal,
   deliveryFee: order.delivery_fee,
   discountAmount: order.discount_amount,
@@ -171,16 +174,41 @@ export const orderService = {
 
   async getByUser(userId) {
     try {
-      const [orders, restaurants] = await Promise.all([
+      const [orders, restaurants, menus] = await Promise.all([
         apiClient.get(ENDPOINTS.ORDERS.BY_USER(userId)),
         apiClient.get("/restaurants"),
+        apiClient.get("/menus"),
       ]);
 
-      return orders.map((order) => {
+      const result = orders.map((order) => {
         const restaurant =
           restaurants.find((r) => r.id === order.restaurant_id) || null;
-        return mapOrderToFrontend(order, null, restaurant);
+
+        // Enrich items with foodId by matching with menus
+        const enrichedOrder = mapOrderToFrontend(order, null, restaurant);
+
+        enrichedOrder.items = enrichedOrder.items.map((item) => {
+          // Try to find menu by name and restaurant_id
+          if (!item.foodId && item.name) {
+            const menu = menus.find(
+              (m) => m.name === item.name && m.restaurant_id === order.restaurant_id
+            );
+            if (menu) {
+              item.foodId = menu.id;
+            }
+          }
+          return item;
+        });
+
+        return enrichedOrder;
       });
+
+      console.log("orderService.getByUser() returned:", result);
+      if (result.length > 0) {
+        console.log("Sample order items:", result[0].items);
+      }
+
+      return result;
     } catch (error) {
       throw error;
     }

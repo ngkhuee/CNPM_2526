@@ -1,7 +1,40 @@
 import axios from "axios";
 
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || "http://localhost:4000";
+// Support both web (Vite) and React Native (Expo) environments
+// This allows the shared service to work with both localStorage (web) and AsyncStorage (mobile)
+
+let storageAdapter = null;
+
+// Initialize storage adapter (called by each platform)
+export const initializeStorageAdapter = (adapter) => {
+  storageAdapter = adapter;
+};
+
+// Get storage adapter or fallback to localStorage
+const getStorage = () => {
+  if (storageAdapter) {
+    return storageAdapter;
+  }
+  // Fallback to localStorage for web
+  return {
+    getItem: (key) => localStorage.getItem(key),
+    setItem: (key, value) => localStorage.setItem(key, value),
+    removeItem: (key) => localStorage.removeItem(key),
+  };
+};
+
+const API_BASE_URL = (() => {
+  // Check for Node/React Native environment first (priority for mobile)
+  if (typeof process !== 'undefined' && process.env?.REACT_APP_API_BASE_URL) {
+    return process.env.REACT_APP_API_BASE_URL;
+  }
+  // Check for Vite environment (web)
+  if (typeof import.meta !== 'undefined' && import.meta.env?.VITE_API_BASE_URL) {
+    return import.meta.env.VITE_API_BASE_URL;
+  }
+  // Default
+  return "http://localhost:4000";
+})();
 
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
@@ -14,7 +47,8 @@ const apiClient = axios.create({
 // Request interceptor
 apiClient.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("token");
+    const storage = getStorage();
+    const token = storage.getItem("token");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -49,8 +83,9 @@ apiClient.interceptors.response.use(
       // Only clear auth data if NOT a public endpoint
       if (!isPublicEndpoint) {
         console.warn("Unauthorized - Clearing auth data");
-        localStorage.removeItem("token");
-        localStorage.removeItem("user");
+        const storage = getStorage();
+        storage.removeItem("token");
+        storage.removeItem("user");
 
         // Don't force redirect - let components handle it
         // This prevents infinite refresh loops

@@ -45,9 +45,11 @@ const MyOrders = () => {
     checkReviewed();
   }, [user?.id, getReviewedFoodIds]);
 
-  const handleOpenReview = (orderItem) => {
+  const handleOpenReview = (orderItem, orderId) => {
+    console.log("👉 handleOpenReview - item:", orderItem, "orderId:", orderId);
+    if (!orderId || !orderItem) return;
     setSelectedOrderItem(orderItem);
-    setSelectedOrderId(displayOrders.find(o => o.items?.find(i => i.id === orderItem.id || i.foodId === orderItem.foodId))?.id);
+    setSelectedOrderId(orderId);
     setShowReviewModal(true);
     setRating(5);
     setComment("");
@@ -60,11 +62,25 @@ const MyOrders = () => {
       setSubmitting(true);
 
       const order = orders.find((o) => o.id === selectedOrderId);
+      if (!order) {
+        alert("Order not found");
+        return;
+      }
+
+      // Get foodId - already mapped in orderService
+      const foodId = selectedOrderItem.foodId;
+      console.log("🎯 handleSubmitReview - selectedOrderItem:", selectedOrderItem);
+      console.log("🎯 handleSubmitReview - foodId:", foodId);
+      if (!foodId) {
+        console.error("❌ Food ID not found in item:", selectedOrderItem);
+        alert("Food ID not found");
+        return;
+      }
 
       const result = await submitReview({
-        foodId: selectedOrderItem.foodId || selectedOrderItem.id,
+        foodId: foodId,
         userId: user.id,
-        restaurantId: order?.restaurantId,
+        restaurantId: order?.restaurantId || order?.restaurant_id,
         orderId: selectedOrderId,
         rating,
         comment,
@@ -79,7 +95,7 @@ const MyOrders = () => {
         // Mark this food as reviewed
         setReviewedFoods((prev) => ({
           ...prev,
-          [selectedOrderItem.foodId || selectedOrderItem.id]: true,
+          [foodId]: true,
         }));
       } else {
         alert(result.message || "Error submitting review");
@@ -257,6 +273,8 @@ const MyOrders = () => {
               items={order.items}
               orderStatus={order.status}
               reviewedFoods={reviewedFoods}
+              orderId={order.id || order._id}
+              restaurantId={order.restaurantId || order.restaurant_id}
               onReviewClick={handleOpenReview}
             />
 

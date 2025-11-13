@@ -1,12 +1,13 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import "./FoodItem.css";
 import { getImageUrl } from "@utils/imageHelper";
 import { formatCurrency } from "shared-utils";
+import { useProductRating } from "shared-hooks";
 import { MdStorefront, MdStar, MdLocalFireDepartment } from "react-icons/md";
 
 /**
- * FoodItem Component - Display single food item
+ * FoodItem Component - Display single food item with dynamic rating
  * @param {Object} props
  * @param {Function} onItemClick - Callback when item is clicked (receives full food object)
  */
@@ -17,7 +18,7 @@ const FoodItem = ({
   desc,
   id,
   restaurant,
-  rating,
+  rating: initialRating,
   sold,
   restaurantId,
   isRestaurantOpen = true,
@@ -25,17 +26,23 @@ const FoodItem = ({
 }) => {
   const navigate = useNavigate();
 
-  const food = {
+  // Fetch dynamic rating from reviews
+  const { rating: dynamicRating } = useProductRating(id);
+
+  // Use dynamic rating if available, otherwise use initial rating
+  const displayRating = dynamicRating !== null ? dynamicRating : (initialRating || 0);
+
+  const food = useMemo(() => ({
     id,
     image,
     name,
     price,
     description: desc,
-    rating: rating || 0,
+    rating: displayRating,
     restaurant,
     restaurantId,
     sold: sold || 0,
-  };
+  }), [id, image, name, price, desc, displayRating, restaurant, restaurantId, sold]);
   const imageUrl = getImageUrl(image);
 
   const handleClick = () => {
@@ -71,7 +78,7 @@ const FoodItem = ({
       <div className="food-item-info">
         <div className="food-item-name-rating">
           <p>{name}</p>
-          {rating !== undefined && rating !== null && (
+          {displayRating !== undefined && displayRating !== null && (
             <span
               style={{
                 color: "#ff6b35",
@@ -83,8 +90,8 @@ const FoodItem = ({
               }}
             >
               <MdStar size={16} />
-              {rating > 0 ? rating.toFixed(1) : "0"}{" "}
-              {rating > 0 ? "" : ""}
+              {displayRating > 0 ? displayRating.toFixed(1) : "0"}{" "}
+              {displayRating > 0 ? "" : ""}
             </span>
           )}
         </div>

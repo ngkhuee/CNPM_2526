@@ -1,236 +1,111 @@
+/**
+ * App Root - Customer Mobile App
+ * Production version with Auth and Navigation
+ * React 19 compatible
+ */
 import React from 'react';
-import { SafeAreaView, StyleSheet } from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/stack';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
+import 'react-native-gesture-handler';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
-// Import shared contexts & providers
-import {
-    AuthProvider,
-    CartProvider,
-    OrderProvider,
-    RestaurantProvider,
-    GeolocationProvider
-} from 'customer-shared';
+// Import providers and navigation
+import { AuthProvider, useAuth } from './src/contexts';
+import RootNavigatorContent from './src/navigation/RootNavigator';
 
-// Import screens
-import HomeScreen from './src/screens/HomeScreen';
-import RestaurantDetailsScreen from './src/screens/RestaurantDetailsScreen';
-import CartScreen from './src/screens/CartScreen';
-import CheckoutScreen from './src/screens/CheckoutScreen';
-import MyOrdersScreen from './src/screens/MyOrdersScreen';
-import TrackingScreen from './src/screens/TrackingScreen';
-import LoginScreen from './src/screens/LoginScreen';
-import ProfileScreen from './src/screens/ProfileScreen';
-import SavedAddressesScreen from './src/screens/SavedAddressesScreen';
+console.log('[App.jsx] Module loaded');
 
-const Stack = createNativeStackNavigator();
-const Tab = createBottomTabNavigator();
+// Main app content wrapped with auth
+function RootWithAuth() {
+    console.log('[RootWithAuth] rendering');
+    try {
+        const { user, isLoading } = useAuth();
+        console.log('[RootWithAuth] got auth context:', { user: !!user, isLoading });
+        return <RootNavigatorContent user={user} isLoading={isLoading} />;
+    } catch (error) {
+        console.error('[RootWithAuth] error:', error, error?.stack);
+        return (
+            <View style={styles.errorContainer}>
+                <Text style={styles.errorText}>Error in RootWithAuth</Text>
+                <Text style={styles.errorMessage}>{error?.message || 'Unknown error'}</Text>
+            </View>
+        );
+    }
+}
 
-// Home Stack Navigator
-const HomeStackNavigator = () => {
-    return (
-        <Stack.Navigator
-            screenOptions={{
-                headerShown: true,
-                headerStyle: styles.header,
-                headerTintColor: '#fff',
-                headerTitleStyle: {
-                    fontWeight: '600',
-                    fontSize: 18,
-                },
-            }}
-        >
-            <Stack.Screen
-                name="HomeStack"
-                component={HomeScreen}
-                options={{ headerTitle: 'Drone Food Delivery' }}
-            />
-            <Stack.Screen
-                name="RestaurantDetails"
-                component={RestaurantDetailsScreen}
-                options={{ headerTitle: 'Restaurant Menu' }}
-            />
-            <Stack.Screen
-                name="Cart"
-                component={CartScreen}
-                options={{ headerTitle: 'Your Cart' }}
-            />
-            <Stack.Screen
-                name="Checkout"
-                component={CheckoutScreen}
-                options={{ headerTitle: 'Checkout' }}
-            />
-        </Stack.Navigator>
-    );
-};
+// Error Boundary for React 19
+class ErrorBoundary extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = { hasError: false, error: null, errorInfo: null };
+    }
 
-// Orders Stack Navigator
-const OrdersStackNavigator = () => {
-    return (
-        <Stack.Navigator
-            screenOptions={{
-                headerShown: true,
-                headerStyle: styles.header,
-                headerTintColor: '#fff',
-                headerTitleStyle: {
-                    fontWeight: '600',
-                    fontSize: 18,
-                },
-            }}
-        >
-            <Stack.Screen
-                name="MyOrdersStack"
-                component={MyOrdersScreen}
-                options={{ headerTitle: 'My Orders' }}
-            />
-            <Stack.Screen
-                name="Tracking"
-                component={TrackingScreen}
-                options={{ headerTitle: 'Track Order' }}
-            />
-        </Stack.Navigator>
-    );
-};
+    static getDerivedStateFromError(error) {
+        return { hasError: true, error };
+    }
 
-// Profile Stack Navigator
-const ProfileStackNavigator = () => {
-    return (
-        <Stack.Navigator
-            screenOptions={{
-                headerShown: true,
-                headerStyle: styles.header,
-                headerTintColor: '#fff',
-                headerTitleStyle: {
-                    fontWeight: '600',
-                    fontSize: 18,
-                },
-            }}
-        >
-            <Stack.Screen
-                name="ProfileStack"
-                component={ProfileScreen}
-                options={{ headerTitle: 'Profile' }}
-            />
-            <Stack.Screen
-                name="SavedAddresses"
-                component={SavedAddressesScreen}
-                options={{ headerTitle: 'Saved Addresses' }}
-            />
-        </Stack.Navigator>
-    );
-};
+    componentDidCatch(error, errorInfo) {
+        console.error('[ErrorBoundary] caught error:', error);
+        console.error('[ErrorBoundary] error info:', errorInfo);
+        this.setState({ errorInfo });
+    }
 
-// Tab Navigator (for authenticated users)
-const TabNavigator = () => {
-    return (
-        <Tab.Navigator
-            screenOptions={{
-                headerShown: false,
-                tabBarStyle: styles.tabBar,
-                tabBarActiveTintColor: '#ff6b35',
-                tabBarInactiveTintColor: '#999',
-            }}
-        >
-            <Tab.Screen
-                name="Home"
-                component={HomeStackNavigator}
-                options={{
-                    tabBarLabel: 'Home',
-                    tabBarIcon: ({ color }) => <HomeIcon color={color} />,
-                }}
-            />
-            <Tab.Screen
-                name="Orders"
-                component={OrdersStackNavigator}
-                options={{
-                    tabBarLabel: 'Orders',
-                    tabBarIcon: ({ color }) => <OrdersIcon color={color} />,
-                }}
-            />
-            <Tab.Screen
-                name="Profile"
-                component={ProfileStackNavigator}
-                options={{
-                    tabBarLabel: 'Profile',
-                    tabBarIcon: ({ color }) => <ProfileIcon color={color} />,
-                }}
-            />
-        </Tab.Navigator>
-    );
-};
+    render() {
+        if (this.state.hasError) {
+            return (
+                <View style={styles.errorContainer}>
+                    <Text style={styles.errorText}>⚠️ App Error</Text>
+                    <Text style={styles.errorMessage}>{this.state.error?.message}</Text>
+                    <Text style={styles.errorStack}>{this.state.error?.toString().substring(0, 100)}</Text>
+                </View>
+            );
+        }
 
-// Root Stack Navigator
-const RootStackNavigator = () => {
-    const [isAuthenticated, setIsAuthenticated] = React.useState(false);
-
-    return (
-        <Stack.Navigator
-            screenOptions={{
-                headerShown: false,
-                animationEnabled: true,
-            }}
-        >
-            {isAuthenticated ? (
-                <Stack.Screen
-                    name="MainApp"
-                    component={TabNavigator}
-                />
-            ) : (
-                <Stack.Screen
-                    name="Login"
-                    component={LoginScreen}
-                    options={{ animationEnabled: false }}
-                />
-            )}
-        </Stack.Navigator>
-    );
-};
-
-// Placeholder icon components
-const HomeIcon = ({ color }) => (
-    <Text style={{ fontSize: 24 }}>🏠</Text>
-);
-const OrdersIcon = ({ color }) => (
-    <Text style={{ fontSize: 24 }}>📦</Text>
-);
-const ProfileIcon = ({ color }) => (
-    <Text style={{ fontSize: 24 }}>👤</Text>
-);
+        return this.props.children;
+    }
+}
 
 export default function App() {
+    console.log('[App] Rendering App component');
+
     return (
-        <SafeAreaView style={styles.container}>
-            <AuthProvider>
-                <CartProvider>
-                    <OrderProvider>
-                        <RestaurantProvider>
-                            <GeolocationProvider>
-                                <NavigationContainer>
-                                    <RootStackNavigator />
-                                </NavigationContainer>
-                            </GeolocationProvider>
-                        </RestaurantProvider>
-                    </OrderProvider>
-                </CartProvider>
-            </AuthProvider>
-        </SafeAreaView>
+        <ErrorBoundary>
+            <GestureHandlerRootView style={{ flex: 1 }}>
+                <SafeAreaProvider>
+                    <AuthProvider>
+                        <RootWithAuth />
+                    </AuthProvider>
+                </SafeAreaProvider>
+            </GestureHandlerRootView>
+        </ErrorBoundary>
     );
 }
 
 const styles = StyleSheet.create({
-    container: {
+    errorContainer: {
         flex: 1,
-        backgroundColor: '#fff',
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#ffebee',
+        padding: 20,
     },
-    header: {
-        backgroundColor: '#ff6b35',
+    errorText: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#c62828',
+        marginBottom: 10,
+        textAlign: 'center',
     },
-    tabBar: {
-        backgroundColor: '#fff',
-        borderTopWidth: 1,
-        borderTopColor: '#e0e0e0',
-        paddingBottom: 5,
-        paddingTop: 5,
+    errorMessage: {
+        fontSize: 14,
+        color: '#d32f2f',
+        textAlign: 'center',
+        marginBottom: 10,
+    },
+    errorStack: {
+        fontSize: 11,
+        color: '#c62828',
+        textAlign: 'center',
+        fontFamily: 'monospace',
     },
 });

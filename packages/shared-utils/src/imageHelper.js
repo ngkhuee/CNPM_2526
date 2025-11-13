@@ -1,7 +1,17 @@
 // Helper functions for image URLs
 
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || "http://localhost:4000";
+const API_BASE_URL = (() => {
+  // Check for Node/React Native environment first (priority for mobile)
+  if (typeof process !== 'undefined' && process.env?.REACT_APP_API_BASE_URL) {
+    return process.env.REACT_APP_API_BASE_URL;
+  }
+  // Check for Vite environment (web)
+  if (typeof import.meta !== 'undefined' && import.meta.env?.VITE_API_BASE_URL) {
+    return import.meta.env.VITE_API_BASE_URL;
+  }
+  // Default
+  return "http://localhost:4000";
+})();
 
 /**
  * Build full image URL from backend path

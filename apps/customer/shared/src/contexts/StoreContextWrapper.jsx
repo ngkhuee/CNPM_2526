@@ -32,7 +32,7 @@ export const StoreContextWrapper = ({ children }) => {
         restaurant_list: restaurants,
         loading: restaurantLoading,
         user,
-        url: import.meta.env.VITE_API_URL || "http://localhost:8000",
+        url: (typeof import.meta !== 'undefined' && import.meta.env?.VITE_API_URL) || "http://localhost:4000",
     }), [restaurants, restaurantLoading, user]);
 
     return (

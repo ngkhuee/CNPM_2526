@@ -1,6 +1,30 @@
 import apiClient from "../config/apiClient";
 import { ENDPOINTS } from "../config/endpoints";
 
+// Helper to get storage (supports both web localStorage and mobile AsyncStorage)
+const getStorage = () => {
+  // Try to get storage from global if initialized by mobile
+  if (typeof global !== 'undefined' && global.__storageAdapter) {
+    return global.__storageAdapter;
+  }
+  // Fallback to localStorage for web
+  if (typeof localStorage !== 'undefined') {
+    return {
+      getItem: (key) => localStorage.getItem(key),
+      setItem: (key, value) => localStorage.setItem(key, value),
+      removeItem: (key) => localStorage.removeItem(key),
+      clear: () => localStorage.clear(),
+    };
+  }
+  // Fallback object (for environments without storage)
+  return {
+    getItem: () => null,
+    setItem: () => { },
+    removeItem: () => { },
+    clear: () => { },
+  };
+};
+
 export const authService = {
   async login(email, password) {
     try {

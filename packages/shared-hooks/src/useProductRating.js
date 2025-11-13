@@ -1,5 +1,21 @@
 import { useState, useEffect } from "react";
 
+// Calculate API_BASE_URL at file level to avoid recalculation
+const getAPIBaseURL = () => {
+    // Check for Node/React Native environment first (priority for mobile)
+    if (typeof process !== 'undefined' && process.env?.REACT_APP_API_BASE_URL) {
+        return process.env.REACT_APP_API_BASE_URL;
+    }
+    // Check for Vite environment (web)
+    if (typeof import.meta !== 'undefined' && import.meta.env?.VITE_API_BASE_URL) {
+        return import.meta.env.VITE_API_BASE_URL;
+    }
+    // Default
+    return "http://localhost:4000";
+};
+
+const API_BASE_URL = getAPIBaseURL();
+
 /**
  * Hook để lấy rating của product từ reviews
  * Tính trung bình rating từ tất cả reviews của product
@@ -10,8 +26,6 @@ export const useProductRating = (productId) => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [reviews, setReviews] = useState([]);
-
-    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:4000";
 
     useEffect(() => {
         if (!productId) {
