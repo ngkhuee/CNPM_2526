@@ -26,12 +26,32 @@ export { usePromotions } from "./hooks/usePromotions";
 export { useSettings } from "./hooks/useSettings";
 export { default as useRestaurantDetail } from "./hooks/useRestaurantDetail";
 
-// New hooks for checkout & order management
+// New hooks for checkout & order management (refactored)
 export { useCheckout } from "./hooks/useCheckout";
+export { useCheckoutProcessing } from "./hooks/useCheckoutProcessing";
+export { useCheckoutValidation } from "./hooks/useCheckoutValidation";
+export { useGPSLocation } from "./hooks/useGPSLocation";
+export { useAddressManagement } from "./hooks/useAddressManagement";
+export { useTrackingLogic } from "./hooks/useTrackingLogic";
 export { useOrderActions } from "./hooks/useOrderActions";
+export { useRestaurantHours, getTodayHours, isRestaurantOpen } from "./hooks/useRestaurantHours";
+
+// Existing hooks
 export { useReview } from "./hooks/useReview";
 export { useOrderFiltering } from "./hooks/useOrderFiltering";
 export { useUserOrderHistory } from "./hooks/useUserOrderHistory";
+
+// ==================== COMPONENTS ====================
+// Shared UI components
+export {
+  OrderCard,
+  OrderStatusBadge,
+  OrderTimeline,
+  OrderCardHeader,
+  OrderItemsTable,
+  ReviewModal,
+} from "./components/order";
+export { DeliveryStatusCard, TrackingHeader } from "./components/tracking";
 
 // ==================== UTILS ====================
 // Utility functions and helpers

@@ -5,27 +5,54 @@ import {
   CartContext,
   OrderContext,
   useAddresses,
-  useCheckout,
+  useGPSLocation,
+  useAddressManagement,
+  useCheckoutProcessing,
+  useCheckoutValidation,
 } from "customer-shared";
 import { formatCurrency } from "shared-utils";
 import { useNavigate } from "react-router-dom";
-import { MdLocationOn, MdCheckCircle, MdError, MdSave } from "react-icons/md";
+import { MdError, MdSave } from "react-icons/md";
+import {
+  CheckoutCustomerForm,
+  CheckoutAddressSection,
+  CheckoutOrderSummary,
+} from "../../components/Checkout";
 
 const CheckoutInfo = () => {
+  // Contexts
   const { user } = useContext(AuthContext);
   const { cart, clearCart, getTotalCartAmount } = useContext(CartContext);
   const { addOrder } = useContext(OrderContext);
-  const { addresses, loading: loadingAddresses } = useAddresses(user?.id);
+  const navigate = useNavigate();
+
+  // Addresses
+  const { addresses } = useAddresses(user?.id);
+
+  // Custom Hooks
   const {
     gpsLocation,
     loadingGPS,
-    loadingSubmit,
-    setGpsLocation,
     handleGetGPS,
-    processCheckout,
-  } = useCheckout(user);
-  const navigate = useNavigate();
+    geocodeAddressToCoords,
+  } = useGPSLocation();
 
+  const { saveAddressToDatabase } = useAddressManagement(user);
+
+  const {
+    loadingSubmit,
+    checkoutError,
+    processCheckoutOrders,
+    clearError: clearCheckoutError,
+  } = useCheckoutProcessing(user);
+
+  const {
+    validateCheckout,
+    markAsTouched,
+    getFieldError,
+  } = useCheckoutValidation();
+
+  // Local state
   const [customer, setCustomer] = useState({
     name: user?.name || "",
     phone: user?.phone || "",
@@ -33,20 +60,23 @@ const CheckoutInfo = () => {
   });
   const [useNewAddress, setUseNewAddress] = useState(true);
   const [selectedAddressId, setSelectedAddressId] = useState(null);
-  const [saveAddress, setSaveAddress] = useState(false);
+  const [saveAddressChecked, setSaveAddressChecked] = useState(false);
 
-  // Auto-fetch GPS on mount if permitted
+  // Auto-fetch GPS on mount
   useEffect(() => {
     if (navigator.permissions) {
-      navigator.permissions.query({ name: "geolocation" }).then((result) => {
-        if (result.state === "granted") {
-          handleGetGPS();
-        }
-      });
+      navigator.permissions
+        .query({ name: "geolocation" })
+        .then((result) => {
+          if (result.state === "granted") {
+            handleGetGPS();
+          }
+        })
+        .catch(() => { });
     }
   }, []);
 
-  // Update customer info when user changes
+  // Update customer when user changes
   useEffect(() => {
     if (user) {
       setCustomer((prev) => ({
@@ -58,269 +88,201 @@ const CheckoutInfo = () => {
   }, [user]);
 
   const handleInput = (e) => {
-    setCustomer({ ...customer, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setCustomer((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+    markAsTouched(name);
+    clearCheckoutError();
   };
 
   const handleSelectSavedAddress = (addr) => {
     setSelectedAddressId(addr.id);
-    setCustomer({
-      ...customer,
+    setCustomer((prev) => ({
+      ...prev,
       address: `${addr.address_line}, ${addr.district}, ${addr.city}`,
-    });
-    if (addr.lat && addr.lng) {
-      setGpsLocation({ lat: addr.lat, lng: addr.lng });
-    } else {
-      setGpsLocation(null);
-    }
+    }));
+    markAsTouched("address");
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!customer.name || !customer.phone || !customer.address) {
-      alert("Please fill in all required information before proceeding!");
+    clearCheckoutError();
+
+    if (!cart?.items || cart.items.length === 0) {
+      alert("Your cart is empty");
       return;
     }
 
-    // Prepare order items
-    const orderItems = food_list
-      .filter((item) => cartItems[item._id] > 0)
-      .map((item) => ({
-        foodId: item._id,
-        name: item.name,
-        price: item.price,
-        quantity: cartItems[item._id],
-        restaurantId: item.restaurantId,
-      }));
-
-    // Validate that all items have restaurantId
-    const itemsWithoutRestaurant = orderItems.filter(
-      (item) => !item.restaurantId
-    );
-    if (itemsWithoutRestaurant.length > 0) {
-      alert(
-        "Error: Some items are missing restaurant information. Please refresh and try again."
-      );
-      return;
-    }
-
-    // Use the new useCheckout hook to process checkout
-    const checkoutResult = await processCheckout(
+    const isValid = validateCheckout({
       customer,
-      orderItems,
       useNewAddress,
       selectedAddressId,
-      saveAddress,
-      addresses
-    );
+      items: cart.items,
+    });
 
-    if (!checkoutResult.success) {
-      alert(`Checkout error: ${checkoutResult.message}`);
+    if (!isValid) {
+      alert("Please fill in all required fields correctly");
       return;
     }
 
-    // Create orders for each restaurant
     try {
-      let lastOrderId = null;
+      let finalGpsLocation = gpsLocation;
+      let addressIdForOrder = selectedAddressId;
 
-      for (const orderData of checkoutResult.orders) {
-        const result = await addOrder(orderData);
-
-        if (!result || !result.success) {
-          alert(
-            `Order creation error: ${result?.message || "Unknown error"}`
-          );
-          return;
+      if (useNewAddress) {
+        if (!finalGpsLocation) {
+          const geocoded = await geocodeAddressToCoords(customer.address);
+          if (geocoded) {
+            finalGpsLocation = geocoded;
+          }
         }
 
-        console.log("✅ Order created successfully:", result.order);
+        if (user && saveAddressChecked) {
+          const savedAddress = await saveAddressToDatabase(
+            {
+              address: customer.address,
+              phone: customer.phone,
+              lat: finalGpsLocation?.lat || null,
+              lng: finalGpsLocation?.lng || null,
+              isDefault: addresses.length === 0,
+            },
+            true
+          );
+
+          if (savedAddress) {
+            addressIdForOrder = savedAddress.id;
+          }
+        }
+      }
+
+      const checkoutResult = await processCheckoutOrders(
+        customer,
+        cart.items,
+        addressIdForOrder,
+        finalGpsLocation
+      );
+
+      if (!checkoutResult.success) {
+        alert(`Checkout error: ${checkoutResult.message}`);
+        return;
+      }
+
+      let lastOrderId = null;
+      for (const orderData of checkoutResult.orders) {
+        const result = await addOrder(orderData);
+        if (!result || !result.success) {
+          alert(`Order error: ${result?.message || "Unknown error"}`);
+          return;
+        }
         lastOrderId = result.order?.id || result.order?._id;
       }
 
-      // Reset cart
       await clearCart();
 
-      // Redirect to MoMo payment page
       if (lastOrderId) {
         navigate(`/payment-momo/${lastOrderId}`);
       } else {
-        alert("Order created! Redirecting to payment...");
         navigate("/myorders");
       }
     } catch (error) {
       console.error("Order error:", error);
-      alert("An error occurred while placing order!");
+      alert(error.message || "An error occurred while placing order!");
     }
   };
+
+  const subtotal = getTotalCartAmount();
 
   return (
     <div className="checkout-page">
       <div className="checkout-left">
         <div className="checkout-info">
-          <h2>Customer Information</h2>
+          <h2>Checkout</h2>
           <form onSubmit={handleSubmit}>
-            <label>Full Name</label>
-            <input
-              type="text"
-              name="name"
-              value={customer.name}
-              onChange={handleInput}
-              placeholder="Enter full name"
-            />
-            <label>Phone Number</label>
-            <input
-              type="text"
-              name="phone"
-              value={customer.phone}
-              onChange={handleInput}
-              placeholder="Enter phone number"
-            />
-
-            <label>Delivery Address</label>
-
-            {/* Address selection radio buttons */}
-            <div className="address-selection">
-              <label>
-                <input
-                  type="radio"
-                  checked={!useNewAddress}
-                  onChange={() => setUseNewAddress(false)}
-                />
-                <span> Select saved address</span>
-              </label>
-              <label>
-                <input
-                  type="radio"
-                  checked={useNewAddress}
-                  onChange={() => {
-                    setUseNewAddress(true);
-                    setSelectedAddressId(null);
-                  }}
-                />
-                <span> Enter new address</span>
-              </label>
-            </div>
-
-            {/* Saved addresses list */}
-            {!useNewAddress && addresses.length > 0 && (
-              <div className="saved-addresses">
-                {addresses.map((addr) => (
-                  <div
-                    key={addr.id}
-                    className={`address-card ${selectedAddressId === addr.id ? "selected" : ""}`}
-                    onClick={() => handleSelectSavedAddress(addr)}
-                  >
-                    <strong>{addr.address_line}</strong>
-                    <br />
-                    <small>
-                      {addr.district}, {addr.city}
-                      {addr.is_default && (
-                        <span className="default-badge">(Default)</span>
-                      )}
-                    </small>
-                  </div>
-                ))}
+            {checkoutError && (
+              <div
+                style={{
+                  background: "#f8d7da",
+                  border: "1px solid #f5c6cb",
+                  borderRadius: "4px",
+                  padding: "12px",
+                  marginBottom: "15px",
+                  color: "#721c24",
+                }}
+              >
+                <MdError style={{ marginRight: "8px" }} />
+                {checkoutError}
               </div>
             )}
 
-            {/* New address input with GPS button */}
-            {useNewAddress && (
-              <>
-                <div className="address-input-container">
-                  <textarea
-                    name="address"
-                    value={customer.address}
-                    onChange={handleInput}
-                    placeholder="Enter detailed address"
-                  ></textarea>
-                  <button
-                    type="button"
-                    onClick={handleGetGPS}
-                    disabled={loadingGPS}
-                    className="gps-btn"
-                    title={
-                      gpsLocation
-                        ? "GPS location obtained"
-                        : "Get current location"
-                    }
-                  >
-                    {loadingGPS ? (
-                      <span className="gps-text">...</span>
-                    ) : gpsLocation ? (
-                      <MdCheckCircle />
-                    ) : (
-                      <>
-                        <MdLocationOn />
-                        <span className="gps-text">Get current location</span>
-                      </>
-                    )}
-                  </button>
-                </div>
+            <CheckoutCustomerForm
+              customer={customer}
+              errors={{}}
+              touched={{}}
+              onInput={handleInput}
+              onBlur={markAsTouched}
+              getFieldError={getFieldError}
+            />
 
-                {user && (
-                  <div className="save-address-option">
-                    <label>
-                      <input
-                        type="checkbox"
-                        checked={saveAddress}
-                        onChange={(e) => setSaveAddress(e.target.checked)}
-                      />
-                      <MdSave
-                        style={{ marginLeft: "8px", marginRight: "4px" }}
-                      />
-                      <span>Save this address for future orders</span>
-                    </label>
-                  </div>
-                )}
-              </>
+            <CheckoutAddressSection
+              useNewAddress={useNewAddress}
+              selectedAddressId={selectedAddressId}
+              addresses={addresses}
+              customer={customer}
+              gpsLocation={gpsLocation}
+              loadingGPS={loadingGPS}
+              errors={{}}
+              touched={{}}
+              onSelectAddressType={(isNew) => {
+                setUseNewAddress(isNew);
+                if (isNew) setSelectedAddressId(null);
+              }}
+              onSelectSavedAddress={handleSelectSavedAddress}
+              onAddressInput={handleInput}
+              onBlur={markAsTouched}
+              onGetGPS={handleGetGPS}
+              getFieldError={getFieldError}
+            />
+
+            {/* Save address option */}
+            {user && useNewAddress && (
+              <div className="save-address-option">
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={saveAddressChecked}
+                    onChange={(e) => setSaveAddressChecked(e.target.checked)}
+                  />
+                  <MdSave style={{ marginLeft: "8px", marginRight: "4px" }} />
+                  <span>Save this address for future orders</span>
+                </label>
+              </div>
             )}
 
             <button
               type="submit"
               className="confirm-btn"
-              disabled={!customer.name || !customer.phone || !customer.address}
+              disabled={
+                loadingSubmit ||
+                !customer.name ||
+                !customer.phone ||
+                !customer.address
+              }
             >
-              Checkout
+              {loadingSubmit ? "Processing..." : "Proceed to Payment"}
             </button>
           </form>
         </div>
       </div>
 
       <div className="checkout-right">
-        <div className="checkout-summary">
-          <h3>Order Summary</h3>
-
-          <div className="order-list">
-            {food_list.filter((item) => cartItems[item._id] > 0).length ===
-              0 ? (
-              <p className="empty-cart">No items yet.</p>
-            ) : (
-              food_list
-                .filter((item) => cartItems[item._id] > 0)
-                .map((item, i) => (
-                  <div key={i} className="order-item">
-                    <div className="order-item-info">
-                      <span className="item-name">{item.name}</span>
-                      <span className="item-quantity">
-                        x{cartItems[item._id]}
-                      </span>
-                    </div>
-                    <span className="item-price">
-                      {formatCurrency(item.price * cartItems[item._id])}
-                    </span>
-                  </div>
-                ))
-            )}
-          </div>
-
-          <div className="order-total">
-            <div className="total-row">
-              <span>Total:</span>
-              <span className="total-amount">
-                {formatCurrency(getTotalCartAmount())}
-              </span>
-            </div>
-          </div>
-        </div>
+        <CheckoutOrderSummary
+          cart={cart}
+          subtotal={subtotal}
+          discountAmount={0}
+          total={subtotal}
+        />
       </div>
     </div>
   );

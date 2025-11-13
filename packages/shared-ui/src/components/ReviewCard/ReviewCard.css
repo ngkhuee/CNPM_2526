@@ -60,7 +60,7 @@
 
 .review-comment {
     background: #f9f9f9;
-    border-left: 3px solid #ff6b35;
+    /* border-left: 3px solid #ff6b35; */
     padding: 12px;
     margin: 12px 0;
     border-radius: 4px;
@@ -75,7 +75,7 @@
 
 .review-reply {
     background: #e8f5e9;
-    border-left: 3px solid #4caf50;
+    /* border-left: 3px solid #4caf50; */
     padding: 12px;
     margin: 12px 0;
     border-radius: 4px;

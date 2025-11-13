@@ -31,6 +31,7 @@ const Delivery = () => {
   } = useDroneManagement(refresh);
 
   const [droneFilter, setDroneFilter] = useState("all");
+  const [searchTerm, setSearchTerm] = useState("");
 
   if (loading) {
     return (
@@ -42,19 +43,31 @@ const Delivery = () => {
   }
 
   const getFilteredDrones = () => {
-    if (droneFilter === "all") return drones;
-    if (droneFilter === "delivering") {
-      return drones.filter(
-        (d) => d.status === "busy" || d.status === "delivering"
+    let filtered = drones;
+
+    // Filter by status
+    if (droneFilter === "all") {
+      // No status filter
+    } else if (droneFilter === "delivering") {
+      filtered = filtered.filter(
+        (d) =>
+          d.status === "busy" || d.status === "delivering" || d.assignedOrderId
+      );
+    } else {
+      filtered = filtered.filter((d) => d.status === droneFilter);
+    }
+
+    // Filter by search term (name or ID)
+    if (searchTerm) {
+      const term = searchTerm.toLowerCase();
+      filtered = filtered.filter(
+        (d) =>
+          d.name?.toLowerCase().includes(term) ||
+          d.id?.toLowerCase().includes(term)
       );
     }
-    return drones.filter((d) => d.status === droneFilter);
-  };
 
-  const getBatteryClass = (battery) => {
-    if (battery >= 70) return "battery-high";
-    if (battery >= 30) return "battery-medium";
-    return "battery-low";
+    return filtered;
   };
 
   const getStatusBadgeClass = (status) => {
@@ -63,23 +76,21 @@ const Delivery = () => {
       locked: "status-idle",
       busy: "status-delivering",
       delivering: "status-delivering",
-      charging: "status-charging",
     };
     return statusMap[status] || "status-default";
   };
 
   const getDisplayStatus = (drone) => {
-    if (drone.status === "busy" || drone.status === "delivering") {
-      return "On Delivery";
-    }
-    if (drone.status === "charging") {
-      return "Charging";
-    }
+    // 3 trạng thái: rảnh rỗi, đang vận chuyển, đã bị khóa
     if (drone.status === "locked") {
       return "Locked";
     }
-    if (drone.assignedOrderId && drone.status === "available") {
-      return "Assigned";
+    if (
+      drone.status === "busy" ||
+      drone.status === "delivering" ||
+      drone.assignedOrderId
+    ) {
+      return "Delivering";
     }
     return "Available";
   };
@@ -102,38 +113,54 @@ const Delivery = () => {
         <div className="section drones-section">
           <div className="section-header">
             <h3>Drones Fleet</h3>
-            <div className="section-filter">
-              <button
-                className={droneFilter === "all" ? "active" : ""}
-                onClick={() => setDroneFilter("all")}
-              >
-                All
-              </button>
-              <button
-                className={droneFilter === "available" ? "active" : ""}
-                onClick={() => setDroneFilter("available")}
-              >
-                Available
-              </button>
-              <button
-                className={droneFilter === "delivering" ? "active" : ""}
-                onClick={() => setDroneFilter("delivering")}
-              >
-                Delivering
-              </button>
-              <button
-                className={droneFilter === "charging" ? "active" : ""}
-                onClick={() => setDroneFilter("charging")}
-              >
-                Charging
-              </button>
+            <div style={{ display: "flex", gap: "16px", alignItems: "center" }}>
+              {/* Search bar */}
+              <input
+                type="text"
+                placeholder="Search by name or ID..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                style={{
+                  padding: "8px 12px",
+                  border: "1px solid #ddd",
+                  borderRadius: "6px",
+                  fontSize: "14px",
+                  minWidth: "250px",
+                }}
+              />
+              {/* Status filter */}
+              <div className="section-filter">
+                <button
+                  className={droneFilter === "all" ? "active" : ""}
+                  onClick={() => setDroneFilter("all")}
+                >
+                  All
+                </button>
+                <button
+                  className={droneFilter === "available" ? "active" : ""}
+                  onClick={() => setDroneFilter("available")}
+                >
+                  Available
+                </button>
+                <button
+                  className={droneFilter === "delivering" ? "active" : ""}
+                  onClick={() => setDroneFilter("delivering")}
+                >
+                  Delivering
+                </button>
+                <button
+                  className={droneFilter === "locked" ? "active" : ""}
+                  onClick={() => setDroneFilter("locked")}
+                >
+                  Locked
+                </button>
+              </div>
             </div>
           </div>
 
           <DroneTable
             drones={drones}
             getFilteredDrones={getFilteredDrones}
-            getBatteryClass={getBatteryClass}
             getStatusBadgeClass={getStatusBadgeClass}
             getDisplayStatus={getDisplayStatus}
             onViewLocation={openLocationModal}

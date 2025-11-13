@@ -4,7 +4,8 @@ import { useContext, useEffect, useState } from 'react';
 import {
     RestaurantContext,
     CartContext,
-    GeolocationContext
+    GeolocationContext,
+    useRestaurantHours,
 } from 'customer-shared';
 
 export default function HomeScreen({ navigation }) {

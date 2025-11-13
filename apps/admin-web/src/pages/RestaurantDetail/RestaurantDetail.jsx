@@ -237,7 +237,7 @@ const RestaurantDetail = () => {
                     {balance && (
                         <div className="stat-card">
                             <div className="stat-icon balance">
-                                💰
+                                $
                             </div>
                             <div className="stat-content">
                                 <div className="stat-label">Available Balance</div>

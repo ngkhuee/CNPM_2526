@@ -1,19 +1,24 @@
-import { useCallback } from "react";
-import { orderService, droneService } from "shared-services";
+import { useCallback, useState } from "react";
+import { orderTrackingService, droneService, orderValidationService } from "shared-services";
 
 /**
  * Custom hook for managing order actions
- * Handles order status updates, cancellation, and drone release
+ * Handles order status updates, cancellation, and reviews
  * Shared between web and mobile customer apps
  */
 export const useOrderActions = () => {
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
+
     /**
      * Cancel order and release drone if assigned
      */
-    const cancelOrder = useCallback(async (order) => {
-        // Check if order can be cancelled (only specific statuses)
-        const cancellableStatuses = ["paid", "confirmed", "preparing"];
-        if (!cancellableStatuses.includes(order.status)) {
+    const cancelOrder = useCallback(async (order, reason = "") => {
+        if (!order) {
+            return { success: false, message: "Order not found" };
+        }
+
+        if (!orderValidationService.canCancelOrder(order)) {
             return {
                 success: false,
                 message: "This order cannot be cancelled at this stage",
@@ -21,12 +26,14 @@ export const useOrderActions = () => {
         }
 
         try {
+            setLoading(true);
+            setError(null);
             console.log("🚫 Cancelling order:", order.id);
 
-            // Step 1: Update order status to cancelled
-            await orderService.updateStatus(order.id, "cancelled");
+            // Update order status to cancelled
+            const updatedOrder = await orderTrackingService.cancelOrder(order.id, reason);
 
-            // Step 2: If drone was assigned, release it
+            // If drone was assigned, release it
             if (order.droneId || order.drone_id) {
                 const droneId = order.droneId || order.drone_id;
                 console.log("🚁 Releasing drone:", droneId);
@@ -45,37 +52,63 @@ export const useOrderActions = () => {
             return {
                 success: true,
                 message: "Order cancelled successfully!",
+                order: updatedOrder,
             };
         } catch (error) {
             console.error("Error cancelling order:", error);
+            setError(error.message);
             return {
                 success: false,
                 message: "Failed to cancel order. Please try again.",
             };
+        } finally {
+            setLoading(false);
         }
     }, []);
 
     /**
-     * Update order status
+     * Check if order can be reviewed
      */
-    const updateOrderStatus = useCallback(async (orderId, newStatus) => {
-        try {
-            const updatedOrder = await orderService.updateStatus(orderId, newStatus);
-            return {
-                success: true,
-                order: updatedOrder,
-            };
-        } catch (error) {
-            console.error("Error updating order status:", error);
-            return {
-                success: false,
-                message: error.message,
-            };
-        }
+    const canReviewOrder = useCallback((order) => {
+        return order && orderValidationService.canReviewOrder(order.status);
+    }, []);
+
+    /**
+     * Check if order can be cancelled
+     */
+    const canCancelOrder = useCallback((order) => {
+        return orderValidationService.canCancelOrder(order);
+    }, []);
+
+    /**
+     * Get order status label
+     */
+    const getStatusLabel = useCallback((status) => {
+        return orderValidationService.getStatusLabel(status);
+    }, []);
+
+    /**
+     * Get status badge style
+     */
+    const getStatusBadgeStyle = useCallback((status) => {
+        return orderValidationService.getStatusBadgeStyle(status);
+    }, []);
+
+    /**
+     * Clear error
+     */
+    const clearError = useCallback(() => {
+        setError(null);
     }, []);
 
     return {
+        loading,
+        error,
         cancelOrder,
-        updateOrderStatus,
+        canReviewOrder,
+        canCancelOrder,
+        getStatusLabel,
+        getStatusBadgeStyle,
+        clearError,
     };
 };

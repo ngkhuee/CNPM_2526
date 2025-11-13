@@ -39,12 +39,12 @@ export const useDroneTracking = () => {
           id: drone.id,
           name: drone.identifier,
           status: drone.status,
-          battery: drone.battery_level || 0,
           latitude: drone.latitude,
           longitude: drone.longitude,
           assignedOrderId: isOrderActive ? drone.assigned_order_id : null,
           maxWeightKg: drone.max_weight_kg,
           currentLocation: drone.current_location,
+          updated_at: drone.updated_at,
         };
       });
       setDrones(mappedDrones);

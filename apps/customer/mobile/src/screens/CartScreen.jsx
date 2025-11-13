@@ -1,23 +1,23 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { useContext } from 'react';
-import { CartContext } from 'customer-shared';
+import { CartContext, calculateCartTotals, useSettings } from 'customer-shared';
 import { formatCurrency } from 'shared-utils';
 
 export default function CartScreen({ navigation, route }) {
-    const { cart, removeFromCart } = useContext(CartContext);
-    const items = route.params?.items || cart || [];
+    const { cart, removeFromCart, getTotalCartAmount } = useContext(CartContext);
+    const { deliveryFee: deliveryFeeValue } = useSettings();
+    const items = route.params?.items || cart?.items || [];
 
-    const calculateTotal = () => {
-        return items.reduce((sum, item) => sum + (item.price || 0), 0);
-    };
+    const subtotal = getTotalCartAmount ? getTotalCartAmount() : items.reduce((sum, item) => sum + ((item.price || 0) * (item.quantity || 1)), 0);
+    const { deliveryFee, total } = calculateCartTotals(subtotal, null, deliveryFeeValue);
 
     const handleCheckout = () => {
         navigation.navigate('Checkout', {
             items,
-            subtotal: formatCurrency(calculateTotal()),
-            deliveryFee: '$2.00',
-            total: formatCurrency(calculateTotal() + 2),
+            subtotal: formatCurrency(subtotal),
+            deliveryFee: formatCurrency(deliveryFee),
+            total: formatCurrency(total),
         });
     };
 
@@ -60,17 +60,17 @@ export default function CartScreen({ navigation, route }) {
                 <View style={styles.summaryRow}>
                     <Text>Subtotal:</Text>
                     <Text style={styles.summaryValue}>
-                        {formatCurrency(calculateTotal())}
+                        {formatCurrency(subtotal)}
                     </Text>
                 </View>
                 <View style={styles.summaryRow}>
                     <Text>Delivery:</Text>
-                    <Text style={styles.summaryValue}>$2.00</Text>
+                    <Text style={styles.summaryValue}>{formatCurrency(deliveryFee)}</Text>
                 </View>
                 <View style={[styles.summaryRow, styles.totalRow]}>
                     <Text style={styles.totalText}>Total:</Text>
                     <Text style={styles.totalValue}>
-                        {formatCurrency(calculateTotal() + 2)}
+                        {formatCurrency(total)}
                     </Text>
                 </View>
 

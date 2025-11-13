@@ -105,7 +105,7 @@
 }
 
 .chart-title svg {
-  font-size: 1.3rem;
+  font-size: 1.4rem;
   color: #f28269;
 }
 
@@ -114,7 +114,7 @@
   gap: 8px;
 }
 
-.filter-button {
+.filter-btn {
   padding: 8px 16px;
   border: 1px solid #e2e8f0;
   background: white;
@@ -126,12 +126,12 @@
   transition: all 0.2s;
 }
 
-.filter-button:hover {
+.filter-btn:hover {
   border-color: #f28269;
   color: #f28269;
 }
 
-.filter-button.active {
+.filter-btn.active {
   background: #f28269;
   color: white;
   border-color: #f28269;

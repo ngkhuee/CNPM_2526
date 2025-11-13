@@ -5,24 +5,14 @@ import {
   useOrderActions,
   useReview,
   useOrderFiltering,
-  getStatusBadgeStyle,
-} from "customer-shared";
-import {
-  canCancelOrder,
-  canReviewOrder,
+  OrderCardHeader,
+  OrderItemsTable,
+  ReviewModal,
 } from "customer-shared";
 import { formatCurrency } from "shared-utils";
 import "./MyOrders.css";
 import { useNavigate } from "react-router-dom";
-import {
-  MdLocationOn,
-  MdStar,
-  MdStarBorder,
-  MdCheckCircle,
-  MdError,
-  MdRefresh,
-  MdCancel,
-} from "react-icons/md";
+import { MdRefresh } from "react-icons/md";
 
 const MyOrders = () => {
   const { orders, fetchUserOrders } = useContext(OrderContext);
@@ -55,9 +45,9 @@ const MyOrders = () => {
     checkReviewed();
   }, [user?.id, getReviewedFoodIds]);
 
-  const handleOpenReview = (orderItem, orderId, restaurantId) => {
+  const handleOpenReview = (orderItem) => {
     setSelectedOrderItem(orderItem);
-    setSelectedOrderId(orderId);
+    setSelectedOrderId(displayOrders.find(o => o.items?.find(i => i.id === orderItem.id || i.foodId === orderItem.foodId))?.id);
     setShowReviewModal(true);
     setRating(5);
     setComment("");
@@ -143,6 +133,16 @@ const MyOrders = () => {
 
   const displayOrders =
     activeTab === "current" ? currentOrders : historyOrders;
+
+  const handleTrackOrder = (order) => {
+    navigate(`/tracking/${order.id || order._id}`);
+  };
+
+  const handleReviewModalClose = () => {
+    setShowReviewModal(false);
+    setSelectedOrderItem(null);
+    setSelectedOrderId(null);
+  };
 
   return (
     <div className="myorders">
@@ -247,233 +247,18 @@ const MyOrders = () => {
       ) : (
         displayOrders.map((order) => (
           <div key={order.id || order._id} className="order-card">
-            <h3>Order #{order.id || order._id}</h3>
+            <OrderCardHeader
+              order={order}
+              onTrackClick={handleTrackOrder}
+              onCancelClick={handleCancelOrder}
+            />
 
-            {/* Restaurant info */}
-            {(order.restaurantName ||
-              order.restaurant?.name ||
-              order.restaurantId ||
-              order.restaurant_id) && (
-                <p
-                  style={{
-                    color: "#ff6b35",
-                    fontWeight: "600",
-                    marginBottom: "8px",
-                  }}
-                >
-                  <b>Restaurant:</b>{" "}
-                  {order.restaurantName ||
-                    order.restaurant?.name ||
-                    `Belga Pizza`}
-                </p>
-              )}
-
-            <p>
-              <b>Status:</b>{" "}
-              <span style={getStatusBadgeStyle(order.status)}>
-                {order.status}
-              </span>
-            </p>
-            <p>
-              <b>Order Date:</b>{" "}
-              {new Date(order.createdAt || order.created_at).toLocaleString(
-                "vi-VN",
-                {
-                  dateStyle: "short",
-                  timeStyle: "short",
-                }
-              )}
-            </p>
-
-            {/* Show rejection reason if order was rejected */}
-            {order.status === "rejected" && order.rejection_reason && (
-              <div
-                style={{
-                  background: "#f8d7da",
-                  border: "1px solid #f5c6cb",
-                  borderRadius: "6px",
-                  padding: "12px",
-                  marginTop: "10px",
-                  marginBottom: "10px",
-                }}
-              >
-                <p style={{ margin: 0, color: "#721c24", fontSize: "14px" }}>
-                  <b>
-                    <MdCancel /> Rejection Reason:
-                  </b>{" "}
-                  {order.rejection_reason}
-                </p>
-                <p
-                  style={{
-                    margin: "8px 0 0 0",
-                    color: "#721c24",
-                    fontSize: "13px",
-                    fontStyle: "italic",
-                  }}
-                >
-                  Your payment will be refunded within 3-5 business days.
-                </p>
-              </div>
-            )}
-
-            {/* Customer info */}
-            {order.customer && (
-              <>
-                <p>
-                  <b>Customer:</b> {order.customer.name}
-                </p>
-                <p>
-                  <b>Phone:</b> {order.customer.phone}
-                </p>
-                <p>
-                  <b>Address:</b> {order.customer.address}
-                </p>
-              </>
-            )}
-
-            <div className="order-actions">
-              {/* Only show Track button if order can be tracked */}
-              {order.status !== "paid" && order.status !== "pending" && (
-                <button
-                  className="track-btn"
-                  onClick={() => navigate(`/tracking/${order.id || order._id}`)}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "8px",
-                    justifyContent: "center",
-                  }}
-                >
-                  <MdLocationOn /> Track Order
-                </button>
-              )}
-
-              {/* Cancel button for orders that can be cancelled */}
-              {canCancelOrder(order) && (
-                <button
-                  className="cancel-btn"
-                  onClick={() => handleCancelOrder(order)}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "8px",
-                    justifyContent: "center",
-                    background: "#dc3545",
-                    color: "white",
-                    border: "none",
-                    padding: "10px 20px",
-                    borderRadius: "6px",
-                    cursor: "pointer",
-                    fontSize: "14px",
-                    fontWeight: "600",
-                  }}
-                >
-                  <MdError /> Cancel Order
-                </button>
-              )}
-
-              {/* Show waiting message for paid orders */}
-              {order.status === "paid" && (
-                <p
-                  style={{
-                    color: "#666",
-                    fontSize: "14px",
-                    fontStyle: "italic",
-                    margin: "10px 0",
-                  }}
-                >
-                  Waiting for restaurant confirmation...
-                </p>
-              )}
-            </div>
-
-            {order.items && order.items.length > 0 && (
-              <table>
-                <thead>
-                  <tr>
-                    <th>Item</th>
-                    <th>Quantity</th>
-                    <th>Price</th>
-                    <th>Total</th>
-                    {canReviewOrder(order) && <th>Review</th>}
-                  </tr>
-                </thead>
-                <tbody>
-                  {order.items.map((item, i) => (
-                    <tr key={i}>
-                      <td>{item.name}</td>
-                      <td>{item.quantity}</td>
-                      <td>
-                        {formatCurrency(item.unit_price || item.price || 0)}
-                      </td>
-                      <td>
-                        {formatCurrency(
-                          item.subtotal ||
-                          (item.unit_price || item.price || 0) * item.quantity
-                        )}
-                      </td>
-                      {canReviewOrder(order.status) && (
-                        <td>
-                          {reviewedFoods[item.foodId || item.id] ? (
-                            <button
-                              style={{
-                                background: "#6c757d",
-                                color: "white",
-                                border: "none",
-                                padding: "6px 12px",
-                                borderRadius: "4px",
-                                fontSize: "12px",
-                                cursor: "not-allowed",
-                                opacity: 0.6,
-                                display: "flex",
-                                alignItems: "center",
-                                gap: "4px",
-                              }}
-                              disabled
-                            >
-                              <MdCheckCircle size={14} /> Reviewed
-                            </button>
-                          ) : (
-                            <button
-                              style={{
-                                background: "#ff9800",
-                                color: "white",
-                                border: "none",
-                                padding: "6px 12px",
-                                borderRadius: "4px",
-                                fontSize: "12px",
-                                cursor: "pointer",
-                                display: "flex",
-                                alignItems: "center",
-                                gap: "4px",
-                                transition: "all 0.2s ease",
-                              }}
-                              onClick={() =>
-                                handleOpenReview(
-                                  item,
-                                  order.id,
-                                  order.restaurantId
-                                )
-                              }
-                              onMouseEnter={(e) => {
-                                e.target.style.background = "#f57c00";
-                                e.target.style.transform = "translateY(-1px)";
-                              }}
-                              onMouseLeave={(e) => {
-                                e.target.style.background = "#ff9800";
-                                e.target.style.transform = "translateY(0)";
-                              }}
-                            >
-                              <MdStar size={14} /> Rate
-                            </button>
-                          )}
-                        </td>
-                      )}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
+            <OrderItemsTable
+              items={order.items}
+              orderStatus={order.status}
+              reviewedFoods={reviewedFoods}
+              onReviewClick={handleOpenReview}
+            />
 
             <p className="order-total">
               <b>Total:</b>{" "}
@@ -484,58 +269,17 @@ const MyOrders = () => {
         ))
       )}
 
-      {/* Review Modal */}
-      {showReviewModal && selectedOrderItem && (
-        <div
-          className="review-modal-overlay"
-          onClick={() => setShowReviewModal(false)}
-        >
-          <div className="review-modal" onClick={(e) => e.stopPropagation()}>
-            <h3>Rate Food</h3>
-            <p style={{ fontSize: "16px", fontWeight: "600", color: "#333" }}>
-              {selectedOrderItem.name}
-            </p>
-
-            <div className="rating-section">
-              <label>Food Quality:</label>
-              <div className="stars">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <span
-                    key={star}
-                    className={`star ${rating >= star ? "filled" : ""}`}
-                    onClick={() => setRating(star)}
-                    style={{
-                      cursor: "pointer",
-                      fontSize: "28px",
-                      color: rating >= star ? "#ffc107" : "#ddd",
-                    }}
-                  >
-                    {rating >= star ? <MdStar /> : <MdStarBorder />}
-                  </span>
-                ))}
-              </div>
-              <p>{rating}/5 stars</p>
-            </div>
-
-            <div className="comment-section">
-              <label>Your comment:</label>
-              <textarea
-                value={comment}
-                onChange={(e) => setComment(e.target.value)}
-                placeholder="Share your experience with this dish..."
-                rows="4"
-              />
-            </div>
-
-            <div className="modal-actions">
-              <button onClick={handleSubmitReview} disabled={submitting}>
-                {submitting ? "Submitting..." : "Submit Review"}
-              </button>
-              <button onClick={() => setShowReviewModal(false)}>Cancel</button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ReviewModal
+        isOpen={showReviewModal}
+        itemName={selectedOrderItem?.name}
+        rating={rating}
+        comment={comment}
+        submitting={submitting}
+        onRatingChange={setRating}
+        onCommentChange={setComment}
+        onSubmit={handleSubmitReview}
+        onClose={handleReviewModalClose}
+      />
     </div>
   );
 };

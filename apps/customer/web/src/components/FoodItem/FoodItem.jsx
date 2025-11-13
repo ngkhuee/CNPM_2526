@@ -84,7 +84,7 @@ const FoodItem = ({
             >
               <MdStar size={16} />
               {rating > 0 ? rating.toFixed(1) : "0"}{" "}
-              {rating > 0 ? "" : "ratings"}
+              {rating > 0 ? "" : ""}
             </span>
           )}
         </div>

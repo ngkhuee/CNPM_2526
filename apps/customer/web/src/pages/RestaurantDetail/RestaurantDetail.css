@@ -293,7 +293,7 @@
 
 .closed-notice {
   background: #fff3cd;
-  border-left: 4px solid #ffc107;
+  /* border-left: 4px solid #ffc107; */
   padding: 16px;
   border-radius: 4px;
   display: flex;

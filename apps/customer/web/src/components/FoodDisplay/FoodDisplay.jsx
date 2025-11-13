@@ -34,15 +34,15 @@ const FoodDisplay = ({
   // Handle featured filters (Top Rated, Best Selling)
   if (filterBy === "featured") {
     if (filterValue === "Top Rated") {
-      // Sort by rating (highest first), limit to top 5
+      // Sort by rating (highest first), limit to top 4
       filteredFood = [...food_list]
         .sort((a, b) => (b.rating || 0) - (a.rating || 0))
-        .slice(0, 5);
+        .slice(0, 4);
     } else if (filterValue === "Best Selling") {
-      // Sort by sold count (highest first), limit to top 5
+      // Sort by sold count (highest first), limit to top 4
       filteredFood = [...food_list]
         .sort((a, b) => (b.sold || 0) - (a.sold || 0))
-        .slice(0, 5);
+        .slice(0, 4);
     }
   } else {
     // Original filtering logic

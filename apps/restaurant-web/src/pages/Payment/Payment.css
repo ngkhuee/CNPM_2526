@@ -132,13 +132,13 @@
 
 .alert-error {
     background: #fee;
-    border-left: 4px solid #f5576c;
+    /* border-left: 4px solid #f5576c; */
     color: #c1121f;
 }
 
 .alert-success {
     background: #efe;
-    border-left: 4px solid #f28269;
+    /* border-left: 4px solid #f28269; */
     color: #145a32;
 }
 
@@ -170,7 +170,7 @@
     padding: 12px;
     background: #f8f9fa;
     border-radius: 6px;
-    border-left: 3px solid #f28269;
+    /* border-left: 3px solid #f28269; */
 }
 
 .form-group {
@@ -236,7 +236,7 @@
     margin-bottom: 24px;
     font-size: 13px;
     color: #333;
-    border-left: 3px solid #f28269;
+    /* border-left: 3px solid #f28269; */
 }
 
 .form-info strong {

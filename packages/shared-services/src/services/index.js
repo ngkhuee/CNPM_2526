@@ -13,3 +13,9 @@ export { default as droneService } from "./droneService";
 export { default as settingsService } from "./settingsService";
 export { default as droneSimulation } from "./droneSimulation";
 export { default as uploadService } from "./uploadService";
+
+// New services for customer app refactoring
+export { orderTrackingService } from "./orderTrackingService";
+export { droneProgressService } from "./droneProgressService";
+export { geoService } from "./geoService";
+export { orderValidationService } from "./orderValidationService";
