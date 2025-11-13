@@ -10,6 +10,30 @@ const fs = require("fs");
 require("dotenv").config();
 const PORT = process.env.PORT || 4000;
 
+// // Auto-save changes to db.json
+// const saveDb = () => {
+//   const db = router.db.getState();
+//   fs.writeFileSync(
+//     path.join(__dirname, "db.json"),
+//     JSON.stringify(db, null, 2),
+//     "utf-8"
+//   );
+// };
+
+// // Save database every 10 seconds if there are changes
+// let saveInterval = setInterval(() => {
+//   saveDb();
+// }, 10000);
+
+// // Save on server shutdown
+// process.on("SIGINT", () => {
+//   console.log("\nSaving database before shutdown...");
+//   clearInterval(saveInterval);
+//   saveDb();
+//   console.log("Database saved. Shutting down...");
+//   process.exit(0);
+// });
+
 // Middlewares
 server.use(middlewares);
 server.use(jsonServer.bodyParser);
@@ -190,80 +214,6 @@ server.post("/auth/register", (req, res) => {
     user: userWithoutPassword,
     message: "Registration successful",
   });
-});
-
-// Cart - Add item
-server.post("/carts/:userId/add", (req, res) => {
-  const { userId } = req.params;
-  const { foodId, quantity } = req.body;
-  const db = router.db;
-
-  let cart = db.get("carts").find({ userId }).value();
-
-  if (!cart) {
-    cart = {
-      id: `cart${Date.now()}`,
-      userId,
-      items: [],
-      updatedAt: new Date().toISOString(),
-    };
-    db.get("carts").push(cart).write();
-  }
-
-  const existingItemIndex = cart.items.findIndex(
-    (item) => item.foodId === foodId
-  );
-
-  if (existingItemIndex !== -1) {
-    cart.items[existingItemIndex].quantity += quantity;
-  } else {
-    cart.items.push({ foodId, quantity });
-  }
-
-  cart.updatedAt = new Date().toISOString();
-
-  db.get("carts").find({ userId }).assign(cart).write();
-
-  res.json({ success: true, cart });
-});
-
-// Cart - Remove item
-server.delete("/carts/:userId/items/:foodId", (req, res) => {
-  const { userId, foodId } = req.params;
-  const db = router.db;
-
-  let cart = db.get("carts").find({ userId }).value();
-
-  if (!cart) {
-    return res.status(404).json({
-      success: false,
-      message: "Cart not found",
-    });
-  }
-
-  cart.items = cart.items.filter((item) => item.foodId !== foodId);
-  cart.updatedAt = new Date().toISOString();
-
-  db.get("carts").find({ userId }).assign(cart).write();
-
-  res.json({ success: true, cart });
-});
-
-// Cart - Clear
-server.delete("/carts/:userId/clear", (req, res) => {
-  const { userId } = req.params;
-  const db = router.db;
-
-  let cart = db.get("carts").find({ userId }).value();
-
-  if (cart) {
-    cart.items = [];
-    cart.updatedAt = new Date().toISOString();
-
-    db.get("carts").find({ userId }).assign(cart).write();
-  }
-
-  res.json({ success: true, cart: cart || { userId, items: [] } });
 });
 
 // Menus with calculated rating and sold count
@@ -509,13 +459,269 @@ server.post("/users/register-owner", (req, res) => {
 // Apply auth middleware (after custom routes)
 server.use(validateToken);
 
+// ========== PROTECTED CART ENDPOINTS (After auth middleware) ==========
+
+// Cart - Get user's cart
+server.get("/carts", (req, res) => {
+  const userId = req.user?.id;
+  if (!userId) {
+    return res.status(401).json({
+      success: false,
+      message: "Unauthorized",
+    });
+  }
+
+  const db = router.db;
+  let cart = db.get("carts").find({ user_id: userId }).value();
+
+  if (!cart) {
+    return res.status(404).json({
+      success: false,
+      message: "Cart not found",
+    });
+  }
+
+  // Add restaurant name if cart has items
+  if (cart.restaurant_id) {
+    const restaurant = db.get("restaurants").find({ id: cart.restaurant_id }).value();
+    cart.restaurant_name = restaurant?.name || "Unknown";
+  }
+
+  res.json(cart);
+});
+
+// Cart - Add item with restaurant validation
+server.post("/carts/add", (req, res) => {
+  const userId = req.user?.id;
+  if (!userId) {
+    return res.status(401).json({
+      success: false,
+      message: "Unauthorized",
+    });
+  }
+
+  const { restaurant_id, food_id, quantity = 1, note = "" } = req.body;
+  const db = router.db;
+
+  // Validate input
+  if (!restaurant_id || !food_id) {
+    return res.status(400).json({
+      success: false,
+      message: "restaurant_id and food_id are required",
+    });
+  }
+
+  // Get food details
+  const food = db.get("menus").find({ id: parseInt(food_id) }).value();
+  if (!food) {
+    return res.status(404).json({
+      success: false,
+      message: "Food not found",
+    });
+  }
+
+  let cart = db.get("carts").find({ user_id: userId }).value();
+
+  // Create cart if doesn't exist
+  if (!cart) {
+    cart = {
+      id: db.get("carts").value().length + 1,
+      user_id: userId,
+      restaurant_id: restaurant_id,
+      items: [],
+      updated_at: new Date().toISOString(),
+    };
+    db.get("carts").push(cart).write();
+  }
+
+  // Check if cart has items from different restaurant
+  if (cart.items.length > 0 && cart.restaurant_id !== restaurant_id) {
+    return res.status(400).json({
+      success: false,
+      message: "Cannot add items from different restaurant. Please clear your cart first.",
+      current_restaurant_id: cart.restaurant_id,
+    });
+  }
+
+  // Update restaurant_id if cart is empty
+  if (cart.items.length === 0) {
+    cart.restaurant_id = restaurant_id;
+  }
+
+  // Check if item already exists in cart
+  const existingItemIndex = cart.items.findIndex(
+    (item) => item.food_id === parseInt(food_id)
+  );
+
+  if (existingItemIndex !== -1) {
+    // Update existing item
+    cart.items[existingItemIndex].quantity += quantity;
+    cart.items[existingItemIndex].note = note;
+    cart.items[existingItemIndex].subtotal = cart.items[existingItemIndex].quantity * cart.items[existingItemIndex].price;
+  } else {
+    // Add new item
+    const newItem = {
+      item_id: `item_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      food_id: parseInt(food_id),
+      name: food.name,
+      price: food.price,
+      image: food.image,
+      quantity: quantity,
+      note: note,
+      subtotal: food.price * quantity,
+    };
+    cart.items.push(newItem);
+  }
+
+  // Calculate total
+  cart.total = cart.items.reduce((sum, item) => sum + item.subtotal, 0);
+  cart.updated_at = new Date().toISOString();
+
+  // Set restaurant ID and name
+  cart.restaurant_id = restaurant_id;
+  const restaurant = db.get("restaurants").find({ id: restaurant_id }).value();
+  cart.restaurant_name = restaurant?.name || "Unknown";
+
+  db.get("carts").find({ user_id: userId }).assign(cart).write();
+
+  res.json(cart);
+});
+
+// Cart - Update item
+server.patch("/carts/item/:item_id", (req, res) => {
+  const userId = req.user?.id;
+  if (!userId) {
+    return res.status(401).json({
+      success: false,
+      message: "Unauthorized",
+    });
+  }
+
+  const { item_id } = req.params;
+  const { quantity, note } = req.body;
+  const db = router.db;
+
+  let cart = db.get("carts").find({ user_id: userId }).value();
+
+  if (!cart) {
+    return res.status(404).json({
+      success: false,
+      message: "Cart not found",
+    });
+  }
+
+  const itemIndex = cart.items.findIndex((item) => item.item_id === item_id);
+  if (itemIndex === -1) {
+    return res.status(404).json({
+      success: false,
+      message: "Item not found in cart",
+    });
+  }
+
+  // Update item
+  if (quantity !== undefined) {
+    cart.items[itemIndex].quantity = quantity;
+    cart.items[itemIndex].subtotal = cart.items[itemIndex].price * quantity;
+  }
+  if (note !== undefined) {
+    cart.items[itemIndex].note = note;
+  }
+
+  // Recalculate total
+  cart.total = cart.items.reduce((sum, item) => sum + item.subtotal, 0);
+  cart.updated_at = new Date().toISOString();
+
+  db.get("carts").find({ user_id: userId }).assign(cart).write();
+
+  res.json(cart);
+});
+
+// Cart - Remove item
+server.delete("/carts/item/:item_id", (req, res) => {
+  const userId = req.user?.id;
+  if (!userId) {
+    return res.status(401).json({
+      success: false,
+      message: "Unauthorized",
+    });
+  }
+
+  const { item_id } = req.params;
+  const db = router.db;
+
+  let cart = db.get("carts").find({ user_id: userId }).value();
+
+  if (!cart) {
+    return res.status(404).json({
+      success: false,
+      message: "Cart not found",
+    });
+  }
+
+  cart.items = cart.items.filter((item) => item.item_id !== item_id);
+
+  // Clear restaurant_id and restaurant_name if cart is empty
+  if (cart.items.length === 0) {
+    cart.restaurant_id = null;
+    cart.restaurant_name = null;
+    cart.total = 0;
+  } else {
+    cart.total = cart.items.reduce((sum, item) => sum + item.subtotal, 0);
+  }
+
+  cart.updated_at = new Date().toISOString();
+
+  db.get("carts").find({ user_id: userId }).assign(cart).write();
+
+  res.json(cart);
+});
+
+// Cart - Clear
+server.delete("/carts/clear", (req, res) => {
+  const userId = req.user?.id;
+  if (!userId) {
+    return res.status(401).json({
+      success: false,
+      message: "Unauthorized",
+    });
+  }
+
+  const db = router.db;
+
+  let cart = db.get("carts").find({ user_id: userId }).value();
+
+  if (cart) {
+    cart.items = [];
+    cart.restaurant_id = null;
+    cart.restaurant_name = null;
+    cart.total = 0;
+    cart.updated_at = new Date().toISOString();
+
+    db.get("carts").find({ user_id: userId }).assign(cart).write();
+  }
+
+  res.json(cart || { user_id: userId, items: [], restaurant_id: null, restaurant_name: null, total: 0 });
+});
+
 // Use default router
 server.use(router);
 
+// Middleware to trigger save after write operations
+server.use((req, res, next) => {
+  res.on("finish", () => {
+    if (["POST", "PUT", "PATCH", "DELETE"].includes(req.method)) {
+      // Save immediately after write operations
+      saveDb();
+    }
+  });
+  next();
+});
+
 server.listen(PORT, () => {
-  console.log(`\nJSON Server is running!`);
-  console.log(`Server: http://localhost:${PORT}`);
-  console.log(`\nAuth endpoints:`);
+  console.log(`\n✅ JSON Server is running with AUTO-SAVE enabled!`);
+  console.log(`📍 Server: http://localhost:${PORT}`);
+  console.log(`💾 Database: db.json (auto-saves every 10s and on changes)`);
+  console.log(`\n🔐 Auth endpoints:`);
   console.log(`   - POST http://localhost:${PORT}/auth/login`);
   console.log(`   - POST http://localhost:${PORT}/auth/register`);
   console.log(`\n`);

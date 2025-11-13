@@ -1,3 +1,4 @@
+// packages/shared-services/src/config/endpoints.js
 export const ENDPOINTS = {
   AUTH: {
     LOGIN: "/auth/login",

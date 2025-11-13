@@ -4,6 +4,11 @@
 
 import React from "react";
 import { droneProgressService } from "shared-services";
+import {
+    MdCheckCircle,
+    MdDeliveryDining,
+    MdRestaurantMenu,
+} from "react-icons/md";
 
 export const DeliveryStatusCard = ({
     order,
@@ -20,15 +25,15 @@ export const DeliveryStatusCard = ({
 
     const getStatusIcon = () => {
         if (order?.status === "delivered") {
-            return "✅";
+            return <MdCheckCircle size={50} color="#fff" />;
         } else if (
             ["ready", "picking_up", "picked_up", "delivering"].includes(
                 order?.status
             )
         ) {
-            return "🚚";
+            return <MdDeliveryDining size={50} color="#fff" />;
         } else {
-            return "👨‍🍳";
+            return <MdRestaurantMenu size={50} color="#fff" />;
         }
     };
 
@@ -41,13 +46,18 @@ export const DeliveryStatusCard = ({
                 color: "white",
                 textAlign: "center",
                 marginTop: "20px",
+                boxShadow: "0 4px 10px rgba(0,0,0,0.15)",
             }}
         >
-            <div style={{ fontSize: "40px", marginBottom: "10px" }}>
-                {getStatusIcon()}
-            </div>
+            <div style={{ marginBottom: "10px" }}>{getStatusIcon()}</div>
 
-            <div style={{ fontSize: "18px", fontWeight: "600", marginBottom: "8px" }}>
+            <div
+                style={{
+                    fontSize: "18px",
+                    fontWeight: "600",
+                    marginBottom: "8px",
+                }}
+            >
                 {statusText}
             </div>
 
@@ -103,7 +113,7 @@ export const DeliveryStatusCard = ({
                             }
                         }}
                     >
-                        {confirming ? "Confirming..." : "✓ Confirmed Received"}
+                        {confirming ? "Confirming..." : "Confirm Received"}
                     </button>
 
                     <p style={{ fontSize: "12px", marginTop: "8px", opacity: 0.9 }}>

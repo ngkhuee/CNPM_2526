@@ -4,17 +4,38 @@
 
 import React from "react";
 import { droneProgressService } from "shared-services";
+import {
+    MdPayment,
+    MdCheckCircle,
+    MdRestaurant,
+    MdInventory,
+    MdFlight,
+    MdLocationOn,
+    MdLocalShipping,
+    MdDone,
+} from "react-icons/md";
 
 export const OrderTimeline = ({ order, timelineStages = null }) => {
+    const iconMap = {
+        paid: <MdPayment />,
+        confirmed: <MdCheckCircle />,
+        preparing: <MdRestaurant />,
+        ready: <MdInventory />,
+        picking_up: <MdFlight style={{ transform: "rotate(45deg)" }} />,
+        picked_up: <MdLocationOn />,
+        delivering: <MdLocalShipping />,
+        delivered: <MdDone />,
+    };
+
     const defaultStages = [
-        { status: "paid", label: "Paid", icon: "💳" },
-        { status: "confirmed", label: "Confirmed", icon: "✓" },
-        { status: "preparing", label: "Preparing", icon: "👨‍🍳" },
-        { status: "ready", label: "Ready", icon: "📦" },
-        { status: "picking_up", label: "Picking Up", icon: "🚁" },
-        { status: "picked_up", label: "Picked Up", icon: "📍" },
-        { status: "delivering", label: "Delivering", icon: "🚚" },
-        { status: "delivered", label: "Delivered", icon: "✅" },
+        { status: "paid", label: "Paid" },
+        { status: "confirmed", label: "Confirmed" },
+        { status: "preparing", label: "Preparing" },
+        { status: "ready", label: "Ready" },
+        { status: "picking_up", label: "Picking Up" },
+        { status: "picked_up", label: "Picked Up" },
+        { status: "delivering", label: "Delivering" },
+        { status: "delivered", label: "Delivered" },
     ];
 
     const stages = timelineStages || defaultStages;
@@ -50,9 +71,10 @@ export const OrderTimeline = ({ order, timelineStages = null }) => {
                                         fontSize: "20px",
                                         marginBottom: "8px",
                                         boxShadow: isActive ? "0 0 10px rgba(76, 175, 80, 0.5)" : "none",
+                                        color: isCompleted ? "white" : "#999",
                                     }}
                                 >
-                                    {stage.icon}
+                                    {iconMap[stage.status] || stage.icon}
                                 </div>
                                 <div
                                     style={{

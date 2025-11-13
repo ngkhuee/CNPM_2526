@@ -1,144 +1,205 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput } from 'react-native';
-import { useContext, useState } from 'react';
-import { AuthContext } from 'customer-shared';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput, ActivityIndicator } from 'react-native';
+import { useContext, useState, useEffect } from 'react';
+import { AuthContext, useAddresses } from 'customer-shared';
 
 export default function ProfileScreen({ navigation }) {
-    const { user, logout } = useContext(AuthContext);
+    const { user, setUser, logout } = useContext(AuthContext);
+    const { addresses, loading: addressLoading, addAddress: addAddressHook } = useAddresses(user?.id);
+
     const [editMode, setEditMode] = useState(false);
-    const [profile, setProfile] = useState({
-        name: user?.name || 'John Doe',
-        email: user?.email || 'john@example.com',
-        phone: user?.phone || '+1 234 567 8900',
-        address: user?.address || 'Add your delivery address',
+    const [formData, setFormData] = useState({
+        name: '',
+        email: '',
+        phone: '',
     });
+    const [loading, setLoading] = useState(false);
+
+    // Initialize form with user data
+    useEffect(() => {
+        if (user) {
+            setFormData({
+                name: user.name || '',
+                email: user.email || '',
+                phone: user.phone || '',
+            });
+        }
+    }, [user]);
+
+    const handleInputChange = (field, value) => {
+        setFormData(prev => ({ ...prev, [field]: value }));
+    };
+
+    const handleSaveProfile = async () => {
+        try {
+            setLoading(true);
+            const updatedUser = { ...user, ...formData };
+            setUser(updatedUser);
+            localStorage.setItem('user', JSON.stringify(updatedUser));
+            setEditMode(false);
+            alert('Cập nhật thông tin thành công!');
+        } catch (error) {
+            console.error('Error updating profile:', error);
+            alert('Lỗi cập nhật thông tin');
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const handleLogout = () => {
         logout();
         navigation.navigate('Login');
     };
 
-    const handleSaveProfile = () => {
-        setEditMode(false);
-        // Save profile logic here
-        alert('Profile updated successfully!');
-    };
+    if (!user) {
+        return (
+            <View style={[styles.container, styles.centerContent]}>
+                <Text style={styles.notLoggedInText}>Vui lòng đăng nhập</Text>
+            </View>
+        );
+    }
 
     return (
         <ScrollView style={styles.container}>
-            {/* Profile Avatar */}
+            {/* Avatar Section */}
             <View style={styles.avatarSection}>
                 <View style={styles.avatar}>
                     <Text style={styles.avatarText}>
-                        {profile.name.charAt(0).toUpperCase()}
+                        {formData.name.charAt(0).toUpperCase() || 'U'}
                     </Text>
                 </View>
-                <Text style={styles.userName}>{profile.name}</Text>
-                <Text style={styles.userEmail}>{profile.email}</Text>
+                <Text style={styles.userName}>{formData.name || 'User'}</Text>
+                <Text style={styles.userEmail}>{formData.email}</Text>
             </View>
 
             {/* Edit Mode Toggle */}
-            {!editMode ? (
-                <TouchableOpacity
-                    style={styles.editBtn}
-                    onPress={() => setEditMode(true)}
-                >
-                    <Text style={styles.editBtnText}>Edit Profile</Text>
-                </TouchableOpacity>
-            ) : (
-                <TouchableOpacity
-                    style={[styles.editBtn, { backgroundColor: '#4caf50' }]}
-                    onPress={handleSaveProfile}
-                >
-                    <Text style={styles.editBtnText}>Save Changes</Text>
-                </TouchableOpacity>
-            )}
+            <View style={styles.buttonRow}>
+                {editMode ? (
+                    <>
+                        <TouchableOpacity
+                            style={[styles.button, styles.saveBtn]}
+                            onPress={handleSaveProfile}
+                            disabled={loading}
+                        >
+                            <Text style={styles.buttonText}>
+                                {loading ? 'Đang lưu...' : 'Lưu thay đổi'}
+                            </Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={[styles.button, styles.cancelBtn]}
+                            onPress={() => setEditMode(false)}
+                        >
+                            <Text style={styles.buttonText}>Hủy</Text>
+                        </TouchableOpacity>
+                    </>
+                ) : (
+                    <TouchableOpacity
+                        style={[styles.button, styles.editBtn]}
+                        onPress={() => setEditMode(true)}
+                    >
+                        <Text style={styles.buttonText}>Chỉnh sửa</Text>
+                    </TouchableOpacity>
+                )}
+            </View>
 
-            {/* Profile Information */}
+            {/* Personal Information Section */}
             <View style={styles.section}>
-                <Text style={styles.sectionTitle}>Personal Information</Text>
+                <Text style={styles.sectionTitle}>Thông tin cá nhân</Text>
 
-                <View style={styles.infoField}>
-                    <Text style={styles.label}>Full Name</Text>
-                    {editMode ? (
-                        <TextInput
-                            style={styles.input}
-                            value={profile.name}
-                            onChangeText={(text) => setProfile({ ...profile, name: text })}
-                            placeholder="Enter your name"
-                        />
-                    ) : (
-                        <Text style={styles.value}>{profile.name}</Text>
-                    )}
+                <View style={styles.formGroup}>
+                    <Text style={styles.label}>Họ và tên</Text>
+                    <TextInput
+                        style={styles.input}
+                        value={formData.name}
+                        onChangeText={(text) => handleInputChange('name', text)}
+                        placeholder="Nhập tên của bạn"
+                        editable={editMode}
+                    />
                 </View>
 
-                <View style={styles.infoField}>
-                    <Text style={styles.label}>Email Address</Text>
-                    {editMode ? (
-                        <TextInput
-                            style={styles.input}
-                            value={profile.email}
-                            onChangeText={(text) => setProfile({ ...profile, email: text })}
-                            placeholder="Enter your email"
-                            keyboardType="email-address"
-                        />
-                    ) : (
-                        <Text style={styles.value}>{profile.email}</Text>
-                    )}
+                <View style={styles.formGroup}>
+                    <Text style={styles.label}>Email</Text>
+                    <TextInput
+                        style={styles.input}
+                        value={formData.email}
+                        onChangeText={(text) => handleInputChange('email', text)}
+                        placeholder="Nhập email"
+                        keyboardType="email-address"
+                        editable={editMode}
+                    />
                 </View>
 
-                <View style={styles.infoField}>
-                    <Text style={styles.label}>Phone Number</Text>
-                    {editMode ? (
-                        <TextInput
-                            style={styles.input}
-                            value={profile.phone}
-                            onChangeText={(text) => setProfile({ ...profile, phone: text })}
-                            placeholder="Enter your phone"
-                            keyboardType="phone-pad"
-                        />
-                    ) : (
-                        <Text style={styles.value}>{profile.phone}</Text>
-                    )}
+                <View style={styles.formGroup}>
+                    <Text style={styles.label}>Số điện thoại</Text>
+                    <TextInput
+                        style={styles.input}
+                        value={formData.phone}
+                        onChangeText={(text) => handleInputChange('phone', text)}
+                        placeholder="Nhập số điện thoại"
+                        keyboardType="phone-pad"
+                        editable={editMode}
+                    />
+                </View>
+            </View>
+
+            {/* Addresses Section */}
+            <View style={styles.section}>
+                <View style={styles.sectionHeader}>
+                    <Text style={styles.sectionTitle}>Địa chỉ giao hàng</Text>
+                    <TouchableOpacity
+                        onPress={() => navigation.navigate('SavedAddresses')}
+                    >
+                        <Text style={styles.viewAllLink}>Xem tất cả ›</Text>
+                    </TouchableOpacity>
                 </View>
 
-                <View style={styles.infoField}>
-                    <Text style={styles.label}>Default Address</Text>
-                    {editMode ? (
-                        <TextInput
-                            style={styles.input}
-                            value={profile.address}
-                            onChangeText={(text) => setProfile({ ...profile, address: text })}
-                            placeholder="Enter your address"
-                            multiline
-                        />
-                    ) : (
-                        <Text style={styles.value}>{profile.address}</Text>
-                    )}
-                </View>
+                {addressLoading ? (
+                    <ActivityIndicator size="small" color="#ff6b35" style={{ marginVertical: 10 }} />
+                ) : addresses.length > 0 ? (
+                    <View>
+                        {addresses.slice(0, 2).map((addr) => (
+                            <View key={addr.id} style={styles.addressPreview}>
+                                <Text style={styles.addressText}>{addr.address_line}</Text>
+                                <Text style={styles.addressDetail}>
+                                    {addr.district}, {addr.city}
+                                </Text>
+                                {addr.is_default && (
+                                    <Text style={styles.defaultBadge}>Địa chỉ mặc định</Text>
+                                )}
+                            </View>
+                        ))}
+                        {addresses.length > 2 && (
+                            <Text style={styles.moreAddresses}>+{addresses.length - 2} địa chỉ khác</Text>
+                        )}
+                    </View>
+                ) : (
+                    <Text style={styles.noDataText}>Chưa có địa chỉ nào</Text>
+                )}
+
+                <TouchableOpacity
+                    style={styles.addAddressBtn}
+                    onPress={() => navigation.navigate('SavedAddresses')}
+                >
+                    <Text style={styles.addAddressBtnText}>+ Thêm địa chỉ</Text>
+                </TouchableOpacity>
             </View>
 
             {/* Settings Section */}
             <View style={styles.section}>
-                <Text style={styles.sectionTitle}>Settings & Help</Text>
+                <Text style={styles.sectionTitle}>Cài đặt</Text>
 
                 <TouchableOpacity style={styles.settingItem}>
-                    <Text style={styles.settingLabel}>Notifications</Text>
+                    <Text style={styles.settingLabel}>Thông báo</Text>
                     <Text style={styles.settingArrow}>›</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity style={styles.settingItem}>
-                    <Text style={styles.settingLabel}>Payment Methods</Text>
+                    <Text style={styles.settingLabel}>Phương thức thanh toán</Text>
                     <Text style={styles.settingArrow}>›</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity style={styles.settingItem}>
-                    <Text style={styles.settingLabel}>Saved Addresses</Text>
-                    <Text style={styles.settingArrow}>›</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity style={styles.settingItem}>
-                    <Text style={styles.settingLabel}>Help & Support</Text>
+                    <Text style={styles.settingLabel}>Về ứng dụng</Text>
                     <Text style={styles.settingArrow}>›</Text>
                 </TouchableOpacity>
             </View>
@@ -148,7 +209,7 @@ export default function ProfileScreen({ navigation }) {
                 style={styles.logoutBtn}
                 onPress={handleLogout}
             >
-                <Text style={styles.logoutText}>Logout</Text>
+                <Text style={styles.logoutText}>Đăng xuất</Text>
             </TouchableOpacity>
 
             <View style={styles.footer} />
@@ -160,6 +221,14 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#f5f5f5',
+    },
+    centerContent: {
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    notLoggedInText: {
+        fontSize: 16,
+        color: '#666',
     },
     avatarSection: {
         backgroundColor: '#fff',
@@ -192,15 +261,28 @@ const styles = StyleSheet.create({
         fontSize: 13,
         color: '#666',
     },
-    editBtn: {
-        marginHorizontal: 15,
-        marginVertical: 15,
-        backgroundColor: '#ff6b35',
-        borderRadius: 8,
+    buttonRow: {
+        flexDirection: 'row',
+        paddingHorizontal: 15,
         paddingVertical: 12,
+        gap: 10,
+    },
+    button: {
+        flex: 1,
+        paddingVertical: 12,
+        borderRadius: 8,
         alignItems: 'center',
     },
-    editBtnText: {
+    editBtn: {
+        backgroundColor: '#ff6b35',
+    },
+    saveBtn: {
+        backgroundColor: '#4caf50',
+    },
+    cancelBtn: {
+        backgroundColor: '#ccc',
+    },
+    buttonText: {
         color: '#fff',
         fontSize: 14,
         fontWeight: '600',
@@ -212,14 +294,24 @@ const styles = StyleSheet.create({
         borderRadius: 12,
         padding: 15,
     },
+    sectionHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: 15,
+    },
     sectionTitle: {
         fontSize: 14,
         fontWeight: '700',
         color: '#333',
-        marginBottom: 15,
         textTransform: 'uppercase',
     },
-    infoField: {
+    viewAllLink: {
+        fontSize: 12,
+        color: '#ff6b35',
+        fontWeight: '600',
+    },
+    formGroup: {
         marginBottom: 15,
     },
     label: {
@@ -228,11 +320,6 @@ const styles = StyleSheet.create({
         color: '#999',
         textTransform: 'uppercase',
         marginBottom: 6,
-    },
-    value: {
-        fontSize: 14,
-        color: '#333',
-        fontWeight: '500',
     },
     input: {
         borderWidth: 1,
@@ -243,6 +330,56 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: '#333',
         backgroundColor: '#f5f5f5',
+    },
+    addressPreview: {
+        backgroundColor: '#f9f9f9',
+        borderRadius: 8,
+        padding: 12,
+        marginBottom: 10,
+        borderLeftWidth: 3,
+        borderLeftColor: '#ff6b35',
+    },
+    addressText: {
+        fontSize: 13,
+        fontWeight: '600',
+        color: '#333',
+        marginBottom: 4,
+    },
+    addressDetail: {
+        fontSize: 12,
+        color: '#666',
+    },
+    defaultBadge: {
+        fontSize: 10,
+        color: '#ff6b35',
+        fontWeight: '700',
+        marginTop: 6,
+    },
+    moreAddresses: {
+        fontSize: 12,
+        color: '#999',
+        textAlign: 'center',
+        marginVertical: 10,
+    },
+    noDataText: {
+        fontSize: 13,
+        color: '#999',
+        textAlign: 'center',
+        marginVertical: 10,
+    },
+    addAddressBtn: {
+        borderWidth: 2,
+        borderColor: '#ff6b35',
+        borderStyle: 'dashed',
+        borderRadius: 8,
+        paddingVertical: 12,
+        alignItems: 'center',
+        marginTop: 10,
+    },
+    addAddressBtnText: {
+        fontSize: 13,
+        color: '#ff6b35',
+        fontWeight: '600',
     },
     settingItem: {
         paddingVertical: 15,

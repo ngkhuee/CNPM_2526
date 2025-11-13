@@ -127,7 +127,7 @@ const PaymentMoMo = () => {
           {paymentFailed && (
             <div className="detail-row" style={{ marginTop: "15px" }}>
               <span style={{ color: "#dc3545", fontWeight: "600" }}>
-                ⚠️ Status:
+                Status:
               </span>
               <strong style={{ color: "#dc3545" }}>Payment Failed</strong>
             </div>

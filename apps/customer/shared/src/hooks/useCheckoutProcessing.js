@@ -66,14 +66,30 @@ export const useCheckoutProcessing = (user) => {
             items,
             customer,
             addressId,
-            gpsLocation
+            gpsLocation,
+            promotion = null
         ) => {
             const pickupGPS = await getRestaurantLocation(restaurantId);
 
-            const total = items.reduce(
+            const subtotal = items.reduce(
                 (sum, item) => sum + item.price * item.quantity,
                 0
             );
+
+            // Calculate discount if promotion applied
+            let discountAmount = 0;
+            if (promotion) {
+                if (promotion.type === "percentage") {
+                    discountAmount = (subtotal * promotion.value) / 100;
+                    if (promotion.max_discount && discountAmount > promotion.max_discount) {
+                        discountAmount = promotion.max_discount;
+                    }
+                } else if (promotion.type === "fixed_amount") {
+                    discountAmount = promotion.value;
+                }
+            }
+
+            const total = subtotal - discountAmount;
 
             return {
                 customerId: customer.id || "guest",
@@ -87,11 +103,12 @@ export const useCheckoutProcessing = (user) => {
                 },
                 pickup_gps: pickupGPS,
                 dropoff_gps: gpsLocation || null,
+                promotion_id: promotion?.id || null,
                 total_amount: total,
-                subtotal: total,
+                subtotal: subtotal,
                 deliveryFee: 0,
-                discountAmount: 0,
-                status: "pending",
+                discountAmount: discountAmount,
+                status: "paid",
                 payment_method: "online",
             };
         },
@@ -102,12 +119,14 @@ export const useCheckoutProcessing = (user) => {
      * Process checkout with validation
      * @param {Object} customer - Customer data
      * @param {Array} orderItems - Order items
+     * @param {string} restaurantId - Restaurant ID (from cart)
      * @param {string} addressId - Address ID
      * @param {Object} gpsLocation - GPS location
+     * @param {Object} promotion - Applied promotion
      * @returns {Promise<Object>} - Result with orders array
      */
     const processCheckoutOrders = useCallback(
-        async (customer, orderItems, addressId, gpsLocation) => {
+        async (customer, orderItems, restaurantId, addressId, gpsLocation, promotion = null) => {
             setLoadingSubmit(true);
             setCheckoutError(null);
 
@@ -127,22 +146,29 @@ export const useCheckoutProcessing = (user) => {
                     };
                 }
 
-                // Group items by restaurant
-                const groupedOrders = groupOrdersByRestaurant(orderItems);
-
-                // Prepare orders for each restaurant
-                const orders = [];
-                for (const [restaurantId, items] of Object.entries(groupedOrders)) {
-                    const orderData = await prepareOrderData(
-                        restaurantId,
-                        items,
-                        customer,
-                        addressId,
-                        gpsLocation
-                    );
-
-                    orders.push(orderData);
+                // Check if restaurantId provided
+                if (!restaurantId) {
+                    throw new Error("Restaurant ID is required");
                 }
+
+                // Only apply promotion if it matches this restaurant
+                const applicablePromo = promotion &&
+                    (promotion.scope === "system" ||
+                        promotion.restaurant_id === restaurantId)
+                    ? promotion
+                    : null;
+
+                // Prepare order for single restaurant
+                const orderData = await prepareOrderData(
+                    restaurantId,
+                    orderItems,
+                    customer,
+                    addressId,
+                    gpsLocation,
+                    applicablePromo
+                );
+
+                const orders = [orderData];
 
                 console.log("✅ Orders prepared:", orders);
 

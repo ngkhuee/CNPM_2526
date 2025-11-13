@@ -108,7 +108,8 @@
 
 .address-input-container {
   display: flex;
-  align-items: stretch; /* Giúp textarea và nút cao bằng nhau */
+  align-items: stretch;
+  /* Giúp textarea và nút cao bằng nhau */
   gap: 8px;
   align-items: flex-start;
 }
@@ -116,18 +117,15 @@
 .address-input-container textarea {
   flex: 1;
   /* min-height: 100px; */
-  resize: none; /* Ngăn kéo resize làm hỏng layout */
+  resize: none;
+  /* Ngăn kéo resize làm hỏng layout */
   padding-right: 45px;
   box-sizing: border-box;
 }
 
-.gps-btn {
-  width: auto;
-  min-width: 45px;
-  height: 45px;
-  padding: 0 12px;
-  align-self: center; /* Giúp nút nằm giữa theo chiều dọc */
-  background: #007bff;
+.gps-button {
+  padding: 10px 16px;
+  background: #ff6b35;
   color: white;
   border: none;
   border-radius: 6px;
@@ -135,28 +133,22 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  font-size: 24px;
-  transition: all 0.2s ease;
-  margin-top: 0; /* ngăn bị đẩy lệch */
-  white-space: nowrap;
-}
-
-.gps-btn:has(.gps-text) {
-  /* When text is present, make button wider */
-  min-width: auto;
-}
-
-.gps-text {
+  gap: 6px;
   font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  min-width: 150px;
 }
 
-.gps-btn:has(svg:only-child) {
-  /* When only icon (CheckCircle), make button square */
-  width: 45px;
-  min-width: 45px;
-  padding: 0;
-  background: #28a745;
+.gps-button:hover {
+  background: #e64a19;
+}
+
+.gps-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background: #ccc;
 }
 
 .save-address-option {
@@ -175,15 +167,6 @@
   width: auto;
   margin-right: 8px;
   cursor: pointer;
-}
-
-.gps-btn:hover {
-  background: #d5795d;
-}
-
-.gps-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
 }
 
 .confirm-btn {

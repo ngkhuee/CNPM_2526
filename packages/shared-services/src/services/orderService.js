@@ -41,9 +41,9 @@ const mapOrderToFrontend = (
     order.dropoff_gps ||
     (address?.latitude && address?.longitude
       ? {
-          lat: address.latitude,
-          lng: address.longitude,
-        }
+        lat: address.latitude,
+        lng: address.longitude,
+      }
       : null),
   current_gps: order.current_gps || null,
   drone_id: order.drone_id,
@@ -141,7 +141,29 @@ export const orderService = {
         console.warn("Could not fetch address:", err);
       }
 
-      return mapOrderToFrontend(order, user, restaurant, address);
+      // Create enriched order
+      const enrichedOrder = mapOrderToFrontend(order, user, restaurant, address);
+
+      // Override with embedded customer data if available
+      if (order.customer) {
+        enrichedOrder.customerName = order.customer.name || enrichedOrder.customerName;
+        enrichedOrder.customerPhone = order.customer.phone || enrichedOrder.customerPhone;
+        enrichedOrder.customerAddress = order.customer.address || enrichedOrder.customerAddress;
+      }
+
+      // Add full address info
+      if (address) {
+        enrichedOrder.addressInfo = {
+          fullAddress: address.full_address || address.address_line,
+          street: address.street,
+          ward: address.ward,
+          district: address.district,
+          city: address.city,
+          phone: address.phone,
+        };
+      }
+
+      return enrichedOrder;
     } catch (error) {
       throw error;
     }

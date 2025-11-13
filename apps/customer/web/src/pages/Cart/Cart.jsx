@@ -18,11 +18,16 @@ const Cart = () => {
   const { addOrder } = useContext(OrderContext);
   const navigate = useNavigate();
 
-  // Use custom hooks
-  const { promotions, loading: loadingPromos } = usePromotions();
+  // Use custom hooks - pass restaurant_id to filter promotions
+  const { promotions, loading: loadingPromos, getApplicablePromotions } = usePromotions(cart?.restaurant_id);
   const { deliveryFee: deliveryFeeValue } = useSettings();
 
   const [appliedPromo, setAppliedPromo] = useState(null);
+
+  // Get promotions applicable to current cart's restaurant
+  const applicablePromotions = cart?.restaurant_id
+    ? getApplicablePromotions(cart.restaurant_id)
+    : promotions.filter(p => p.status === "active");
 
   const subtotal = getTotalCartAmount();
   const { discountAmount, deliveryFee, total } = calculateCartTotals(
@@ -75,7 +80,7 @@ const Cart = () => {
           deliveryFee={deliveryFee}
           total={total}
           appliedPromo={appliedPromo}
-          promotions={promotions}
+          promotions={applicablePromotions}
           loadingPromos={loadingPromos}
           onApplyPromo={setAppliedPromo}
           onRemovePromo={() => setAppliedPromo(null)}

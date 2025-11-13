@@ -1,7 +1,7 @@
 import React from 'react';
 import { SafeAreaView, StyleSheet } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { createNativeStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
 // Import shared contexts & providers
@@ -22,6 +22,7 @@ import MyOrdersScreen from './src/screens/MyOrdersScreen';
 import TrackingScreen from './src/screens/TrackingScreen';
 import LoginScreen from './src/screens/LoginScreen';
 import ProfileScreen from './src/screens/ProfileScreen';
+import SavedAddressesScreen from './src/screens/SavedAddressesScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -111,6 +112,11 @@ const ProfileStackNavigator = () => {
                 component={ProfileScreen}
                 options={{ headerTitle: 'Profile' }}
             />
+            <Stack.Screen
+                name="SavedAddresses"
+                component={SavedAddressesScreen}
+                options={{ headerTitle: 'Saved Addresses' }}
+            />
         </Stack.Navigator>
     );
 };
@@ -182,9 +188,15 @@ const RootStackNavigator = () => {
 };
 
 // Placeholder icon components
-const HomeIcon = ({ color }) => null;
-const OrdersIcon = ({ color }) => null;
-const ProfileIcon = ({ color }) => null;
+const HomeIcon = ({ color }) => (
+    <Text style={{ fontSize: 24 }}>🏠</Text>
+);
+const OrdersIcon = ({ color }) => (
+    <Text style={{ fontSize: 24 }}>📦</Text>
+);
+const ProfileIcon = ({ color }) => (
+    <Text style={{ fontSize: 24 }}>👤</Text>
+);
 
 export default function App() {
     return (

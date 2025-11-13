@@ -36,6 +36,10 @@ export { useTrackingLogic } from "./hooks/useTrackingLogic";
 export { useOrderActions } from "./hooks/useOrderActions";
 export { useRestaurantHours, getTodayHours, isRestaurantOpen } from "./hooks/useRestaurantHours";
 
+// Profile form hooks (web + mobile)
+export { useProfileForm } from "./hooks/useProfileForm";
+export { useAddressForm } from "./hooks/useAddressForm";
+
 // Existing hooks
 export { useReview } from "./hooks/useReview";
 export { useOrderFiltering } from "./hooks/useOrderFiltering";

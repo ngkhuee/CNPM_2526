@@ -1,4 +1,5 @@
 import React from "react";
+import { MdLocationOn } from "react-icons/md";
 
 const CheckoutAddressSection = ({
     useNewAddress,

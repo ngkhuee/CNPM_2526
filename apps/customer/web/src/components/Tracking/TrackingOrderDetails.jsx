@@ -7,8 +7,6 @@ const TrackingOrderDetails = ({ order }) => {
 
     return (
         <div className="tracking-section order-details">
-            <h3>Order Details</h3>
-
             {/* Order ID & Status */}
             <div className="detail-row">
                 <strong>Order ID:</strong>
@@ -17,7 +15,7 @@ const TrackingOrderDetails = ({ order }) => {
             <div className="detail-row">
                 <strong>Status:</strong>
                 <span className={`status-badge status-${order.status}`}>
-                    {order.status}
+                    {order.status?.replace(/_/g, ' ')}
                 </span>
             </div>
 

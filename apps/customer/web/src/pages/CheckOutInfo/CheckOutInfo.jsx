@@ -9,6 +9,9 @@ import {
   useAddressManagement,
   useCheckoutProcessing,
   useCheckoutValidation,
+  usePromotions,
+  useSettings,
+  calculateCartTotals,
 } from "customer-shared";
 import { formatCurrency } from "shared-utils";
 import { useNavigate } from "react-router-dom";
@@ -52,6 +55,14 @@ const CheckoutInfo = () => {
     getFieldError,
   } = useCheckoutValidation();
 
+  const { getApplicablePromotions, loading: loadingPromos } = usePromotions(cart?.restaurant_id);
+  const { deliveryFee: deliveryFeeValue } = useSettings();
+
+  // Get promotions applicable to current cart's restaurant
+  const applicablePromotions = cart?.restaurant_id
+    ? getApplicablePromotions(cart.restaurant_id)
+    : [];
+
   // Local state
   const [customer, setCustomer] = useState({
     name: user?.name || "",
@@ -61,6 +72,7 @@ const CheckoutInfo = () => {
   const [useNewAddress, setUseNewAddress] = useState(true);
   const [selectedAddressId, setSelectedAddressId] = useState(null);
   const [saveAddressChecked, setSaveAddressChecked] = useState(false);
+  const [appliedPromo, setAppliedPromo] = useState(null);
 
   // Auto-fetch GPS on mount
   useEffect(() => {
@@ -160,8 +172,10 @@ const CheckoutInfo = () => {
       const checkoutResult = await processCheckoutOrders(
         customer,
         cart.items,
+        cart.restaurant_id,
         addressIdForOrder,
-        finalGpsLocation
+        finalGpsLocation,
+        appliedPromo
       );
 
       if (!checkoutResult.success) {
@@ -193,6 +207,11 @@ const CheckoutInfo = () => {
   };
 
   const subtotal = getTotalCartAmount();
+  const { discountAmount, deliveryFee, total } = calculateCartTotals(
+    subtotal,
+    appliedPromo,
+    deliveryFeeValue
+  );
 
   return (
     <div className="checkout-page">
@@ -241,7 +260,13 @@ const CheckoutInfo = () => {
               onSelectSavedAddress={handleSelectSavedAddress}
               onAddressInput={handleInput}
               onBlur={markAsTouched}
-              onGetGPS={handleGetGPS}
+              onGetGPS={async () => {
+                const result = await handleGetGPS();
+                if (result.success && result.address) {
+                  setCustomer(prev => ({ ...prev, address: result.address }));
+                  markAsTouched('address');
+                }
+              }}
               getFieldError={getFieldError}
             />
 
@@ -280,8 +305,14 @@ const CheckoutInfo = () => {
         <CheckoutOrderSummary
           cart={cart}
           subtotal={subtotal}
-          discountAmount={0}
-          total={subtotal}
+          discountAmount={discountAmount}
+          deliveryFee={deliveryFee}
+          total={total}
+          appliedPromo={appliedPromo}
+          promotions={applicablePromotions}
+          loadingPromos={loadingPromos}
+          onApplyPromo={setAppliedPromo}
+          onRemovePromo={() => setAppliedPromo(null)}
         />
       </div>
     </div>

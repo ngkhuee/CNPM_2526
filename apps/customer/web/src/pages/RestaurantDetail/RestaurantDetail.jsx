@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   MdArrowBack,
@@ -7,7 +7,8 @@ import {
   MdWarning,
 } from "react-icons/md";
 import useRestaurantDetail from "customer-shared/hooks/useRestaurantDetail";
-import { useRestaurantRating, useCart } from "shared-hooks";
+import { useRestaurantRating } from "shared-hooks";
+import { CartContext } from "customer-shared";
 import { SwitchRestaurantDialog } from "shared-ui";
 import FoodItem from "../../components/FoodItem/FoodItem";
 import FoodDetailPopup from "../../components/FoodDetailPopup/FoodDetailPopup";
@@ -33,8 +34,8 @@ const RestaurantDetail = () => {
   // Get dynamic rating from reviews
   const { rating, totalReviews } = useRestaurantRating(restaurant?.id);
 
-  // Cart management
-  const { cart, addItem, clearCart, canAddFromRestaurant } = useCart();
+  // Cart management - Use CartContext to share state across app
+  const { cart, addItem, clearCart, canAddFromRestaurant } = useContext(CartContext);
 
   // Local state for food detail popup
   const [selectedFood, setSelectedFood] = useState(null);
@@ -96,13 +97,8 @@ const RestaurantDetail = () => {
       const can = canAddFromRestaurant(restaurant.id);
 
       if (can) {
-        // Same restaurant, add directly
-        await addItem({
-          restaurant_id: restaurant.id,
-          food_id: foodId,
-          quantity,
-          note: "",
-        });
+        // Same restaurant or empty cart, add directly
+        await addItem(restaurant.id, foodId, quantity, "");
         alert("✅ Added to cart!");
         setShowFoodPopup(false);
       } else {
@@ -112,7 +108,14 @@ const RestaurantDetail = () => {
       }
     } catch (error) {
       console.error("Error adding to cart:", error);
-      alert("❌ Error adding to cart");
+
+      // Check if error is about different restaurant
+      if (error.message?.includes("different restaurant")) {
+        setPendingFoodData({ foodId, quantity });
+        setShowSwitchDialog(true);
+      } else {
+        alert("❌ Error adding to cart: " + error.message);
+      }
     }
   };
 
@@ -126,12 +129,12 @@ const RestaurantDetail = () => {
 
       // Add new item from this restaurant
       if (pendingFoodData) {
-        await addItem({
-          restaurant_id: restaurant.id,
-          food_id: pendingFoodData.foodId,
-          quantity: pendingFoodData.quantity,
-          note: "",
-        });
+        await addItem(
+          restaurant.id,
+          pendingFoodData.foodId,
+          pendingFoodData.quantity,
+          ""
+        );
       }
 
       alert("✅ Cart updated!");
@@ -140,7 +143,7 @@ const RestaurantDetail = () => {
       setShowFoodPopup(false);
     } catch (error) {
       console.error("Error switching restaurant:", error);
-      alert("❌ Error updating cart");
+      alert("❌ Error updating cart: " + error.message);
     }
   };
 
@@ -150,6 +153,15 @@ const RestaurantDetail = () => {
   const handleCancelSwitch = () => {
     setShowSwitchDialog(false);
     setPendingFoodData(null);
+  };
+
+  /**
+   * Handle go to checkout with current cart
+   */
+  const handleGoToCheckout = () => {
+    setShowSwitchDialog(false);
+    setPendingFoodData(null);
+    navigate("/cart");
   };
 
   return (
@@ -298,10 +310,11 @@ const RestaurantDetail = () => {
       {/* Switch Restaurant Dialog */}
       <SwitchRestaurantDialog
         isOpen={showSwitchDialog}
-        currentRestaurant={cart?.restaurant_id ? `Restaurant ID: ${cart.restaurant_id}` : "Unknown"}
+        currentRestaurant={cart?.restaurant_name || "Unknown Restaurant"}
         newRestaurant={restaurant.name}
         onConfirm={handleConfirmSwitch}
         onCancel={handleCancelSwitch}
+        onGoToCheckout={handleGoToCheckout}
         isLoading={false}
       />
     </div>

@@ -21,7 +21,7 @@ const MyOrders = () => {
   const navigate = useNavigate();
 
   // Use new hooks for business logic
-  const { cancelOrder } = useOrderActions();
+  const { cancelOrder, canCancelOrder } = useOrderActions();
   const { submitReview, getReviewedFoodIds } = useReview();
   const { currentOrders, historyOrders } = useOrderFiltering(orders);
 

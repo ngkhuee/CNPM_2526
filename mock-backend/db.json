@@ -21,6 +21,8 @@
       "name": "User1",
       "phone": "0902222222",
       "avatar": "/images/avatars/user.png",
+      "gender": "Nam",
+      "dob": "2000-01-15",
       "roles": [
         "customer"
       ],
@@ -160,50 +162,29 @@
     {
       "id": "addr1",
       "user_id": "u2",
-      "full_address": "123 Lê Lợi, Phường Bến Thành, Quận 1, TP.HCM",
-      "street": "123 Lê Lợi",
-      "ward": "Phường Bến Thành",
+      "address_line": "123 Lê Lợi, Phường Bến Thành",
       "district": "Quận 1",
       "city": "TP.HCM",
       "phone": "0902222222",
-      "latitude": 10.7729,
-      "longitude": 106.6981,
+      "note": "Nhà gần siêu thị Big C",
+      "lat": 10.7729,
+      "lng": 106.6981,
       "is_default": true,
       "created_at": "2023-06-15T00:00:00.000Z",
       "updated_at": "2023-06-15T00:00:00.000Z"
     },
     {
       "user_id": "u2",
-      "address_line": "Công Ty TNHH Magnon Việt Nam, Lầu 7, Hẻm 18A Nguyễn Thị Minh Khai, Khu phố 10, Phường Sài Gòn, Thành phố Thủ Đức, Thành phố Hồ Chí Minh, 71006, Việt Nam",
-      "district": "",
-      "city": "",
+      "address_line": "456 Nguyễn Thị Minh Khai, Phường Sài Gòn",
+      "district": "Thành phố Thủ Đức",
+      "city": "TP.HCM",
+      "phone": "0902222222",
+      "note": "Công ty Magnon, Tầng 7",
       "lat": 10.7867717,
       "lng": 106.7001404,
       "is_default": false,
       "created_at": "2025-11-06T04:24:47.640Z",
       "id": "Z-Zk4Cz"
-    },
-    {
-      "user_id": "u2",
-      "address_line": "Công Ty TNHH Magnon Việt Nam, Lầu 7, Hẻm 18A Nguyễn Thị Minh Khai, Khu phố 10, Phường Sài Gòn, Thành phố Thủ Đức, Thành phố Hồ Chí Minh, 71006, Việt Nam",
-      "district": "",
-      "city": "",
-      "lat": 10.7867717,
-      "lng": 106.7001404,
-      "is_default": false,
-      "created_at": "2025-11-06T04:24:52.178Z",
-      "id": "JWKe8Ky"
-    },
-    {
-      "user_id": "u2",
-      "address_line": "Công Ty TNHH Magnon Việt Nam, Lầu 7, Hẻm 18A Nguyễn Thị Minh Khai, Khu phố 10, Phường Sài Gòn, Thành phố Thủ Đức, Thành phố Hồ Chí Minh, 71006, Việt Nam",
-      "district": "",
-      "city": "",
-      "lat": 10.7867737,
-      "lng": 106.7001522,
-      "is_default": false,
-      "created_at": "2025-11-06T04:29:19.811Z",
-      "id": "bNTF3WQ"
     },
     {
       "user_id": "u1762416794526",
@@ -268,6 +249,36 @@
       "created_at": "2025-11-12T08:38:46.538Z",
       "updated_at": "2025-11-12T08:38:46.538Z",
       "id": "tJh_f6l"
+    },
+    {
+      "user_id": "u1762957623609",
+      "street": "",
+      "ward": "",
+      "district": "District 1",
+      "city": "Ho Chi Minh",
+      "phone": "",
+      "latitude": 10.7867552,
+      "longitude": 106.7001405,
+      "is_default": true,
+      "created_at": "2025-11-13T05:11:19.085Z",
+      "updated_at": "2025-11-13T05:11:19.085Z",
+      "id": "VKHUyAF"
+    },
+    {
+      "user_id": "u1762957623609",
+      "full_address": "Công Ty TNHH Magnon Việt Nam, Lầu 7, Hẻm 18A Nguyễn Thị Minh Khai, Khu phố 10, Phường Sài Gòn, Thành phố Thủ Đức, Thành phố Hồ Chí Minh, 71006, Việt Nam",
+      "address_line": "Công Ty TNHH Magnon Việt Nam, Lầu 7, Hẻm 18A Nguyễn Thị Minh Khai, Khu phố 10, Phường Sài Gòn, Thành phố Thủ Đức, Thành phố Hồ Chí Minh, 71006, Việt Nam",
+      "street": "",
+      "ward": "",
+      "district": "",
+      "city": "",
+      "phone": "0902222222",
+      "latitude": 10.7867622,
+      "longitude": 106.7001335,
+      "is_default": false,
+      "created_at": "2025-11-13T06:36:29.080Z",
+      "updated_at": "2025-11-13T06:36:29.080Z",
+      "id": "d2UrnEb"
     }
   ],
   "restaurants": [
@@ -1074,34 +1085,6 @@
   ],
   "orders": [
     {
-      "id": "ord1",
-      "user_id": "u2",
-      "restaurant_id": "r3",
-      "address_id": "addr1",
-      "items": [
-        {
-          "menu_id": 9,
-          "name": "Pizza Spicy Garlic Shrimp",
-          "quantity": 1,
-          "unit_price": 254000,
-          "subtotal": 254000
-        }
-      ],
-      "subtotal": 254000,
-      "delivery_fee": 15000,
-      "discount_amount": 0,
-      "total_amount": 269000,
-      "payment_method": "momo",
-      "status": "delivered",
-      "drone_id": "drone2",
-      "special_instructions": null,
-      "estimated_delivery_time": "2025-11-03T11:30:00.000Z",
-      "actual_delivery_time": null,
-      "created_at": "2025-11-03T10:00:00.000Z",
-      "updated_at": "2025-11-03T10:35:00.000Z",
-      "updatedAt": "2025-11-05T11:27:44.017Z"
-    },
-    {
       "user_id": "u2",
       "restaurant_id": "r1",
       "items": [
@@ -1293,6 +1276,76 @@
       "id": "h_D_mkM",
       "drone_id": "drone2",
       "actual_delivery_time": "2025-11-12T08:42:49.189Z"
+    },
+    {
+      "user_id": "u1762957623609",
+      "restaurant_id": "undefined",
+      "address_id": "d2UrnEb",
+      "items": [
+        {
+          "name": "Chicken Burger",
+          "quantity": 1,
+          "unit_price": 69000,
+          "subtotal": 69000
+        }
+      ],
+      "subtotal": 69000,
+      "delivery_fee": 0,
+      "discount_amount": 0,
+      "total_amount": 69000,
+      "payment_method": "online",
+      "status": "cancelled",
+      "payment_status": "pending",
+      "special_instructions": "",
+      "customer": {
+        "name": "ngoc",
+        "phone": "0902222222",
+        "address": "Công Ty TNHH Magnon Việt Nam, Lầu 7, Hẻm 18A Nguyễn Thị Minh Khai, Khu phố 10, Phường Sài Gòn, Thành phố Thủ Đức, Thành phố Hồ Chí Minh, 71006, Việt Nam"
+      },
+      "dropoff_gps": {
+        "lat": 10.7867622,
+        "lng": 106.7001335
+      },
+      "order_number": "ORD-1763015789170",
+      "created_at": "2025-11-13T06:36:29.170Z",
+      "updated_at": "2025-11-13T07:00:56.957Z",
+      "id": "qXiuRrb",
+      "cancellation_reason": ""
+    },
+    {
+      "user_id": "u1762957623609",
+      "restaurant_id": "r3",
+      "address_id": "d2UrnEb",
+      "items": [
+        {
+          "name": "Pizza Burrata Parma Ham",
+          "quantity": 2,
+          "unit_price": 298000,
+          "subtotal": 596000
+        }
+      ],
+      "subtotal": 596000,
+      "delivery_fee": 0,
+      "discount_amount": 0,
+      "total_amount": 596000,
+      "payment_method": "online",
+      "status": "preparing",
+      "payment_status": "pending",
+      "special_instructions": "",
+      "customer": {
+        "name": "ngoc",
+        "phone": "0902222222",
+        "address": "Công Ty TNHH Magnon Việt Nam, Lầu 7, Hẻm 18A Nguyễn Thị Minh Khai, Khu phố 10, Phường Sài Gòn, Thành phố Thủ Đức, Thành phố Hồ Chí Minh, 71006, Việt Nam, , "
+      },
+      "dropoff_gps": {
+        "lat": 10.7867574,
+        "lng": 106.700124
+      },
+      "order_number": "ORD-1763018151968",
+      "created_at": "2025-11-13T07:15:51.968Z",
+      "updated_at": "2025-11-13T08:00:19.927Z",
+      "id": "6ZTPwiu",
+      "drone_id": "drone2"
     }
   ],
   "order_tracking": [
@@ -1531,7 +1584,7 @@
     {
       "id": "drone2",
       "identifier": "Drone 2",
-      "status": "available",
+      "status": "busy",
       "battery_level": 65,
       "latitude": 10.78840471483555,
       "longitude": 106.75246556632509,
@@ -1540,10 +1593,10 @@
         "lng": 106.68
       },
       "max_weight_kg": 5,
-      "assigned_order_id": null,
+      "assigned_order_id": "6ZTPwiu",
       "last_maintenance": "2025-10-28T00:00:00.000Z",
       "created_at": "2025-01-01T00:00:00.000Z",
-      "updated_at": "2025-11-12T08:42:49.217Z"
+      "updated_at": "2025-11-13T07:58:28.090Z"
     },
     {
       "id": "drone3",
@@ -1595,23 +1648,6 @@
       "last_maintenance": "2025-10-30T00:00:00.000Z",
       "created_at": "2025-02-01T00:00:00.000Z",
       "updated_at": "2025-11-06T00:00:00.000Z"
-    },
-    {
-      "id": "drone6",
-      "identifier": "Drone 6",
-      "status": "charging",
-      "battery_level": 45,
-      "latitude": 10.779,
-      "longitude": 106.701,
-      "current_location": {
-        "lat": 10.779,
-        "lng": 106.701
-      },
-      "max_weight_kg": 5,
-      "assigned_order_id": null,
-      "last_maintenance": "2025-11-03T00:00:00.000Z",
-      "created_at": "2025-03-01T00:00:00.000Z",
-      "updated_at": "2025-11-06T00:00:00.000Z"
     }
   ],
   "settings": [
@@ -1654,34 +1690,12 @@
   ],
   "carts": [
     {
-      "user_id": "u2",
-      "items": [],
-      "updated_at": "2025-11-12T08:38:46.752Z",
-      "id": 1
-    },
-    {
-      "user_id": "u1762416794526",
-      "items": [],
-      "updated_at": "2025-11-06T08:15:16.158Z",
-      "id": 2
-    },
-    {
-      "user_id": "u1",
-      "items": [],
-      "updated_at": "2025-11-06T12:59:05.850Z",
-      "id": 3
-    },
-    {
-      "user_id": "u3",
-      "items": [],
-      "updated_at": "2025-11-06T12:59:26.976Z",
-      "id": 4
-    },
-    {
+      "id": 1,
       "user_id": "u1762957623609",
+      "restaurant_id": null,
       "items": [],
-      "updated_at": "2025-11-12T14:27:05.667Z",
-      "id": 5
+      "updated_at": "2025-11-13T07:15:52.073Z",
+      "total": 0
     }
   ],
   "withdrawals": [

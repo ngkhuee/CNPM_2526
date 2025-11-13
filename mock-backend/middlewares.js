@@ -1,3 +1,4 @@
+// mock-backend/middlewares.js
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
 

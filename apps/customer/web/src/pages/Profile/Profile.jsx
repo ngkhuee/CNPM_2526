@@ -1,16 +1,13 @@
-import React, { useContext, useState, useEffect } from "react";
-import { StoreContext, useAddresses } from "customer-shared";
+import React, { useContext, useState } from "react";
+import { AuthContext, useAddresses } from "customer-shared";
+import { useProfileForm } from "customer-shared";
+import { useAddressForm } from "customer-shared";
 import "./Profile.css";
-import {
-  MdLocationOn,
-  MdCheckCircle,
-  MdEdit,
-  MdDelete,
-  MdAdd,
-} from "react-icons/md";
+import AddressList from "./AddressList";
 
 const Profile = () => {
-  const { user, setUser } = useContext(StoreContext);
+  const { user, setUser } = useContext(AuthContext);
+  const [activeTab, setActiveTab] = useState("account"); // "account" or "address"
   const {
     addresses,
     loading: addressLoading,
@@ -19,120 +16,31 @@ const Profile = () => {
     setDefaultAddress,
   } = useAddresses(user?.id);
 
-  const [editing, setEditing] = useState(false);
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    phone: "",
-  });
-  const [showAddressForm, setShowAddressForm] = useState(false);
-  const [newAddress, setNewAddress] = useState({
-    address_line: "",
-    city: "TP.HCM",
-    district: "",
-    lat: null,
-    lng: null,
-  });
-  const [loading, setLoading] = useState(false);
+  // Profile form logic
+  const {
+    editing,
+    setEditing,
+    formData,
+    loading: profileLoading,
+    handleInputChange,
+    handleSaveProfile,
+  } = useProfileForm(user, setUser);
 
-  useEffect(() => {
-    if (user) {
-      setFormData({
-        name: user.name || "",
-        email: user.email || "",
-        phone: user.phone || "",
-      });
-    }
-  }, [user]);
+  // Address form logic
+  const {
+    showAddressForm,
+    setShowAddressForm,
+    loading: addressFormLoading,
+    newAddress,
+    handleAddressInputChange,
+    handleGetGPS,
+    handleAddAddress,
+  } = useAddressForm(addAddressHook);
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleAddressInputChange = (e) => {
-    const { name, value } = e.target;
-    setNewAddress((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleGetGPS = () => {
-    if (!navigator.geolocation) {
-      alert("Trình duyệt không hỗ trợ GPS");
-      return;
-    }
-
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const { latitude, longitude } = position.coords;
-        setNewAddress((prev) => ({
-          ...prev,
-          lat: latitude,
-          lng: longitude,
-        }));
-        alert(`Đã lấy GPS: ${latitude.toFixed(4)}, ${longitude.toFixed(4)}`);
-      },
-      (error) => {
-        console.error("GPS error:", error);
-        alert("Không thể lấy GPS");
-      }
-    );
-  };
-
-  const handleSaveProfile = async () => {
-    try {
-      setLoading(true);
-      // Update user info via API (you'd need to implement this endpoint)
-      // For now, just update local storage
-      const updatedUser = { ...user, ...formData };
-      setUser(updatedUser);
-      localStorage.setItem("user", JSON.stringify(updatedUser));
-      setEditing(false);
-      alert("Cập nhật thông tin thành công!");
-    } catch (error) {
-      console.error("Error updating profile:", error);
-      alert("Lỗi cập nhật thông tin");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleAddAddress = async () => {
-    if (!newAddress.address_line || !newAddress.district) {
-      alert("Vui lòng nhập đầy đủ thông tin địa chỉ");
-      return;
-    }
-
-    try {
-      setLoading(true);
-      const result = await addAddressHook(newAddress);
-
-      if (result.success) {
-        // Reset form
-        setNewAddress({
-          address_line: "",
-          city: "TP.HCM",
-          district: "",
-          lat: null,
-          lng: null,
-        });
-        setShowAddressForm(false);
-        alert("Thêm địa chỉ thành công!");
-      } else {
-        alert(`Lỗi thêm địa chỉ: ${result.message}`);
-      }
-    } catch (error) {
-      console.error("Error adding address:", error);
-      alert("Lỗi thêm địa chỉ");
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  // Address management handlers
   const handleDeleteAddress = async (addressId) => {
     if (!window.confirm("Are you sure you want to delete this address?")) return;
-
     try {
-      setLoading(true);
       const result = await deleteAddressHook(addressId);
       if (result.success) {
         alert("Address deleted successfully");
@@ -142,25 +50,47 @@ const Profile = () => {
     } catch (error) {
       console.error("Error deleting address:", error);
       alert("Error deleting address");
-    } finally {
-      setLoading(false);
     }
   };
 
   const handleSetDefault = async (addressId) => {
     try {
-      setLoading(true);
       const result = await setDefaultAddress(addressId);
       if (result.success) {
-        alert("Address set as default");
+        alert("Address set as default successfully");
       } else {
-        alert(`Error setting default address: ${result.message}`);
+        alert(`Error: ${result.message}`);
       }
     } catch (error) {
       console.error("Error setting default:", error);
       alert("Error setting default address");
-    } finally {
-      setLoading(false);
+    }
+  };
+
+  const handleSaveClick = async () => {
+    const result = await handleSaveProfile();
+    if (result.success) {
+      alert(result.message);
+    } else {
+      alert(result.message);
+    }
+  };
+
+  const handleAddAddressClick = async () => {
+    const result = await handleAddAddress();
+    if (result.success) {
+      alert(result.message);
+    } else {
+      alert(result.message);
+    }
+  };
+
+  const handleGetGPSClick = async () => {
+    const result = await handleGetGPS();
+    if (result.success) {
+      alert(result.message);
+    } else {
+      alert(result.message);
     }
   };
 
@@ -170,177 +100,251 @@ const Profile = () => {
 
   return (
     <div className="profile-page">
-      <h1>Profile</h1>
-
-      {/* User Info Section */}
-      <div className="profile-section">
-        <h2>Account Information</h2>
-        <div className="profile-form">
-          <div className="form-group">
-            <label>Full Name</label>
-            <input
-              type="text"
-              name="name"
-              value={formData.name}
-              onChange={handleInputChange}
-              disabled={!editing}
-            />
-          </div>
-          <div className="form-group">
-            <label>Email</label>
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleInputChange}
-              disabled={!editing}
-            />
-          </div>
-          <div className="form-group">
-            <label>Phone</label>
-            <input
-              type="tel"
-              name="phone"
-              value={formData.phone}
-              onChange={handleInputChange}
-              disabled={!editing}
-            />
-          </div>
-
-          <div className="profile-actions">
-            {editing ? (
-              <>
-                <button onClick={handleSaveProfile} disabled={loading}>
-                  {loading ? "Saving..." : "Save Changes"}
-                </button>
-                <button onClick={() => setEditing(false)}>Cancel</button>
-              </>
+      <div className="profile-container">
+        {/* Sidebar */}
+        <div className="profile-sidebar">
+          <div className="sidebar-avatar">
+            {user?.avatar ? (
+              <img src={user.avatar} alt="Avatar" />
             ) : (
-              <button onClick={() => setEditing(true)}>Edit</button>
+              <div className="avatar-placeholder">
+                {formData.name?.charAt(0).toUpperCase() || "U"}
+              </div>
             )}
           </div>
-        </div>
-      </div>
-
-      {/* Addresses Section */}
-      <div className="profile-section">
-        <div className="section-header">
-          <h2>Delivery Addresses</h2>
+          <div className="sidebar-name">{formData.name}</div>
           <button
-            onClick={() => setShowAddressForm(!showAddressForm)}
-            style={{ display: "flex", alignItems: "center", gap: "8px" }}
+            className={`sidebar-btn ${activeTab === "account" ? "active" : ""}`}
+            onClick={() => setActiveTab("account")}
           >
-            {showAddressForm ? (
-              "Close"
-            ) : (
-              <>
-                <MdAdd /> Add Address
-              </>
-            )}
+            Account Info
+          </button>
+          <button
+            className={`sidebar-btn ${activeTab === "address" ? "active" : ""}`}
+            onClick={() => setActiveTab("address")}
+          >
+            My Addresses
           </button>
         </div>
 
-        {showAddressForm && (
-          <div className="address-form">
-            <div className="form-group">
-              <label>Street Address</label>
-              <input
-                type="text"
-                name="address_line"
-                value={newAddress.address_line}
-                onChange={handleAddressInputChange}
-                placeholder="House number, street name..."
-              />
-            </div>
-            <div className="form-group">
-              <label>District</label>
-              <input
-                type="text"
-                name="district"
-                value={newAddress.district}
-                onChange={handleAddressInputChange}
-                placeholder="District 1, District 2..."
-              />
-            </div>
-            <div className="form-group">
-              <label>City</label>
-              <input
-                type="text"
-                name="city"
-                value={newAddress.city}
-                onChange={handleAddressInputChange}
-              />
-            </div>
-
-            <button
-              type="button"
-              onClick={handleGetGPS}
-              className="gps-btn"
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                justifyContent: "center",
-              }}
-            >
-              {newAddress.lat ? (
-                <>
-                  <MdCheckCircle /> GPS Retrieved
-                </>
-              ) : (
-                <>
-                  <MdLocationOn /> Get GPS Location
-                </>
-              )}
-            </button>
-
-            <div className="form-actions">
-              <button onClick={handleAddAddress} disabled={loading}>
-                {loading ? "Adding..." : "Add Address"}
-              </button>
-            </div>
-          </div>
-        )}
-
-        <div className="addresses-list">
-          {addresses.length === 0 ? (
-            <p>No addresses yet</p>
-          ) : (
-            addresses.map((addr) => (
-              <div key={addr.id} className="address-item">
-                <div className="address-content">
-                  <p className="address-line">{addr.address_line}</p>
-                  <p className="address-detail">
-                    {addr.district}, {addr.city}
-                  </p>
-                  {addr.lat && addr.lng && (
-                    <p className="address-gps">
-                      GPS: {addr.lat.toFixed(4)}, {addr.lng.toFixed(4)}
-                    </p>
-                  )}
-                  {addr.is_default && (
-                    <span className="default-badge">Default</span>
-                  )}
+        {/* Main Content */}
+        <div className="profile-content">
+          {/* Account Info Section */}
+          {activeTab === "account" && (
+            <div className="profile-content-section">
+              <h2>Account Information</h2>
+              <div className="profile-form">
+                <div className="form-group">
+                  <label>Email</label>
+                  <input
+                    type="email"
+                    value={formData.email}
+                    disabled
+                    className="readonly"
+                  />
                 </div>
-                <div className="address-actions">
-                  {!addr.is_default && (
-                    <button
-                      onClick={() => handleSetDefault(addr.id)}
-                      disabled={loading}
-                    >
-                      Set Default
+
+                <div className="form-group">
+                  <label>Full Name</label>
+                  <input
+                    type="text"
+                    value={formData.name}
+                    onChange={(e) => handleInputChange("name", e.target.value)}
+                    disabled={!editing}
+                    placeholder="Enter full name"
+                  />
+                  {editing && <div className="checkmark">✓</div>}
+                </div>
+
+                <div className="form-group">
+                  <label>Phone Number</label>
+                  <input
+                    type="tel"
+                    value={formData.phone}
+                    onChange={(e) => handleInputChange("phone", e.target.value)}
+                    disabled={!editing}
+                    placeholder="Enter phone number"
+                  />
+                  {editing && <div className="checkmark">✓</div>}
+                </div>
+
+                <div className="form-group">
+                  <label>Gender</label>
+                  <div className="radio-group">
+                    <label>
+                      <input
+                        type="radio"
+                        value="Male"
+                        checked={formData.gender === "Male"}
+                        onChange={(e) => handleInputChange("gender", e.target.value)}
+                        disabled={!editing}
+                      />
+                      Male
+                    </label>
+                    <label>
+                      <input
+                        type="radio"
+                        value="Female"
+                        checked={formData.gender === "Female"}
+                        onChange={(e) => handleInputChange("gender", e.target.value)}
+                        disabled={!editing}
+                      />
+                      Female
+                    </label>
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label>Date of Birth</label>
+                  <input
+                    type="date"
+                    value={formData.dob}
+                    onChange={(e) => {
+                      const dob = new Date(e.target.value);
+                      const today = new Date();
+                      if (dob <= today) {
+                        handleInputChange("dob", e.target.value);
+                      } else {
+                        alert("Date of birth cannot be greater than today");
+                      }
+                    }}
+                    disabled={!editing}
+                  />
+                  {editing && <div className="checkmark">✓</div>}
+                </div>
+
+                <div className="profile-actions">
+                  {editing ? (
+                    <>
+                      <button onClick={handleSaveClick} disabled={profileLoading} className="btn-primary">
+                        {profileLoading ? "Saving..." : "Save"}
+                      </button>
+                      <button onClick={() => setEditing(false)} className="btn-secondary">
+                        Cancel
+                      </button>
+                    </>
+                  ) : (
+                    <button onClick={() => setEditing(true)} className="btn-primary">
+                      Edit
                     </button>
                   )}
-                  <button
-                    onClick={() => handleDeleteAddress(addr.id)}
-                    disabled={loading}
-                    className="delete-btn"
-                  >
-                    Delete
-                  </button>
                 </div>
               </div>
-            ))
+            </div>
+          )}
+
+          {/* Address Section */}
+          {activeTab === "address" && (
+            <div className="profile-content-section">
+              <div className="profile-addresses-header">
+                <h2>Delivery Addresses</h2>
+                <button
+                  onClick={() => setShowAddressForm(!showAddressForm)}
+                  className="btn-add-address"
+                >
+                  + Add Address
+                </button>
+              </div>
+
+              {showAddressForm && (
+                <div className="address-form">
+                  <h3>Add New Address</h3>
+                  <div className="form-row">
+                    <div className="form-group">
+                      <label>City/Province</label>
+                      <select
+                        value={newAddress.city}
+                        onChange={(e) => {
+                          handleAddressInputChange("city", e.target.value);
+                          handleAddressInputChange("district", "");
+                        }}
+                      >
+                        <option value="">Select city/province</option>
+                        <option value="Ho Chi Minh">Ho Chi Minh City</option>
+                        {/* <option value="Hanoi">Hanoi</option>
+                        <option value="Da Nang">Da Nang</option> */}
+                      </select>
+                    </div>
+
+                    <div className="form-group">
+                      <label>District</label>
+                      <select
+                        value={newAddress.district}
+                        onChange={(e) => handleAddressInputChange("district", e.target.value)}
+                      >
+                        <option value="">Select district</option>
+                        {newAddress.city === "Ho Chi Minh" && (
+                          <>
+                            <option value="District 1">District 1</option>
+                            <option value="District 2">District 2</option>
+                            <option value="District 3">District 3</option>
+                            <option value="District 4">District 4</option>
+                            <option value="District 5">District 5</option>
+                            <option value="District 6">District 6</option>
+                            <option value="District 7">District 7</option>
+                            <option value="District 8">District 8</option>
+                            <option value="District 9">District 9</option>
+                            <option value="District 10">District 10</option>
+                          </>
+                        )}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="form-group">
+                    <label>Address {newAddress.lat && newAddress.lng && <span style={{ color: '#4caf50', fontWeight: 'bold' }}>(Auto-filled from GPS)</span>}</label>
+                    <input
+                      type="text"
+                      value={newAddress.address_line}
+                      onChange={(e) => handleAddressInputChange("address_line", e.target.value)}
+                      placeholder="Street address, building number, etc. (or use GPS)"
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>Note</label>
+                    <input
+                      type="text"
+                      value={newAddress.note || ""}
+                      onChange={(e) => handleAddressInputChange("note", e.target.value)}
+                      placeholder="Optional note"
+                    />
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={handleGetGPSClick}
+                    className="gps-btn"
+                  >
+                    {newAddress.lat && newAddress.lng ? "✓ GPS Location Retrieved" : "Get Current GPS Location"}
+                  </button>
+
+                  <div className="form-group">
+                    <label>
+                      <input
+                        type="checkbox"
+                        checked={newAddress.isDefault || false}
+                        onChange={(e) => handleAddressInputChange("isDefault", e.target.checked)}
+                      />
+                      Set as default address
+                    </label>
+                  </div>
+
+                  <div className="form-actions">
+                    <button onClick={handleAddAddressClick} disabled={addressFormLoading} className="btn-primary">
+                      {addressFormLoading ? "Adding..." : "Add Address"}
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              <AddressList
+                addresses={addresses}
+                loading={addressLoading}
+                onSetDefault={handleSetDefault}
+                onDeleteAddress={handleDeleteAddress}
+              />
+            </div>
           )}
         </div>
       </div>

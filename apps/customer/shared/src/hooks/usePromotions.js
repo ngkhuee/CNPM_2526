@@ -48,16 +48,13 @@ export const usePromotions = (restaurantId = null) => {
     return promotions.filter((promo) => {
       if (promo.status !== "active") return false;
 
-      // Admin/global promotions (apply to all)
-      if (!promo.restaurantId || promo.applicableRestaurants?.length === 0) {
+      // Admin/system promotions (scope = "system", restaurant_id = null) - apply to all restaurants
+      if (promo.scope === "system" || !promo.restaurant_id) {
         return true;
       }
 
-      // Restaurant-specific promotions
-      return (
-        promo.restaurantId === restId ||
-        promo.applicableRestaurants?.includes(restId)
-      );
+      // Restaurant-specific promotions (scope = "restaurant") - only for that restaurant
+      return promo.restaurant_id === restId;
     });
   };
 

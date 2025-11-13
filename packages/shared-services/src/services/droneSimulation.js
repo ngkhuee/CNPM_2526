@@ -214,7 +214,7 @@ export const autoTriggerDelivery = async (orderId) => {
     const order = await apiClient.get(ENDPOINTS.ORDERS.BY_ID(orderId));
 
     if (!order.drone_id) {
-      console.warn(`⚠️ Order ${orderId} does not have an assigned drone`);
+      console.warn(`Order ${orderId} does not have an assigned drone`);
       alert(
         "Warning: Order has no drone assigned. Please confirm order first to assign a drone."
       );
@@ -238,9 +238,9 @@ export const autoTriggerDelivery = async (orderId) => {
         lng: 106.7,
       };
 
-    console.log(`🚁 Auto-triggering delivery for order ${orderId}`);
-    console.log(`📍 From: ${JSON.stringify(restaurantLocation)}`);
-    console.log(`📍 To: ${JSON.stringify(customerLocation)}`);
+    console.log(`Auto-triggering delivery for order ${orderId}`);
+    console.log(`From: ${JSON.stringify(restaurantLocation)}`);
+    console.log(`To: ${JSON.stringify(customerLocation)}`);
 
     // Run the full simulation
     await runFullDroneSimulation(

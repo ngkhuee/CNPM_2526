@@ -3,6 +3,7 @@
  */
 
 import React from "react";
+import { MdRefresh } from "react-icons/md";
 
 export const TrackingHeader = ({
     order,
@@ -18,6 +19,7 @@ export const TrackingHeader = ({
                 marginBottom: "20px",
             }}
         >
+            {/* Order Info */}
             <div>
                 <h2 style={{ margin: 0, marginBottom: "8px" }}>
                     Order #{order?.id || order?._id}
@@ -36,44 +38,16 @@ export const TrackingHeader = ({
                 )}
             </div>
 
-            <button
-                onClick={onRefresh}
-                disabled={refreshing}
-                style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "8px",
-                    padding: "10px 16px",
-                    background: refreshing ? "#9e9e9e" : "#4caf50",
-                    color: "white",
-                    border: "none",
-                    borderRadius: "6px",
-                    cursor: refreshing ? "not-allowed" : "pointer",
-                    fontSize: "14px",
-                    fontWeight: "600",
-                    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-                    transition: "all 0.2s ease",
-                }}
-                onMouseEnter={(e) => {
-                    if (!refreshing) {
-                        e.target.style.background = "#45a049";
-                        e.target.style.transform = "translateY(-1px)";
-                        e.target.style.boxShadow = "0 4px 6px rgba(0,0,0,0.15)";
-                    }
-                }}
-                onMouseLeave={(e) => {
-                    if (!refreshing) {
-                        e.target.style.background = "#4caf50";
-                        e.target.style.transform = "translateY(0)";
-                        e.target.style.boxShadow = "0 2px 4px rgba(0,0,0,0.1)";
-                    }
-                }}
-            >
-                <span style={{ animation: refreshing ? "spin 1s linear infinite" : "none" }}>
-                    🔄
-                </span>
-                {refreshing ? "Loading..." : "Refresh"}
-            </button>
+
+            {/* Inline animation */}
+            <style>
+                {`
+                @keyframes spin {
+                    from { transform: rotate(0deg); }
+                    to { transform: rotate(360deg); }
+                }
+                `}
+            </style>
         </div>
     );
 };

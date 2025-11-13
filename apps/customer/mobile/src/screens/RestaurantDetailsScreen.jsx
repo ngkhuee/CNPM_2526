@@ -1,65 +1,95 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
-import { useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
+import { useContext, useEffect, useState } from 'react';
+import { RestaurantContext, CartContext } from 'customer-shared';
 
 export default function RestaurantDetailsScreen({ navigation, route }) {
     const { restaurantId } = route.params;
-    const [cart, setCart] = useState([]);
+    const { restaurants } = useContext(RestaurantContext);
+    const { cart, addItem } = useContext(CartContext);
+    const [restaurant, setRestaurant] = useState(null);
+    const [foods, setFoods] = useState([]);
+    const [addingToCart, setAddingToCart] = useState(false);
 
-    // Mock food items
-    const foods = [
-        { id: 1, name: 'Margherita Pizza', price: 8.99, category: 'Pizza' },
-        { id: 2, name: 'Pasta Carbonara', price: 10.99, category: 'Pasta' },
-        { id: 3, name: 'Caesar Salad', price: 6.99, category: 'Salad' },
-    ];
+    useEffect(() => {
+        // Find the restaurant from context
+        const foundRestaurant = restaurants?.find(r => r.id === restaurantId);
+        if (foundRestaurant) {
+            setRestaurant(foundRestaurant);
+            setFoods(foundRestaurant.foods || []);
+        }
+    }, [restaurantId, restaurants]);
 
-    const handleAddToCart = (food) => {
-        setCart([...cart, food]);
-        alert(`${food.name} added to cart!`);
+    const handleAddToCart = async (food) => {
+        try {
+            setAddingToCart(true);
+            // addItem expects: (restaurant_id, food_id, quantity, note)
+            await addItem(restaurantId, food.id, 1, '');
+            alert(`${food.name} thêm vào giỏ hàng!`);
+        } catch (error) {
+            console.error('Error adding to cart:', error);
+            alert(`Lỗi: ${error.message || 'Không thể thêm vào giỏ hàng'}`);
+        } finally {
+            setAddingToCart(false);
+        }
     };
 
-    const goToCart = () => {
-        navigation.navigate('Cart', { items: cart });
-    };
+    if (!restaurant) {
+        return (
+            <View style={[styles.container, styles.centerContent]}>
+                <ActivityIndicator size="large" color="#ff6b35" />
+                <Text style={styles.loadingText}>Loading restaurant...</Text>
+            </View>
+        );
+    }
 
     return (
         <ScrollView style={styles.container}>
             {/* Restaurant Header */}
             <View style={styles.header}>
                 <View style={styles.restaurantImage}>
-                    <Text style={styles.imagePlaceholder}>Restaurant</Text>
+                    <Text style={styles.imagePlaceholder}>🏪</Text>
                 </View>
-                <Text style={styles.restaurantTitle}>Restaurant #{restaurantId}</Text>
-                <Text style={styles.restaurantInfo}>Address: Restaurant Details | Rating: Pending</Text>
+                <Text style={styles.restaurantTitle}>{restaurant.name}</Text>
+                <Text style={styles.restaurantInfo}>
+                    {restaurant.address} | Rating: {restaurant.rating || 'N/A'}
+                </Text>
             </View>
 
             {/* Menu Section */}
             <View style={styles.section}>
                 <Text style={styles.sectionTitle}>Menu</Text>
-                {foods.map((food) => (
-                    <View key={food.id} style={styles.foodCard}>
-                        <View style={styles.foodInfo}>
-                            <Text style={styles.foodName}>{food.name}</Text>
-                            <Text style={styles.foodCategory}>{food.category}</Text>
-                            <Text style={styles.foodPrice}>${food.price.toFixed(2)}</Text>
+                {foods.length > 0 ? (
+                    foods.map((food) => (
+                        <View key={food.id} style={styles.foodCard}>
+                            <View style={styles.foodInfo}>
+                                <Text style={styles.foodName}>{food.name}</Text>
+                                <Text style={styles.foodCategory}>{food.category || 'Food'}</Text>
+                                <Text style={styles.foodPrice}>${food.price?.toFixed(2)}</Text>
+                            </View>
+                            <TouchableOpacity
+                                style={[styles.addBtn, addingToCart && styles.addBtnDisabled]}
+                                onPress={() => handleAddToCart(food)}
+                                disabled={addingToCart}
+                            >
+                                <Text style={styles.addBtnText}>
+                                    {addingToCart ? '...' : '+'}
+                                </Text>
+                            </TouchableOpacity>
                         </View>
-                        <TouchableOpacity
-                            style={styles.addBtn}
-                            onPress={() => handleAddToCart(food)}
-                        >
-                            <Text style={styles.addBtnText}>+</Text>
-                        </TouchableOpacity>
-                    </View>
-                ))}
+                    ))
+                ) : (
+                    <Text style={styles.noFoodsText}>No menu items available</Text>
+                )}
             </View>
 
             {/* Floating Cart Button */}
-            {cart.length > 0 && (
+            {cart?.items && cart.items.length > 0 && (
                 <TouchableOpacity
                     style={styles.fab}
-                    onPress={goToCart}
+                    onPress={() => navigation.navigate('Cart')}
                 >
-                    <Text style={styles.fabText}>Cart {cart.length}</Text>
+                    <Text style={styles.fabText}>Cart {cart.items.length}</Text>
                 </TouchableOpacity>
             )}
         </ScrollView>
@@ -70,6 +100,10 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#f5f5f5',
+    },
+    centerContent: {
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     header: {
         backgroundColor: '#fff',
@@ -148,6 +182,10 @@ const styles = StyleSheet.create({
         color: '#fff',
         fontWeight: 'bold',
     },
+    addBtnDisabled: {
+        backgroundColor: '#cccccc',
+        opacity: 0.6,
+    },
     fab: {
         position: 'absolute',
         bottom: 20,
@@ -166,5 +204,16 @@ const styles = StyleSheet.create({
         color: '#fff',
         fontSize: 16,
         fontWeight: '700',
+    },
+    noFoodsText: {
+        fontSize: 14,
+        color: '#999',
+        textAlign: 'center',
+        marginTop: 20,
+    },
+    loadingText: {
+        marginTop: 12,
+        fontSize: 14,
+        color: '#666',
     },
 });

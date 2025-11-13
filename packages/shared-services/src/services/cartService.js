@@ -31,10 +31,11 @@ export const cartService = {
    */
   async getCart() {
     try {
-      const response = await apiClient.get("/cart");
+      const response = await apiClient.get("/carts");
       return response;
     } catch (error) {
-      if (error.response?.status === 404) {
+      // Return null if cart not found or if error message contains "not found"
+      if (error.response?.status === 404 || error.message?.toLowerCase().includes("not found")) {
         return null; // No cart exists yet
       }
       throw error;
@@ -55,7 +56,7 @@ export const cartService = {
    */
   async addItem({ restaurant_id, food_id, quantity = 1, note = "" }) {
     try {
-      const response = await apiClient.post("/cart/add", {
+      const response = await apiClient.post("/carts/add", {
         restaurant_id,
         food_id,
         quantity,
@@ -78,7 +79,7 @@ export const cartService = {
    */
   async updateItem({ item_id, quantity, note }) {
     try {
-      const response = await apiClient.patch(`/cart/item/${item_id}`, {
+      const response = await apiClient.patch(`/carts/item/${item_id}`, {
         quantity,
         note,
       });
@@ -96,7 +97,7 @@ export const cartService = {
    */
   async removeItem(item_id) {
     try {
-      const response = await apiClient.delete(`/cart/item/${item_id}`);
+      const response = await apiClient.delete(`/carts/item/${item_id}`);
       return response;
     } catch (error) {
       throw error;
@@ -110,7 +111,7 @@ export const cartService = {
    */
   async clearCart() {
     try {
-      const response = await apiClient.delete("/cart/clear");
+      const response = await apiClient.delete("/carts/clear");
       return response;
     } catch (error) {
       throw error;

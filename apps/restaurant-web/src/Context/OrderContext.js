@@ -8,7 +8,7 @@ export const OrderProvider = ({ children }) => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // Fetch restaurant orders on mount
+  // Fetch restaurant orders on mount and auto-refresh
   useEffect(() => {
     const user = authService.getCurrentUser();
     if (!user?.restaurantId) {
@@ -23,6 +23,7 @@ export const OrderProvider = ({ children }) => {
         setLoading(true);
         const restaurantOrders = await orderService.getByRestaurant(user.restaurantId);
         if (isActive) {
+          console.log(`🍽️ Restaurant orders updated: ${restaurantOrders.length} orders`);
           setOrders(restaurantOrders);
         }
       } catch (error) {
@@ -38,8 +39,16 @@ export const OrderProvider = ({ children }) => {
 
     fetchOrders();
 
+    // Auto-refresh every 10 seconds to catch new orders
+    const refreshInterval = setInterval(() => {
+      if (isActive) {
+        fetchOrders();
+      }
+    }, 10000);
+
     return () => {
       isActive = false;
+      clearInterval(refreshInterval);
     };
   }, []);
 

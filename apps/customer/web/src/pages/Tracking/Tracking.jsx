@@ -5,7 +5,7 @@ import { TrackingHeader, DeliveryStatusCard, OrderTimeline } from "customer-shar
 import { formatCurrency } from "shared-utils";
 import { droneProgressService } from "shared-services";
 import "./Tracking.css";
-import { MdLocationOn, MdRestaurant, MdHome, MdArrowBack } from "react-icons/md";
+import { MdLocationOn, MdRestaurant, MdHome, MdArrowBack, MdFlight } from "react-icons/md";
 import {
   TrackingLoadingError,
   TrackingOrderDetails,
@@ -15,6 +15,7 @@ import {
 const Tracking = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [showOrderDetails, setShowOrderDetails] = useState(false);
 
   const {
     order,
@@ -107,22 +108,31 @@ const Tracking = () => {
         onToggleAutoRefresh={() => setAutoRefreshEnabled(!autoRefreshEnabled)}
       />
 
-      {/* Main Content */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr",
-          gap: "20px",
-          marginBottom: "30px",
-        }}
-      >
-        <TrackingOrderDetails order={order} />
-
-        <div>
+      {/* Order Timeline */}
+      <div className="order-timeline-section">
+        <div className="timeline-header">
           <h3>Order Journey</h3>
-          <OrderTimeline order={order} />
+          <button className="btn-view-details" onClick={() => setShowOrderDetails(true)}>
+            View Order Details
+          </button>
         </div>
+        <OrderTimeline order={order} />
       </div>
+
+      {/* Order Details Modal */}
+      {showOrderDetails && (
+        <div className="modal-overlay" onClick={() => setShowOrderDetails(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>Order Details</h3>
+              <button className="modal-close" onClick={() => setShowOrderDetails(false)}>
+                ×
+              </button>
+            </div>
+            <TrackingOrderDetails order={order} />
+          </div>
+        </div>
+      )}
 
       {/* Delivery Status */}
       <DeliveryStatusCard
@@ -140,21 +150,7 @@ const Tracking = () => {
           Delivery Route
         </h3>
 
-        {/* Map */}
-        <div className="map-container" style={{ position: "relative", marginBottom: "20px" }}>
-          <iframe
-            title="Delivery Map"
-            width="100%"
-            height="450"
-            style={{ border: 0, borderRadius: "8px" }}
-            loading="lazy"
-            src={`https://www.openstreetmap.org/export/embed.html?bbox=${dropoffGPS.lng - 0.02
-              },${dropoffGPS.lat - 0.02},${dropoffGPS.lng + 0.02},${dropoffGPS.lat + 0.02
-              }&layer=mapnik&marker=${dropoffGPS.lat},${dropoffGPS.lng}`}
-          />
-        </div>
-
-        {/* Legend */}
+        {/* Legend - Restaurant & Delivery Info */}
         <div
           style={{
             display: "flex",
@@ -163,6 +159,7 @@ const Tracking = () => {
             background: "#f5f5f5",
             borderRadius: "8px",
             flexWrap: "wrap",
+            marginBottom: "20px",
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
@@ -179,12 +176,26 @@ const Tracking = () => {
           </div>
           {order.drone_id && (
             <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-              <span style={{ fontSize: "20px" }}>🚁</span>
+              <MdFlight size={24} color="#ff6b35" style={{ transform: "rotate(45deg)" }} />
               <span>
                 <b>Drone:</b> {order.drone_id}
               </span>
             </div>
           )}
+        </div>
+
+        {/* Map */}
+        <div className="map-container" style={{ position: "relative", marginBottom: "20px" }}>
+          <iframe
+            title="Delivery Map"
+            width="100%"
+            height="450"
+            style={{ border: 0, borderRadius: "8px" }}
+            loading="lazy"
+            src={`https://www.openstreetmap.org/export/embed.html?bbox=${dropoffGPS.lng - 0.02
+              },${dropoffGPS.lat - 0.02},${dropoffGPS.lng + 0.02},${dropoffGPS.lat + 0.02
+              }&layer=mapnik&marker=${dropoffGPS.lat},${dropoffGPS.lng}`}
+          />
         </div>
 
         {/* GPS Position */}
@@ -204,7 +215,7 @@ const Tracking = () => {
         )}
       </div>
 
-      {/* Items Table */}
+      {/* Items Table
       {order.items && order.items.length > 0 && (
         <div style={{ marginTop: "30px" }}>
           <h3>Order Items</h3>
@@ -243,7 +254,7 @@ const Tracking = () => {
             </tbody>
           </table>
         </div>
-      )}
+      )} */}
     </div>
   );
 };

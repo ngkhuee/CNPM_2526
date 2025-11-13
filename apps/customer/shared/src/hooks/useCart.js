@@ -32,6 +32,7 @@ export const useCart = () => {
   // Load cart on mount
   useEffect(() => {
     fetchCart();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   /**
@@ -130,8 +131,13 @@ export const useCart = () => {
   const clearCart = useCallback(async () => {
     try {
       setError(null);
-      await cartService.clearCart();
-      setCart(null);
+      const clearedCart = await cartService.clearCart();
+      // Set cart to empty object with null restaurant_id
+      setCart({
+        items: [],
+        restaurant_id: null,
+        total: 0,
+      });
     } catch (err) {
       console.error("Error clearing cart:", err);
       setError(err.message);
@@ -147,7 +153,8 @@ export const useCart = () => {
    * @returns {boolean}
    */
   const canAddFromRestaurant = useCallback((restaurant_id) => {
-    if (!cart) return true; // Empty cart, can add
+    if (!cart || !cart.items || cart.items.length === 0) return true; // Empty cart, can add
+    if (!cart.restaurant_id) return true; // No restaurant set, can add
     return cart.restaurant_id === restaurant_id; // Same restaurant, can add
   }, [cart]);
 

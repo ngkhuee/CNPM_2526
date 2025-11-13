@@ -7,8 +7,9 @@ import "./SwitchRestaurantDialog.css";
  * 
  * Shows warning when user tries to add item from different restaurant
  * Allows user to:
- * - Cancel: Keep current cart
- * - Confirm: Clear current cart and add from new restaurant
+ * - Go to Checkout: Keep current cart and go to checkout
+ * - Switch Restaurant: Clear current cart and add from new restaurant
+ * - Cancel: Close dialog and stay on current page
  */
 const SwitchRestaurantDialog = ({
     isOpen,
@@ -16,6 +17,7 @@ const SwitchRestaurantDialog = ({
     newRestaurant,
     onConfirm,
     onCancel,
+    onGoToCheckout,
     isLoading = false,
 }) => {
     if (!isOpen) return null;
@@ -51,26 +53,49 @@ const SwitchRestaurantDialog = ({
                     </p>
 
                     <p className="dialog-warning">
-                        ⚠️ <em>Each order can only contain items from one restaurant</em>
+                        <em>Each order can only contain items from one restaurant</em>
                     </p>
                 </div>
 
                 {/* Action Buttons */}
-                <div className="dialog-actions">
-                    <button
-                        className="btn-cancel"
-                        onClick={onCancel}
-                        disabled={isLoading}
-                    >
-                        Keep Current Cart
-                    </button>
-
+                <div className="dialog-actions" style={{ flexDirection: 'column', gap: '10px' }}>
                     <button
                         className="btn-confirm"
                         onClick={onConfirm}
                         disabled={isLoading}
+                        style={{ width: '100%' }}
                     >
                         {isLoading ? "Switching..." : "Switch Restaurant"}
+                    </button>
+
+                    {onGoToCheckout && (
+                        <button
+                            className="btn-secondary"
+                            onClick={onGoToCheckout}
+                            disabled={isLoading}
+                            style={{
+                                width: '100%',
+                                background: '#4CAF50',
+                                color: 'white',
+                                border: 'none',
+                                padding: '12px 24px',
+                                borderRadius: '8px',
+                                cursor: 'pointer',
+                                fontSize: '16px',
+                                fontWeight: '500'
+                            }}
+                        >
+                            Go to Checkout
+                        </button>
+                    )}
+
+                    <button
+                        className="btn-cancel"
+                        onClick={onCancel}
+                        disabled={isLoading}
+                        style={{ width: '100%' }}
+                    >
+                        Cancel
                     </button>
                 </div>
             </div>
