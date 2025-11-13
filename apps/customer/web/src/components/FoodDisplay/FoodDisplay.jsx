@@ -34,17 +34,15 @@ const FoodDisplay = ({
   // Handle featured filters (Top Rated, Best Selling)
   if (filterBy === "featured") {
     if (filterValue === "Top Rated") {
-      // Sort by rating (highest first), limit to top 10
+      // Sort by rating (highest first), limit to top 5
       filteredFood = [...food_list]
-        .filter((item) => item.rating && item.rating > 0)
         .sort((a, b) => (b.rating || 0) - (a.rating || 0))
-        .slice(0, 10);
+        .slice(0, 5);
     } else if (filterValue === "Best Selling") {
-      // Sort by sold count (highest first), limit to top 10
+      // Sort by sold count (highest first), limit to top 5
       filteredFood = [...food_list]
-        .filter((item) => item.sold && item.sold > 0)
         .sort((a, b) => (b.sold || 0) - (a.sold || 0))
-        .slice(0, 10);
+        .slice(0, 5);
     }
   } else {
     // Original filtering logic
@@ -94,20 +92,6 @@ const FoodDisplay = ({
   return (
     <div className="food-display" id="food-display">
       <h2 className="restaurant-display-title">{getDisplayTitle()}</h2>
-      {/* Filter bar */}
-      {/* {showFilter && (
-        <div className='food-filter-bar'>
-          {filters.map(f => (
-            <button
-              key={f}
-              className={selectedFilter === f ? 'active' : ''}
-              onClick={() => setSelectedFilter(f)}
-            >
-              {f}
-            </button>
-          ))}
-        </div>
-      )} */}
 
       {/* Search bar */}
       {showFilter && (

@@ -12,6 +12,7 @@ import {
   MdLogout,
   MdPerson,
   MdLocalOffer,
+  MdAttachMoney,
 } from "react-icons/md";
 
 const Sidebar = () => {
@@ -92,6 +93,16 @@ const Sidebar = () => {
         >
           <MdLocalOffer size={24} />
           <p>Promotions</p>
+        </NavLink>
+
+        <NavLink
+          to="/admin/payments"
+          className={({ isActive }) =>
+            isActive ? "sidebar-option active" : "sidebar-option"
+          }
+        >
+          <MdAttachMoney size={24} />
+          <p>Payments</p>
         </NavLink>
       </div>
 

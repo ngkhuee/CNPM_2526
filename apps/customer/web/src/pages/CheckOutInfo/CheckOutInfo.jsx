@@ -3,7 +3,6 @@ import "./CheckOutInfo.css";
 import {
   AuthContext,
   CartContext,
-  StoreContext,
   OrderContext,
   useAddresses,
   useCheckout,
@@ -14,8 +13,7 @@ import { MdLocationOn, MdCheckCircle, MdError, MdSave } from "react-icons/md";
 
 const CheckoutInfo = () => {
   const { user } = useContext(AuthContext);
-  const { cartItems, getTotalCartAmount, clearCart } = useContext(CartContext);
-  const { food_list } = useContext(StoreContext);
+  const { cart, clearCart, getTotalCartAmount } = useContext(CartContext);
   const { addOrder } = useContext(OrderContext);
   const { addresses, loading: loadingAddresses } = useAddresses(user?.id);
   const {
@@ -318,7 +316,7 @@ const CheckoutInfo = () => {
             <div className="total-row">
               <span>Total:</span>
               <span className="total-amount">
-                {formatCurrency(getTotalCartAmount(food_list))}
+                {formatCurrency(getTotalCartAmount())}
               </span>
             </div>
           </div>

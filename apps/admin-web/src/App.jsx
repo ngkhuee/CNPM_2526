@@ -4,9 +4,11 @@ import Sidebar from "./components/Sidebar/Sidebar";
 import Dashboard from "./pages/Dashboard/Dashboard";
 import Orders from "./pages/Orders/Orders";
 import Partners from "./pages/Partners/Partners";
+import RestaurantDetail from "./pages/RestaurantDetail/RestaurantDetail";
 import Delivery from "./pages/Delivery/Delivery";
 import Users from "./pages/Users/Users";
 import Promotions from "./pages/Promotions/Promotions";
+import Payments from "./pages/Payments/Payments";
 import Login from "./pages/Login/Login";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -87,6 +89,14 @@ const AppContent = () => {
                     }
                   />
                   <Route
+                    path="/admin/partners/:restaurantId"
+                    element={
+                      <ProtectedRoute>
+                        <RestaurantDetail />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
                     path="/admin/delivery"
                     element={
                       <ProtectedRoute>
@@ -107,6 +117,14 @@ const AppContent = () => {
                     element={
                       <ProtectedRoute>
                         <Promotions />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path="/admin/payments"
+                    element={
+                      <ProtectedRoute>
+                        <Payments />
                       </ProtectedRoute>
                     }
                   />

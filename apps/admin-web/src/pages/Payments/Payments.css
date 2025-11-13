@@ -1,0 +1,178 @@
+/* Payments Page */
+.payments-page {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.payments-page h2 {
+    font-size: 32px;
+    font-weight: 700;
+    color: #333;
+    margin: 0 0 8px 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.payments-page .subtitle {
+    font-size: 15px;
+    color: #999;
+    margin: 0 0 32px 0;
+}
+
+/* Summary Cards */
+.summary-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 24px;
+    margin-bottom: 40px;
+}
+
+.summary-card {
+    padding: 24px;
+    border-radius: 12px;
+    color: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.summary-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+}
+
+.summary-card.pending {
+    background: #f28269;
+}
+
+.summary-card.approved {
+    background: #4caf50;
+}
+
+.summary-card.rejected {
+    background: #f44336;
+}
+
+.card-label {
+    font-size: 14px;
+    font-weight: 600;
+    opacity: 0.9;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.card-count {
+    font-size: 36px;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.card-amount {
+    font-size: 16px;
+    opacity: 0.8;
+}
+
+/* Tabs */
+.tabs-container {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    margin-bottom: 24px;
+}
+
+.tabs {
+    display: flex;
+    gap: 0;
+    border-bottom: 2px solid #f0f0f0;
+    background: #f8f9fa;
+}
+
+.tab {
+    flex: 1;
+    padding: 16px 24px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    color: #666;
+    transition: all 0.2s;
+    border-bottom: 3px solid transparent;
+}
+
+.tab:hover {
+    background: #fff;
+    color: #333;
+}
+
+.tab.active {
+    color: #f28269;
+    background: white;
+    border-bottom-color: #f28269;
+}
+
+/* Error & Loading */
+.error-message {
+    padding: 16px;
+    background: #fee;
+    border-left: 4px solid #f5576c;
+    color: #c1121f;
+    border-radius: 8px;
+    margin-bottom: 24px;
+    font-size: 14px;
+}
+
+.loading {
+    text-align: center;
+    padding: 40px;
+    color: #999;
+    font-size: 16px;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 80px 24px;
+    color: #999;
+}
+
+.empty-state p {
+    font-size: 16px;
+    margin: 0;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+    .summary-cards {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    }
+
+    .payments-page h2 {
+        font-size: 24px;
+    }
+}
+
+@media (max-width: 768px) {
+    .summary-cards {
+        grid-template-columns: 1fr;
+    }
+
+    .tabs {
+        flex-wrap: wrap;
+    }
+
+    .tab {
+        flex: auto;
+        padding: 12px 16px;
+        font-size: 13px;
+    }
+
+    .payments-page h2 {
+        font-size: 20px;
+    }
+
+    .card-count {
+        font-size: 28px;
+    }
+}

@@ -144,6 +144,16 @@
       "status": "pending",
       "created_at": "2025-11-06T11:39:13.178Z",
       "updated_at": "2025-11-06T11:39:13.178Z"
+    },
+    {
+      "id": "u1762957623609",
+      "email": "ngoc123@test.com",
+      "password": "123",
+      "name": "ngoc",
+      "phone": "",
+      "role": "customer",
+      "status": "active",
+      "createdAt": "2025-11-12T14:27:03.609Z"
     }
   ],
   "addresses": [
@@ -276,10 +286,10 @@
       "phone": "0901234567",
       "email": "belga@yummy.com",
       "image": "/images/restaurants/menu_1.png",
-      "banner_image": "/images/restaurants/menu_1.png",
+      "banner_image": "/images/other/bannerTest_1762994381011.webp",
       "primary_category": "Pizza",
       "rating": 4.5,
-      "total_reviews": 0,
+      "total_reviews": 2,
       "is_open": true,
       "opening_hours": {
         "monday": {
@@ -292,7 +302,7 @@
         },
         "wednesday": {
           "open": "09:00",
-          "close": "22:00"
+          "close": "23:00"
         },
         "thursday": {
           "open": "09:00",
@@ -307,7 +317,7 @@
           "close": "23:00"
         },
         "sunday": {
-          "open": "09:00",
+          "open": "00:00",
           "close": "22:00"
         }
       },
@@ -315,7 +325,7 @@
       "min_order_amount": 50000,
       "status": "active",
       "created_at": "2020-01-01T00:00:00.000Z",
-      "updated_at": "2020-01-01T00:00:00.000Z"
+      "updated_at": "2025-11-13T00:39:43.353Z"
     },
     {
       "id": "r2",
@@ -391,7 +401,7 @@
       "banner_image": "/images/restaurants/menu_3.png",
       "primary_category": "Pizza",
       "rating": 4.8,
-      "total_reviews": 0,
+      "total_reviews": 1,
       "is_open": true,
       "opening_hours": {
         "monday": {
@@ -1433,6 +1443,71 @@
       "restaurant_reply": null,
       "created_at": "2025-11-06T06:47:43.622Z",
       "updated_at": "2025-11-06T08:01:46.344Z"
+    },
+    {
+      "id": "rev3",
+      "user_id": "u2",
+      "food_id": 1,
+      "restaurant_id": "r1",
+      "order_id": "h_D_mkM",
+      "rating": 5,
+      "comment": "Excellent salad! Fresh and delicious. Highly recommend!",
+      "images": [],
+      "restaurant_reply": "Thank you for visiting us!",
+      "created_at": "2025-11-12T08:40:00.000Z",
+      "updated_at": "2025-11-12T08:45:00.000Z"
+    },
+    {
+      "id": "rev4",
+      "user_id": "u2",
+      "food_id": 9,
+      "restaurant_id": "r3",
+      "order_id": "ord1",
+      "rating": 4,
+      "comment": "Great Pizza! A bit spicy but delicious.",
+      "images": [],
+      "restaurant_reply": "Thanks for the feedback!",
+      "created_at": "2025-11-03T10:15:00.000Z",
+      "updated_at": "2025-11-03T10:20:00.000Z"
+    },
+    {
+      "id": "rev5",
+      "user_id": "u2",
+      "food_id": 13,
+      "restaurant_id": "r4",
+      "order_id": "rty8-9M",
+      "rating": 3,
+      "comment": "Good chicken but a bit expensive.",
+      "images": [],
+      "restaurant_reply": null,
+      "created_at": "2025-11-06T08:20:00.000Z",
+      "updated_at": "2025-11-06T08:25:00.000Z"
+    },
+    {
+      "id": "rev6",
+      "user_id": "u2",
+      "food_id": 13,
+      "restaurant_id": "r4",
+      "order_id": "cdNemGJ",
+      "rating": 4,
+      "comment": "Better this time! Fresh and tasty.",
+      "images": [],
+      "restaurant_reply": "We appreciate your visit!",
+      "created_at": "2025-11-07T02:00:00.000Z",
+      "updated_at": "2025-11-07T02:05:00.000Z"
+    },
+    {
+      "id": "rev7",
+      "user_id": "u2",
+      "food_id": 19,
+      "restaurant_id": "r6",
+      "order_id": "Pp7QYVs",
+      "rating": 5,
+      "comment": "Whopper is amazing! Crispy and juicy!",
+      "images": [],
+      "restaurant_reply": "Thanks for being a loyal customer!",
+      "created_at": "2025-11-07T02:35:00.000Z",
+      "updated_at": "2025-11-07T02:40:00.000Z"
     }
   ],
   "drones": [
@@ -1601,6 +1676,64 @@
       "items": [],
       "updated_at": "2025-11-06T12:59:26.976Z",
       "id": 4
+    },
+    {
+      "user_id": "u1762957623609",
+      "items": [],
+      "updated_at": "2025-11-12T14:27:05.667Z",
+      "id": 5
+    }
+  ],
+  "withdrawals": [
+    {
+      "id": "w_1731385200000",
+      "restaurant_id": "r1",
+      "amount": 5000000,
+      "status": "approved",
+      "created_at": "2025-11-12T02:00:00.000Z",
+      "updated_at": "2025-11-12T03:00:00.000Z",
+      "approved_at": "2025-11-12T03:00:00.000Z"
+    },
+    {
+      "id": "w_1731398600000",
+      "restaurant_id": "r1",
+      "amount": 3000000,
+      "status": "pending",
+      "created_at": "2025-11-12T05:30:00.000Z",
+      "updated_at": "2025-11-12T05:30:00.000Z",
+      "approved_at": null
+    },
+    {
+      "id": "w_1731408900000",
+      "restaurant_id": "r2",
+      "amount": 7000000,
+      "status": "approved",
+      "created_at": "2025-11-12T08:15:00.000Z",
+      "updated_at": "2025-11-12T08:45:00.000Z",
+      "approved_at": "2025-11-12T08:45:00.000Z"
+    }
+  ],
+  "restaurant_balances": [
+    {
+      "restaurant_id": "r1",
+      "available_balance": 12500000,
+      "total_earned": 20500000,
+      "total_withdrawn": 8000000,
+      "last_updated": "2025-11-12T09:00:00.000Z"
+    },
+    {
+      "restaurant_id": "r2",
+      "available_balance": 18750000,
+      "total_earned": 25750000,
+      "total_withdrawn": 7000000,
+      "last_updated": "2025-11-12T08:45:00.000Z"
+    },
+    {
+      "restaurant_id": "r3",
+      "available_balance": 9200000,
+      "total_earned": 9200000,
+      "total_withdrawn": 0,
+      "last_updated": "2025-11-12T09:00:00.000Z"
     }
   ]
 }

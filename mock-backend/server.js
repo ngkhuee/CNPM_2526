@@ -20,7 +20,6 @@ const express = require("express");
 server.use("/images", express.static("public/images"));
 // không phải API upload, mà chỉ là phần serve ảnh tĩnh trong backend.
 
-
 // CORS
 server.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", "*");
@@ -49,7 +48,9 @@ const storage = multer.diskStorage({
   filename: (req, file, cb) => {
     // Sanitize filename and add timestamp
     const ext = path.extname(file.originalname);
-    const name = path.basename(file.originalname, ext).replace(/[^a-zA-Z0-9_-]/g, "_");
+    const name = path
+      .basename(file.originalname, ext)
+      .replace(/[^a-zA-Z0-9_-]/g, "_");
     const timestamp = Date.now();
     cb(null, `${name}_${timestamp}${ext}`);
   },
@@ -265,13 +266,14 @@ server.delete("/carts/:userId/clear", (req, res) => {
   res.json({ success: true, cart: cart || { userId, items: [] } });
 });
 
-// Menus with calculated rating
+// Menus with calculated rating and sold count
 server.get("/menus", (req, res) => {
   const db = router.db;
   const menus = db.get("menus").value();
   const reviews = db.get("reviews").value();
+  const orders = db.get("orders").value();
 
-  // Calculate rating for each menu item
+  // Calculate rating and sold count for each menu item
   const menusWithRating = menus.map((menu) => {
     const foodReviews = reviews.filter((review) => review.food_id === menu.id);
 
@@ -284,10 +286,23 @@ server.get("/menus", (req, res) => {
       avgRating = totalRating / foodReviews.length;
     }
 
+    // Calculate sold count from orders
+    let soldCount = 0;
+    orders.forEach((order) => {
+      if (order.items && Array.isArray(order.items)) {
+        order.items.forEach((item) => {
+          if (item.menu_id === menu.id) {
+            soldCount += item.quantity || 0;
+          }
+        });
+      }
+    });
+
     return {
       ...menu,
       rating: avgRating,
       reviewCount: foodReviews.length,
+      sold: soldCount,
     };
   });
 
@@ -309,7 +324,7 @@ server.get("/menus", (req, res) => {
   res.json(result);
 });
 
-// Single menu item with rating
+// Single menu item with rating and sold count
 server.get("/menus/:id", (req, res) => {
   const db = router.db;
   const menu = db
@@ -322,6 +337,7 @@ server.get("/menus/:id", (req, res) => {
   }
 
   const reviews = db.get("reviews").value();
+  const orders = db.get("orders").value();
   const foodReviews = reviews.filter((review) => review.food_id === menu.id);
 
   let avgRating = 0;
@@ -333,10 +349,87 @@ server.get("/menus/:id", (req, res) => {
     avgRating = totalRating / foodReviews.length;
   }
 
+  // Calculate sold count from orders
+  let soldCount = 0;
+  orders.forEach((order) => {
+    if (order.items && Array.isArray(order.items)) {
+      order.items.forEach((item) => {
+        if (item.menu_id === menu.id) {
+          soldCount += item.quantity || 0;
+        }
+      });
+    }
+  });
+
   res.json({
     ...menu,
     rating: avgRating,
     reviewCount: foodReviews.length,
+    sold: soldCount,
+  });
+});
+
+// Restaurants with calculated rating and review count
+server.get("/restaurants", (req, res) => {
+  const db = router.db;
+  const restaurants = db.get("restaurants").value();
+  const reviews = db.get("reviews").value();
+  const menus = db.get("menus").value();
+
+  // Calculate rating and review count for each restaurant
+  const restaurantsWithRating = restaurants.map((restaurant) => {
+    // Get all reviews for this restaurant
+    const restaurantReviews = reviews.filter(
+      (review) => review.restaurant_id === restaurant.id
+    );
+
+    // Calculate average rating
+    let avgRating = 0;
+    if (restaurantReviews.length > 0) {
+      const totalRating = restaurantReviews.reduce(
+        (sum, review) => sum + review.rating,
+        0
+      );
+      avgRating = totalRating / restaurantReviews.length;
+    }
+
+    return {
+      ...restaurant,
+      rating: avgRating || restaurant.rating, // Use calculated or fallback to existing
+      total_reviews: restaurantReviews.length,
+    };
+  });
+
+  res.json(restaurantsWithRating);
+});
+
+// Single restaurant with calculated rating
+server.get("/restaurants/:id", (req, res) => {
+  const db = router.db;
+  const restaurant = db.get("restaurants").find({ id: req.params.id }).value();
+
+  if (!restaurant) {
+    return res.status(404).json({ error: "Restaurant not found" });
+  }
+
+  const reviews = db.get("reviews").value();
+  const restaurantReviews = reviews.filter(
+    (review) => review.restaurant_id === restaurant.id
+  );
+
+  let avgRating = 0;
+  if (restaurantReviews.length > 0) {
+    const totalRating = restaurantReviews.reduce(
+      (sum, review) => sum + review.rating,
+      0
+    );
+    avgRating = totalRating / restaurantReviews.length;
+  }
+
+  res.json({
+    ...restaurant,
+    rating: avgRating || restaurant.rating,
+    total_reviews: restaurantReviews.length,
   });
 });
 

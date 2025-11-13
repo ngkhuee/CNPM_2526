@@ -1,5 +1,6 @@
 import apiClient from "../config/apiClient";
 import { ENDPOINTS } from "../config/endpoints";
+import { isRestaurantOpen } from "shared-utils";
 
 export const restaurantService = {
   // GET /restaurants?lat={lat}&lng={lng}&radius=5000 - Lấy danh sách nhà hàng gần
@@ -23,7 +24,7 @@ export const restaurantService = {
         },
         category: restaurant.primary_category,
         rating: restaurant.rating || 0,
-        isOpen: restaurant.is_open !== undefined ? restaurant.is_open : true,
+        isOpen: isRestaurantOpen(restaurant.opening_hours),
         images: [restaurant.image, restaurant.banner_image].filter(Boolean),
         image: restaurant.image,
         banner: restaurant.banner_image,
@@ -68,7 +69,7 @@ export const restaurantService = {
         },
         category: response.primary_category,
         rating: response.rating || 0,
-        isOpen: response.is_open !== undefined ? response.is_open : true,
+        isOpen: isRestaurantOpen(response.opening_hours),
         images: [response.image, response.banner_image].filter(Boolean),
         image: response.image,
         banner: response.banner_image,
@@ -114,7 +115,7 @@ export const restaurantService = {
         isAvailable: menu.is_available,
         category: categoriesMap[menu.category_id] || menu.category || "Other",
         categoryId: menu.category_id,
-        rating: menu.rating || 0, // Rating from menu item
+        rating: menu.rating || 0, // Rating from menu item (calculated in backend)
         sold: menu.sold || 0, // Sold count (calculated from orders in backend)
         createdAt: menu.created_at,
       }));

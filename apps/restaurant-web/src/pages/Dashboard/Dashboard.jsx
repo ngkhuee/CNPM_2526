@@ -1,18 +1,23 @@
 import React, { useContext, useEffect } from "react";
 import "./Dashboard.css";
-import { CardStats, LineChart, BarChart } from "shared-ui";
+import { CardStats } from "shared-ui";
 import { RestaurantContext } from "../../Context/RestaurantContext";
 import { useRestaurantStats } from "../../hooks/useRestaurantStats";
 import { useRestaurantReviews } from "../../hooks/useRestaurantReviews";
+import { useDashboardCharts } from "../../hooks/useDashboardCharts";
 import { formatCurrency } from "shared-utils";
 import { MdLocationOn, MdStar, MdPhone } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
+import RevenueChart from "./RevenueChart";
+import OrderChart from "./OrderChart";
+import ProductRevenueTable from "./ProductRevenueTable";
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const { currentRestaurant } = useContext(RestaurantContext);
   const stats = useRestaurantStats();
   const { fetchReviews, getStats: getReviewStats, loading: reviewsLoading } = useRestaurantReviews();
+  const { chartData, dateRange, loading: chartsLoading, error: chartsError, loadChartData, setDateRange } = useDashboardCharts();
   const [reviewStats, setReviewStats] = React.useState(null);
 
   useEffect(() => {
@@ -23,6 +28,10 @@ const Dashboard = () => {
     };
     loadReviewStats();
   }, [fetchReviews, getReviewStats]);
+
+  useEffect(() => {
+    loadChartData();
+  }, [dateRange]);
 
   return (
     <div className="main-content">
@@ -105,20 +114,23 @@ const Dashboard = () => {
         {/* Charts */}
         <div className="charts-container">
           <div className="chart-item">
-            <h3>Revenue Over Time (Last 7 Days)</h3>
-            {stats.chartData.length > 0 ? (
-              <LineChart data={stats.chartData} dataKey="revenue" />
-            ) : (
-              <p>No data available</p>
-            )}
+            <RevenueChart
+              data={chartData.revenueChart}
+              loading={chartsLoading}
+              onDateRangeChange={setDateRange}
+            />
           </div>
           <div className="chart-item">
-            <h3>Orders Over Time (Last 7 Days)</h3>
-            {stats.chartData.length > 0 ? (
-              <BarChart data={stats.chartData} dataKey="orders" />
-            ) : (
-              <p>No data available</p>
-            )}
+            <OrderChart
+              data={chartData.orderChart}
+              loading={chartsLoading}
+            />
+          </div>
+          <div className="chart-item full-width">
+            <ProductRevenueTable
+              data={chartData.revenueByProduct}
+              loading={chartsLoading}
+            />
           </div>
         </div>
       </div>

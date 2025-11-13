@@ -7,6 +7,7 @@ export { Badge } from "./components/Badge";
 export { LoadingSpinner } from "./components/LoadingSpinner";
 export { OrderDetailModal } from "./components/OrderDetailModal";
 export { default as FoodDetail } from "./components/FoodDetail/FoodDetail";
+export { default as SwitchRestaurantDialog } from "./components/SwitchRestaurantDialog/SwitchRestaurantDialog";
 
 // Review Components
 export { default as ReviewCard } from "./components/ReviewCard/ReviewCard";

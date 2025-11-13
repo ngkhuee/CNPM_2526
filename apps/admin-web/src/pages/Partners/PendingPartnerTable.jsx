@@ -1,8 +1,9 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import { getImageUrl } from "shared-utils";
 import { MdVisibility, MdCheckCircle } from "react-icons/md";
 
-const PendingPartnerTable = ({ restaurants, onViewDetails, onApprove }) => {
+const PendingPartnerTable = ({ restaurants, onApprove }) => {
     if (restaurants.length === 0) {
         return <div className="empty-state">No pending restaurants</div>;
     }
@@ -38,13 +39,13 @@ const PendingPartnerTable = ({ restaurants, onViewDetails, onApprove }) => {
                         <td>{new Date(r.created_at).toLocaleDateString("vi-VN")}</td>
                         <td>
                             <div className="action-buttons">
-                                <button
+                                <Link
+                                    to={`/admin/partners/${r.id}`}
                                     className="btn-view"
-                                    onClick={() => onViewDetails(r)}
                                     title="View Details"
                                 >
                                     <MdVisibility /> View
-                                </button>
+                                </Link>
                                 <button
                                     className="btn-approve"
                                     onClick={() => onApprove(r.id)}

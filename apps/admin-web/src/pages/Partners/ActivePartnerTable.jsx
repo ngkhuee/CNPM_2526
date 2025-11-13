@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import { getImageUrl } from "shared-utils";
 import { MdVisibility, MdBlock, MdDelete } from "react-icons/md";
 
@@ -46,13 +47,13 @@ const ActivePartnerTable = ({ restaurants, onViewDetails, onBlock, onDelete }) =
                         </td>
                         <td>
                             <div className="action-buttons">
-                                <button
+                                <Link
+                                    to={`/admin/partners/${r.id}`}
                                     className="btn-view"
-                                    onClick={() => onViewDetails(r)}
                                     title="View Details"
                                 >
                                     <MdVisibility />
-                                </button>
+                                </Link>
                                 <button
                                     className="btn-block"
                                     onClick={() => onBlock(r.id)}

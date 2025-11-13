@@ -31,6 +31,7 @@ export { useCheckout } from "./hooks/useCheckout";
 export { useOrderActions } from "./hooks/useOrderActions";
 export { useReview } from "./hooks/useReview";
 export { useOrderFiltering } from "./hooks/useOrderFiltering";
+export { useUserOrderHistory } from "./hooks/useUserOrderHistory";
 
 // ==================== UTILS ====================
 // Utility functions and helpers

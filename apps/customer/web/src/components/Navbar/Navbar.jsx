@@ -2,13 +2,12 @@ import React, { useContext } from "react";
 import "./Navbar.css";
 import { assets } from "../../assets/assets";
 import { Link, NavLink, useNavigate } from "react-router-dom";
-import { AuthContext, CartContext, StoreContext } from "customer-shared";
+import { AuthContext, CartContext } from "customer-shared";
 import { MdStorefront } from "react-icons/md";
 
 const Navbar = ({ setShowLogin }) => {
   const { user, logout } = useContext(AuthContext);
-  const { getTotalCartAmount } = useContext(CartContext);
-  const { food_list } = useContext(StoreContext);
+  const { cart } = useContext(CartContext);
   const navigate = useNavigate();
 
   const logoutHandler = () => {
@@ -50,7 +49,7 @@ const Navbar = ({ setShowLogin }) => {
       <div className="navbar-right">
         <NavLink to="/cart" className="navbar-search-icon">
           <img src={assets.basket_icon} alt="Cart" />
-          <div className={getTotalCartAmount(food_list) > 0 ? "dot" : ""}></div>
+          <div className={cart?.items?.length > 0 ? "dot" : ""}></div>
         </NavLink>
 
         {!user ? (

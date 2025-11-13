@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import "../FoodItem/FoodItem.css";
 import "./RestaurantItem.css";
 import { getImageUrl } from "@utils/imageHelper";
-import { MdStar, MdAccessTime } from "react-icons/md";
+import { MdStar } from "react-icons/md";
 
 const RestaurantItem = ({
   id,
@@ -11,7 +11,6 @@ const RestaurantItem = ({
   name,
   desc,
   rating,
-  deliveryTime,
   isOpen,
 }) => {
   const navigate = useNavigate();
@@ -64,13 +63,6 @@ const RestaurantItem = ({
           >
             <MdStar size={16} />
             {rating.toFixed(1)}
-            {deliveryTime && (
-              <>
-                <span style={{ color: "#999" }}>•</span>
-                <MdAccessTime size={16} />
-                {deliveryTime} mins
-              </>
-            )}
           </div>
         )}
         <p className="restaurant-item-desc">{desc}</p>

@@ -1,101 +1,136 @@
 import apiClient from "../config/apiClient";
 import { ENDPOINTS } from "../config/endpoints";
 
+/**
+ * Cart Service - Handles all API calls for cart management
+ * Separates HTTP logic from component/hook logic
+ * 
+ * Cart Structure:
+ * {
+ *   id: string
+ *   user_id: string
+ *   restaurant_id: string (NEW: Single restaurant constraint)
+ *   items: [{
+ *     id: string
+ *     food_id: string
+ *     name: string
+ *     price: number
+ *     quantity: number
+ *     note: string
+ *     subtotal: number
+ *   }]
+ *   total: number
+ *   created_at: string
+ *   updated_at: string
+ * }
+ */
 export const cartService = {
-  // Get cart by user (returns existing or creates new)
-  async getByUser(userId) {
+  /**
+   * Get current user's cart
+   * @returns {Object|null} Cart object or null if no cart
+   */
+  async getCart() {
     try {
-      const carts = await apiClient.get(ENDPOINTS.CART.BY_USER(userId));
-
-      if (carts.length > 0) {
-        return carts[0];
+      const response = await apiClient.get("/cart");
+      return response;
+    } catch (error) {
+      if (error.response?.status === 404) {
+        return null; // No cart exists yet
       }
-
-      // Create new cart if not exists
-      const newCart = {
-        user_id: userId,
-        items: [],
-        updated_at: new Date().toISOString(),
-      };
-      const created = await apiClient.post(ENDPOINTS.CART.BASE, newCart);
-      return created;
-    } catch (error) {
-      console.error("Error getting cart:", error);
       throw error;
     }
   },
 
-  // Update entire cart (upsert)
-  async updateCart(userId, items) {
+  /**
+   * Add item to cart (or create cart if doesn't exist)
+   * 
+   * @param {Object} params
+   * @param {string} params.restaurant_id - Restaurant ID
+   * @param {string} params.food_id - Food ID
+   * @param {number} params.quantity - Quantity to add
+   * @param {string} params.note - Optional note/request
+   * @returns {Object} Updated cart
+   * 
+   * @throws {Error} If trying to add from different restaurant
+   */
+  async addItem({ restaurant_id, food_id, quantity = 1, note = "" }) {
     try {
-      // Get existing cart
-      const carts = await apiClient.get(ENDPOINTS.CART.BY_USER(userId));
-
-      const cartData = {
-        user_id: userId,
-        items,
-        updated_at: new Date().toISOString(),
-      };
-
-      if (carts.length > 0) {
-        // Update existing cart
-        return await apiClient.patch(
-          `${ENDPOINTS.CART.BASE}/${carts[0].id}`,
-          cartData
-        );
-      } else {
-        // Create new cart
-        return await apiClient.post(ENDPOINTS.CART.BASE, cartData);
-      }
+      const response = await apiClient.post("/cart/add", {
+        restaurant_id,
+        food_id,
+        quantity,
+        note,
+      });
+      return response;
     } catch (error) {
-      console.error("Error updating cart:", error);
       throw error;
     }
   },
 
-  // Add item to cart
-  async addItem(userId, foodId, quantity = 1) {
+  /**
+   * Update cart item (quantity, note)
+   * 
+   * @param {Object} params
+   * @param {string} params.item_id - Cart item ID
+   * @param {number} params.quantity - New quantity
+   * @param {string} params.note - Updated note
+   * @returns {Object} Updated cart
+   */
+  async updateItem({ item_id, quantity, note }) {
     try {
-      const cart = await this.getByUser(userId);
-      const items = cart.items || [];
-
-      // Find existing item
-      const existingIndex = items.findIndex((item) => item.foodId === foodId);
-
-      if (existingIndex >= 0) {
-        // Update quantity
-        items[existingIndex].quantity += quantity;
-      } else {
-        // Add new item
-        items.push({ foodId, quantity });
-      }
-
-      return await this.updateCart(userId, items);
+      const response = await apiClient.patch(`/cart/item/${item_id}`, {
+        quantity,
+        note,
+      });
+      return response;
     } catch (error) {
-      console.error("Error adding item:", error);
       throw error;
     }
   },
 
-  // Remove item from cart
-  async removeItem(userId, foodId) {
+  /**
+   * Remove item from cart
+   * 
+   * @param {string} item_id - Cart item ID to remove
+   * @returns {Object} Updated cart
+   */
+  async removeItem(item_id) {
     try {
-      const cart = await this.getByUser(userId);
-      const items = (cart.items || []).filter((item) => item.foodId !== foodId);
-      return await this.updateCart(userId, items);
+      const response = await apiClient.delete(`/cart/item/${item_id}`);
+      return response;
     } catch (error) {
-      console.error("Error removing item:", error);
       throw error;
     }
   },
 
-  // Clear cart
-  async clear(userId) {
+  /**
+   * Clear entire cart (used when switching restaurants)
+   * 
+   * @returns {Object} Empty cart or success message
+   */
+  async clearCart() {
     try {
-      return await this.updateCart(userId, []);
+      const response = await apiClient.delete("/cart/clear");
+      return response;
     } catch (error) {
-      console.error("Error clearing cart:", error);
       throw error;
+    }
+  },
+
+  /**
+   * Check if can add item from different restaurant
+   * Returns the current restaurant_id if cart exists
+   * 
+   * @returns {string|null} Current restaurant_id or null if no cart
+   */
+  async getCurrentRestaurantId() {
+    try {
+      const cart = await this.getCart();
+      return cart?.restaurant_id || null;
+    } catch (error) {
+      return null;
     }
   },
 };
+
+export default cartService;

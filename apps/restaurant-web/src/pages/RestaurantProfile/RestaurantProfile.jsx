@@ -5,6 +5,8 @@ import defaultBanner from "../../assets/default_banner.png";
 import { RestaurantContext } from "../../Context/RestaurantContext";
 import { AuthContext } from "../../Context/AuthContext";
 import { getImageUrl } from "@utils/imageHelper";
+import { uploadService } from "shared-services";
+import { useRestaurantRating } from "shared-hooks";
 import {
   MdRestaurant,
   MdCamera,
@@ -53,6 +55,9 @@ const RestaurantProfile = () => {
   });
   const [loading, setLoading] = useState(false);
 
+  // Get dynamic rating from reviews
+  const { rating, totalReviews } = useRestaurantRating(currentRestaurant?.id);
+
   // Load restaurant data from context
   useEffect(() => {
     if (currentRestaurant && !editing) {
@@ -97,7 +102,9 @@ const RestaurantProfile = () => {
       if (times && times.open && times.close) {
         const timeRegex = /^\d{2}:\d{2}$/;
         if (!timeRegex.test(times.open) || !timeRegex.test(times.close)) {
-          alert(`Invalid time format for ${day}. Use HH:mm format (e.g., 09:00)`);
+          alert(
+            `Invalid time format for ${day}. Use HH:mm format (e.g., 09:00)`
+          );
           return;
         }
         if (times.open >= times.close) {
@@ -115,32 +122,66 @@ const RestaurantProfile = () => {
         return;
       }
 
+      console.log("DEBUG - Saving restaurant data:");
+      console.log("  User:", currentUser);
+      console.log("  Restaurant ID:", currentUser.restaurantId);
+      console.log("  Token in localStorage:", !!localStorage.getItem("token"));
+      console.log("  Form data:", formData);
       const result = await updateRestaurant(currentUser.restaurantId, formData);
+      console.log("DEBUG - Update result:", result);
 
       if (result.success) {
         setEditing(false);
         alert("Restaurant information updated successfully!");
+        // Refresh restaurant data
+        await fetchRestaurantInfo(currentUser.restaurantId);
       } else {
-        alert(`Failed to update: ${result.message}`);
+        console.error("❌ Update failed:", result.message);
+
+        // Check if token expired
+        if (
+          result.message.includes("Invalid or expired token") ||
+          result.message.includes("Unauthorized")
+        ) {
+          alert("Your session has expired. Please login again.");
+          localStorage.removeItem("token");
+          localStorage.removeItem("user");
+          window.location.href = "/login";
+        } else {
+          alert(`Failed to update: ${result.message}`);
+        }
       }
     } catch (error) {
-      console.error("Error saving restaurant:", error);
-      alert("An error occurred while saving!");
+      console.error("❌ Error saving restaurant:", error);
+      alert(`An error occurred while saving: ${error.message}`);
     } finally {
       setLoading(false);
     }
   };
 
   // Upload ảnh logo hoặc banner
-  const handleImageUpload = (e, type) => {
-    // Don't prevent default here - this is file input onChange, not form submit
+  const handleImageUpload = async (e, type) => {
     const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setFormData((prev) => ({ ...prev, [type]: reader.result }));
-      };
-      reader.readAsDataURL(file);
+      try {
+        setLoading(true);
+        // Upload file to server
+        // Use "restaurants" category for logo, "other" for banner
+        const category = type === "banner" ? "other" : "restaurants";
+        const uploadResult = await uploadService.uploadImage(file, category);
+
+        if (uploadResult.success) {
+          // Set form data with uploaded path (not base64)
+          setFormData((prev) => ({ ...prev, [type]: uploadResult.path }));
+        } else {
+          alert("Image upload failed");
+        }
+      } catch (error) {
+        console.error("Error uploading image:", error);
+        alert("Error uploading image");
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -334,7 +375,10 @@ const RestaurantProfile = () => {
                             type="time"
                             value={formData.opening_hours[day]?.open || "09:00"}
                             onChange={(e) =>
-                              handleChange(`opening_hours.${day}.open`, e.target.value)
+                              handleChange(
+                                `opening_hours.${day}.open`,
+                                e.target.value
+                              )
                             }
                             className="hours-input"
                             title="Opening time (HH:mm)"
@@ -343,9 +387,14 @@ const RestaurantProfile = () => {
                           <input
                             id={`close-${day}`}
                             type="time"
-                            value={formData.opening_hours[day]?.close || "22:00"}
+                            value={
+                              formData.opening_hours[day]?.close || "22:00"
+                            }
                             onChange={(e) =>
-                              handleChange(`opening_hours.${day}.close`, e.target.value)
+                              handleChange(
+                                `opening_hours.${day}.close`,
+                                e.target.value
+                              )
                             }
                             className="hours-input"
                             title="Closing time (HH:mm)"
@@ -354,7 +403,13 @@ const RestaurantProfile = () => {
                       </div>
                     ))}
                   </div>
-                  <small style={{ color: "#666", marginTop: "8px", display: "block" }}>
+                  <small
+                    style={{
+                      color: "#666",
+                      marginTop: "8px",
+                      display: "block",
+                    }}
+                  >
                     Set opening and closing times separately for each day.
                   </small>
                 </div>
@@ -364,10 +419,10 @@ const RestaurantProfile = () => {
                 <div className="readonly-info">
                   <p>
                     <strong>Rating:</strong> <MdStar />{" "}
-                    {currentRestaurant.rating}
+                    {rating !== null ? rating : currentRestaurant.rating}
                   </p>
                   <p>
-                    <strong>Reviews:</strong> {currentRestaurant.reviewCount}
+                    <strong>Reviews:</strong> {totalReviews}
                   </p>
                   <p>
                     <strong>Status:</strong> {currentRestaurant.status}

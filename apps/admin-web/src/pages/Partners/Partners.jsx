@@ -4,7 +4,6 @@ import { useRestaurantApproval } from "../../hooks/useRestaurantApproval";
 import PendingPartnerTable from "./PendingPartnerTable";
 import ActivePartnerTable from "./ActivePartnerTable";
 import BlockedPartnerTable from "./BlockedPartnerTable";
-import PartnerDetailsModal from "./PartnerDetailsModal";
 import "./Partners.css";
 import { MdRefresh, MdNotifications, MdCheckCircle, MdBlock } from "react-icons/md";
 
@@ -13,18 +12,10 @@ const Partners = () => {
   const { handleApprove, handleBlock, handleUnblock, handleDelete } =
     useRestaurantApproval(refresh);
 
-  const [viewingPartner, setViewingPartner] = useState(null);
-  const [modalOpen, setModalOpen] = useState(false);
-
   // Split restaurants by status
   const pendingRestaurants = restaurants.filter((r) => r.status === "pending");
   const activeRestaurants = restaurants.filter((r) => r.status === "active");
   const blockedRestaurants = restaurants.filter((r) => r.status === "blocked");
-
-  const handleViewDetails = (restaurant) => {
-    setViewingPartner(restaurant);
-    setModalOpen(true);
-  };
 
   const handleApproveClick = async (id) => {
     if (
@@ -112,7 +103,6 @@ const Partners = () => {
         </h3>
         <PendingPartnerTable
           restaurants={pendingRestaurants}
-          onViewDetails={handleViewDetails}
           onApprove={handleApproveClick}
         />
       </div>
@@ -124,7 +114,6 @@ const Partners = () => {
         </h3>
         <ActivePartnerTable
           restaurants={activeRestaurants}
-          onViewDetails={handleViewDetails}
           onBlock={handleBlockClick}
           onDelete={handleDeleteClick}
         />
@@ -138,19 +127,11 @@ const Partners = () => {
           </h3>
           <BlockedPartnerTable
             restaurants={blockedRestaurants}
-            onViewDetails={handleViewDetails}
             onUnblock={handleUnblockClick}
             onDelete={handleDeleteClick}
           />
         </div>
       )}
-
-      {/* DETAILS MODAL */}
-      <PartnerDetailsModal
-        isOpen={modalOpen}
-        onClose={() => setModalOpen(false)}
-        restaurant={viewingPartner}
-      />
     </div>
   );
 };

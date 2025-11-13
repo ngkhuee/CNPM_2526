@@ -1,15 +1,16 @@
-import React from "react";
+import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   MdArrowBack,
   MdLocationOn,
   MdStar,
-  MdAccessTime,
-  MdDeliveryDining,
   MdWarning,
 } from "react-icons/md";
 import useRestaurantDetail from "customer-shared/hooks/useRestaurantDetail";
+import { useRestaurantRating, useCart } from "shared-hooks";
+import { SwitchRestaurantDialog } from "shared-ui";
 import FoodItem from "../../components/FoodItem/FoodItem";
+import FoodDetailPopup from "../../components/FoodDetailPopup/FoodDetailPopup";
 import RestaurantReviews from "../../components/ReviewSection/RestaurantReviews";
 import { getImageUrl, isRestaurantOpen, getTodayHours } from "@utils";
 import "./RestaurantDetail.css";
@@ -28,6 +29,20 @@ const RestaurantDetail = () => {
     menuLoading,
     error,
   } = useRestaurantDetail(id);
+
+  // Get dynamic rating from reviews
+  const { rating, totalReviews } = useRestaurantRating(restaurant?.id);
+
+  // Cart management
+  const { cart, addItem, clearCart, canAddFromRestaurant } = useCart();
+
+  // Local state for food detail popup
+  const [selectedFood, setSelectedFood] = useState(null);
+  const [showFoodPopup, setShowFoodPopup] = useState(false);
+
+  // Dialog state for switching restaurant
+  const [showSwitchDialog, setShowSwitchDialog] = useState(false);
+  const [pendingFoodData, setPendingFoodData] = useState(null);
 
   if (loading) {
     return (
@@ -63,6 +78,80 @@ const RestaurantDetail = () => {
   console.log("Is Open:", isOpen);
   console.log("Today Hours:", todayHours);
 
+  /**
+   * Handle food item click
+   * Opens popup to add to cart
+   */
+  const handleFoodClick = (food) => {
+    setSelectedFood(food);
+    setShowFoodPopup(true);
+  };
+
+  /**
+   * Handle adding food to cart
+   * Check if can add from current restaurant, show dialog if switching
+   */
+  const handleAddToCart = async (foodId, quantity = 1) => {
+    try {
+      const can = canAddFromRestaurant(restaurant.id);
+
+      if (can) {
+        // Same restaurant, add directly
+        await addItem({
+          restaurant_id: restaurant.id,
+          food_id: foodId,
+          quantity,
+          note: "",
+        });
+        alert("✅ Added to cart!");
+        setShowFoodPopup(false);
+      } else {
+        // Different restaurant, show warning dialog
+        setPendingFoodData({ foodId, quantity });
+        setShowSwitchDialog(true);
+      }
+    } catch (error) {
+      console.error("Error adding to cart:", error);
+      alert("❌ Error adding to cart");
+    }
+  };
+
+  /**
+   * Handle confirming restaurant switch
+   */
+  const handleConfirmSwitch = async () => {
+    try {
+      // Clear old cart
+      await clearCart();
+
+      // Add new item from this restaurant
+      if (pendingFoodData) {
+        await addItem({
+          restaurant_id: restaurant.id,
+          food_id: pendingFoodData.foodId,
+          quantity: pendingFoodData.quantity,
+          note: "",
+        });
+      }
+
+      alert("✅ Cart updated!");
+      setShowSwitchDialog(false);
+      setPendingFoodData(null);
+      setShowFoodPopup(false);
+    } catch (error) {
+      console.error("Error switching restaurant:", error);
+      alert("❌ Error updating cart");
+    }
+  };
+
+  /**
+   * Handle cancel switching
+   */
+  const handleCancelSwitch = () => {
+    setShowSwitchDialog(false);
+    setPendingFoodData(null);
+  };
+
   return (
     <div className="restaurant-detail">
       {/* Back Button */}
@@ -83,27 +172,13 @@ const RestaurantDetail = () => {
           <h1 className="restaurant-name">{restaurant.name}</h1>
 
           <div className="restaurant-meta">
-            {restaurant.rating > 0 && (
+            {rating !== null || restaurant.rating > 0 && (
               <div className="restaurant-meta-item">
                 <MdStar size={18} />
                 <span>
-                  {restaurant.rating.toFixed(1)} ({restaurant.reviewCount || 0}{" "}
+                  {rating !== null ? rating.toFixed(1) : restaurant.rating.toFixed(1)} ({totalReviews || restaurant.reviewCount || 0}{" "}
                   reviews)
                 </span>
-              </div>
-            )}
-
-            {restaurant.deliveryTime && (
-              <div className="restaurant-meta-item">
-                <MdAccessTime size={18} />
-                <span>{restaurant.deliveryTime} mins</span>
-              </div>
-            )}
-
-            {restaurant.minOrderAmount && (
-              <div className="restaurant-meta-item">
-                <MdDeliveryDining size={18} />
-                <span>Min. order: ${restaurant.minOrderAmount}</span>
               </div>
             )}
 
@@ -185,7 +260,9 @@ const RestaurantDetail = () => {
                 restaurant={restaurant.name}
                 rating={item.rating}
                 sold={item.sold}
+                restaurantId={restaurant.id}
                 isRestaurantOpen={isOpen}
+                onItemClick={handleFoodClick}
               />
             ))}
           </div>
@@ -207,6 +284,26 @@ const RestaurantDetail = () => {
           maxReviews={5}
         />
       </div>
+
+      {/* Food Detail Popup */}
+      {showFoodPopup && selectedFood && (
+        <FoodDetailPopup
+          food={selectedFood}
+          onClose={() => setShowFoodPopup(false)}
+          addToCart={handleAddToCart}
+          fromRestaurantDetail={true}
+        />
+      )}
+
+      {/* Switch Restaurant Dialog */}
+      <SwitchRestaurantDialog
+        isOpen={showSwitchDialog}
+        currentRestaurant={cart?.restaurant_id ? `Restaurant ID: ${cart.restaurant_id}` : "Unknown"}
+        newRestaurant={restaurant.name}
+        onConfirm={handleConfirmSwitch}
+        onCancel={handleCancelSwitch}
+        isLoading={false}
+      />
     </div>
   );
 };

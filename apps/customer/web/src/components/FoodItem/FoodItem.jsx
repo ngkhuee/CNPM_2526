@@ -1,13 +1,15 @@
-import React, { useContext, useState } from "react";
-import ReactDOM from "react-dom";
+import React from "react";
+import { useNavigate } from "react-router-dom";
 import "./FoodItem.css";
-import { assets } from "../../assets/assets";
-import { CartContext } from "customer-shared";
-import FoodDetailPopup from "../FoodDetailPopup/FoodDetailPopup";
 import { getImageUrl } from "@utils/imageHelper";
 import { formatCurrency } from "shared-utils";
 import { MdStorefront, MdStar, MdLocalFireDepartment } from "react-icons/md";
 
+/**
+ * FoodItem Component - Display single food item
+ * @param {Object} props
+ * @param {Function} onItemClick - Callback when item is clicked (receives full food object)
+ */
 const FoodItem = ({
   image,
   name,
@@ -19,10 +21,9 @@ const FoodItem = ({
   sold,
   restaurantId,
   isRestaurantOpen = true,
+  onItemClick = null, // Callback from parent (RestaurantDetail)
 }) => {
-  const [showPopup, setShowPopup] = useState(false);
-
-  const { cartItems, addToCart, removeFromCart } = useContext(CartContext);
+  const navigate = useNavigate();
 
   const food = {
     id,
@@ -35,19 +36,29 @@ const FoodItem = ({
     restaurantId,
     sold: sold || 0,
   };
-  const imageUrl = getImageUrl(image); // Build full URL from backend path
+  const imageUrl = getImageUrl(image);
 
-  const openPopup = () => setShowPopup(true);
-  const closePopup = () => setShowPopup(false);
+  const handleClick = () => {
+    if (onItemClick) {
+      // Parent callback (RestaurantDetail uses this)
+      onItemClick(food);
+    } else {
+      // Navigate to restaurant detail page (Home/Menu uses this)
+      navigate(`/restaurant/${restaurantId}`);
+    }
+  };
 
   return (
-    <div className="food-item">
+    <div
+      className="food-item"
+      onClick={handleClick}
+      style={{ cursor: "pointer" }}
+    >
       <div className="food-item-img-container">
         <img
           className="food-item-image"
           src={imageUrl}
           alt={name}
-          onClick={openPopup}
           style={!isRestaurantOpen ? { opacity: 0.6 } : {}}
         />
 
@@ -55,35 +66,12 @@ const FoodItem = ({
           <div className="closed-overlay">
             <span>Restaurant Closed</span>
           </div>
-        ) : !cartItems[id] ? (
-          // Nếu chưa có trong giỏ thì hiện nút thêm
-          <img
-            className="add"
-            onClick={() => addToCart(id)}
-            src={assets.add_icon_white}
-            alt="add"
-          />
-        ) : (
-          // Nếu có rồi thì hiện bộ đếm tăng/giảm
-          <div className="food-item-counter">
-            <img
-              src={assets.remove_icon_red}
-              onClick={() => removeFromCart(id)}
-              alt="remove"
-            />
-            <p>{cartItems[id]}</p>
-            <img
-              src={assets.add_icon_green}
-              onClick={() => addToCart(id)}
-              alt="add"
-            />
-          </div>
-        )}
+        ) : null}
       </div>
       <div className="food-item-info">
         <div className="food-item-name-rating">
           <p>{name}</p>
-          {rating && (
+          {rating !== undefined && rating !== null && (
             <span
               style={{
                 color: "#ff6b35",
@@ -95,7 +83,8 @@ const FoodItem = ({
               }}
             >
               <MdStar size={16} />
-              {rating}
+              {rating > 0 ? rating.toFixed(1) : "0"}{" "}
+              {rating > 0 ? "" : "ratings"}
             </span>
           )}
         </div>
@@ -109,7 +98,7 @@ const FoodItem = ({
           }}
         >
           <p className="food-item-price">{formatCurrency(price)}</p>
-          {sold && (
+          {sold !== undefined && sold !== null && (
             <span
               style={{
                 fontSize: "12px",
@@ -120,7 +109,7 @@ const FoodItem = ({
               }}
             >
               <MdLocalFireDepartment size={16} style={{ color: "#ff6b35" }} />
-              {sold} sold
+              {sold > 0 ? `${sold} sold` : "0 sold"}
             </span>
           )}
         </div>
@@ -131,17 +120,6 @@ const FoodItem = ({
           <MdStorefront /> {restaurant}
         </p>
       </div>
-      {showPopup &&
-        ReactDOM.createPortal(
-          <FoodDetailPopup
-            food={food}
-            onClose={closePopup}
-            addToCart={(itemId, qty) => {
-              addToCart(itemId, qty);
-            }}
-          />,
-          document.body
-        )}
     </div>
   );
 };

@@ -404,6 +404,16 @@
   font-weight: 500;
 }
 
+.review-disabled-badge {
+  background: #fff3e0;
+  color: #e65100;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  display: inline-block;
+}
+
 .review-form {
   background: #f9f9f9;
   border: 1px solid #e0e0e0;

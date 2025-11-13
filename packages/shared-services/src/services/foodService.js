@@ -18,6 +18,8 @@ export const foodService = {
         image: menu.image,
         isAvailable: menu.is_available,
         preparationTime: menu.preparation_time_minutes,
+        rating: menu.rating || 0,
+        sold: menu.sold || 0,
         createdAt: menu.created_at,
         updatedAt: menu.updated_at,
       }));
@@ -40,6 +42,8 @@ export const foodService = {
         image: response.image,
         isAvailable: response.is_available,
         preparationTime: response.preparation_time_minutes,
+        rating: response.rating || 0,
+        sold: response.sold || 0,
         createdAt: response.created_at,
         updatedAt: response.updated_at,
       };
@@ -63,6 +67,8 @@ export const foodService = {
         image: menu.image,
         isAvailable: menu.is_available,
         preparationTime: menu.preparation_time_minutes,
+        rating: menu.rating || 0,
+        sold: menu.sold || 0,
         createdAt: menu.created_at,
         updatedAt: menu.updated_at,
       }));

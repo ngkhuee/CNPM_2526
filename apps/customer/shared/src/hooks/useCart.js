@@ -1,150 +1,174 @@
 // useCart hook - Cart logic tách riêng để web và mobile dùng chung
+// Manages Single Restaurant Cart with conflict detection
 import { useState, useEffect, useCallback } from "react";
 import { cartService } from "shared-services";
 
-export const useCart = (user) => {
-  const [cartItems, setCartItems] = useState({});
+/**
+ * useCart Hook - Manages cart state and logic
+ * Handles:
+ * - Loading cart from API
+ * - Adding/removing/updating items
+ * - Checking if can add from different restaurant (Single Restaurant Constraint)
+ * - Clearing cart
+ * 
+ * Returns: {
+ *   cart: Object|null,        // Full cart object with items
+ *   loading: boolean,
+ *   error: string|null,
+ *   addItem: (restaurant_id, food_id, quantity, note) => Promise<Object>,
+ *   removeItem: (item_id) => Promise<Object>,
+ *   updateItem: (item_id, quantity, note) => Promise<Object>,
+ *   clearCart: () => Promise<void>,
+ *   canAddFromRestaurant: (restaurant_id) => boolean,
+ *   getCurrentRestaurantId: () => string|null,
+ *   fetchCart: () => Promise<void>
+ * }
+ */
+export const useCart = () => {
+  const [cart, setCart] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-  // Load cart from API when user changes
+  // Load cart on mount
   useEffect(() => {
-    if (user?.id) {
-      loadCart(user.id);
-    } else {
-      setCartItems({});
-    }
-  }, [user?.id]);
+    fetchCart();
+  }, []);
 
-  // Load cart from API
-  const loadCart = async (userId) => {
+  /**
+   * Fetch cart from API
+   */
+  const fetchCart = useCallback(async () => {
     try {
       setLoading(true);
-      const cart = await cartService.getByUser(userId);
-      const cartObj = {};
-      cart.items.forEach((item) => {
-        cartObj[item.foodId] = item.quantity;
-      });
-      setCartItems(cartObj);
-    } catch (error) {
-      console.error("Error loading cart:", error);
+      setError(null);
+      const data = await cartService.getCart();
+      setCart(data);
+    } catch (err) {
+      console.error("Error fetching cart:", err);
+      setError(err.message);
+      setCart(null);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  // Add to cart with API sync
-  const addToCart = useCallback(
-    async (itemId, qty = 1) => {
-      if (!user) {
-        alert("Please login to add items to cart");
-        return;
-      }
-
+  /**
+   * Add item to cart
+   * @param {string} restaurant_id - Restaurant ID
+   * @param {string} food_id - Food ID
+   * @param {number} quantity - Quantity (default 1)
+   * @param {string} note - Optional note
+   * @returns {Object} Updated cart
+   * @throws {Error} If different restaurant
+   */
+  const addItem = useCallback(
+    async (restaurant_id, food_id, quantity = 1, note = "") => {
       try {
-        // Optimistic update
-        setCartItems((prev) => ({
-          ...prev,
-          [itemId]: (prev[itemId] || 0) + qty,
-        }));
-
-        // Sync with backend
-        await cartService.addItem(user.id, itemId, qty);
-      } catch (error) {
-        console.error("Error adding to cart:", error);
-        // Rollback on error
-        setCartItems((prev) => {
-          const newCart = { ...prev };
-          if (newCart[itemId] === qty) {
-            delete newCart[itemId];
-          } else {
-            newCart[itemId] -= qty;
-          }
-          return newCart;
+        setError(null);
+        const updatedCart = await cartService.addItem({
+          restaurant_id,
+          food_id,
+          quantity,
+          note,
         });
+        setCart(updatedCart);
+        return updatedCart;
+      } catch (err) {
+        console.error("Error adding item:", err);
+        setError(err.message);
+        throw err;
       }
     },
-    [user]
+    []
   );
 
-  // Remove from cart with API sync
-  const removeFromCart = useCallback(
-    async (itemId) => {
-      if (!user) return;
-
-      try {
-        const newQuantity = cartItems[itemId] - 1;
-
-        // Optimistic update
-        setCartItems((prev) => {
-          const newCart = { ...prev };
-          if (newQuantity <= 0) {
-            delete newCart[itemId];
-          } else {
-            newCart[itemId] = newQuantity;
-          }
-          return newCart;
-        });
-
-        // Sync with backend
-        if (newQuantity <= 0) {
-          await cartService.removeItem(user.id, itemId);
-        } else {
-          await cartService.addItem(user.id, itemId, -1);
-        }
-      } catch (error) {
-        console.error("Error removing from cart:", error);
-      }
-    },
-    [user, cartItems]
-  );
-
-  // Clear cart after checkout
-  const clearCart = useCallback(async () => {
-    if (!user) return;
-
+  /**
+   * Remove item from cart
+   * @param {string} item_id - Cart item ID
+   * @returns {Object} Updated cart
+   */
+  const removeItem = useCallback(async (item_id) => {
     try {
-      await cartService.clear(user.id);
-      setCartItems({});
-      console.log("✅ Cart cleared successfully");
-    } catch (error) {
-      console.error("Error clearing cart:", error);
+      setError(null);
+      const updatedCart = await cartService.removeItem(item_id);
+      setCart(updatedCart);
+      return updatedCart;
+    } catch (err) {
+      console.error("Error removing item:", err);
+      setError(err.message);
+      throw err;
     }
-  }, [user]);
+  }, []);
 
-  // Get cart count
-  const getCartCount = useCallback(() => {
-    return Object.values(cartItems).reduce((sum, qty) => sum + qty, 0);
-  }, [cartItems]);
+  /**
+   * Update item quantity and note
+   * @param {string} item_id - Cart item ID
+   * @param {number} quantity - New quantity
+   * @param {string} note - Updated note
+   * @returns {Object} Updated cart
+   */
+  const updateItem = useCallback(async (item_id, quantity, note = "") => {
+    try {
+      setError(null);
+      const updatedCart = await cartService.updateItem({
+        item_id,
+        quantity,
+        note,
+      });
+      setCart(updatedCart);
+      return updatedCart;
+    } catch (err) {
+      console.error("Error updating item:", err);
+      setError(err.message);
+      throw err;
+    }
+  }, []);
 
-  // Calculate total amount (requires food_list from another hook/context)
-  const getTotalCartAmount = useCallback(
-    (food_list) => {
-      let totalAmount = 0;
-      for (const item in cartItems) {
-        if (cartItems[item] > 0) {
-          let itemInfo = food_list.find(
-            (product) =>
-              String(product.id) === String(item) ||
-              String(product._id) === String(item)
-          );
-          if (itemInfo) {
-            totalAmount += itemInfo.price * cartItems[item];
-          }
-        }
-      }
-      return totalAmount;
-    },
-    [cartItems]
-  );
+  /**
+   * Clear entire cart
+   */
+  const clearCart = useCallback(async () => {
+    try {
+      setError(null);
+      await cartService.clearCart();
+      setCart(null);
+    } catch (err) {
+      console.error("Error clearing cart:", err);
+      setError(err.message);
+      throw err;
+    }
+  }, []);
+
+  /**
+   * Check if can add item from specific restaurant
+   * - True if cart is empty OR same restaurant
+   * - False if different restaurant (need to switch)
+   * @param {string} restaurant_id - Restaurant ID to check
+   * @returns {boolean}
+   */
+  const canAddFromRestaurant = useCallback((restaurant_id) => {
+    if (!cart) return true; // Empty cart, can add
+    return cart.restaurant_id === restaurant_id; // Same restaurant, can add
+  }, [cart]);
+
+  /**
+   * Get current restaurant ID from cart
+   * @returns {string|null}
+   */
+  const getCurrentRestaurantId = useCallback(() => {
+    return cart?.restaurant_id || null;
+  }, [cart]);
 
   return {
-    cartItems,
+    cart,
     loading,
-    addToCart,
-    removeFromCart,
+    error,
+    addItem,
+    removeItem,
+    updateItem,
     clearCart,
-    getCartCount,
-    getTotalCartAmount,
-    setCartItems, // For manual updates if needed
+    canAddFromRestaurant,
+    getCurrentRestaurantId,
+    fetchCart,
   };
 };

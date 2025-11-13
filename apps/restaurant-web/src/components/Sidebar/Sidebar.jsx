@@ -13,6 +13,8 @@ import {
   MdRestaurant,
   MdLogout,
   MdRateReview,
+  MdAttachMoney,
+  MdInfo,
 } from "react-icons/md";
 
 const Sidebar = () => {
@@ -70,6 +72,18 @@ const Sidebar = () => {
             className={({ isActive }) => (isActive ? "active" : "")}
           >
             <MdCardGiftcard /> Promotions
+          </NavLink>
+          <NavLink
+            to="/restaurant-info"
+            className={({ isActive }) => (isActive ? "active" : "")}
+          >
+            <MdInfo /> Restaurant Info
+          </NavLink>
+          <NavLink
+            to="/payment"
+            className={({ isActive }) => (isActive ? "active" : "")}
+          >
+            <MdAttachMoney /> Payment & Withdrawal
           </NavLink>
         </nav>
       </div>

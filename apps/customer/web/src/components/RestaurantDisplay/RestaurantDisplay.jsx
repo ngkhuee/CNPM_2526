@@ -2,7 +2,6 @@ import React, { useContext, useState, useEffect } from "react";
 import { StoreContext } from "customer-shared";
 import "./RestaurantDisplay.css";
 import RestaurantItem from "../RestaurantItem/RestaurantItem";
-import { MdRestaurant } from "react-icons/md";
 
 const RestaurantDisplay = ({ showAllRestaurants = false }) => {
   const { restaurant_list } = useContext(StoreContext);
@@ -16,7 +15,6 @@ const RestaurantDisplay = ({ showAllRestaurants = false }) => {
         className="restaurant-display-title"
         style={{ display: "flex", alignItems: "center", gap: "10px" }}
       >
-        <MdRestaurant size={28} style={{ color: "#ff6b35" }} />
         All Restaurants
       </h2>
       <p style={{ color: "#666", marginBottom: "20px", fontSize: "14px" }}>
@@ -32,16 +30,7 @@ const RestaurantDisplay = ({ showAllRestaurants = false }) => {
               image={item.image}
               name={item.name}
               rating={item.rating || 0}
-              deliveryTime={item.deliveryTime}
               isOpen={item.isOpen}
-              desc={
-                <span
-                  style={{ display: "flex", alignItems: "center", gap: "4px" }}
-                >
-                  <MdRestaurant size={16} />{" "}
-                  {item.primary_category || item.category || "Restaurant"}
-                </span>
-              }
             />
           );
         })}

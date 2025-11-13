@@ -12,6 +12,7 @@ const FoodDetail = ({
   currentUserId = null,
   currentRestaurantId = null, // Restaurant ID for checking ownership
   onAddToCart = null, // Callback for adding to cart (customer only)
+  canReview = false, // Whether user can review (from order history)
 }) => {
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -187,7 +188,7 @@ const FoodDetail = ({
         <div className="food-detail-reviews">
           <div className="reviews-header">
             <h3>Customer Reviews</h3>
-            {userRole === "customer" && currentUserId && !userHasReviewed && (
+            {userRole === "customer" && currentUserId && !userHasReviewed && canReview && (
               <button
                 className="submit-review-toggle-btn"
                 onClick={() => setShowReviewForm(!showReviewForm)}
@@ -195,13 +196,14 @@ const FoodDetail = ({
                 {showReviewForm ? "Cancel" : "Write a Review"}
               </button>
             )}
+            {userRole === "customer" && currentUserId && !canReview && !userHasReviewed}
             {userHasReviewed && (
               <span className="already-reviewed-badge">You reviewed this</span>
             )}
           </div>
 
           {/* Review Submission Form */}
-          {showReviewForm && userRole === "customer" && (
+          {showReviewForm && userRole === "customer" && canReview && (
             <div className="review-form">
               <div className="form-group">
                 <label>Rating</label>

@@ -1,8 +1,9 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import { getImageUrl } from "shared-utils";
 import { MdVisibility, MdCheckCircle, MdDelete } from "react-icons/md";
 
-const BlockedPartnerTable = ({ restaurants, onViewDetails, onUnblock, onDelete }) => {
+const BlockedPartnerTable = ({ restaurants, onUnblock, onDelete }) => {
     if (restaurants.length === 0) {
         return null;
     }
@@ -36,13 +37,13 @@ const BlockedPartnerTable = ({ restaurants, onViewDetails, onUnblock, onDelete }
                         <td>{new Date(r.updated_at).toLocaleDateString("vi-VN")}</td>
                         <td>
                             <div className="action-buttons">
-                                <button
+                                <Link
+                                    to={`/admin/partners/${r.id}`}
                                     className="btn-view"
-                                    onClick={() => onViewDetails(r)}
                                     title="View Details"
                                 >
                                     <MdVisibility />
-                                </button>
+                                </Link>
                                 <button
                                     className="btn-unblock"
                                     onClick={() => onUnblock(r.id)}

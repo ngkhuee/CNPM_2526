@@ -12,7 +12,7 @@ const generateToken = (user) => {
       role: user.role,
     },
     SECRET_KEY,
-    { expiresIn: "7d" }
+    { expiresIn: "30d" }
   );
 };
 
@@ -31,6 +31,8 @@ const validateToken = (req, res, next) => {
     "/payments",
     "/notifications",
     "/reviews", // GET reviews is public
+    "/withdrawals", // GET withdrawals is public (for admin dashboard)
+    "/restaurant_balances", // GET balances is public (for admin dashboard)
   ];
 
   // Allow GET requests to public endpoints
