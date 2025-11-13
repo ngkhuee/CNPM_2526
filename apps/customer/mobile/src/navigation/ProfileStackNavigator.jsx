@@ -75,7 +75,7 @@ export function useProfileStack() {
         throw new Error('useProfileStack must be used within ProfileStackContext.Provider');
     }
     return context;
-}
+} 
 
 const styles = StyleSheet.create({
     header: {
