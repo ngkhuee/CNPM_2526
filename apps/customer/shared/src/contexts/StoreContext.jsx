@@ -14,12 +14,14 @@ const StoreContextProvider = (props) => {
 
   // Fetch data on mount - CHỈ GỌI fetchFoods (đã bao gồm restaurants)
   useEffect(() => {
+    console.log('[StoreContext] useEffect triggered - calling fetchFoods');
     fetchFoods();
   }, []);
 
   // Fetch foods from API - ĐỒNG THỜI fetch restaurants và categories
   const fetchFoods = async () => {
     try {
+      console.log('[StoreContext] fetchFoods() started');
       setLoading(true);
 
       // Fetch all data PARALLEL để tăng performance
@@ -29,13 +31,19 @@ const StoreContextProvider = (props) => {
         categoryService.getAll(),
       ]);
 
+      console.log('[StoreContext] API responses received:', {
+        foods: foods?.length,
+        restaurants: allRestaurants?.length,
+        categories: allCategories?.length,
+      });
+
       // Filter only ACTIVE restaurants (approved by admin)
       const activeRestaurants = allRestaurants.filter(
         (r) => r.status === "active"
       );
 
       console.log(
-        `🏪 Restaurants: ${activeRestaurants.length} active / ${allRestaurants.length} total`
+        `[StoreContext] 🏪 Restaurants: ${activeRestaurants.length} active / ${allRestaurants.length} total`
       );
 
       setCategories(allCategories);
@@ -66,8 +74,11 @@ const StoreContextProvider = (props) => {
         });
 
       setFoodList(enrichedFoods);
+      console.log('[StoreContext] fetchFoods() completed successfully:', {
+        enrichedFoods: enrichedFoods.length,
+      });
     } catch (error) {
-      console.error("Error fetching foods:", error);
+      console.error("[StoreContext] Error fetching foods:", error);
     } finally {
       setLoading(false);
     }

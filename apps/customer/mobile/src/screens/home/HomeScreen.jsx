@@ -1,153 +1,111 @@
-/**
- * Home Screen - Main screen matching web Home.jsx
- */
-import React, { useState, useEffect, useContext } from 'react';
-import { View, StyleSheet, ScrollView, Text } from 'react-native';
-import { StoreContext, GeolocationContext } from '../../contexts';
-import { Header, ExploreMenu } from '../../components/common';
-import { FoodDisplay } from '../../components/food/FoodDisplay';
-import { RestaurantDisplay } from '../../components/restaurant/RestaurantDisplay';
-import { colors, spacing } from '../../styles';
-import { useHomeStack } from '../../navigation/useHomeStackNavigation';
+import React, { useContext, useEffect } from 'react';
+import { View, ScrollView, StyleSheet, FlatList } from 'react-native';
+import { StoreContext } from '../../contexts/StoreContext';
+import { GeolocationContext } from '../../contexts/GeolocationContext';
+import { Header } from '../../components/Header';
+import { HomeHero } from './components/HomeHero';
+import { LocationBar } from './components/LocationBar';
+import { NearbyRestaurants } from './components/NearbyRestaurants';
+import { SectionTitle } from './components/SectionTitle';
+import { FoodCard } from './components/FoodCard';
+import { RestaurantCard } from './components/RestaurantCard';
 
 export default function HomeScreen() {
-    const [selectedFilter, setSelectedFilter] = useState('Top Rated');
-    const [nearbyRestaurants, setNearbyRestaurants] = useState([]);
-
-    // Get navigation context safely
-    let navigation;
-    try {
-        navigation = useHomeStack();
-    } catch (e) {
-        console.warn('[HomeScreen] useHomeStack hook error:', e.message);
-        navigation = { navigate: () => { } };
-    }
-
-    // Get data from StoreContext
-    console.log('[HomeScreen] About to useContext(StoreContext)...');
     const storeContext = useContext(StoreContext);
-    console.log('[HomeScreen] Got storeContext:', storeContext ? 'FOUND' : 'NULL', storeContext);
+    const { requestLocation } = useContext(GeolocationContext);
 
-    console.log('[HomeScreen] About to useContext(GeolocationContext)...');
-    const geoContext = useContext(GeolocationContext);
-    console.log('[HomeScreen] Got geoContext:', geoContext ? 'FOUND' : 'NULL');
+    const foodList = storeContext?.foodList || [];
+    const restaurantList = storeContext?.restaurantList || [];
 
-    // Safety check - should no longer be null due to default context value
-    if (!storeContext) {
-        console.error('[HomeScreen] ERROR: StoreContext is null - this should not happen');
-        return <View style={styles.container}><Text>Store context initialization failed</Text></View>;
-    }
-    if (!geoContext) {
-        console.error('[HomeScreen] ERROR: GeolocationContext is null');
-        return <View style={styles.container}><Text>Geolocation context not available</Text></View>;
-    }
+    const topFoods = foodList.filter(f => f.rating >= 4).slice(0, 6);
+    const topRestaurants = restaurantList.slice(0, 6);
 
-    const { food_list, restaurant_list, loading, error } = storeContext;
-    const { userLocation, requestLocation, geoLoading, locationPermissionDenied } = geoContext;
+    // Request location khi component mount
+    useEffect(() => {
+        requestLocation();
+    }, [requestLocation]);
 
-    // Show loading screen if still fetching data
-    if (loading) {
-        return (
-            <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
-                <Text style={{ fontSize: 16, color: '#666' }}>Loading restaurants...</Text>
-            </View>
-        );
-    }
-
-    // Show error if fetch failed
-    if (error) {
-        return (
-            <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
-                <Text style={{ fontSize: 16, color: 'red' }}>Error: {error}</Text>
-            </View>
-        );
-    }
-
-    // Handler to request GPS permission
-    const handleRequestLocation = async () => {
-        console.log('[HomeScreen] User requesting GPS location...');
-        await requestLocation();
+    const handleProfilePress = () => {
+        // For future navigation to profile or login screen
+        // Will be implemented when navigation stack is set up
     };
 
-    const handleFoodPress = (food) => {
-        console.log('[HomeScreen] Food pressed:', food.name);
-    };
-
-    const handleRestaurantPress = (restaurant) => {
-        console.log('[HomeScreen] Restaurant pressed:', restaurant.name, 'id:', restaurant.id);
-        navigation?.navigate?.('RestaurantDetail', { id: restaurant.id });
-    };
-
-    const handleNearbyRestaurantsLoaded = (nearby) => {
-        console.log('[HomeScreen] Nearby restaurants loaded:', nearby.length);
-        setNearbyRestaurants(nearby);
+    const handleExplorePress = () => {
+        // For future navigation to menu or restaurants
+        // Will be implemented when navigation stack is set up
     };
 
     return (
-        <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-            {/* Header Banner */}
-            <View style={styles.headerContainer}>
-                <Header onExplorePress={() => { }} />
-            </View>
+        <View style={styles.container}>
+            <Header onProfilePress={handleProfilePress} />
+            <ScrollView
+                style={styles.content}
+                showsVerticalScrollIndicator={false}
+            >
+                {/* Location Bar */}
+                <View style={styles.locationWrapper}>
+                    <LocationBar />
+                </View>
 
-            {/* Nearby Restaurants Section - Only show when GPS is granted */}
-            {userLocation && (
+                {/* Hero Banner */}
+                <HomeHero onExplorePress={handleExplorePress} />
+
+                {/* Nearby Restaurants - Only show when GPS is granted */}
+                <NearbyRestaurants onRestaurantPress={(id) => { }} />
+
+                {/* Top Rated Foods */}
                 <View style={styles.section}>
-                    <ExploreMenu
-                        selected="Nearby"
-                        userLocation={userLocation}
-                        restaurants={restaurant_list}
-                        showOnlyNearby={true}
-                        onNearbyRestaurantsLoaded={handleNearbyRestaurantsLoaded}
+                    <SectionTitle
+                        title="Discover Delicious Food"
+                        count={topFoods.length}
+                    />
+                    <FlatList
+                        scrollEnabled={false}
+                        data={topFoods}
+                        keyExtractor={(item) => item.id?.toString()}
+                        renderItem={({ item }) => (
+                            <FoodCard item={item} onPress={() => { }} />
+                        )}
                     />
                 </View>
-            )}
 
-            {/* Discover Delicious Food Section - Always show */}
-            <View style={styles.section}>
-                <ExploreMenu
-                    selected={selectedFilter}
-                    setSelected={setSelectedFilter}
-                    restaurants={restaurant_list}
-                    showOnlyNearby={false}
-                />
-            </View>
+                {/* Top Rated Restaurants */}
+                <View style={styles.section}>
+                    <SectionTitle
+                        title="Top Rated Restaurants"
+                        count={topRestaurants.length}
+                    />
+                    <FlatList
+                        scrollEnabled={false}
+                        data={topRestaurants}
+                        keyExtractor={(item) => item.id?.toString()}
+                        renderItem={({ item }) => (
+                            <RestaurantCard item={item} onPress={() => { }} />
+                        )}
+                    />
+                </View>
 
-            {/* Top Rated / Best Selling Dishes */}
-            <View style={styles.section}>
-                <FoodDisplay
-                    foods={food_list}
-                    loading={loading}
-                    filterBy="featured"
-                    filterValue={selectedFilter}
-                    onFoodPress={handleFoodPress}
-                />
-            </View>
-
-            {/* All Restaurants Section */}
-            <View style={styles.section}>
-                <RestaurantDisplay
-                    restaurants={restaurant_list}
-                    loading={loading}
-                    onRestaurantPress={handleRestaurantPress}
-                    showAllRestaurants={true}
-                />
-            </View>
-        </ScrollView>
+                {/* Spacer */}
+                <View style={{ height: 20 }} />
+            </ScrollView>
+        </View>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: colors.background,
+        backgroundColor: '#f8f8f8',
     },
-    headerContainer: {
-        paddingHorizontal: spacing.lg,
-        paddingTop: spacing.md,
+    content: {
+        flex: 1,
+        padding: 16,
+    },
+    locationWrapper: {
+        marginBottom: 16,
+        alignItems: 'flex-start',
     },
     section: {
-        paddingHorizontal: spacing.lg,
-        marginBottom: spacing.lg,
+        marginBottom: 24,
     },
 });

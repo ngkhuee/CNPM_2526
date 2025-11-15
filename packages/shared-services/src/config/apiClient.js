@@ -1,27 +1,5 @@
 import axios from "axios";
-
-// Support both web (Vite) and React Native (Expo) environments
-// This allows the shared service to work with both localStorage (web) and AsyncStorage (mobile)
-
-let storageAdapter = null;
-
-// Initialize storage adapter (called by each platform)
-export const initializeStorageAdapter = (adapter) => {
-  storageAdapter = adapter;
-};
-
-// Get storage adapter or fallback to localStorage
-const getStorage = () => {
-  if (storageAdapter) {
-    return storageAdapter;
-  }
-  // Fallback to localStorage for web
-  return {
-    getItem: (key) => localStorage.getItem(key),
-    setItem: (key, value) => localStorage.setItem(key, value),
-    removeItem: (key) => localStorage.removeItem(key),
-  };
-};
+import { storage } from "../utils/storage";
 
 const API_BASE_URL = (() => {
   // Check for Node/React Native environment first (priority for mobile)
@@ -46,9 +24,8 @@ const apiClient = axios.create({
 
 // Request interceptor
 apiClient.interceptors.request.use(
-  (config) => {
-    const storage = getStorage();
-    const token = storage.getItem("token");
+  async (config) => {
+    const token = await storage.getItem("token");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -62,7 +39,7 @@ apiClient.interceptors.request.use(
 // Response interceptor
 apiClient.interceptors.response.use(
   (response) => response.data,
-  (error) => {
+  async (error) => {
     if (error.response?.status === 401) {
       // List of public endpoints that don't require auth
       const publicEndpoints = [
@@ -83,9 +60,8 @@ apiClient.interceptors.response.use(
       // Only clear auth data if NOT a public endpoint
       if (!isPublicEndpoint) {
         console.warn("Unauthorized - Clearing auth data");
-        const storage = getStorage();
-        storage.removeItem("token");
-        storage.removeItem("user");
+        await storage.removeItem("token");
+        await storage.removeItem("user");
 
         // Don't force redirect - let components handle it
         // This prevents infinite refresh loops

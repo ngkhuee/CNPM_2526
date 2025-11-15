@@ -1,6 +1,6 @@
 // useAuth hook - Auth logic tách riêng để web và mobile dùng chung
 import { useState, useEffect, useCallback } from "react";
-import { authService } from "shared-services";
+import { authService, storage } from "shared-services";
 
 export const useAuth = () => {
   const [user, setUser] = useState(null);
@@ -8,11 +8,11 @@ export const useAuth = () => {
   const [loading, setLoading] = useState(false);
   const [initialized, setInitialized] = useState(false);
 
-  // Initialize auth state from localStorage and validate status
+  // Initialize auth state from storage and validate status
   useEffect(() => {
     const initializeAuth = async () => {
-      const savedToken = localStorage.getItem("token");
-      const savedUser = authService.getCurrentUser();
+      const savedToken = await storage.getItem("token");
+      const savedUser = await authService.getCurrentUser();
 
       if (savedToken && savedUser) {
         // Set user first to avoid blank screen

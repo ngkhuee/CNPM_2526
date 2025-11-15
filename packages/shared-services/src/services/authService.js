@@ -1,29 +1,6 @@
 import apiClient from "../config/apiClient";
 import { ENDPOINTS } from "../config/endpoints";
-
-// Helper to get storage (supports both web localStorage and mobile AsyncStorage)
-const getStorage = () => {
-  // Try to get storage from global if initialized by mobile
-  if (typeof global !== 'undefined' && global.__storageAdapter) {
-    return global.__storageAdapter;
-  }
-  // Fallback to localStorage for web
-  if (typeof localStorage !== 'undefined') {
-    return {
-      getItem: (key) => localStorage.getItem(key),
-      setItem: (key, value) => localStorage.setItem(key, value),
-      removeItem: (key) => localStorage.removeItem(key),
-      clear: () => localStorage.clear(),
-    };
-  }
-  // Fallback object (for environments without storage)
-  return {
-    getItem: () => null,
-    setItem: () => { },
-    removeItem: () => { },
-    clear: () => { },
-  };
-};
+import { storage } from "../utils/storage";
 
 export const authService = {
   async login(email, password) {
@@ -63,8 +40,8 @@ export const authService = {
           }
         }
 
-        localStorage.setItem("token", response.token);
-        localStorage.setItem("user", JSON.stringify(user));
+        await storage.setItem("token", response.token);
+        await storage.setItem("user", JSON.stringify(user));
 
         // Return with mapped user
         response.user = user;
@@ -110,8 +87,8 @@ export const authService = {
           }
         }
 
-        localStorage.setItem("token", response.token);
-        localStorage.setItem("user", JSON.stringify(user));
+        await storage.setItem("token", response.token);
+        await storage.setItem("user", JSON.stringify(user));
 
         // Return with mapped user
         response.user = user;
@@ -123,19 +100,20 @@ export const authService = {
     }
   },
 
-  logout() {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    localStorage.removeItem("cartItems");
+  async logout() {
+    await storage.removeItem("token");
+    await storage.removeItem("user");
+    await storage.removeItem("cartItems");
   },
 
-  getCurrentUser() {
-    const userStr = localStorage.getItem("user");
+  async getCurrentUser() {
+    const userStr = await storage.getItem("user");
     return userStr ? JSON.parse(userStr) : null;
   },
 
-  isAuthenticated() {
-    return !!localStorage.getItem("token");
+  async isAuthenticated() {
+    const token = await storage.getItem("token");
+    return !!token;
   },
 
   // Admin: Get all users

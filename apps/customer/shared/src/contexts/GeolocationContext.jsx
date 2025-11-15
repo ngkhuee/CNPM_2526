@@ -1,4 +1,5 @@
 import React, { createContext, useState, useCallback } from "react";
+import { geolocation } from "shared-services";
 
 export const GeolocationContext = createContext();
 
@@ -13,42 +14,45 @@ export const GeolocationProvider = ({ children }) => {
     const [geoLoading, setGeoLoading] = useState(false);
 
     /**
-     * Request GPS location from browser
+     * Request GPS location (works on both web and mobile)
      */
-    const requestLocation = useCallback(() => {
-        if (!navigator.geolocation) {
-            console.log("Geolocation not supported");
-            setLocationPermissionDenied(true);
-            return;
-        }
+    const requestLocation = useCallback(async () => {
+        try {
+            console.log("Requesting GPS location...");
+            setGeoLoading(true);
 
-        console.log("Requesting GPS location...");
-        setGeoLoading(true);
-
-        navigator.geolocation.getCurrentPosition(
-            (position) => {
-                console.log("GPS location granted:", position.coords);
-                setUserLocation({
-                    latitude: position.coords.latitude,
-                    longitude: position.coords.longitude,
-                    accuracy: position.coords.accuracy,
-                    timestamp: position.timestamp,
-                });
-                setLocationPermissionDenied(false);
-                setGeoLoading(false);
-            },
-            (error) => {
-                console.error("GPS error:", error.code, error.message);
+            // Request permission first
+            const permission = await geolocation.requestPermission();
+            if (!permission.granted) {
+                console.log("GPS permission denied");
                 setLocationPermissionDenied(true);
                 setUserLocation(null);
                 setGeoLoading(false);
-            },
-            {
+                return;
+            }
+
+            // Get current position
+            const position = await geolocation.getCurrentPosition({
                 enableHighAccuracy: true,
                 timeout: 10000,
                 maximumAge: 0,
-            }
-        );
+            });
+
+            console.log("GPS location granted:", position.coords);
+            setUserLocation({
+                latitude: position.coords.latitude,
+                longitude: position.coords.longitude,
+                accuracy: position.coords.accuracy,
+                timestamp: position.timestamp,
+            });
+            setLocationPermissionDenied(false);
+            setGeoLoading(false);
+        } catch (error) {
+            console.error("GPS error:", error.message);
+            setLocationPermissionDenied(true);
+            setUserLocation(null);
+            setGeoLoading(false);
+        }
     }, []);
 
     /**

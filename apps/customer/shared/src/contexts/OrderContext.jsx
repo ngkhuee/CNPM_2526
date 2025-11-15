@@ -1,5 +1,5 @@
 import React, { createContext, useState, useEffect, useContext } from "react";
-import { orderService } from "shared-services";
+import { orderService, storage } from "shared-services";
 import { AuthContext } from "./AuthContext";
 
 export const OrderContext = createContext();
@@ -11,15 +11,18 @@ export const OrderProvider = ({ children }) => {
 
   // Fetch user orders when user changes (no auto-refresh)
   useEffect(() => {
-    if (user) {
-      // Check if token exists before fetching
-      const token = localStorage.getItem("token");
-      if (token) {
-        fetchUserOrders();
+    const checkTokenAndFetch = async () => {
+      if (user) {
+        // Check if token exists before fetching
+        const token = await storage.getItem("token");
+        if (token) {
+          fetchUserOrders();
+        }
+      } else {
+        setOrders([]);
       }
-    } else {
-      setOrders([]);
-    }
+    };
+    checkTokenAndFetch();
   }, [user]);
 
   // Fetch user orders from API
@@ -27,7 +30,7 @@ export const OrderProvider = ({ children }) => {
     if (!user) return;
 
     // Double check token exists
-    const token = localStorage.getItem("token");
+    const token = await storage.getItem("token");
     if (!token) {
       console.warn("No token found, skipping order fetch");
       return;

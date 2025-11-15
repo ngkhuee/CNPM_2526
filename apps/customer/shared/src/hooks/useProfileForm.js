@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { storage } from "shared-services";
 
 /**
  * Custom hook for profile form management (web + mobile)
@@ -40,10 +41,10 @@ export const useProfileForm = (user, setUser) => {
         try {
             setLoading(true);
             // Update user info via API (you'd need to implement this endpoint)
-            // For now, just update local storage
+            // For now, just update storage
             const updatedUser = { ...user, ...formData };
             setUser(updatedUser);
-            localStorage.setItem("user", JSON.stringify(updatedUser));
+            await storage.setItem("user", JSON.stringify(updatedUser));
             setEditing(false);
             return { success: true, message: "Cập nhật thông tin thành công!" };
         } catch (error) {
