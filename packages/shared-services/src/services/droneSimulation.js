@@ -34,7 +34,7 @@ export const simulateDroneDelivery = async (orderId, droneId) => {
     await delay(5000); // 5 seconds
 
     // Step 2: Update to "picked_up" (3 seconds)
-    console.log("✅ Step 2: Order picked up successfully!");
+    console.log("Step 2: Order picked up successfully!");
     await apiClient.patch(ENDPOINTS.ORDERS.BY_ID(orderId), {
       status: "picked_up",
       updated_at: new Date().toISOString(),
@@ -64,9 +64,9 @@ export const simulateDroneDelivery = async (orderId, droneId) => {
       updated_at: new Date().toISOString(),
     });
 
-    console.log(`✅ Drone simulation completed for order ${orderId}`);
+    console.log(`Drone simulation completed for order ${orderId}`);
   } catch (error) {
-    console.error(`❌ Error in drone simulation for order ${orderId}:`, error);
+    console.error(`Error in drone simulation for order ${orderId}:`, error);
     throw error;
   }
 };
@@ -115,9 +115,9 @@ export const simulateDroneMovement = async (
       }
     }
 
-    console.log("✅ Drone movement simulation completed");
+    console.log("Drone movement simulation completed");
   } catch (error) {
-    console.error("❌ Error simulating drone movement:", error);
+    console.error("Error simulating drone movement:", error);
     throw error;
   }
 };
@@ -155,7 +155,7 @@ export const runFullDroneSimulation = async (
     await delay(5000);
 
     // Step 2: Picked up (3 seconds)
-    console.log("✅ Phase 2: Order picked up!");
+    console.log("Phase 2: Order picked up!");
     await apiClient.patch(ENDPOINTS.ORDERS.BY_ID(orderId), {
       status: "picked_up",
       updated_at: new Date().toISOString(),
@@ -195,9 +195,9 @@ export const runFullDroneSimulation = async (
       updated_at: new Date().toISOString(),
     });
 
-    console.log(`✅ Full simulation completed for order ${orderId}`);
+    console.log(`Full simulation completed for order ${orderId}`);
   } catch (error) {
-    console.error(`❌ Error in full drone simulation:`, error);
+    console.error(`Error in full drone simulation:`, error);
     throw error;
   }
 };
@@ -234,9 +234,9 @@ export const autoTriggerDelivery = async (orderId) => {
     };
     const customerLocation = order.dropoff_gps ||
       customerAddress?.location || {
-        lat: 10.8,
-        lng: 106.7,
-      };
+      lat: 10.8,
+      lng: 106.7,
+    };
 
     console.log(`Auto-triggering delivery for order ${orderId}`);
     console.log(`From: ${JSON.stringify(restaurantLocation)}`);
@@ -250,7 +250,7 @@ export const autoTriggerDelivery = async (orderId) => {
       customerLocation
     );
   } catch (error) {
-    console.error(`❌ Failed to auto-trigger delivery:`, error);
+    console.error(`Failed to auto-trigger delivery:`, error);
     throw error;
   }
 };

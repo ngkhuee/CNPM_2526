@@ -130,7 +130,7 @@ export const OrderCardWeb = ({
                             fontSize: "14px",
                         }}
                     >
-                        ❌ Cancel
+                        Cancel
                     </button>
                 )}
 

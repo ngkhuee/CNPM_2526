@@ -2,7 +2,7 @@ import React, { useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import "./FoodItem.css";
 import { getImageUrl } from "@utils/imageHelper";
-import { formatCurrency } from "shared-utils";
+import { formatCurrency, formatRating } from "shared-utils";
 import { useProductRating } from "shared-hooks";
 import { MdStorefront, MdStar, MdLocalFireDepartment } from "react-icons/md";
 
@@ -90,8 +90,7 @@ const FoodItem = ({
               }}
             >
               <MdStar size={16} />
-              {displayRating > 0 ? displayRating.toFixed(1) : "0"}{" "}
-              {displayRating > 0 ? "" : ""}
+              {formatRating(displayRating)}
             </span>
           )}
         </div>

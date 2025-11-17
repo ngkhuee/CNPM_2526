@@ -1,6 +1,7 @@
 .myorders {
   padding: 20px;
 }
+
 .order-card {
   background: #fff;
   padding: 15px;
@@ -8,26 +9,28 @@
   margin-bottom: 20px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
+
 .order-card table {
   width: 100%;
   border-collapse: collapse;
   margin-top: 10px;
 }
+
 .order-card th,
 .order-card td {
   border-bottom: 1px solid #ddd;
   padding: 8px;
   text-align: left;
 }
+
 /* Nút theo dõi đơn hàng */
 .track-btn {
   display: inline-block;
   padding: 10px 20px;
-  background: linear-gradient(
-    90deg,
-    #ff7e5f,
-    #feb47b
-  ); /* gradient màu nổi bật */
+  background: linear-gradient(90deg,
+      #ff7e5f,
+      #feb47b);
+  /* gradient màu nổi bật */
   color: #fff;
   font-weight: 600;
   border: none;
@@ -85,6 +88,42 @@
 .order-total {
   margin-top: 15px;
   font-size: 16px;
+}
+
+.order-summary {
+  margin-top: 15px;
+  padding: 12px;
+  background: #f9f9f9;
+  border-left: 3px solid #ff7e5f;
+  border-radius: 4px;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0;
+  font-size: 14px;
+  color: #555;
+}
+
+.summary-row.discount span:last-child {
+  color: #28a745;
+  font-weight: 600;
+}
+
+.order-summary .order-total {
+  margin: 12px 0 0 0;
+  padding-top: 12px;
+  border-top: 1px solid #ddd;
+  font-size: 16px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.order-summary .order-total span {
+  font-weight: 700;
+  color: #ff7e5f;
 }
 
 /* Review Modal */

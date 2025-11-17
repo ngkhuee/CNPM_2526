@@ -1,12 +1,54 @@
-import React from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { formatCurrency } from "shared-utils";
+import { Pagination } from "shared-ui";
+import { HiOutlineChevronUpDown } from "react-icons/hi2";
 
 const OrderTable = ({ orders, onOrderSelect, getStatusBadgeClass }) => {
     const navigate = useNavigate();
+    const [sortOrder, setSortOrder] = useState("desc");
+    const [searchId, setSearchId] = useState("");
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 10;
+
+    const filteredOrders = useMemo(() => {
+        return orders
+            .filter((order) => {
+                if (!searchId) return true;
+                return order.id.toString().includes(searchId);
+            })
+            .sort((a, b) => {
+                const dateA = new Date(a.createdAt || a.created_at);
+                const dateB = new Date(b.createdAt || b.created_at);
+                return sortOrder === "desc" ? dateB - dateA : dateA - dateB;
+            });
+    }, [orders, searchId, sortOrder]);
+
+    const totalPages = Math.ceil(filteredOrders.length / itemsPerPage);
+    const startIdx = (currentPage - 1) * itemsPerPage;
+    const paginatedOrders = filteredOrders.slice(startIdx, startIdx + itemsPerPage);
+
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [searchId, sortOrder]);
 
     return (
         <div className="orders-table-container">
+            <div style={{ marginBottom: "15px" }}>
+                <input
+                    type="text"
+                    placeholder="Search by Order ID..."
+                    value={searchId}
+                    onChange={(e) => setSearchId(e.target.value)}
+                    style={{
+                        padding: "8px 12px",
+                        borderRadius: "4px",
+                        border: "1px solid #ddd",
+                        minWidth: "150px",
+                        fontSize: "14px",
+                    }}
+                />
+            </div>
             <table className="orders-table">
                 <thead>
                     <tr>
@@ -17,12 +59,39 @@ const OrderTable = ({ orders, onOrderSelect, getStatusBadgeClass }) => {
                         <th>Payment</th>
                         <th>Status</th>
                         <th>Drone</th>
-                        <th>Time</th>
+                        <th>
+                            <div
+                                style={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "space-between",
+                                    cursor: "pointer",
+                                    gap: "8px",
+                                }}
+                                onClick={() =>
+                                    setSortOrder(sortOrder === "desc" ? "asc" : "desc")
+                                }
+                                title="Click to change sort order"
+                            >
+                                Time
+                                <HiOutlineChevronUpDown
+                                    style={{
+                                        transform:
+                                            sortOrder === "asc"
+                                                ? "rotate(0deg)"
+                                                : "rotate(180deg)",
+                                        transition: "transform 0.2s",
+                                        fontSize: "16px",
+                                        color: "#ff6b35",
+                                    }}
+                                />
+                            </div>
+                        </th>
                         <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {orders.map((order) => (
+                    {paginatedOrders.map((order) => (
                         <tr key={order.id}>
                             <td className="order-id">#{order.id}</td>
                             <td>
@@ -109,6 +178,11 @@ const OrderTable = ({ orders, onOrderSelect, getStatusBadgeClass }) => {
                     ))}
                 </tbody>
             </table>
+            <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+            />
         </div>
     );
 };

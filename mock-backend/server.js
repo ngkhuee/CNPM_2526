@@ -151,7 +151,47 @@ server.use(jsonServer.rewriter(routes));
 
 // ========== CUSTOM ENDPOINTS ==========
 
-// Auth - Login
+// ========== AUTO-CANCEL PENDING ORDERS (Before auth middleware - PUBLIC) ==========
+// Check and auto-cancel pending orders older than 30 minutes
+server.post("/orders/check-pending-expiry", (req, res) => {
+  const db = router.db;
+  const orders = db.get("orders").value();
+  const PENDING_TIMEOUT = 30 * 60 * 1000; // 30 minutes in milliseconds
+  const now = Date.now();
+
+  let cancelledCount = 0;
+
+  orders.forEach((order) => {
+    if (order.status === "pending") {
+      const createdAt = new Date(order.created_at).getTime();
+      const timeDiff = now - createdAt;
+
+      // If order is pending for more than 30 minutes, cancel it
+      if (timeDiff > PENDING_TIMEOUT) {
+        order.status = "cancelled";
+        order.cancellation_reason = "Auto-cancelled: Payment not completed within 30 minutes";
+        order.updated_at = new Date().toISOString();
+        cancelledCount++;
+      }
+    }
+  });
+
+  // Write changes back to db
+  if (cancelledCount > 0) {
+    db.set("orders", orders).write();
+  }
+
+  res.json({
+    success: true,
+    message: `${cancelledCount} pending orders auto-cancelled`,
+    cancelled_count: cancelledCount,
+  });
+});
+
+// Apply auth middleware (after custom routes)
+server.use(validateToken);
+
+// ========== PROTECTED CART ENDPOINTS (After auth middleware) ==========
 server.post("/auth/login", (req, res) => {
   const { email, password } = req.body;
   const db = router.db;
@@ -459,6 +499,43 @@ server.post("/users/register-owner", (req, res) => {
 // Apply auth middleware (after custom routes)
 server.use(validateToken);
 
+// ========== AUTO-CANCEL PENDING ORDERS (Before cart endpoints) ==========
+// Check and auto-cancel pending orders older than 30 minutes
+server.post("/orders/check-pending-expiry", (req, res) => {
+  const db = router.db;
+  const orders = db.get("orders").value();
+  const PENDING_TIMEOUT = 30 * 60 * 1000; // 30 minutes in milliseconds
+  const now = Date.now();
+
+  let cancelledCount = 0;
+
+  orders.forEach((order) => {
+    if (order.status === "pending") {
+      const createdAt = new Date(order.created_at).getTime();
+      const timeDiff = now - createdAt;
+
+      // If order is pending for more than 30 minutes, cancel it
+      if (timeDiff > PENDING_TIMEOUT) {
+        order.status = "cancelled";
+        order.cancellation_reason = "Auto-cancelled: Payment not completed within 30 minutes";
+        order.updated_at = new Date().toISOString();
+        cancelledCount++;
+      }
+    }
+  });
+
+  // Write changes back to db
+  if (cancelledCount > 0) {
+    db.set("orders", orders).write();
+  }
+
+  res.json({
+    success: true,
+    message: `${cancelledCount} pending orders auto-cancelled`,
+    cancelled_count: cancelledCount,
+  });
+});
+
 // ========== PROTECTED CART ENDPOINTS (After auth middleware) ==========
 
 // Cart - Get user's cart
@@ -718,11 +795,7 @@ server.use((req, res, next) => {
 });
 
 server.listen(PORT, () => {
-  console.log(`\n✅ JSON Server is running with AUTO-SAVE enabled!`);
-  console.log(`📍 Server: http://localhost:${PORT}`);
-  console.log(`💾 Database: db.json (auto-saves every 10s and on changes)`);
-  console.log(`\n🔐 Auth endpoints:`);
-  console.log(`   - POST http://localhost:${PORT}/auth/login`);
-  console.log(`   - POST http://localhost:${PORT}/auth/register`);
-  console.log(`\n`);
+  console.log(`\nJSON Server is running with AUTO-SAVE enabled!`);
+  console.log(`    Server: http://localhost:${PORT}`);
+  console.log(`    Database: db.json (auto-saves every 10s and on changes)`);
 });

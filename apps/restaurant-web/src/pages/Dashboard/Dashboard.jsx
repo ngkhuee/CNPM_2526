@@ -5,7 +5,7 @@ import { RestaurantContext } from "../../Context/RestaurantContext";
 import { useRestaurantStats } from "../../hooks/useRestaurantStats";
 import { useRestaurantReviews } from "../../hooks/useRestaurantReviews";
 import { useDashboardCharts } from "../../hooks/useDashboardCharts";
-import { formatCurrency } from "shared-utils";
+import { formatCurrency, formatRating } from "shared-utils";
 import { MdLocationOn, MdStar, MdPhone } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
 import RevenueChart from "./RevenueChart";
@@ -27,11 +27,13 @@ const Dashboard = () => {
       setReviewStats(stats);
     };
     loadReviewStats();
-  }, [fetchReviews, getReviewStats]);
+  }, []); // Run once on mount only
 
   useEffect(() => {
-    loadChartData();
-  }, [dateRange]);
+    if (currentRestaurant?.id) {
+      loadChartData();
+    }
+  }, [currentRestaurant?.id, loadChartData]);
 
   return (
     <div className="main-content">
@@ -86,7 +88,7 @@ const Dashboard = () => {
           <div className="cards-container">
             <CardStats
               title="Average Rating"
-              value={`${reviewStats.avgRating}/5`}
+              value={`${formatRating(reviewStats.avgRating)}/5`}
               color="info"
             />
             <CardStats

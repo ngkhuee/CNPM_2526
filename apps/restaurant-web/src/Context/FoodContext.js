@@ -10,10 +10,19 @@ export const FoodProvider = ({ children }) => {
 
   // Fetch foods on mount (only if user is logged in)
   useEffect(() => {
-    const user = authService.getCurrentUser();
-    if (user?.role === "restaurant" && user?.restaurantId && /^r\d+$/.test(user.restaurantId)) {
-      fetchFoods(user.restaurantId);
-    }
+    const initializeFoods = async () => {
+      try {
+        const user = await authService.getCurrentUser();
+        console.log("FoodContext - user loaded:", user);
+        if (user?.role === "restaurant" && user?.restaurantId && /^r\d+$/.test(user.restaurantId)) {
+          console.log("FoodContext - fetching foods for:", user.restaurantId);
+          await fetchFoods(user.restaurantId);
+        }
+      } catch (err) {
+        console.error("Error initializing foods:", err);
+      }
+    };
+    initializeFoods();
   }, []);
 
   // Fetch all foods from API
@@ -36,7 +45,7 @@ export const FoodProvider = ({ children }) => {
   // Add new food
   const addFood = async (foodData) => {
     try {
-      const currentUser = authService.getCurrentUser();
+      const currentUser = await authService.getCurrentUser();
       if (!currentUser) {
         return { success: false, message: "User not authenticated" };
       }
@@ -63,7 +72,7 @@ export const FoodProvider = ({ children }) => {
   // Update food
   const updateFood = async (foodId, foodData) => {
     try {
-      const currentUser = authService.getCurrentUser();
+      const currentUser = await authService.getCurrentUser();
       const payload = {
         ...foodData,
         updated_at: new Date().toISOString(),
@@ -84,7 +93,7 @@ export const FoodProvider = ({ children }) => {
   // Delete food
   const deleteFood = async (foodId) => {
     try {
-      const currentUser = authService.getCurrentUser();
+      const currentUser = await authService.getCurrentUser();
       const result = await foodService.delete(foodId);
       if (result) {
         await fetchFoods(currentUser?.restaurantId);

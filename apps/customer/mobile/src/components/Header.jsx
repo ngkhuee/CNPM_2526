@@ -1,70 +1,175 @@
-import React, { useContext } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
-import { BellIcon, AccountIcon } from './Icons';
-import { AuthContext } from '../contexts/AuthContext';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput } from 'react-native';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
-export function Header({ onProfilePress }) {
-    const { user } = useContext(AuthContext);
+export default function Header({
+    userLocation,
+    onLocationPress,
+    onSearchPress,
+    onSearchFocus,
+    onSearchBlur,
+    onSearchSubmit,
+}) {
+    const [searchFocused, setSearchFocused] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
+
+    // Truncate address if too long (max 30 chars)
+    const truncateAddress = (addr) => {
+        if (!addr) return 'Select location';
+        return addr.length > 30 ? addr.substring(0, 27) + '...' : addr;
+    };
+
+    const handleSearchFocus = () => {
+        setSearchFocused(true);
+        if (onSearchFocus) {
+            onSearchFocus();
+        }
+    };
+
+    const handleSearchBlur = () => {
+        setSearchFocused(false);
+        if (onSearchBlur) {
+            onSearchBlur();
+        }
+    };
+
+    const handleSearchChange = (text) => {
+        setSearchQuery(text);
+        if (onSearchPress) {
+            onSearchPress(text);
+        }
+    };
 
     return (
-        <View style={styles.container}>
-            <View style={styles.left}>
-                <Text style={styles.logo}>Yummy</Text>
-                <Text style={styles.subtitle}>Delivery</Text>
+        <View style={styles.headerContainer}>
+            {/* Top row: Menu, Location, Avatar */}
+            <View style={styles.topRow}>
+                <TouchableOpacity style={styles.menuBtn}>
+                    <MaterialIcons name="menu" size={24} color="#333" />
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                    style={styles.locationBtn}
+                    onPress={onLocationPress}
+                >
+                    <View style={styles.locationIcon}>
+                        <MaterialIcons name="location-on" size={16} color="#ff6b35" />
+                    </View>
+                    <Text style={styles.locationText} numberOfLines={1}>
+                        {truncateAddress(userLocation)}
+                    </Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity style={styles.avatarBtn}>
+                    <MaterialIcons name="account-circle" size={32} color="#ff6b35" />
+                </TouchableOpacity>
             </View>
-            <View style={styles.right}>
-                <TouchableOpacity style={styles.iconBtn}>
-                    <BellIcon size={24} color="#fff" />
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.iconBtn} onPress={onProfilePress}>
-                    {user?.avatar ? (
-                        <Image
-                            source={{ uri: user.avatar }}
-                            style={styles.avatar}
-                        />
-                    ) : (
-                        <AccountIcon size={24} color="#fff" />
-                    )}
-                </TouchableOpacity>
+
+            {/* Search bar */}
+            <View style={[styles.searchContainer, searchFocused && styles.searchFocused]}>
+                <MaterialIcons name="search" size={20} color="#999" />
+                <TextInput
+                    style={styles.searchInput}
+                    placeholder="Search food..."
+                    placeholderTextColor="#ccc"
+                    onFocus={handleSearchFocus}
+                    onBlur={handleSearchBlur}
+                    onChangeText={handleSearchChange}
+                    onSubmitEditing={() => {
+                        if (onSearchSubmit && searchQuery.trim() !== '') {
+                            onSearchSubmit(searchQuery);
+                        }
+                    }}
+                    value={searchQuery}
+                />
+                {searchQuery !== '' && (
+                    <TouchableOpacity
+                        style={styles.clearBtn}
+                        onPress={() => {
+                            setSearchQuery('');
+                            if (onSearchPress) {
+                                onSearchPress('');
+                            }
+                        }}
+                    >
+                        <MaterialIcons name="close" size={18} color="#999" />
+                    </TouchableOpacity>
+                )}
             </View>
         </View>
     );
-} const styles = StyleSheet.create({
-    container: {
+}
+
+const styles = StyleSheet.create({
+    headerContainer: {
+        backgroundColor: '#fff',
+        borderBottomWidth: 1,
+        borderBottomColor: '#eee',
+        paddingTop: 55,
+    },
+    topRow: {
         flexDirection: 'row',
-        justifyContent: 'space-between',
         alignItems: 'center',
+        justifyContent: 'space-between',
         paddingHorizontal: 16,
         paddingVertical: 12,
-        backgroundColor: '#ff6b35',
     },
-    left: {
-        flexDirection: 'row',
-        alignItems: 'baseline',
-    },
-    logo: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        color: '#fff',
-        marginRight: 4,
-    },
-    subtitle: {
-        fontSize: 12,
-        color: '#fff',
-        opacity: 0.8,
-    },
-    right: {
-        flexDirection: 'row',
-        gap: 12,
+    menuBtn: {
+        width: 40,
+        height: 40,
+        justifyContent: 'center',
         alignItems: 'center',
     },
-    iconBtn: {
-        padding: 6,
+    locationBtn: {
+        flex: 1,
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginHorizontal: 12,
+        paddingHorizontal: 12,
+        paddingVertical: 8,
+        backgroundColor: '#f5f5f5',
+        borderRadius: 8,
     },
-    avatar: {
-        width: 32,
-        height: 32,
-        borderRadius: 16,
-        backgroundColor: '#f0f0f0',
+    locationIcon: {
+        marginRight: 6,
+    },
+    locationText: {
+        fontSize: 13,
+        color: '#333',
+        fontWeight: '500',
+        flex: 1,
+    },
+    avatarBtn: {
+        width: 40,
+        height: 40,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    searchContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginHorizontal: 16,
+        marginBottom: 12,
+        paddingHorizontal: 12,
+        backgroundColor: '#f5f5f5',
+        borderRadius: 20,
+        height: 40,
+        borderWidth: 1,
+        borderColor: 'transparent',
+    },
+    searchFocused: {
+        borderColor: '#ff6b35',
+        backgroundColor: '#fff',
+    },
+    searchInput: {
+        flex: 1,
+        marginLeft: 8,
+        fontSize: 14,
+        color: '#333',
+        paddingVertical: 0,
+    },
+    clearBtn: {
+        padding: 4,
+        marginRight: 4,
     },
 });

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { ReviewCard, ReplyModal } from "shared-ui";
 import { useRestaurantReviews } from "../../hooks/useRestaurantReviews";
 import { MdStar, MdRateReview, MdHourglassEmpty, MdCheckCircle, MdError, MdNavigateBefore, MdNavigateNext } from "react-icons/md";
+import { formatRating } from "@utils/formatters";
 import "./Reviews.css";
 
 const Reviews = () => {
@@ -93,15 +94,15 @@ const Reviews = () => {
                 {/* Stats Cards */}
                 <div className="stats-grid">
                     <div className="stat-card">
-                        <div className="stat-icon"><MdStar/></div>
+                        <div className="stat-icon"><MdStar /></div>
                         <div className="stat-content">
                             <div className="stat-label">Rating</div>
-                            <div className="stat-value">{stats.avgRating}/5</div>
+                            <div className="stat-value">{formatRating(stats.avgRating)}/5</div>
                         </div>
                     </div>
 
                     <div className="stat-card">
-                        <div className="stat-icon"><MdRateReview/></div>
+                        <div className="stat-icon"><MdRateReview /></div>
                         <div className="stat-content">
                             <div className="stat-label">Total Reviews</div>
                             <div className="stat-value">{stats.total}</div>
@@ -109,7 +110,7 @@ const Reviews = () => {
                     </div>
 
                     <div className="stat-card">
-                        <div className="stat-icon"><MdHourglassEmpty/></div>
+                        <div className="stat-icon"><MdHourglassEmpty /></div>
                         <div className="stat-content">
                             <div className="stat-label">Pending Replies</div>
                             <div className="stat-value">{stats.pending}</div>
@@ -117,7 +118,7 @@ const Reviews = () => {
                     </div>
 
                     <div className="stat-card">
-                        <div className="stat-icon"><MdCheckCircle/></div>
+                        <div className="stat-icon"><MdCheckCircle /></div>
                         <div className="stat-content">
                             <div className="stat-label">Replied</div>
                             <div className="stat-value">{stats.replied}</div>

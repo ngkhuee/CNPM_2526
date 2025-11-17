@@ -47,7 +47,7 @@ export const useReview = () => {
                     comment: comment.trim(),
                 });
 
-                console.log("✅ Review submitted successfully:", review);
+                console.log("Review submitted successfully:", review);
                 return {
                     success: true,
                     review: review,

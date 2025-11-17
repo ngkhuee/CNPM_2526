@@ -1,9 +1,9 @@
 import React from "react";
-import { MdLocationOn, MdError, MdCancel } from "react-icons/md";
+import { MdLocationOn, MdError, MdCancel, MdPayment } from "react-icons/md";
 import { formatCurrency } from "shared-utils";
 import { orderValidationService } from "shared-services";
 
-const OrderCardHeader = ({ order, onTrackClick, onCancelClick }) => {
+const OrderCardHeader = ({ order, onTrackClick, onCancelClick, onContinuePaymentClick }) => {
     return (
         <>
             <h3>Order #{order.id || order._id}</h3>
@@ -89,6 +89,30 @@ const OrderCardHeader = ({ order, onTrackClick, onCancelClick }) => {
             )}
 
             <div className="order-actions">
+                {/* Show "Continue Payment" button for pending orders */}
+                {order.status === "pending" && (
+                    <button
+                        className="continue-payment-btn"
+                        onClick={() => onContinuePaymentClick?.(order)}
+                        style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "8px",
+                            justifyContent: "center",
+                            background: "#28a745",
+                            color: "white",
+                            border: "none",
+                            padding: "10px 20px",
+                            borderRadius: "6px",
+                            cursor: "pointer",
+                            fontSize: "14px",
+                            fontWeight: "600",
+                        }}
+                    >
+                        <MdPayment /> Continue Payment
+                    </button>
+                )}
+
                 {/* Only show Track button if order can be tracked */}
                 {order.status !== "paid" && order.status !== "pending" && (
                     <button

@@ -11,47 +11,53 @@ export const AuthProvider = ({ children }) => {
   // Load user from localStorage on mount
   useEffect(() => {
     const loadUser = async () => {
-      const user = authService.getCurrentUser();
-      if (user?.role === "restaurant" && user?.restaurantId && /^r[_\d]+$/.test(user.restaurantId)) {
-        try {
-          const token = localStorage.getItem("token");
-          const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:4000";
+      try {
+        const user = await authService.getCurrentUser();
+        // Check "restaurant" role (authService converts restaurant_owner to "restaurant")
+        if (user?.role === "restaurant" && user?.restaurantId) {
+          try {
+            const token = localStorage.getItem("token");
+            const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:4000";
 
-          const [userResponse, restaurantResponse] = await Promise.all([
-            fetch(`${API_BASE_URL}/users/${user.id}`, {
-              headers: token ? { Authorization: `Bearer ${token}` } : {}
-            }),
-            fetch(`${API_BASE_URL}/restaurants/${user.restaurantId}`, {
-              headers: token ? { Authorization: `Bearer ${token}` } : {}
-            })
-          ]);
-
-          if (userResponse.ok && restaurantResponse.ok) {
-            const [userData, restaurantData] = await Promise.all([
-              userResponse.json(),
-              restaurantResponse.json()
+            const [userResponse, restaurantResponse] = await Promise.all([
+              fetch(`${API_BASE_URL}/users/${user.id}`, {
+                headers: token ? { Authorization: `Bearer ${token}` } : {}
+              }),
+              fetch(`${API_BASE_URL}/restaurants/${user.restaurantId}`, {
+                headers: token ? { Authorization: `Bearer ${token}` } : {}
+              })
             ]);
 
-            // Check if user or restaurant is blocked or not active
-            if (userData.status === "blocked" || userData.status !== "active" ||
-              restaurantData.status === "blocked" || restaurantData.status !== "active") {
-              console.warn("User or restaurant account is blocked/inactive on startup, logging out...");
-              authService.logout();
-              setCurrentUser(null);
+            if (userResponse.ok && restaurantResponse.ok) {
+              const [userData, restaurantData] = await Promise.all([
+                userResponse.json(),
+                restaurantResponse.json()
+              ]);
+
+              // Check if user or restaurant is blocked or not active
+              if (userData.status === "blocked" || userData.status !== "active" ||
+                restaurantData.status === "blocked" || restaurantData.status !== "active") {
+                console.warn("User or restaurant account is blocked/inactive on startup, logging out...");
+                await authService.logout();
+                setCurrentUser(null);
+              } else {
+                setCurrentUser(user);
+              }
             } else {
+              // If we can't validate, still load user to avoid blank screen
               setCurrentUser(user);
             }
-          } else {
-            // If we can't validate, still load user to avoid blank screen
+          } catch (error) {
+            console.error("Error validating user status on startup:", error);
+            // Still load user on network error during init
             setCurrentUser(user);
           }
-        } catch (error) {
-          console.error("Error validating user status on startup:", error);
-          // Still load user on network error during init
-          setCurrentUser(user);
         }
+      } catch (error) {
+        console.error("Error loading user:", error);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     loadUser();

@@ -1,5 +1,5 @@
 import React from "react";
-import { getImageUrl } from "shared-utils";
+import { getImageUrl, formatRating } from "shared-utils";
 
 const RevenueTable = ({ restaurants, formatCurrency }) => {
     if (!restaurants || restaurants.length === 0) {

@@ -170,7 +170,7 @@ export const useCheckoutProcessing = (user) => {
 
                 const orders = [orderData];
 
-                console.log("✅ Orders prepared:", orders);
+                console.log("Orders prepared:", orders);
 
                 return {
                     success: true,
@@ -179,7 +179,7 @@ export const useCheckoutProcessing = (user) => {
                     gpsLocation: gpsLocation,
                 };
             } catch (error) {
-                console.error("❌ Checkout processing error:", error);
+                console.error("Checkout processing error:", error);
                 setCheckoutError(error.message);
                 return {
                     success: false,

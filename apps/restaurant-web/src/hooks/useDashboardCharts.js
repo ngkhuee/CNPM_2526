@@ -24,6 +24,7 @@ export const useDashboardCharts = () => {
      */
     const getDateRange = useCallback((range) => {
         const today = new Date();
+        today.setHours(23, 59, 59, 999); // End of today
         let startDate;
 
         switch (range) {
@@ -41,6 +42,7 @@ export const useDashboardCharts = () => {
                 startDate = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
         }
 
+        startDate.setHours(0, 0, 0, 0); // Start of the day
         return { startDate, endDate: today };
     }, []);
 
@@ -80,52 +82,82 @@ export const useDashboardCharts = () => {
      * Fetch and aggregate revenue data
      */
     const fetchRevenueChart = useCallback(async () => {
-        if (!currentRestaurant?.id) return;
+        console.log("=== fetchRevenueChart START ===");
+        console.log("currentRestaurant:", currentRestaurant);
+        console.log("currentRestaurant?.id:", currentRestaurant?.id);
+        if (!currentRestaurant?.id) {
+            console.warn("useDashboardCharts - No restaurant ID available");
+            return;
+        }
 
         try {
             const { startDate, endDate } = getDateRange(dateRange);
-            const response = await fetch(
-                `${API_BASE_URL}/orders?restaurant_id=${currentRestaurant.id}&status=delivered`
-            );
+            console.log("Date range:", startDate, "to", endDate);
+
+            const queryUrl = `${API_BASE_URL}/orders?restaurant_id=${currentRestaurant.id}`;
+            console.log("Fetching from URL:", queryUrl);
+
+            const response = await fetch(queryUrl);
+            console.log("Response status:", response.status);
+
             const orders = await response.json();
+            console.log("=== Orders fetched ===");
+            console.log("Total orders:", orders.length);
+            console.log("Orders response:", orders);
+
+            if (orders.length > 0) {
+                console.log("First order:", JSON.stringify(orders[0], null, 2));
+            } else {
+                console.warn("No orders found for restaurant:", currentRestaurant.id);
+            }
+
+            // Helper to format date as YYYY-MM-DD using local time (not UTC)
+            const formatDateLocal = (date) => {
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
+            };
 
             // Filter orders by date range
             const filteredOrders = orders.filter((order) => {
-                const orderDate = new Date(order.completed_at);
+                const orderDate = new Date(order.updated_at || order.created_at);
                 return orderDate >= startDate && orderDate <= endDate;
             });
+            console.log("fetchRevenueChart - Filtered orders:", filteredOrders.length);
 
             // Group by date
             const dateMap = {};
             let daysToShow = 7;
 
             if (dateRange === "month") {
-                daysToShow = new Date(
-                    startDate.getFullYear(),
-                    startDate.getMonth() + 1,
-                    0
-                ).getDate();
+                daysToShow = 30;
             } else if (dateRange === "week") {
                 daysToShow = 7;
             }
 
             for (let i = 0; i < daysToShow; i++) {
                 const date = new Date(startDate.getTime() + i * 24 * 60 * 60 * 1000);
-                const dateKey = date.toISOString().split("T")[0];
+                const dateKey = formatDateLocal(date);
                 dateMap[dateKey] = 0;
             }
 
+            console.log("fetchRevenueChart - dateMap keys:", Object.keys(dateMap));
+
             filteredOrders.forEach((order) => {
-                const dateKey = new Date(order.completed_at)
-                    .toISOString()
-                    .split("T")[0];
+                const orderDate = new Date(order.updated_at || order.created_at);
+                const dateKey = formatDateLocal(orderDate);
+                const amount = order.total_amount || 0;
+                console.log("fetchRevenueChart - Order id:", order.id, "orderDate:", orderDate.toString(), "dateKey:", dateKey, "inMap:", dateMap.hasOwnProperty(dateKey), "amount:", amount);
                 if (dateMap.hasOwnProperty(dateKey)) {
-                    dateMap[dateKey] += order.total_amount || 0;
+                    dateMap[dateKey] += amount;
                 }
             });
 
             const labels = generateDateLabels(dateRange, startDate, endDate);
             const data = Object.values(dateMap).slice(-labels.length);
+
+            console.log("fetchRevenueChart - Chart data:", data);
 
             setChartData((prev) => ({
                 ...prev,
@@ -138,20 +170,35 @@ export const useDashboardCharts = () => {
             console.error("Error fetching revenue chart:", err);
             setError("Failed to load revenue data");
         }
-    }, [currentRestaurant?.id, dateRange, getDateRange, generateDateLabels, API_BASE_URL]);
-
-    /**
+    }, [currentRestaurant?.id, dateRange, getDateRange, generateDateLabels, API_BASE_URL]);    /**
      * Fetch and aggregate order data
      */
     const fetchOrderChart = useCallback(async () => {
-        if (!currentRestaurant?.id) return;
+        if (!currentRestaurant?.id) {
+            console.warn("useDashboardCharts - No restaurant ID available for orders");
+            return;
+        }
 
         try {
             const { startDate, endDate } = getDateRange(dateRange);
+            console.log("fetchOrderChart - Date range:", startDate, "to", endDate);
+
             const response = await fetch(
                 `${API_BASE_URL}/orders?restaurant_id=${currentRestaurant.id}`
             );
             const orders = await response.json();
+            console.log("fetchOrderChart - Fetched orders:", orders.length);
+            if (orders.length > 0) {
+                console.log("fetchOrderChart - First order sample:", orders[0]);
+            }
+
+            // Helper to format date as YYYY-MM-DD using local time (not UTC)
+            const formatDateLocal = (date) => {
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
+            };
 
             // Filter orders by date range
             const filteredOrders = orders.filter((order) => {
@@ -159,30 +206,30 @@ export const useDashboardCharts = () => {
                 return orderDate >= startDate && orderDate <= endDate;
             });
 
+            console.log("fetchOrderChart - Filtered orders:", filteredOrders.length);
+
             // Group by date
             const dateMap = {};
             let daysToShow = 7;
 
             if (dateRange === "month") {
-                daysToShow = new Date(
-                    startDate.getFullYear(),
-                    startDate.getMonth() + 1,
-                    0
-                ).getDate();
+                daysToShow = 30;
             } else if (dateRange === "week") {
                 daysToShow = 7;
             }
 
             for (let i = 0; i < daysToShow; i++) {
                 const date = new Date(startDate.getTime() + i * 24 * 60 * 60 * 1000);
-                const dateKey = date.toISOString().split("T")[0];
+                const dateKey = formatDateLocal(date);
                 dateMap[dateKey] = 0;
             }
 
+            console.log("fetchOrderChart - dateMap keys:", Object.keys(dateMap));
+
             filteredOrders.forEach((order) => {
-                const dateKey = new Date(order.created_at)
-                    .toISOString()
-                    .split("T")[0];
+                const orderDate = new Date(order.created_at);
+                const dateKey = formatDateLocal(orderDate);
+                console.log("fetchOrderChart - Order id:", order.id, "orderDate:", orderDate.toString(), "dateKey:", dateKey, "inMap:", dateMap.hasOwnProperty(dateKey));
                 if (dateMap.hasOwnProperty(dateKey)) {
                     dateMap[dateKey] += 1;
                 }
@@ -190,6 +237,8 @@ export const useDashboardCharts = () => {
 
             const labels = generateDateLabels(dateRange, startDate, endDate);
             const data = Object.values(dateMap).slice(-labels.length);
+
+            console.log("fetchOrderChart - Chart data:", data);
 
             setChartData((prev) => ({
                 ...prev,
@@ -212,31 +261,50 @@ export const useDashboardCharts = () => {
 
         try {
             const { startDate, endDate } = getDateRange(dateRange);
+            console.log("fetchRevenueByProduct - Date range:", startDate, "to", endDate);
+
             const response = await fetch(
-                `${API_BASE_URL}/orders?restaurant_id=${currentRestaurant.id}&status=delivered`
+                `${API_BASE_URL}/orders?restaurant_id=${currentRestaurant.id}`
             );
             const orders = await response.json();
+            console.log("fetchRevenueByProduct - Total orders fetched:", orders.length);
 
-            // Filter by date range
+            // Helper to format date as YYYY-MM-DD using local time (not UTC)
+            const formatDateLocal = (date) => {
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                return `${year}-${month}-${day}`;
+            };
+
+            // Filter by selected date range
             const filteredOrders = orders.filter((order) => {
-                const orderDate = new Date(order.completed_at);
+                const orderDate = new Date(order.updated_at || order.created_at);
                 return orderDate >= startDate && orderDate <= endDate;
             });
+            console.log("fetchRevenueByProduct - Filtered orders:", filteredOrders.length);
 
             // Group by product
             const productMap = {};
             filteredOrders.forEach((order) => {
+                console.log("fetchRevenueByProduct - Processing order:", order.id, "items:", order.items?.length || 0);
                 if (order.items && Array.isArray(order.items)) {
                     order.items.forEach((item) => {
                         const productName = item.name || `Product ${item.id}`;
                         if (!productMap[productName]) {
                             productMap[productName] = { count: 0, revenue: 0 };
                         }
-                        productMap[productName].count += item.quantity || 1;
-                        productMap[productName].revenue += (item.price || 0) * (item.quantity || 1);
+                        const qty = item.quantity || 1;
+                        productMap[productName].count += qty;
+                        // Use subtotal if available, otherwise unit_price * quantity
+                        const rev = (item.subtotal || (item.unit_price || 0) * qty);
+                        productMap[productName].revenue += rev;
+                        console.log("fetchRevenueByProduct - Item:", productName, "qty:", qty, "revenue:", rev);
                     });
                 }
             });
+
+            console.log("fetchRevenueByProduct - productMap:", productMap);
 
             // Sort by revenue
             const sorted = Object.entries(productMap)
@@ -248,6 +316,8 @@ export const useDashboardCharts = () => {
                 .sort((a, b) => b.revenue - a.revenue)
                 .slice(0, 10);
 
+            console.log("fetchRevenueByProduct - Final sorted data:", sorted);
+
             setChartData((prev) => ({
                 ...prev,
                 revenueByProduct: sorted,
@@ -256,9 +326,7 @@ export const useDashboardCharts = () => {
             console.error("Error fetching revenue by product:", err);
             setError("Failed to load product data");
         }
-    }, [currentRestaurant?.id, dateRange, getDateRange, API_BASE_URL]);
-
-    /**
+    }, [currentRestaurant?.id, dateRange, getDateRange, API_BASE_URL]);    /**
      * Load all chart data
      */
     const loadChartData = useCallback(async () => {

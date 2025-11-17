@@ -38,7 +38,7 @@ const Login = () => {
           return;
         }
 
-        // ✅ Validate user status from backend
+        // Validate user status from backend
         try {
           const API_BASE_URL =
             import.meta.env.VITE_API_BASE_URL || "http://localhost:4000";

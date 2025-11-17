@@ -5,6 +5,7 @@ import defaultBanner from "../../assets/default_banner.png";
 import { RestaurantContext } from "../../Context/RestaurantContext";
 import { AuthContext } from "../../Context/AuthContext";
 import { getImageUrl } from "@utils/imageHelper";
+import { formatRating } from "@utils/formatters";
 import { uploadService } from "shared-services";
 import { useRestaurantRating } from "shared-hooks";
 import {
@@ -136,7 +137,7 @@ const RestaurantProfile = () => {
         // Refresh restaurant data
         await fetchRestaurantInfo(currentUser.restaurantId);
       } else {
-        console.error("❌ Update failed:", result.message);
+        console.error("Update failed:", result.message);
 
         // Check if token expired
         if (
@@ -152,7 +153,7 @@ const RestaurantProfile = () => {
         }
       }
     } catch (error) {
-      console.error("❌ Error saving restaurant:", error);
+      console.error("Error saving restaurant:", error);
       alert(`An error occurred while saving: ${error.message}`);
     } finally {
       setLoading(false);
@@ -419,7 +420,7 @@ const RestaurantProfile = () => {
                 <div className="readonly-info">
                   <p>
                     <strong>Rating:</strong> <MdStar />{" "}
-                    {rating !== null ? rating : currentRestaurant.rating}
+                    {formatRating(rating !== null ? rating : currentRestaurant.rating)}
                   </p>
                   <p>
                     <strong>Reviews:</strong> {totalReviews}

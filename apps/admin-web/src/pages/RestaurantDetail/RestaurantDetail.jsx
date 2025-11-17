@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { formatCurrency } from "@utils/formatters";
+import { formatCurrency, formatRating } from "@utils/formatters";
 import { useRestaurantRating } from "shared-hooks";
 import {
     MdArrowBack,
@@ -176,7 +176,7 @@ const RestaurantDetail = () => {
                             <div className="info-item">
                                 <span className="info-label">Rating:</span>
                                 <span className="info-value">
-                                    <MdStar /> {rating !== null ? rating : restaurant.rating} ({totalReviews} reviews)
+                                    <MdStar /> {formatRating(rating !== null ? rating : restaurant.rating)} ({totalReviews} reviews)
                                 </span>
                             </div>
                             <div className="info-item">

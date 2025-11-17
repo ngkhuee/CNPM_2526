@@ -1,11 +1,12 @@
 // CartContext - Cart state riêng, sử dụng useCart hook
-import React, { createContext, useContext, useMemo } from "react";
+import React, { createContext, useContext, useMemo, useState } from "react";
 import { useCart } from "../hooks/useCart";
 
 export const CartContext = createContext();
 
 export const CartProvider = ({ children }) => {
   const cartHook = useCart();
+  const [appliedPromotion, setAppliedPromotion] = useState(null);
 
   // Add helper function to calculate total (for backward compatibility)
   const getTotalCartAmount = useMemo(() => {
@@ -19,6 +20,8 @@ export const CartProvider = ({ children }) => {
   const value = {
     ...cartHook,
     getTotalCartAmount,
+    appliedPromotion,
+    setAppliedPromotion,
   };
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;

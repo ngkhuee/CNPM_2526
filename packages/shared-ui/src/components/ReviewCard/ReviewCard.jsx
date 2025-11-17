@@ -1,5 +1,6 @@
 import React from "react";
 import { MdStar, MdStarBorder, MdModeEdit, MdChatBubbleOutline, MdCheckCircle } from "react-icons/md";
+import { formatRating } from "shared-utils";
 import "./ReviewCard.css";
 
 /**
@@ -41,7 +42,7 @@ const ReviewCard = ({ review, foodName, onReplyClick, showReplyButton = true }) 
                 <h4 className="review-food-name">{foodName}</h4>
                 <div className="review-rating">
                     {renderStars(review.rating)}
-                    <span className="review-rating-text">{review.rating}/5</span>
+                    <span className="review-rating-text">{formatRating(review.rating)}/5</span>
                 </div>
             </div>
 

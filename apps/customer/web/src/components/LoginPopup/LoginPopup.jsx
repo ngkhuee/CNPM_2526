@@ -51,7 +51,7 @@ const LoginPopup = ({ setShowLogin }) => {
           // AuthContext handles token and user state
           const currentUser = JSON.parse(localStorage.getItem("user"));
 
-          // ✅ Validate customer status from backend
+          // Validate customer status from backend
           try {
             const API_BASE_URL =
               import.meta.env.VITE_API_BASE_URL || "http://localhost:4000";

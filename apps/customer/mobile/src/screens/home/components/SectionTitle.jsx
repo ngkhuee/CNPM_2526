@@ -1,46 +1,40 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { OfferIcon } from '../../../components/Icons';
+import { View, Text, StyleSheet } from 'react-native';
 
-export function SectionTitle({ title, count, onViewAll }) {
+export default function SectionTitle({ title, count }) {
     return (
         <View style={styles.container}>
-            <View style={styles.left}>
-                <OfferIcon size={18} color="#ff6b35" />
-                <Text style={styles.title}>{title}</Text>
-                {count !== undefined && <Text style={styles.count}>({count})</Text>}
-            </View>
-            {onViewAll && (
-                <TouchableOpacity onPress={onViewAll}>
-                    <Text style={styles.viewAll}>View All</Text>
-                </TouchableOpacity>
+            <Text style={styles.title}>{title}</Text>
+            {count !== undefined && (
+                <View style={styles.badge}>
+                    <Text style={styles.count}>{count}</Text>
+                </View>
             )}
         </View>
     );
-} const styles = StyleSheet.create({
+}
+
+const styles = StyleSheet.create({
     container: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
         marginBottom: 12,
     },
-    left: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 8,
-    },
     title: {
         fontSize: 16,
-        fontWeight: '600',
+        fontWeight: '700',
         color: '#333',
     },
-    count: {
-        fontSize: 14,
-        color: '#666',
+    badge: {
+        backgroundColor: '#ff6b35',
+        paddingHorizontal: 10,
+        paddingVertical: 4,
+        borderRadius: 12,
     },
-    viewAll: {
+    count: {
+        color: '#fff',
         fontSize: 12,
-        color: '#ff6b35',
         fontWeight: '600',
     },
 });

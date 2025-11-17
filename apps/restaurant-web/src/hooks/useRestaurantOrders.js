@@ -12,16 +12,14 @@ export const useRestaurantOrders = () => {
 
   // Fetch restaurant orders on mount
   useEffect(() => {
-    const user = authService.getCurrentUser();
+    const loadOrders = async () => {
+      const user = await authService.getCurrentUser();
 
-    if (!user || !user.restaurantId) {
-      return; // Exit early if no user or restaurantId
-    }
+      if (!user || !user.restaurantId) {
+        return; // Exit early if no user or restaurantId
+      }
 
-    let isActive = true; // Flag to prevent state updates after unmount
-
-    const fetchOrders = async () => {
-      if (!isActive) return;
+      let isActive = true; // Flag to prevent state updates after unmount
 
       try {
         setLoading(true);
@@ -42,19 +40,19 @@ export const useRestaurantOrders = () => {
           setLoading(false);
         }
       }
+
+      // Cleanup function
+      return () => {
+        isActive = false;
+      };
     };
 
-    fetchOrders();
-
-    // Cleanup function
-    return () => {
-      isActive = false;
-    };
+    loadOrders();
   }, []);
 
   // Refresh orders (can be called manually)
   const refreshOrders = async () => {
-    const user = authService.getCurrentUser();
+    const user = await authService.getCurrentUser();
     if (!user || !user.restaurantId) {
       return { success: false, message: "No user or restaurantId found" };
     }

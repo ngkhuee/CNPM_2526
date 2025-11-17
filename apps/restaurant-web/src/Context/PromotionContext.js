@@ -36,7 +36,7 @@ export const PromotionProvider = ({ children }) => {
   // Add promotion
   const addPromotion = async (promoData) => {
     try {
-      const currentUser = authService.getCurrentUser();
+      const currentUser = await authService.getCurrentUser();
       if (!currentUser) {
         return { success: false, message: "User not authenticated" };
       }

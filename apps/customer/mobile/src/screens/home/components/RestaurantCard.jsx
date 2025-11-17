@@ -1,86 +1,102 @@
 import React from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
-import { StarIcon, ClockIcon } from '../../../components/Icons';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { formatRating } from '../../../shared/formatters';
 
-export function RestaurantCard({ item, onPress }) {
+export default function RestaurantCard({ item, onPress }) {
+    if (!item) {
+        console.error('[RestaurantCard] Item is null/undefined!');
+        return null;
+    }
+
     const imageUrl = `http://192.168.0.127:4000${item.image}`;
+    const ratingValue = parseFloat(item.rating) || 0;
+    const ratingText = formatRating(ratingValue);
+
+    const deliveryTime = String(item.delivery_time_minutes || 30);
+    const distance = item.distance || 0;
 
     return (
-        <TouchableOpacity style={styles.card} onPress={() => onPress?.(item)}>
+        <TouchableOpacity
+            style={styles.card}
+            onPress={() => onPress?.(item.id)}
+        >
             <Image source={{ uri: imageUrl }} style={styles.image} />
 
             <View style={styles.content}>
-                <Text style={styles.name}>{item.name}</Text>
-                <Text style={styles.category} numberOfLines={1}>{item.category}</Text>
+                <Text style={styles.name} numberOfLines={2}>
+                    {item.name || 'Unknown Restaurant'}
+                </Text>
 
-                <View style={styles.footer}>
-                    <View style={styles.ratingBox}>
-                        <StarIcon size={14} color="#ff6b35" />
-                        <Text style={styles.rating}>{item.rating || 0}</Text>
+                <View style={styles.infoRow}>
+                    {/* Rating */}
+                    <View style={styles.infoItem}>
+                        <MaterialIcons name="star" size={16} color="#ff6b35" />
+                        <Text style={styles.infoText}>{ratingText}</Text>
                     </View>
-                    <View style={styles.timeBox}>
-                        <ClockIcon size={12} color="#666" />
-                        <Text style={styles.deliveryTime}>
-                            {item.deliveryTime || 30} min
-                        </Text>
+
+                    {/* Distance */}
+                    <View style={styles.infoItem}>
+                        <MaterialIcons name="location-on" size={15} color="#ff6b35" />
+                        <Text style={styles.infoText}>{distance.toFixed(1)} km</Text>
+                    </View>
+
+                    {/* Delivery Time */}
+                    <View style={styles.infoItem}>
+                        <MaterialIcons name="two-wheeler" size={15} color="#ff6b35" />
+                        <Text style={styles.infoText}>{deliveryTime} phút</Text>
                     </View>
                 </View>
             </View>
         </TouchableOpacity>
     );
-} const styles = StyleSheet.create({
+}
+
+const styles = StyleSheet.create({
     card: {
+        flexDirection: 'row',
         backgroundColor: '#fff',
-        borderRadius: 8,
-        overflow: 'hidden',
+        borderRadius: 10,
+        padding: 10,
         marginBottom: 12,
         elevation: 2,
     },
+
     image: {
-        width: '100%',
-        height: 180,
+        width: 85,
+        height: 85,
+        borderRadius: 8,
         backgroundColor: '#eee',
+        marginRight: 14,
     },
+
     content: {
-        padding: 12,
+        flex: 1,
+        justifyContent: 'center',
     },
+
     name: {
-        fontSize: 16,
+        fontSize: 15,
+        fontWeight: '700',
+        color: '#333',
+        marginBottom: 8,
+    },
+
+    infoRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+
+    infoItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginRight: 12,
+    },
+
+    infoText: {
+        fontSize: 12,
         fontWeight: '600',
         color: '#333',
-    },
-    category: {
-        fontSize: 12,
-        color: '#666',
-        marginTop: 4,
-    },
-    footer: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginTop: 8,
-    },
-    ratingBox: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 4,
-        backgroundColor: '#f0f0f0',
-        paddingHorizontal: 8,
-        paddingVertical: 4,
-        borderRadius: 4,
-    },
-    rating: {
-        fontSize: 12,
-        color: '#333',
-        fontWeight: '600',
-    },
-    timeBox: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 4,
-    },
-    deliveryTime: {
-        fontSize: 12,
-        color: '#666',
+        marginLeft: 3,
     },
 });

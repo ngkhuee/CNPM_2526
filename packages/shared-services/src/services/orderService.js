@@ -64,7 +64,7 @@ export const orderService = {
       ]);
 
       console.log(
-        "🔍 OrderService.getAll() - Raw orders from API:",
+        "OrderService.getAll() - Raw orders from API:",
         orders.length
       );
       console.log("Sample raw order:", orders[0]);
@@ -97,7 +97,7 @@ export const orderService = {
       });
 
       console.log(
-        "✅ OrderService.getAll() - Mapped orders:",
+        "OrderService.getAll() - Mapped orders:",
         mappedOrders.length
       );
       console.log("Sample mapped order:", mappedOrders[0]);
@@ -290,10 +290,10 @@ export const orderService = {
 
       console.log("📤 Sending order to backend:", newOrder);
       const response = await apiClient.post(ENDPOINTS.ORDERS.BASE, newOrder);
-      console.log("✅ Backend response:", response);
+      console.log("Backend response:", response);
       return mapOrderToFrontend(response);
     } catch (error) {
-      console.error("❌ Order creation failed:", error);
+      console.error("Order creation failed:", error);
       throw error;
     }
   },

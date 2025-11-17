@@ -1,6 +1,7 @@
 import React from "react";
 import { MdEdit, MdDelete, MdLocalOffer, MdStar } from "react-icons/md";
 import { getImageUrl } from "@utils/imageHelper";
+import { formatRating } from "@utils/formatters";
 
 const FoodCard = ({ food, assets, onEdit, onDelete, onViewDetail, onFormatVND, categories }) => {
     const getImageSrc = (foodItem) => {
@@ -68,7 +69,7 @@ const FoodCard = ({ food, assets, onEdit, onDelete, onViewDetail, onFormatVND, c
                                 color: "#ff9800",
                             }}
                         >
-                            {(food.rating || 0).toFixed(1)}
+                            {formatRating(food.rating || 0)}
                         </span>
                     </div>
                 </div>

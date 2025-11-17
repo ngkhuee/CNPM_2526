@@ -83,11 +83,11 @@ export const useCheckout = (user) => {
                 console.log("🗺️ Geocoding address to get GPS coordinates...");
                 const result = await geocodeAddress(address);
                 if (result) {
-                    console.log("✅ Geocoded GPS:", result);
+                    console.log("Geocoded GPS:", result);
                     return { lat: result.lat, lng: result.lng };
                 }
             } catch (error) {
-                console.error("❌ Geocoding error:", error);
+                console.error("Geocoding error:", error);
             }
             return null;
         },
@@ -122,10 +122,10 @@ export const useCheckout = (user) => {
                     isDefault: shouldSave && addressData.isDefault,
                 });
 
-                console.log("✅ Address created successfully:", savedAddress);
+                console.log("Address created successfully:", savedAddress);
                 return savedAddress;
             } catch (error) {
-                console.error("❌ Error creating address:", error);
+                console.error("Error creating address:", error);
                 return null;
             }
         },
@@ -272,7 +272,7 @@ export const useCheckout = (user) => {
                     gpsLocation: finalGpsLocation,
                 };
             } catch (error) {
-                console.error("❌ Checkout processing error:", error);
+                console.error("Checkout processing error:", error);
                 return {
                     success: false,
                     message: error.message || "Error processing checkout",

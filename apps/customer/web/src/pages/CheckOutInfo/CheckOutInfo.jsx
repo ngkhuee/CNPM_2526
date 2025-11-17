@@ -25,7 +25,7 @@ import {
 const CheckoutInfo = () => {
   // Contexts
   const { user } = useContext(AuthContext);
-  const { cart, clearCart, getTotalCartAmount } = useContext(CartContext);
+  const { cart, clearCart, getTotalCartAmount, appliedPromotion, setAppliedPromotion } = useContext(CartContext);
   const { addOrder } = useContext(OrderContext);
   const navigate = useNavigate();
 
@@ -72,7 +72,6 @@ const CheckoutInfo = () => {
   const [useNewAddress, setUseNewAddress] = useState(true);
   const [selectedAddressId, setSelectedAddressId] = useState(null);
   const [saveAddressChecked, setSaveAddressChecked] = useState(false);
-  const [appliedPromo, setAppliedPromo] = useState(null);
 
   // Auto-fetch GPS on mount
   useEffect(() => {
@@ -86,7 +85,7 @@ const CheckoutInfo = () => {
         })
         .catch(() => { });
     }
-  }, []);
+  }, [handleGetGPS]);
 
   // Update customer when user changes
   useEffect(() => {
@@ -117,6 +116,18 @@ const CheckoutInfo = () => {
     }));
     markAsTouched("address");
   };
+
+  // When GPS location is obtained, auto-fill address field
+  useEffect(() => {
+    if (gpsLocation && useNewAddress && !customer.address) {
+      // Auto-fill address field with GPS coords
+      setCustomer((prev) => ({
+        ...prev,
+        address: `Latitude: ${gpsLocation.lat.toFixed(6)}, Longitude: ${gpsLocation.lng.toFixed(6)}`,
+      }));
+      console.log("GPS location auto-filled address field");
+    }
+  }, [gpsLocation, useNewAddress]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -175,7 +186,7 @@ const CheckoutInfo = () => {
         cart.restaurant_id,
         addressIdForOrder,
         finalGpsLocation,
-        appliedPromo
+        appliedPromotion
       );
 
       if (!checkoutResult.success) {
@@ -209,7 +220,7 @@ const CheckoutInfo = () => {
   const subtotal = getTotalCartAmount();
   const { discountAmount, deliveryFee, total } = calculateCartTotals(
     subtotal,
-    appliedPromo,
+    appliedPromotion,
     deliveryFeeValue
   );
 
@@ -308,11 +319,11 @@ const CheckoutInfo = () => {
           discountAmount={discountAmount}
           deliveryFee={deliveryFee}
           total={total}
-          appliedPromo={appliedPromo}
+          appliedPromo={appliedPromotion}
           promotions={applicablePromotions}
           loadingPromos={loadingPromos}
-          onApplyPromo={setAppliedPromo}
-          onRemovePromo={() => setAppliedPromo(null)}
+          onApplyPromo={setAppliedPromotion}
+          onRemovePromo={() => setAppliedPromotion(null)}
         />
       </div>
     </div>

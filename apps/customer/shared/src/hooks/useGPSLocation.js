@@ -84,11 +84,11 @@ export const useGPSLocation = () => {
             console.log("🗺️ Geocoding address to get GPS coordinates...");
             const result = await geoService.geocodeAddress(address);
             if (result) {
-                console.log("✅ Geocoded GPS:", result);
+                console.log("Geocoded GPS:", result);
                 return { lat: result.lat, lng: result.lng };
             }
         } catch (error) {
-            console.error("❌ Geocoding error:", error);
+            console.error("Geocoding error:", error);
             setGpsError(error.message);
         }
         return null;

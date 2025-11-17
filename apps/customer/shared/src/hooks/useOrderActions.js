@@ -42,7 +42,7 @@ export const useOrderActions = () => {
                         status: "available",
                         assigned_order_id: null,
                     });
-                    console.log("✅ Drone released successfully");
+                    console.log("Drone released successfully");
                 } catch (error) {
                     console.warn("⚠️ Could not release drone:", error);
                     // Continue anyway - order is cancelled

@@ -1,74 +1,126 @@
 import React from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
-import { StarIcon } from '../../../components/Icons';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { formatCurrency, formatRating } from '../../../shared/formatters';
 
-export function FoodCard({ item, onPress }) {
+export default function FoodCard({ item, onPress }) {
+    // console.log('[FoodCard] Item:', item);
+
+    if (!item) {
+        console.error('[FoodCard] Item is null/undefined!');
+        return null;
+    }
+
     const imageUrl = `http://192.168.0.127:4000${item.image}`;
+    const priceFormatted = formatCurrency(item.price || 0);
+    const ratingValue = parseFloat(item.rating) || 0;
+    const ratingFormatted = formatRating(ratingValue);
+    const soldCount = parseInt(item.sold) || 0;
 
     return (
         <TouchableOpacity style={styles.card} onPress={() => onPress?.(item)}>
-            <Image source={{ uri: imageUrl }} style={styles.image} />
-            <View style={styles.content}>
-                <Text style={styles.name} numberOfLines={2}>{item.name}</Text>
-                <Text style={styles.description} numberOfLines={1}>{item.description}</Text>
-
-                <View style={styles.footer}>
-                    <Text style={styles.price}>{item.price?.toLocaleString('vi-VN')}₫</Text>
-                    <View style={styles.ratingBox}>
-                        <StarIcon size={14} color="#ff6b35" />
-                        <Text style={styles.rating}>{item.rating || 0}</Text>
+            <View style={styles.imageContainer}>
+                <Image source={{ uri: imageUrl }} style={styles.image} />
+                {ratingValue > 0 ? (
+                    <View style={styles.ratingBadge}>
+                        <View style={{ marginRight: 2 }}>
+                            <MaterialIcons name="star" size={12} color="#ffc107" />
+                        </View>
+                        <Text style={styles.ratingText}>{ratingFormatted}</Text>
                     </View>
+                ) : null}
+            </View>
+            <View style={styles.content}>
+                <View style={styles.nameRow}>
+                    <Text style={styles.name} numberOfLines={2}>
+                        {item.name || 'Unknown Item'}
+                    </Text>
+                    {soldCount > 0 ? (
+                        <View style={[styles.soldBadge, { marginLeft: 'auto' }]}>
+                            <Text style={styles.soldText}>Sold {soldCount}</Text>
+                        </View>
+                    ) : null}
                 </View>
+                {/* <Text style={styles.description} numberOfLines={1}>
+                    {item.description}
+                </Text> */}
+                <Text style={styles.price}>{priceFormatted || '0đ'}</Text>
             </View>
         </TouchableOpacity>
     );
-} const styles = StyleSheet.create({
+}
+
+const styles = StyleSheet.create({
     card: {
         backgroundColor: '#fff',
         borderRadius: 8,
         overflow: 'hidden',
-        marginBottom: 12,
-        flexDirection: 'row',
         elevation: 2,
+        flex: 1,
+        margin: 6,
     },
-    image: {
-        width: 100,
-        height: 100,
+    imageContainer: {
+        width: '100%',
+        height: 120,
+        position: 'relative',
         backgroundColor: '#eee',
     },
-    content: {
-        flex: 1,
-        padding: 12,
-        justifyContent: 'space-between',
+    image: {
+        width: '100%',
+        height: '100%',
+        resizeMode: 'cover',
     },
-    name: {
-        fontSize: 14,
+    ratingBadge: {
+        position: 'absolute',
+        top: 8,
+        right: 8,
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#fff',
+        paddingHorizontal: 8,
+        paddingVertical: 4,
+        borderRadius: 12,
+        elevation: 2,
+    },
+    ratingText: {
+        fontSize: 11,
         fontWeight: '600',
         color: '#333',
     },
-    description: {
-        fontSize: 12,
-        color: '#666',
-        marginTop: 4,
+    content: {
+        padding: 10,
     },
-    footer: {
+    nameRow: {
         flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginTop: 8,
+        alignItems: 'flex-start',
+        marginBottom: 4,
+    },
+    name: {
+        fontSize: 13,
+        fontWeight: '600',
+        color: '#333',
+        flex: 1,
+        marginRight: 8,
+    },
+    soldBadge: {
+        backgroundColor: '#ffebee',
+        paddingHorizontal: 6,
+        paddingVertical: 2,
+        borderRadius: 4,
+    },
+    soldText: {
+        fontSize: 10,
+        fontWeight: '600',
+        color: '#d32f2f',
+    },
+    description: {
+        fontSize: 11,
+        color: '#999',
+        marginBottom: 8,
     },
     price: {
         fontSize: 14,
         fontWeight: 'bold',
         color: '#ff6b35',
-    },
-    ratingBox: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 4,
-    },
-    rating: {
-        fontSize: 12,
-        color: '#333',
     },
 });

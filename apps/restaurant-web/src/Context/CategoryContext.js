@@ -10,10 +10,19 @@ export const CategoryProvider = ({ children }) => {
 
   // Fetch categories for current restaurant on mount
   useEffect(() => {
-    const user = authService.getCurrentUser();
-    if (user?.role === "restaurant" && user?.restaurantId && /^r\d+$/.test(user.restaurantId)) {
-      fetchCategories(user.restaurantId);
-    }
+    const initializeCategories = async () => {
+      try {
+        const user = await authService.getCurrentUser();
+        console.log("CategoryContext - user loaded:", user);
+        if (user?.role === "restaurant" && user?.restaurantId && /^r\d+$/.test(user.restaurantId)) {
+          console.log("CategoryContext - fetching categories for:", user.restaurantId);
+          await fetchCategories(user.restaurantId);
+        }
+      } catch (err) {
+        console.error("Error initializing categories:", err);
+      }
+    };
+    initializeCategories();
   }, []);
 
   // Fetch categories
@@ -37,7 +46,7 @@ export const CategoryProvider = ({ children }) => {
   // Add category
   const addCategory = async (categoryData) => {
     try {
-      const currentUser = authService.getCurrentUser();
+      const currentUser = await authService.getCurrentUser();
       if (!currentUser) {
         return { success: false, message: "User not authenticated" };
       }
@@ -64,7 +73,7 @@ export const CategoryProvider = ({ children }) => {
   // Update category
   const updateCategory = async (categoryId, categoryData) => {
     try {
-      const currentUser = authService.getCurrentUser();
+      const currentUser = await authService.getCurrentUser();
       const payload = {
         ...categoryData,
         updated_at: new Date().toISOString(),
@@ -85,7 +94,7 @@ export const CategoryProvider = ({ children }) => {
   // Delete category
   const deleteCategory = async (categoryId) => {
     try {
-      const currentUser = authService.getCurrentUser();
+      const currentUser = await authService.getCurrentUser();
       const result = await categoryService.delete(categoryId);
       if (result) {
         await fetchCategories(currentUser?.restaurantId);

@@ -13,7 +13,7 @@ export const useDroneTracking = () => {
 
   // Fetch drones and orders
   const fetchData = async () => {
-    const user = authService.getCurrentUser();
+    const user = await authService.getCurrentUser();
     if (!user || !user.restaurantId) {
       console.warn("No user or restaurantId found for drone tracking");
       return;

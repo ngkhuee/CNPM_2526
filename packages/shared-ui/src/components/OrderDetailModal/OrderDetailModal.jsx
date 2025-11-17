@@ -27,7 +27,8 @@ export const OrderDetailModal = ({ isOpen, onClose, order }) => {
             <p>
               <strong>Name:</strong>
               <span>
-                {order.user?.full_name ||
+                {order.customer?.name ||
+                  order.user?.full_name ||
                   order.userName ||
                   order.full_name ||
                   "-"}
@@ -37,26 +38,43 @@ export const OrderDetailModal = ({ isOpen, onClose, order }) => {
               <strong>ID:</strong>
               <span>{order.user_id || order.userId || "-"}</span>
             </p>
+            <p>
+              <strong>Phone:</strong>
+              <span>
+                {order.customer?.phone ||
+                  order.user?.phone ||
+                  order.phone ||
+                  "N/A"}
+              </span>
+            </p>
           </section>
 
           <section className="odm-section odm-half">
             <h4>Restaurant</h4>
             <p>
-              <strong>Restaurant ID:</strong>
+              <strong>Name:</strong>
+              <span>
+                {order.restaurant?.name || order.restaurantName || "N/A"}
+                {(order.restaurant?.address || order.restaurantAddress) &&
+                  ` (${order.restaurant?.address || order.restaurantAddress})`}
+              </span>
+            </p>
+            <p>
+              <strong>ID:</strong>
               <span className="value-highlight">
                 {order.restaurant_id || order.restaurantId || "-"}
               </span>
             </p>
             <p>
-              <strong>Restaurant Name:</strong>
+              <strong>Phone:</strong>
               <span>
-                {order.restaurant?.name || order.restaurantName || "N/A"}
+                {order.restaurant?.phone || order.restaurantPhone || "N/A"}
               </span>
             </p>
           </section>
         </div>
 
-        {/* Row 2: Payment Summary (full width or split) */}
+        {/* Row 2: Payment Summary */}
         <div className="odm-row">
           <section className="odm-section odm-half">
             <h4>Payment Summary</h4>
@@ -101,9 +119,15 @@ export const OrderDetailModal = ({ isOpen, onClose, order }) => {
               </span>
             </p>
             <p>
-              <strong>Payment:</strong>
+              <strong>Payment Method:</strong>
               <span className="odm-payment-badge">
                 {order.payment_method || order.paymentMethod || "N/A"}
+              </span>
+            </p>
+            <p>
+              <strong>Payment Status:</strong>
+              <span>
+                {order.payment_status || order.paymentStatus || "N/A"}
               </span>
             </p>
             <p>
@@ -111,15 +135,15 @@ export const OrderDetailModal = ({ isOpen, onClose, order }) => {
               <span>
                 {order.created_at || order.createdAt
                   ? new Date(
-                      order.created_at || order.createdAt
-                    ).toLocaleString()
+                    order.created_at || order.createdAt
+                  ).toLocaleString()
                   : "Unknown"}
               </span>
             </p>
           </section>
         </div>
 
-        {/* Row 3: Items (full width) */}
+        {/* Row 3: Items */}
         <section className="odm-section">
           <h4>Order Items</h4>
           <ul>
@@ -145,14 +169,13 @@ export const OrderDetailModal = ({ isOpen, onClose, order }) => {
         {/* Row 4: Delivery Info */}
         <div className="odm-row">
           <section className="odm-section odm-half">
-            <h4>Delivery</h4>
+            <h4>Delivery Address</h4>
             <p>
               <strong>Address:</strong>
               <span>
-                {order.addressInfo?.fullAddress ||
-                  order.address?.full_address ||
-                  order.address ||
+                {order.customer?.address ||
                   order.delivery_address ||
+                  order.address ||
                   (order.addressId || order.address_id
                     ? `Address ID: ${order.addressId || order.address_id}`
                     : "-")}
@@ -161,30 +184,29 @@ export const OrderDetailModal = ({ isOpen, onClose, order }) => {
             <p>
               <strong>Phone:</strong>
               <span>
-                {order.user?.phone ||
-                  order.addressInfo?.phone ||
-                  order.address?.phone ||
+                {order.customer?.phone ||
+                  order.user?.phone ||
                   "N/A"}
               </span>
             </p>
             <p>
-              <strong>Estimated:</strong>
+              <strong>Estimated Delivery:</strong>
               <span>
                 {order.estimated_delivery_time ||
                   order.estimatedDeliveryTime ||
                   "Not specified"}
               </span>
             </p>
+          </section>
+
+          <section className="odm-section odm-half">
+            <h4>Additional Info</h4>
             <p>
               <strong>Drone:</strong>
               <span className="value-highlight">
                 {order.drone_id || order.droneId || "Not assigned"}
               </span>
             </p>
-          </section>
-
-          <section className="odm-section odm-half">
-            <h4>Additional Info</h4>
             <p>
               <strong>Special Instructions:</strong>
               <span>
@@ -194,14 +216,14 @@ export const OrderDetailModal = ({ isOpen, onClose, order }) => {
               </span>
             </p>
             <p>
-              <strong>Order ID:</strong>
-              <span className="value-highlight">#{order.id}</span>
+              <strong>Order Number:</strong>
+              <span className="value-highlight">
+                {order.order_number || order.orderNumber || order.id}
+              </span>
             </p>
           </section>
         </div>
       </div>
     </Modal>
   );
-};
-
-export default OrderDetailModal;
+}; export default OrderDetailModal;

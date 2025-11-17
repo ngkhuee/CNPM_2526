@@ -108,8 +108,8 @@ export const usePromotions = () => {
   };
 
   // Get current restaurant's promotions
-  const getCurrentRestaurantPromotions = () => {
-    const user = authService.getCurrentUser();
+  const getCurrentRestaurantPromotions = async () => {
+    const user = await authService.getCurrentUser();
     if (!user || !user.restaurantId) {
       return [];
     }

@@ -39,10 +39,10 @@ export const useAddressManagement = (user) => {
                     isDefault: shouldSave && addressData.isDefault,
                 });
 
-                console.log("✅ Address created successfully:", savedAddress);
+                console.log("Address created successfully:", savedAddress);
                 return savedAddress;
             } catch (error) {
-                console.error("❌ Error creating address:", error);
+                console.error("Error creating address:", error);
                 return null;
             }
         },
@@ -58,10 +58,10 @@ export const useAddressManagement = (user) => {
     const updateAddress = useCallback(async (addressId, addressData) => {
         try {
             const updated = await addressService.update(addressId, addressData);
-            console.log("✅ Address updated successfully:", updated);
+            console.log("Address updated successfully:", updated);
             return updated;
         } catch (error) {
-            console.error("❌ Error updating address:", error);
+            console.error("Error updating address:", error);
             return null;
         }
     }, []);
@@ -74,10 +74,10 @@ export const useAddressManagement = (user) => {
     const deleteAddress = useCallback(async (addressId) => {
         try {
             await addressService.delete(addressId);
-            console.log("✅ Address deleted successfully");
+            console.log("Address deleted successfully");
             return true;
         } catch (error) {
-            console.error("❌ Error deleting address:", error);
+            console.error("Error deleting address:", error);
             return false;
         }
     }, []);

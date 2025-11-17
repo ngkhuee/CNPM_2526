@@ -10,45 +10,56 @@ export const OrderProvider = ({ children }) => {
 
   // Fetch restaurant orders on mount and auto-refresh
   useEffect(() => {
-    const user = authService.getCurrentUser();
-    if (!user?.restaurantId) {
-      return;
-    }
-
     let isActive = true;
 
-    const fetchOrders = async () => {
-      if (!isActive) return;
+    const initializeFetch = async () => {
       try {
-        setLoading(true);
-        const restaurantOrders = await orderService.getByRestaurant(user.restaurantId);
-        if (isActive) {
-          console.log(`🍽️ Restaurant orders updated: ${restaurantOrders.length} orders`);
-          setOrders(restaurantOrders);
+        const user = await authService.getCurrentUser();
+        if (!user?.restaurantId || !isActive) {
+          return;
         }
+
+        const fetchOrders = async () => {
+          if (!isActive) return;
+          try {
+            setLoading(true);
+            const restaurantOrders = await orderService.getByRestaurant(user.restaurantId);
+            if (isActive) {
+              console.log(`Restaurant orders updated: ${restaurantOrders.length} orders`);
+              setOrders(restaurantOrders);
+            }
+          } catch (error) {
+            if (isActive) {
+              console.error("Error fetching restaurant orders:", error);
+            }
+          } finally {
+            if (isActive) {
+              setLoading(false);
+            }
+          }
+        };
+
+        fetchOrders();
+
+        // Auto-refresh every 10 seconds to catch new orders
+        const refreshInterval = setInterval(() => {
+          if (isActive) {
+            fetchOrders();
+          }
+        }, 10000);
+
+        return () => {
+          clearInterval(refreshInterval);
+        };
       } catch (error) {
-        if (isActive) {
-          console.error("Error fetching restaurant orders:", error);
-        }
-      } finally {
-        if (isActive) {
-          setLoading(false);
-        }
+        console.error("Error initializing orders:", error);
       }
     };
 
-    fetchOrders();
-
-    // Auto-refresh every 10 seconds to catch new orders
-    const refreshInterval = setInterval(() => {
-      if (isActive) {
-        fetchOrders();
-      }
-    }, 10000);
+    initializeFetch();
 
     return () => {
       isActive = false;
-      clearInterval(refreshInterval);
     };
   }, []);
 

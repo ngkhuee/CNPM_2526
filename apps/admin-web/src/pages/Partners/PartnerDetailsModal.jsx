@@ -1,5 +1,5 @@
 import React from "react";
-import { getImageUrl } from "shared-utils";
+import { getImageUrl, formatRating } from "shared-utils";
 
 const PartnerDetailsModal = ({ isOpen, onClose, restaurant }) => {
     if (!isOpen || !restaurant) return null;
@@ -54,7 +54,7 @@ const PartnerDetailsModal = ({ isOpen, onClose, restaurant }) => {
                     <div className="detail-row">
                         <strong>Rating:</strong>
                         <span>
-                            Rating: {restaurant.rating?.toFixed(1) || "0.0"} (
+                            Rating: {formatRating(restaurant.rating || 0)} (
                             {restaurant.total_reviews || 0} reviews)
                         </span>
                     </div>

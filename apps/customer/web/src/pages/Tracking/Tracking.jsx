@@ -165,13 +165,13 @@ const Tracking = () => {
           <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
             <MdRestaurant size={24} color="#ff6b35" />
             <span>
-              <b>Restaurant:</b> {order.restaurantName || "Restaurant"}
+              <b>Restaurant:</b> {order.restaurant?.name || order.restaurantName || "Restaurant"}
             </span>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
             <MdHome size={24} color="#4caf50" />
             <span>
-              <b>Delivery:</b> {order.customerAddress || "Your Location"}
+              <b>Delivery:</b> {order.customer?.address || order.customerAddress || order.delivery_address || order.address || "Your Location"}
             </span>
           </div>
           {order.drone_id && (

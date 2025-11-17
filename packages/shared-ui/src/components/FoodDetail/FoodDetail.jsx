@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { MdStar, MdStarBorder, MdClose, MdReply, MdSend } from "react-icons/md";
 import { reviewService } from "shared-services";
-import { getImageUrl } from "shared-utils";
+import { getImageUrl, formatRating } from "shared-utils";
 import { formatCurrency } from "shared-utils";
 import "./FoodDetail.css";
 
@@ -35,7 +35,7 @@ const FoodDetail = ({
     try {
       setLoading(true);
       const foodId = food.id || food._id;
-      console.log("🔍 Fetching reviews for food:", foodId);
+      console.log("Fetching reviews for food:", foodId);
       const data = await reviewService.getByFood(foodId);
       console.log("📝 Reviews received:", data);
       // Sort by created_at descending (newest first)
@@ -153,7 +153,7 @@ const FoodDetail = ({
             <div className="food-rating-summary">
               {renderStars(Math.round(avgRating))}
               <span className="rating-text">
-                {avgRating.toFixed(1)} ({totalReviews} reviews)
+                {formatRating(avgRating)} ({totalReviews} reviews)
               </span>
             </div>
 

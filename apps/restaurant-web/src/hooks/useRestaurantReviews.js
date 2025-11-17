@@ -8,6 +8,7 @@ import { RestaurantContext } from "../Context/RestaurantContext";
  */
 export const useRestaurantReviews = () => {
     const [reviews, setReviews] = useState([]);
+    const [allReviews, setAllReviews] = useState([]); // Store all unfiltered reviews
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const { currentRestaurant } = useContext(RestaurantContext);
@@ -30,6 +31,9 @@ export const useRestaurantReviews = () => {
                 const allReviews = await reviewService.getByRestaurant(
                     currentRestaurant.id
                 );
+
+                // Store all reviews for stats calculation
+                setAllReviews(allReviews);
 
                 // Filter theo trạng thái reply
                 let filtered = allReviews;
@@ -113,18 +117,18 @@ export const useRestaurantReviews = () => {
     }, [reviews]);
 
     /**
-     * Tính stats cho restaurant
+     * Tính stats cho restaurant (từ tất cả reviews, không filter)
      */
     const getStats = useCallback(() => {
-        const total = reviews.length;
-        const pending = reviews.filter((r) => !r.restaurant_reply).length;
-        const replied = reviews.filter((r) => r.restaurant_reply).length;
+        const total = allReviews.length;
+        const pending = allReviews.filter((r) => !r.restaurant_reply).length;
+        const replied = allReviews.filter((r) => r.restaurant_reply).length;
 
         // Tính avg rating
         let avgRating = 0;
-        if (reviews.length > 0) {
-            const totalRating = reviews.reduce((sum, r) => sum + (r.rating || 0), 0);
-            avgRating = (totalRating / reviews.length).toFixed(1);
+        if (allReviews.length > 0) {
+            const totalRating = allReviews.reduce((sum, r) => sum + (r.rating || 0), 0);
+            avgRating = (totalRating / allReviews.length).toFixed(1);
         }
 
         return {
@@ -133,7 +137,7 @@ export const useRestaurantReviews = () => {
             replied,
             avgRating,
         };
-    }, [reviews]);
+    }, [allReviews]);
 
     return {
         reviews,

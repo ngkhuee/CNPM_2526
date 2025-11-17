@@ -9,17 +9,31 @@ export const useRestaurantInfo = () => {
 
     // Fetch restaurant info on mount
     useEffect(() => {
-        const user = authService.getCurrentUser();
-        if (user?.role === "restaurant" && user?.restaurantId && /^r\d+$/.test(user.restaurantId)) {
-            fetchRestaurantInfo(user.restaurantId);
-        }
+        const initializeRestaurant = async () => {
+            try {
+                const user = await authService.getCurrentUser();
+                console.log("useRestaurantInfo - user loaded:", user);
+                if (user?.role === "restaurant" && user?.restaurantId && /^r\d+$/.test(user.restaurantId)) {
+                    console.log("useRestaurantInfo - fetching restaurant data for:", user.restaurantId);
+                    await fetchRestaurantInfo(user.restaurantId);
+                } else {
+                    console.warn("useRestaurantInfo - User is not restaurant or no restaurantId:", user);
+                }
+            } catch (err) {
+                console.error("Error initializing restaurant info:", err);
+            }
+        };
+
+        initializeRestaurant();
     }, []);
 
     const fetchRestaurantInfo = async (restaurantId) => {
         try {
             setLoading(true);
             setError(null);
+            console.log("Fetching restaurant info for ID:", restaurantId);
             const restaurant = await restaurantService.getById(restaurantId);
+            console.log("Restaurant info fetched:", restaurant);
             setCurrentRestaurant(restaurant);
             return { success: true, restaurant };
         } catch (err) {

@@ -1,5 +1,5 @@
 import React from "react";
-import { MdAttachMoney, MdShoppingCart } from "react-icons/md";
+import { MdShoppingCart } from "react-icons/md";
 import { formatCurrency } from "@utils/formatters";
 
 /**
@@ -48,9 +48,8 @@ const ProductRevenueTable = ({ data = [], loading = false }) => {
                                     <span className="rank-badge">{index + 1}</span>
                                 </td>
                                 <td className="product-name">{item.name}</td>
-                                <td className="center-cell">{item.count || 0}</td>
+                                <td className="center-cell">{item.quantity || 0}</td>
                                 <td className="revenue-cell">
-                                    <MdAttachMoney className="icon" />
                                     {formatCurrency(item.revenue || 0)}
                                 </td>
                             </tr>

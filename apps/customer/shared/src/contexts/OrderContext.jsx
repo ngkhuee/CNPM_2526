@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect, useContext } from "react";
+import React, { createContext, useState, useEffect, useContext, useCallback } from "react";
 import { orderService, storage } from "shared-services";
 import { AuthContext } from "./AuthContext";
 
@@ -9,24 +9,8 @@ export const OrderProvider = ({ children }) => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // Fetch user orders when user changes (no auto-refresh)
-  useEffect(() => {
-    const checkTokenAndFetch = async () => {
-      if (user) {
-        // Check if token exists before fetching
-        const token = await storage.getItem("token");
-        if (token) {
-          fetchUserOrders();
-        }
-      } else {
-        setOrders([]);
-      }
-    };
-    checkTokenAndFetch();
-  }, [user]);
-
-  // Fetch user orders from API
-  const fetchUserOrders = async () => {
+  // Fetch user orders from API (wrapped in useCallback to prevent re-creation)
+  const fetchUserOrders = useCallback(async () => {
     if (!user) return;
 
     // Double check token exists
@@ -49,12 +33,28 @@ export const OrderProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user]);
+
+  // Fetch user orders when user changes (no auto-refresh)
+  useEffect(() => {
+    const checkTokenAndFetch = async () => {
+      if (user) {
+        // Check if token exists before fetching
+        const token = await storage.getItem("token");
+        if (token) {
+          await fetchUserOrders();
+        }
+      } else {
+        setOrders([]);
+      }
+    };
+    checkTokenAndFetch();
+  }, [user, fetchUserOrders]);
 
   // Create new order
   const addOrder = async (orderData) => {
     if (!user) {
-      console.error("❌ No user found in OrderContext");
+      console.error("No user found in OrderContext");
       return {
         success: false,
         message: "User must be logged in to create order",
@@ -72,14 +72,14 @@ export const OrderProvider = ({ children }) => {
         status: "pending",
       });
 
-      console.log("✅ OrderContext: Order created successfully:", newOrder);
+      console.log("OrderContext: Order created successfully:", newOrder);
 
       // Update local state
       setOrders((prev) => [newOrder, ...prev]);
 
       return { success: true, order: newOrder };
     } catch (error) {
-      console.error("❌ OrderContext: Error creating order:", error);
+      console.error("OrderContext: Error creating order:", error);
       return {
         success: false,
         message: error.message || "Unknown error occurred",

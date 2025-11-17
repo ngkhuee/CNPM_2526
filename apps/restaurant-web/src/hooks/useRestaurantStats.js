@@ -7,7 +7,22 @@ export const useRestaurantStats = () => {
   const { currentUser } = useContext(AuthContext);
 
   const stats = useMemo(() => {
-    if (!orders || !currentUser?.restaurantId) {
+    console.log("useRestaurantStats - currentUser:", currentUser);
+    console.log("useRestaurantStats - orders count:", orders?.length);
+
+    if (!currentUser?.restaurantId) {
+      console.warn("Missing restaurantId:", currentUser?.restaurantId);
+      return {
+        totalOrders: 0,
+        completedOrders: 0,
+        revenue: 0,
+        pendingOrders: 0,
+        chartData: [],
+      };
+    }
+
+    if (!orders || orders.length === 0) {
+      console.warn("⚠️ No orders yet - orders count:", orders?.length);
       return {
         totalOrders: 0,
         completedOrders: 0,
@@ -21,6 +36,8 @@ export const useRestaurantStats = () => {
     const restaurantOrders = orders.filter(
       (order) => order.restaurant_id === currentUser.restaurantId
     );
+
+    console.log("Restaurant orders filtered:", restaurantOrders.length, "for restaurantId:", currentUser.restaurantId);
 
     const totalOrders = restaurantOrders.length;
     const completedOrders = restaurantOrders.filter(

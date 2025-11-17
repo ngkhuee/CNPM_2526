@@ -52,7 +52,7 @@ const CartSummary = ({
                             <div key={promo.id} className="promo-item">
                                 <span>
                                     {promo.code} -{" "}
-                                    {promo.type === "fixed"
+                                    {promo.type === "fixed_amount" || promo.type === "fixed"
                                         ? `Save ${formatCurrency(promo.value)}`
                                         : `Save ${promo.value}%`}
                                 </span>

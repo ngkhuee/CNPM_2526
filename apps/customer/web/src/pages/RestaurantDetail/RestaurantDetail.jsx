@@ -13,7 +13,7 @@ import { SwitchRestaurantDialog } from "shared-ui";
 import FoodItem from "../../components/FoodItem/FoodItem";
 import FoodDetailPopup from "../../components/FoodDetailPopup/FoodDetailPopup";
 import RestaurantReviews from "../../components/ReviewSection/RestaurantReviews";
-import { getImageUrl, isRestaurantOpen, getTodayHours } from "@utils";
+import { getImageUrl, isRestaurantOpen, getTodayHours, formatRating } from "@utils";
 import "./RestaurantDetail.css";
 
 const RestaurantDetail = () => {
@@ -99,7 +99,7 @@ const RestaurantDetail = () => {
       if (can) {
         // Same restaurant or empty cart, add directly
         await addItem(restaurant.id, foodId, quantity, "");
-        alert("✅ Added to cart!");
+        alert("Added to cart!");
         setShowFoodPopup(false);
       } else {
         // Different restaurant, show warning dialog
@@ -114,7 +114,7 @@ const RestaurantDetail = () => {
         setPendingFoodData({ foodId, quantity });
         setShowSwitchDialog(true);
       } else {
-        alert("❌ Error adding to cart: " + error.message);
+        alert("Error adding to cart: " + error.message);
       }
     }
   };
@@ -137,13 +137,13 @@ const RestaurantDetail = () => {
         );
       }
 
-      alert("✅ Cart updated!");
+      alert("Cart updated!");
       setShowSwitchDialog(false);
       setPendingFoodData(null);
       setShowFoodPopup(false);
     } catch (error) {
       console.error("Error switching restaurant:", error);
-      alert("❌ Error updating cart: " + error.message);
+      alert("Error updating cart: " + error.message);
     }
   };
 
@@ -188,7 +188,7 @@ const RestaurantDetail = () => {
               <div className="restaurant-meta-item">
                 <MdStar size={18} />
                 <span>
-                  {rating !== null ? rating.toFixed(1) : restaurant.rating.toFixed(1)} ({totalReviews || restaurant.reviewCount || 0}{" "}
+                  {formatRating(rating !== null ? rating : restaurant.rating)} ({totalReviews || restaurant.reviewCount || 0}{" "}
                   reviews)
                 </span>
               </div>

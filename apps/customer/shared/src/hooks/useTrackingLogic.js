@@ -5,7 +5,7 @@
  */
 
 import { useState, useEffect, useCallback } from "react";
-import { orderTrackingService, droneProgressService } from "shared-services";
+import { orderTrackingService, droneProgressService, orderService } from "shared-services";
 
 export const useTrackingLogic = (orderId) => {
     const [order, setOrder] = useState(null);
@@ -25,7 +25,10 @@ export const useTrackingLogic = (orderId) => {
         try {
             setLoading(true);
             setError(null);
-            const data = await orderTrackingService.getOrderDetails(orderId);
+
+            // Use orderService instead of orderTrackingService to get enriched order with restaurant data
+            const data = await orderService.getById(orderId);
+
             setOrder(data);
 
             // Calculate progress based on order status
@@ -69,7 +72,7 @@ export const useTrackingLogic = (orderId) => {
             setDroneProgress(1);
             setDroneArrived(false);
             setArrivalTime(null);
-            console.log("✅ Delivery confirmed successfully");
+            console.log("Delivery confirmed successfully");
             return { success: true };
         } catch (error) {
             console.error("Error confirming delivery:", error);
@@ -90,7 +93,7 @@ export const useTrackingLogic = (orderId) => {
                 setConfirming(true);
                 const updated = await orderTrackingService.cancelOrder(order.id, reason);
                 setOrder(updated);
-                console.log("✅ Order cancelled successfully");
+                console.log("Order cancelled successfully");
                 return { success: true };
             } catch (error) {
                 console.error("Error cancelling order:", error);

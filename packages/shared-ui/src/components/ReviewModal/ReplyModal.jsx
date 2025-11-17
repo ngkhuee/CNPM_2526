@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { MdClose, MdStar, MdStarBorder } from "react-icons/md";
+import { formatRating } from "shared-utils";
 import "./ReplyModal.css";
 
 /**
@@ -83,7 +84,7 @@ const ReplyModal = ({ review, onSubmit, onClose, loading = false }) => {
                                     <span key={star} style={{ color: star <= (review?.rating || 0) ? "#ffc107" : "#ddd" }}>
                                         {star <= (review?.rating || 0) ? <MdStar size={16} /> : <MdStarBorder size={16} />}
                                     </span>
-                                ))} {review?.rating || 0}/5
+                                ))} {formatRating(review?.rating || 0)}/5
                             </span>
                         </div>
                     </div>

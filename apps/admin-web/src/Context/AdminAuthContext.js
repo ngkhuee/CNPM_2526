@@ -12,7 +12,7 @@ export const AdminAuthProvider = ({ children }) => {
   useEffect(() => {
     const loadUser = async () => {
       const token = localStorage.getItem("token");
-      const user = authService.getCurrentUser();
+      const user = await authService.getCurrentUser();
 
       if (user && user.role === "admin") {
         setCurrentUser(user);
@@ -41,7 +41,7 @@ export const AdminAuthProvider = ({ children }) => {
                 console.warn(
                   "Admin account is blocked/inactive, logging out..."
                 );
-                authService.logout();
+                await authService.logout();
                 setCurrentUser(null);
               }
             }

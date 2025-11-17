@@ -8,6 +8,7 @@ export { LoadingSpinner } from "./components/LoadingSpinner";
 export { OrderDetailModal } from "./components/OrderDetailModal";
 export { default as FoodDetail } from "./components/FoodDetail/FoodDetail";
 export { default as SwitchRestaurantDialog } from "./components/SwitchRestaurantDialog/SwitchRestaurantDialog";
+export { default as Pagination } from "./components/Pagination";
 
 // Review Components
 export { default as ReviewCard } from "./components/ReviewCard/ReviewCard";

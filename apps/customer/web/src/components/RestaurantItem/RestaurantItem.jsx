@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import "../FoodItem/FoodItem.css";
 import "./RestaurantItem.css";
 import { getImageUrl } from "@utils/imageHelper";
+import { formatRating } from "shared-utils";
 import { MdStar } from "react-icons/md";
 
 const RestaurantItem = ({
@@ -62,7 +63,7 @@ const RestaurantItem = ({
             }}
           >
             <MdStar size={16} />
-            {rating.toFixed(1)}
+            {formatRating(rating)}
           </div>
         )}
         <p className="restaurant-item-desc">{desc}</p>

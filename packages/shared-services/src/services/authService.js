@@ -108,7 +108,32 @@ export const authService = {
 
   async getCurrentUser() {
     const userStr = await storage.getItem("user");
-    return userStr ? JSON.parse(userStr) : null;
+    if (!userStr) return null;
+
+    const user = JSON.parse(userStr);
+
+    // Ensure mappings are applied (in case stored user has old format)
+    if (user.restaurant_id && !user.restaurantId) {
+      user.restaurantId = user.restaurant_id;
+    }
+    if (user.full_name && !user.fullName) {
+      user.fullName = user.full_name;
+    }
+
+    // Ensure role mapping is applied
+    if (user.roles && Array.isArray(user.roles) && !user.role) {
+      if (user.roles.includes("restaurant_owner")) {
+        user.role = "restaurant";
+      } else if (user.roles.includes("admin")) {
+        user.role = "admin";
+      } else if (user.roles.includes("customer")) {
+        user.role = "customer";
+      } else {
+        user.role = user.roles[0];
+      }
+    }
+
+    return user;
   },
 
   async isAuthenticated() {

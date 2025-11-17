@@ -25,5 +25,5 @@ export const assets = {
   login_bg,
 };
 
-// ✅ API URL now configured via environment variable
+// API URL now configured via environment variable
 // See packages/shared-services/src/config/apiClient.js

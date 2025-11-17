@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext } from "react";
 import "./Cart.css";
 import {
   AuthContext,
@@ -14,15 +14,13 @@ import { CartItems, CartSummary } from "../../components/Cart";
 
 const Cart = () => {
   const { user } = useContext(AuthContext);
-  const { cart, removeItem, updateItem, getTotalCartAmount } = useContext(CartContext);
+  const { cart, removeItem, updateItem, getTotalCartAmount, appliedPromotion, setAppliedPromotion } = useContext(CartContext);
   const { addOrder } = useContext(OrderContext);
   const navigate = useNavigate();
 
   // Use custom hooks - pass restaurant_id to filter promotions
   const { promotions, loading: loadingPromos, getApplicablePromotions } = usePromotions(cart?.restaurant_id);
   const { deliveryFee: deliveryFeeValue } = useSettings();
-
-  const [appliedPromo, setAppliedPromo] = useState(null);
 
   // Get promotions applicable to current cart's restaurant
   const applicablePromotions = cart?.restaurant_id
@@ -32,7 +30,7 @@ const Cart = () => {
   const subtotal = getTotalCartAmount();
   const { discountAmount, deliveryFee, total } = calculateCartTotals(
     subtotal,
-    appliedPromo,
+    appliedPromotion,
     deliveryFeeValue
   );
 
@@ -79,11 +77,11 @@ const Cart = () => {
           discountAmount={discountAmount}
           deliveryFee={deliveryFee}
           total={total}
-          appliedPromo={appliedPromo}
+          appliedPromo={appliedPromotion}
           promotions={applicablePromotions}
           loadingPromos={loadingPromos}
-          onApplyPromo={setAppliedPromo}
-          onRemovePromo={() => setAppliedPromo(null)}
+          onApplyPromo={setAppliedPromotion}
+          onRemovePromo={() => setAppliedPromotion(null)}
           onCheckout={handleCheckout}
         />
       )}

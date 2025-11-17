@@ -1,8 +1,8 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ImageBackground } from 'react-native';
-import { ExploreIcon } from '../../../components/Icons';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
-export function HomeHero({ onExplorePress }) {
+export default function HomeHero({ onExplorePress }) {
     return (
         <ImageBackground
             source={require('../../../../assets/banner.png')}
@@ -16,10 +16,10 @@ export function HomeHero({ onExplorePress }) {
                         Choose from a diverse menu featuring delectable dishes crafted with the finest ingredients
                     </Text>
 
-                    <TouchableOpacity style={styles.btn} onPress={onExplorePress}>
-                        <ExploreIcon size={18} color="#ff6b35" />
+                    {/* <TouchableOpacity style={styles.btn} onPress={onExplorePress}>
+                        <MaterialIcons name="search" size={18} color="#ff6b35" />
                         <Text style={styles.btnText}>View Menu</Text>
-                    </TouchableOpacity>
+                    </TouchableOpacity> */}
                 </View>
             </View>
         </ImageBackground>
@@ -45,7 +45,7 @@ const styles = StyleSheet.create({
         padding: 20,
     },
     content: {
-        gap: 12,
+        marginBottom: 12,
         alignItems: 'center',
     },
     title: {
@@ -64,7 +64,7 @@ const styles = StyleSheet.create({
     btn: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 8,
+        marginRight: 8,
         backgroundColor: '#fff',
         paddingHorizontal: 24,
         paddingVertical: 12,
