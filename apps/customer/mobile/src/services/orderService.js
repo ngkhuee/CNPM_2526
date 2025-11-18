@@ -1,126 +1,220 @@
-// services/orderService.js
-import axios from 'axios';
-import apiConfig from '../config/api.config';
+/**
+ * orderService.js - Service xử lý các hành động liên quan order
+ * Gọi API endpoint /orders để tạo order
+ */
 
-const API_BASE_URL = apiConfig.api.baseURL;
+import apiClient from './apiClient';
 
-export const orderService = {
-    // Mock orders
-    getMockOrders: () => [
-        {
-            id: '1',
-            restaurantId: 'rest-1',
-            restaurantName: 'Burger King',
-            status: 'completed', // pending, confirmed, preparing, delivering, completed, cancelled
-            totalPrice: 150000,
-            createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-            deliveryAddress: '123 Main Street, District 1',
-            items: [
-                { id: '1', foodId: 'food-1', name: 'Grilled Beef Burger', quantity: 2, price: 50000, image: null },
-                { id: '2', foodId: 'food-2', name: 'Fries', quantity: 1, price: 25000, image: null },
-            ],
-            deliveryTime: '30 mins',
-        },
-        {
-            id: '2',
-            restaurantId: 'rest-2',
-            restaurantName: 'Pizza Hut',
-            status: 'pending',
-            totalPrice: 200000,
-            createdAt: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(),
-            deliveryAddress: '456 Park Avenue, District 2',
-            items: [
-                { id: '1', foodId: 'food-3', name: 'Margarita Pizza', quantity: 1, price: 120000, image: null },
-                { id: '2', foodId: 'food-4', name: 'Coke', quantity: 2, price: 40000, image: null },
-            ],
-            deliveryTime: '45 mins',
-        },
-        {
-            id: '3',
-            restaurantId: 'rest-3',
-            restaurantName: 'Pho Restaurant',
-            status: 'delivering',
-            totalPrice: 120000,
-            createdAt: new Date(Date.now() - 3 * 60 * 1000).toISOString(),
-            deliveryAddress: '789 Nguyen Hue, District 1',
-            items: [
-                { id: '1', foodId: 'food-5', name: 'Beef Pho', quantity: 2, price: 60000, image: null },
-            ],
-            deliveryTime: '20 mins',
-        },
-    ],
+/**
+ * Lấy danh sách orders của user
+ * 
+ * @returns {Array} Danh sách orders
+ */
+export const getOrders = async () => {
+    try {
+        const response = await apiClient.get('/orders');
+        console.log('[orderService.getOrders] Response:', response);
+        return response;
+    } catch (error) {
+        console.error('[orderService.getOrders] Error:', error.message);
+        throw error;
+    }
+};
 
-    // API calls (ready for implementation)
-    getOrders: async (userId) => {
-        try {
-            const response = await axios.get(`${API_BASE_URL}/api/orders/${userId}`);
-            return response.data;
-        } catch (error) {
-            console.error('Error fetching orders:', error);
-            throw error;
-        }
+/**
+ * Lấy chi tiết một order
+ * 
+ * @param {string} orderId - ID của order
+ * @returns {Object} Chi tiết order
+ */
+export const getOrderDetail = async (orderId) => {
+    try {
+        const response = await apiClient.get(`/orders/${orderId}`);
+        console.log('[orderService.getOrderDetail] Response:', response);
+        return response;
+    } catch (error) {
+        console.error('[orderService.getOrderDetail] Error:', error.message);
+        throw error;
+    }
+};
+
+/**
+ * Tạo order từ giỏ hàng
+ * 
+ * @param {Object} orderData - Dữ liệu order
+ * @param {string} orderData.cart_id - ID giỏ hàng
+ * @param {string} orderData.delivery_address - Địa chỉ giao hàng
+ * @param {string} orderData.phone_number - Số điện thoại
+ * @param {string} orderData.payment_method - Phương thức thanh toán (cash, card)
+ * @param {string} orderData.promo_code - Mã khuyến mãi (tuỳ chọn)
+ * @param {number} orderData.total - Tổng tiền
+ * @returns {Object} Order đã tạo
+ */
+export const submitOrder = async (orderData) => {
+    try {
+        console.log('[orderService.submitOrder] Submitting order:', orderData);
+
+        const response = await apiClient.post('/orders', {
+            cart_id: orderData.cart_id,
+            delivery_address: orderData.delivery_address,
+            phone_number: orderData.phone_number,
+            payment_method: orderData.payment_method,
+            promo_code: orderData.promo_code || '',
+            total: orderData.total,
+        });
+
+        console.log('[orderService.submitOrder] Success:', response);
+        return response;
+    } catch (error) {
+        console.error('[orderService.submitOrder] Error:', error.message);
+        throw error;
+    }
+};
+
+/**
+ * Hủy order
+ * 
+ * @param {string} orderId - ID của order
+ * @returns {Object} Response từ API
+ */
+export const cancelOrder = async (orderId) => {
+    try {
+        console.log('[orderService.cancelOrder] Cancelling order:', orderId);
+
+        const response = await apiClient.patch(`/orders/${orderId}/cancel`);
+
+        console.log('[orderService.cancelOrder] Success:', response);
+        return response;
+    } catch (error) {
+        console.error('[orderService.cancelOrder] Error:', error.message);
+        throw error;
+    }
+};
+
+/**
+ * Cập nhật status order (admin only - for reference)
+ * 
+ * @param {string} orderId - ID của order
+ * @param {string} status - Status mới
+ * @returns {Object} Response từ API
+ */
+export const updateOrderStatus = async (orderId, status) => {
+    try {
+        console.log('[orderService.updateOrderStatus] Updating order status:', { orderId, status });
+
+        const response = await apiClient.patch(`/orders/${orderId}`, {
+            status,
+        });
+
+        console.log('[orderService.updateOrderStatus] Success:', response);
+        return response;
+    } catch (error) {
+        console.error('[orderService.updateOrderStatus] Error:', error.message);
+        throw error;
+    }
+};
+
+/**
+ * Xóa order
+ * 
+ * @param {string} orderId - ID của order
+ * @returns {Object} Response từ API
+ */
+export const deleteOrder = async (orderId) => {
+    try {
+        console.log('[orderService.deleteOrder] Deleting order:', orderId);
+
+        const response = await apiClient.delete(`/orders/${orderId}`);
+
+        console.log('[orderService.deleteOrder] Success:', response);
+        return response;
+    } catch (error) {
+        console.error('[orderService.deleteOrder] Error:', error.message);
+        throw error;
+    }
+};
+
+/**
+ * Lấy danh sách mock orders (deprecated - only for development)
+ */
+export const getMockOrders = () => [
+    {
+        id: '1',
+        restaurantId: 'rest-1',
+        restaurantName: 'Burger King',
+        status: 'completed', // pending, confirmed, preparing, delivering, completed, cancelled
+        totalPrice: 150000,
+        createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+        deliveryAddress: '123 Main Street, District 1',
+        items: [
+            { id: '1', foodId: 'food-1', name: 'Grilled Beef Burger', quantity: 2, price: 50000, image: null },
+            { id: '2', foodId: 'food-2', name: 'Fries', quantity: 1, price: 25000, image: null },
+        ],
+        deliveryTime: '30 mins',
     },
-
-    getOrderDetails: async (orderId) => {
-        try {
-            const response = await axios.get(`${API_BASE_URL}/api/orders/${orderId}`);
-            return response.data;
-        } catch (error) {
-            console.error('Error fetching order details:', error);
-            throw error;
-        }
+    {
+        id: '2',
+        restaurantId: 'rest-2',
+        restaurantName: 'Pizza Hut',
+        status: 'pending',
+        totalPrice: 200000,
+        createdAt: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(),
+        deliveryAddress: '456 Park Avenue, District 2',
+        items: [
+            { id: '1', foodId: 'food-3', name: 'Margarita Pizza', quantity: 1, price: 120000, image: null },
+            { id: '2', foodId: 'food-4', name: 'Coke', quantity: 2, price: 40000, image: null },
+        ],
+        deliveryTime: '45 mins',
     },
+];
 
-    cancelOrder: async (orderId) => {
-        try {
-            const response = await axios.post(`${API_BASE_URL}/api/orders/${orderId}/cancel`);
-            return response.data;
-        } catch (error) {
-            console.error('Error cancelling order:', error);
-            throw error;
-        }
-    },
+/**
+ * Get status display text
+ */
+export const getStatusText = (status) => {
+    const statusMap = {
+        pending: 'Pending',
+        confirmed: 'Confirmed',
+        preparing: 'Preparing',
+        delivering: 'Delivering',
+        completed: 'Completed',
+        cancelled: 'Cancelled',
+    };
+    return statusMap[status] || status;
+};
 
-    // Filter orders by status
-    getCurrentOrders: (orders) => {
-        const activeStatuses = ['pending', 'confirmed', 'preparing', 'delivering'];
-        return orders.filter(order => activeStatuses.includes(order.status));
-    },
+/**
+ * Get status color
+ */
+export const getStatusColor = (status) => {
+    const colorMap = {
+        pending: '#FFA500',
+        confirmed: '#2196F3',
+        preparing: '#FF9800',
+        delivering: '#9C27B0',
+        completed: '#4CAF50',
+        cancelled: '#F44336',
+    };
+    return colorMap[status] || '#999';
+};
 
-    getHistoryOrders: (orders) => {
-        const completeStatuses = ['completed', 'cancelled'];
-        return orders.filter(order => completeStatuses.includes(order.status));
-    },
+/**
+ * Check if order can be cancelled
+ */
+export const canCancelOrder = (status) => {
+    const cancellableStatuses = ['pending', 'confirmed'];
+    return cancellableStatuses.includes(status);
+};
 
-    // Get status display text
-    getStatusText: (status) => {
-        const statusMap = {
-            pending: 'Pending',
-            confirmed: 'Confirmed',
-            preparing: 'Preparing',
-            delivering: 'Delivering',
-            completed: 'Completed',
-            cancelled: 'Cancelled',
-        };
-        return statusMap[status] || status;
-    },
-
-    // Get status color
-    getStatusColor: (status) => {
-        const colorMap = {
-            pending: '#FFA500',
-            confirmed: '#2196F3',
-            preparing: '#FF9800',
-            delivering: '#9C27B0',
-            completed: '#4CAF50',
-            cancelled: '#F44336',
-        };
-        return colorMap[status] || '#999';
-    },
-
-    // Check if order can be cancelled
-    canCancelOrder: (status) => {
-        const cancellableStatuses = ['pending', 'confirmed'];
-        return cancellableStatuses.includes(status);
-    },
+export default {
+    getOrders,
+    getOrderDetail,
+    submitOrder,
+    cancelOrder,
+    updateOrderStatus,
+    deleteOrder,
+    getMockOrders,
+    getStatusText,
+    getStatusColor,
+    canCancelOrder,
 };

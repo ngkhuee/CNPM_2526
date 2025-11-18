@@ -3,6 +3,8 @@ import React, { createContext, useState, useCallback } from 'react';
 /**
  * NavigationContext - Quản lý state navigation toàn app
  * Lưu trữ:
+ * - activeRoute: Screen hiện tại ('home', 'restaurant', 'cart', 'checkout', 'orders', 'profile')
+ * - navigate: Function để navigate đến screen khác
  * - targetRestaurantId: ID nhà hàng cần navigate đến
  * - highlightedFoodId: ID food cần highlight
  * - isNavigating: Flag để trigger navigation
@@ -11,6 +13,7 @@ import React, { createContext, useState, useCallback } from 'react';
 export const NavigationContext = createContext(null);
 
 export const NavigationProvider = ({ children }) => {
+    const [activeRoute, setActiveRouteInternal] = useState('home');
     const [navigationState, setNavigationStateInternal] = useState({
         targetRestaurantId: null,
         highlightedFoodId: null,
@@ -38,7 +41,18 @@ export const NavigationProvider = ({ children }) => {
         });
     }, []);
 
+    /**
+     * Navigate đến screen khác
+     * @param {string} route - Tên route ('home', 'cart', 'checkout', etc)
+     */
+    const navigate = useCallback((route) => {
+        console.log('[NavigationContext] Navigating to:', route);
+        setActiveRouteInternal(route);
+    }, []);
+
     const value = {
+        activeRoute,
+        navigate,
         ...navigationState,
         setNavigationState,
         resetNavigationState,

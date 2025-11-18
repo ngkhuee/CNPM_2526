@@ -13,4 +13,4 @@ export const getImageUrl = (imagePath) => {
 
 export const getFoodImageUrl = (food) => getImageUrl(food?.image);
 export const getRestaurantImageUrl = (r) => getImageUrl(r?.image);
-export const getRestaurantBannerUrl = (r) => getImageUrl(r?.banner);
+export const getRestaurantBannerUrl = (r) => getImageUrl(r?.bannerImage || r?.banner_image);

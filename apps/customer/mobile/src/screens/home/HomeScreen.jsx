@@ -9,8 +9,10 @@ import {
   TouchableOpacity,
   SafeAreaView,
 } from 'react-native';
+import { useContext } from 'react';
 import axios from 'axios';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { NavigationContext } from '../../contexts/NavigationContext';
 import Header from '../../components/Header';
 import SearchOverlay from '../../components/SearchOverlay';
 import HomeHero from './components/HomeHero';
@@ -32,6 +34,7 @@ import apiConfig from '../../config/api.config';
 const API_BASE = apiConfig.api.baseURL;
 
 export default function HomeScreen({ onNavigate }) {
+  const { activeRoute, navigate } = useContext(NavigationContext);
   const [foodList, setFoodList] = useState([]);
   const [restaurantList, setRestaurantList] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -39,7 +42,6 @@ export default function HomeScreen({ onNavigate }) {
   const [selectedCategory, setSelectedCategory] = useState('');
   const [nearbyRestaurants, setNearbyRestaurants] = useState([]);
   const [address, setAddress] = useState('Select location');
-  const [activeRoute, setActiveRoute] = useState('home');
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearchOverlay, setShowSearchOverlay] = useState(false);
   const [showSearchResults, setShowSearchResults] = useState(false);
@@ -160,11 +162,17 @@ export default function HomeScreen({ onNavigate }) {
   };
 
   const handleNavigate = (route) => {
-    setActiveRoute(route);
-    if (onNavigate) {
-      onNavigate(route);
+    if (route === 'home') {
+      // Ở lại HomeScreen
+      onNavigate('home');
+    } else if (route === 'cart') {
+      onNavigate('cart');
+    } else if (route === 'orders') {
+      onNavigate('orders');
+    } else if (route === 'profile') {
+      onNavigate('profile');
     }
-    console.log('Navigate to:', route);
+    navigate(route);
   };
 
   // Show search results if requested

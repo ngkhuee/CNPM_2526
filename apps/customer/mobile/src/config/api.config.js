@@ -11,7 +11,7 @@ const ENV = process.env.EXPO_PUBLIC_ENV || 'development';
 // API Configurations based on environment
 const API_CONFIGS = {
     development: {
-        baseURL: 'http://192.168.0.127:4000',
+        baseURL: process.env.EXPO_PUBLIC_API_URL || 'http://localhost:4000',
         timeout: 10000,
     },
     staging: {

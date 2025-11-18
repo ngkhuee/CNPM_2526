@@ -15,9 +15,9 @@ import { NavigationContext } from '../../contexts/NavigationContext';
 import RestaurantSearchBar from './components/RestaurantSearchBar';
 import CategoryFilter from './components/CategoryFilter';
 import RestaurantFoodCard from './components/RestaurantFoodCard';
-import RestaurantReviewsSection from './components/RestaurantReviewsSection';
 import { restaurantDetailService } from '../../services/restaurantDetailService';
 import { categoryService } from '../../services/categoryService';
+import { reviewService } from '../../services/reviewService';
 import { formatRating } from '../../shared/formatters';
 import { isRestaurantOpen, getTodayHours } from '../../utils/hoursHelper';
 import { getRestaurantImageUrl, getRestaurantBannerUrl } from '../../shared/imageHelper';
@@ -37,12 +37,14 @@ export default function RestaurantDetail({ onNavigate, onSelectFood }) {
     const [allFoods, setAllFoods] = useState([]);
     const [filteredFoods, setFilteredFoods] = useState([]);
     const [categories, setCategories] = useState([]);
+    const [reviews, setReviews] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [currentCategoryId, setCurrentCategoryId] = useState(null);
     const [showStickyHeader, setShowStickyHeader] = useState(false);
     const [activeTab, setActiveTab] = useState('menu'); // 'menu' or 'reviews'
+    const [avgRating, setAvgRating] = useState(0);
     const sectionListRef = useRef(null);
     const sectionIndexMap = useRef({});
 
@@ -107,10 +109,22 @@ export default function RestaurantDetail({ onNavigate, onSelectFood }) {
             const categoriesData = await categoryService.getByRestaurant(targetRestaurantId);
             setCategories(categoriesData);
 
+            // Fetch reviews for this restaurant
+            const reviewsData = await reviewService.getByRestaurant(targetRestaurantId);
+            if (reviewsData && reviewsData.length > 0) {
+                const sorted = reviewsData.sort(
+                    (a, b) => new Date(b.created_at) - new Date(a.created_at)
+                );
+                const avg = sorted.reduce((sum, r) => sum + (r.rating || 0), 0) / sorted.length;
+                setAvgRating(Number(avg.toFixed(1)));
+                setReviews(sorted);
+            }
+
             console.log('[RestaurantDetail] Data loaded:', {
                 restaurant: restaurantData?.name,
                 foods: foodsData?.length,
                 categories: categoriesData?.length,
+                reviews: reviewsData?.length,
             });
         } catch (err) {
             console.error('[RestaurantDetail] Fetch error:', err);
@@ -367,6 +381,31 @@ export default function RestaurantDetail({ onNavigate, onSelectFood }) {
         </>
     );
 
+    // Render stars for reviews
+    const renderStars = (rating) => {
+        return (
+            <View style={styles.starsContainer}>
+                {[1, 2, 3, 4, 5].map((star) =>
+                    star <= rating ? (
+                        <MaterialIcons
+                            key={star}
+                            name="star"
+                            size={14}
+                            color="#ffc107"
+                        />
+                    ) : (
+                        <MaterialIcons
+                            key={star}
+                            name="star-border"
+                            size={14}
+                            color="#ddd"
+                        />
+                    )
+                )}
+            </View>
+        );
+    };
+
     // Render category section header (with sticky support)
     const renderSectionHeader = ({ section }) => (
         <View style={styles.sectionHeader}>
@@ -391,6 +430,74 @@ export default function RestaurantDetail({ onNavigate, onSelectFood }) {
                 onPress={handleFoodPress}
                 isHighlighted={item.id === highlightedFoodId}
             />
+        );
+    };
+
+    // Render review item
+    const renderReviewItem = ({ item }) => (
+        <View style={styles.reviewItem}>
+            {/* Review Header */}
+            <View style={styles.reviewHeader}>
+                <View style={styles.reviewUserInfo}>
+                    <Text style={styles.reviewUserName}>{item.user?.name || 'Anonymous'}</Text>
+                    {renderStars(item.rating || 0)}
+                </View>
+                <Text style={styles.reviewDate}>
+                    {new Date(item.created_at).toLocaleDateString('vi-VN')}
+                </Text>
+            </View>
+
+            {/* Food Name */}
+            {item.food_name && (
+                <Text style={styles.foodNameTag}>{item.food_name}</Text>
+            )}
+
+            {/* Review Comment */}
+            <Text style={styles.reviewComment}>{item.comment}</Text>
+
+            {/* Restaurant Reply */}
+            {item.restaurant_reply && (
+                <View style={styles.restaurantReply}>
+                    <View style={styles.replyHeader}>
+                        <MaterialIcons name="reply" size={14} color="#ff6b35" />
+                        <Text style={styles.replyLabel}>Restaurant's Reply</Text>
+                    </View>
+                    <Text style={styles.replyText}>{item.restaurant_reply}</Text>
+                </View>
+            )}
+        </View>
+    );
+
+    // Render reviews section content
+    const renderReviewsContent = () => {
+        if (reviews.length === 0) {
+            return (
+                <View style={styles.emptyReviewsContainer}>
+                    <MaterialIcons name="rate-review" size={32} color="#ccc" />
+                    <Text style={styles.emptyReviewsText}>No reviews yet</Text>
+                    <Text style={styles.emptyReviewsSubtext}>Be the first to review this restaurant</Text>
+                </View>
+            );
+        }
+
+        return (
+            <>
+                {/* Reviews Header with Rating */}
+                <View style={styles.reviewsHeaderContainer}>
+                    <View style={styles.ratingBadge}>
+                        <MaterialIcons name="star" size={16} color="#ffc107" />
+                        <Text style={styles.ratingValue}>{avgRating}</Text>
+                        <Text style={styles.reviewCountBadge}>({reviews.length})</Text>
+                    </View>
+                </View>
+
+                {/* Reviews List */}
+                {reviews.map((review) => (
+                    <View key={review.id}>
+                        {renderReviewItem({ item: review })}
+                    </View>
+                ))}
+            </>
         );
     };
 
@@ -445,10 +552,75 @@ export default function RestaurantDetail({ onNavigate, onSelectFood }) {
                     )}
                 </>
             ) : (
-                <ScrollView style={styles.reviewsTabContainer}>
-                    {/* Reviews Section */}
-                    <RestaurantReviewsSection restaurantId={restaurant.id} />
-                </ScrollView>
+                // Reviews Tab Content
+                <SafeAreaView style={styles.container}>
+                    <ScrollView style={styles.reviewsTabContainer} showsVerticalScrollIndicator={false}>
+                        {/* Header */}
+                        <View style={styles.headerRow}>
+                            <TouchableOpacity style={styles.backBtn} onPress={handleBack}>
+                                <MaterialIcons name="arrow-back" size={24} color="#fff" />
+                            </TouchableOpacity>
+                        </View>
+
+                        {/* Banner & Restaurant Info */}
+                        <Image source={{ uri: bannerUrl }} style={styles.banner} />
+
+                        <View style={styles.restaurantInfo}>
+                            <View style={styles.infoHeader}>
+                                <Image source={{ uri: imageUrl }} style={styles.restaurantImage} />
+                                <View style={styles.infoContent}>
+                                    <Text style={styles.restaurantName}>{restaurant.name}</Text>
+                                    <View style={styles.ratingRow}>
+                                        <MaterialIcons name="star" size={14} color="#ffc107" />
+                                        <Text style={styles.ratingText}>{rating}</Text>
+                                        <Text style={styles.reviewCount}>
+                                            ({restaurant.totalReviews})
+                                        </Text>
+                                    </View>
+                                    <Text style={styles.category}>{restaurant.primaryCategory}</Text>
+                                </View>
+                            </View>
+                        </View>
+
+                        {/* Tab Buttons */}
+                        <View style={styles.tabContainer}>
+                            <TouchableOpacity
+                                style={[styles.tabButton, activeTab === 'menu' && styles.tabButtonActive]}
+                                onPress={() => setActiveTab('menu')}
+                            >
+                                <MaterialIcons
+                                    name="restaurant-menu"
+                                    size={18}
+                                    color={activeTab === 'menu' ? '#ff6b35' : '#999'}
+                                />
+                                <Text style={[styles.tabText, activeTab === 'menu' && styles.tabTextActive]}>
+                                    Menu
+                                </Text>
+                            </TouchableOpacity>
+
+                            <TouchableOpacity
+                                style={[styles.tabButton, activeTab === 'reviews' && styles.tabButtonActive]}
+                                onPress={() => setActiveTab('reviews')}
+                            >
+                                <MaterialIcons
+                                    name="rate-review"
+                                    size={18}
+                                    color={activeTab === 'reviews' ? '#ff6b35' : '#999'}
+                                />
+                                <Text style={[styles.tabText, activeTab === 'reviews' && styles.tabTextActive]}>
+                                    Reviews
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
+
+                        {/* Reviews Content */}
+                        <View style={styles.reviewsContent}>
+                            {renderReviewsContent()}
+                        </View>
+
+                        <View style={{ height: 30 }} />
+                    </ScrollView>
+                </SafeAreaView>
             )}
         </SafeAreaView>
     );
@@ -736,5 +908,150 @@ const styles = StyleSheet.create({
     reviewsTabContainer: {
         flex: 1,
         backgroundColor: '#f8f8f8',
+    },
+    quickReviewHeader: {
+        flexDirection: 'row',
+        backgroundColor: '#fff',
+        paddingHorizontal: 12,
+        paddingVertical: 12,
+        borderBottomWidth: 1,
+        borderBottomColor: '#eee',
+        alignItems: 'center',
+    },
+    smallRestaurantImage: {
+        width: 50,
+        height: 50,
+        borderRadius: 8,
+        marginRight: 12,
+        backgroundColor: '#eee',
+    },
+    quickInfoReview: {
+        flex: 1,
+    },
+    restaurantNameReview: {
+        fontSize: 14,
+        fontWeight: '700',
+        color: '#333',
+        marginBottom: 4,
+    },
+    ratingRowReview: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    ratingTextReview: {
+        fontSize: 12,
+        fontWeight: '600',
+        color: '#333',
+        marginLeft: 4,
+    },
+    reviewCountText: {
+        fontSize: 12,
+        color: '#999',
+        marginLeft: 4,
+    },
+    reviewsContentContainer: {
+        backgroundColor: '#fff',
+        borderTopWidth: 1,
+        borderTopColor: '#eee',
+        paddingHorizontal: 12,
+        paddingVertical: 12,
+        marginTop: 8,
+    },
+    reviewsHeaderContainer: {
+        marginBottom: 16,
+    },
+    ratingBadge: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 4,
+    },
+    ratingValue: {
+        fontSize: 13,
+        fontWeight: '600',
+        color: '#333',
+    },
+    reviewCountBadge: {
+        fontSize: 12,
+        color: '#999',
+    },
+    reviewItem: {
+        paddingVertical: 12,
+        borderBottomWidth: 1,
+        borderBottomColor: '#f5f5f5',
+    },
+    reviewHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'flex-start',
+        marginBottom: 8,
+    },
+    reviewUserInfo: {
+        flex: 1,
+    },
+    reviewUserName: {
+        fontSize: 13,
+        fontWeight: '600',
+        color: '#333',
+        marginBottom: 4,
+    },
+    starsContainer: {
+        flexDirection: 'row',
+        gap: 2,
+    },
+    reviewDate: {
+        fontSize: 11,
+        color: '#999',
+    },
+    foodNameTag: {
+        fontSize: 12,
+        color: '#ff6b35',
+        fontWeight: '500',
+        marginBottom: 6,
+    },
+    reviewComment: {
+        fontSize: 12,
+        color: '#666',
+        lineHeight: 16,
+        marginBottom: 8,
+    },
+    restaurantReply: {
+        backgroundColor: '#f5f5f5',
+        borderLeftWidth: 3,
+        borderLeftColor: '#ff6b35',
+        paddingHorizontal: 10,
+        paddingVertical: 8,
+        borderRadius: 4,
+        marginTop: 8,
+    },
+    replyHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 6,
+        marginBottom: 6,
+    },
+    replyLabel: {
+        fontSize: 11,
+        fontWeight: '600',
+        color: '#ff6b35',
+    },
+    replyText: {
+        fontSize: 12,
+        color: '#333',
+        lineHeight: 16,
+    },
+    emptyReviewsContainer: {
+        alignItems: 'center',
+        paddingVertical: 32,
+    },
+    emptyReviewsText: {
+        fontSize: 13,
+        fontWeight: '500',
+        color: '#999',
+        marginTop: 8,
+    },
+    emptyReviewsSubtext: {
+        fontSize: 12,
+        color: '#bbb',
+        marginTop: 4,
     },
 });

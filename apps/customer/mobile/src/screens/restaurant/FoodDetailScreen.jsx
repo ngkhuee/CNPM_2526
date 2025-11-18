@@ -9,12 +9,18 @@ import {
     SafeAreaView,
     ActivityIndicator,
     FlatList,
+    Modal,
 } from 'react-native';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { NavigationContext } from '../../contexts/NavigationContext';
+import { CartContext } from '../../contexts/CartContext';
+import { AuthContext } from '../../contexts/AuthContext';
+import LoginAuthScreen from '../auth/LoginAuthScreen';
 import { formatCurrency, formatRating } from '../../shared/formatters';
 import { reviewService } from '../../services/reviewService';
 import { getFoodImageUrl } from '../../shared/imageHelper';
+import { showToast } from '../../utils/toastHelper';
+import SwitchRestaurantModal from '../../components/SwitchRestaurantModal';
 
 /**
  * FoodDetailScreen - Product detail page (based on web version)
@@ -23,11 +29,16 @@ import { getFoodImageUrl } from '../../shared/imageHelper';
  * NO: like button, preparation time, availability, total price
  */
 export default function FoodDetailScreen({ foodItem, onNavigate }) {
-    const { resetNavigationState } = useContext(NavigationContext);
+    const { resetNavigationState, navigate } = useContext(NavigationContext);
+    const { addItem, canAddFromRestaurant, getCurrentRestaurantName, clearCart } = useContext(CartContext);
+    const { isAuthenticated } = useContext(AuthContext);
     const [quantity, setQuantity] = useState(1);
     const [isAdding, setIsAdding] = useState(false);
     const [reviews, setReviews] = useState([]);
     const [reviewsLoading, setReviewsLoading] = useState(true);
+    const [showSwitchModal, setShowSwitchModal] = useState(false);
+    const [pendingAddItem, setPendingAddItem] = useState(null);
+    const [showLoginModal, setShowLoginModal] = useState(false);
 
     // Fetch reviews on mount
     useEffect(() => {
@@ -78,20 +89,87 @@ export default function FoodDetailScreen({ foodItem, onNavigate }) {
     };
 
     const handleAddToCart = async () => {
+        // Check if user is authenticated first
+        if (!isAuthenticated) {
+            setShowLoginModal(true);
+            return;
+        }
+
         try {
             setIsAdding(true);
-            // TODO: Implement add to cart logic
-            console.log('[FoodDetail] Add to cart:', {
-                foodId: foodItem.id,
+
+            // Kiểm tra xem có thể thêm từ restaurant này không
+            if (!canAddFromRestaurant(foodItem.restaurant_id)) {
+                // Khác restaurant - hiển thị modal
+                console.log('[FoodDetailScreen] Different restaurant, show modal');
+                setPendingAddItem({
+                    restaurant_id: foodItem.restaurant_id,
+                    food_id: foodItem.id,
+                    quantity,
+                });
+                setShowSwitchModal(true);
+                setIsAdding(false);
+                return;
+            }
+
+            // Cùng restaurant hoặc giỏ rỗng - thêm vào giỏ
+            await addItem(
+                foodItem.restaurant_id,
+                foodItem.id,
                 quantity,
-                price: foodItem.price,
-                total: (foodItem.price || 0) * quantity,
+                ''
+            );
+
+            console.log('[FoodDetailScreen] Added to cart:', {
+                foodId: foodItem.id,
+                quantity
             });
-            // Show success toast
-            setTimeout(() => setIsAdding(false), 500);
+
+            showToast('success', `Added ${quantity} item(s) to cart!`);
+            setQuantity(1);
         } catch (error) {
-            console.error('[FoodDetail] Error adding to cart:', error);
+            console.error('[FoodDetailScreen] Error adding to cart:', error.message);
+            showToast('error', 'Failed to add item: ' + error.message);
+        } finally {
             setIsAdding(false);
+        }
+    };
+
+    /**
+     * Xử lý checkout từ modal - đi đến checkout
+     */
+    const handleModalCheckout = () => {
+        setShowSwitchModal(false);
+        setPendingAddItem(null);
+        navigate('checkout');
+    };
+
+    /**
+     * Xử lý clear cart và thêm item mới từ modal
+     */
+    const handleModalClearAndAdd = async () => {
+        try {
+            await clearCart();
+
+            // Thêm item từ restaurant mới
+            if (pendingAddItem) {
+                await addItem(
+                    pendingAddItem.restaurant_id,
+                    pendingAddItem.food_id,
+                    pendingAddItem.quantity,
+                    ''
+                );
+
+                console.log('[FoodDetailScreen] Cleared and added new item');
+                showToast('success', 'Cart updated with new restaurant');
+            }
+
+            setShowSwitchModal(false);
+            setPendingAddItem(null);
+            setQuantity(1);
+        } catch (error) {
+            console.error('[FoodDetailScreen] Error in handleModalClearAndAdd:', error.message);
+            showToast('error', 'Error: ' + error.message);
         }
     };
 
@@ -294,6 +372,29 @@ export default function FoodDetailScreen({ foodItem, onNavigate }) {
                     )}
                 </TouchableOpacity>
             </View>
+
+            {/* Switch Restaurant Modal */}
+            <SwitchRestaurantModal
+                visible={showSwitchModal}
+                currentRestaurant={getCurrentRestaurantName()}
+                newRestaurant={foodItem?.restaurant_name}
+                onCheckout={handleModalCheckout}
+                onClearAndAdd={handleModalClearAndAdd}
+                onCancel={() => {
+                    setShowSwitchModal(false);
+                    setPendingAddItem(null);
+                }}
+            />
+
+            {/* Login Modal */}
+            <Modal
+                visible={showLoginModal}
+                animationType="slide"
+                transparent={false}
+                onRequestClose={() => setShowLoginModal(false)}
+            >
+                <LoginAuthScreen onBackPress={() => setShowLoginModal(false)} />
+            </Modal>
         </SafeAreaView>
     );
 }

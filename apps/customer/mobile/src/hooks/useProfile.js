@@ -1,9 +1,11 @@
 // hooks/useProfile.js
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { Alert } from 'react-native';
+import { AuthContext } from '../contexts/AuthContext';
 import { profileService } from '../services/profileService';
 
 export const useProfile = () => {
+    const { user: authUser, logout } = useContext(AuthContext);
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
     const [editing, setEditing] = useState(false);
@@ -19,24 +21,36 @@ export const useProfile = () => {
 
     useEffect(() => {
         fetchUserData();
-    }, []);
+    }, [authUser]);
 
     const fetchUserData = async () => {
         try {
             setLoading(true);
-            // In production, get from AsyncStorage or auth context
-            const storedUser = profileService.getMockUser();
-            
-            if (storedUser) {
-                setUser(storedUser);
+            // Get user from auth context
+            if (authUser) {
+                setUser(authUser);
                 setFormData({
-                    name: storedUser.name || '',
-                    email: storedUser.email || '',
-                    phone: storedUser.phone || '',
-                    gender: storedUser.gender || 'Male',
-                    dob: storedUser.dob || '',
-                    avatar: storedUser.avatar || '',
+                    name: authUser.name || '',
+                    email: authUser.email || '',
+                    phone: authUser.phone || '',
+                    gender: authUser.gender || 'Male',
+                    dob: authUser.dob || '',
+                    avatar: authUser.avatar || '',
                 });
+            } else {
+                // Fallback to mock for testing
+                const storedUser = profileService.getMockUser();
+                if (storedUser) {
+                    setUser(storedUser);
+                    setFormData({
+                        name: storedUser.name || '',
+                        email: storedUser.email || '',
+                        phone: storedUser.phone || '',
+                        gender: storedUser.gender || 'Male',
+                        dob: storedUser.dob || '',
+                        avatar: storedUser.avatar || '',
+                    });
+                }
             }
         } catch (error) {
             console.error('Error fetching user data:', error);
@@ -56,8 +70,9 @@ export const useProfile = () => {
     const handleSaveProfile = async () => {
         try {
             setSaveLoading(true);
-            // In production: await profileService.updateUserProfile(user.id, formData);
-            
+            if (user?.id) {
+                await profileService.updateUserProfile(user.id, formData);
+            }
             setUser(prev => ({ ...prev, ...formData }));
             setEditing(false);
             Alert.alert('Success', 'Profile updated successfully');
@@ -79,7 +94,7 @@ export const useProfile = () => {
                     text: 'Logout',
                     style: 'destructive',
                     onPress: () => {
-                        setUser(null);
+                        logout();
                         Alert.alert('Logged out', 'You have been logged out successfully');
                     },
                 },

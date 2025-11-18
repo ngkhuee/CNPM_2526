@@ -1,5 +1,5 @@
 // screens/profile/ProfileScreen.jsx
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import {
     View,
     StyleSheet,
@@ -7,7 +7,11 @@ import {
     ActivityIndicator,
     Text,
     SafeAreaView,
+    TouchableOpacity,
 } from 'react-native';
+import { MaterialIcons } from '@expo/vector-icons';
+import { NavigationContext } from '../../contexts/NavigationContext';
+import { AuthContext } from '../../contexts/AuthContext';
 import BottomNavigation from '../../components/BottomNavigation';
 import ProfileHeader from '../../components/profile/ProfileHeader';
 import ProfileTabs from '../../components/profile/ProfileTabs';
@@ -18,8 +22,9 @@ import { useProfile } from '../../hooks/useProfile';
 import { useAddress } from '../../hooks/useAddress';
 
 export default function ProfileScreen({ onNavigate }) {
+    const { activeRoute, navigate } = useContext(NavigationContext);
+    const { isAuthenticated } = useContext(AuthContext);
     const [activeTab, setActiveTab] = useState('account');
-    const [activeRoute, setActiveRoute] = useState('profile');
 
     // Profile hook
     const {
@@ -50,11 +55,43 @@ export default function ProfileScreen({ onNavigate }) {
     } = useAddress(user?.id);
 
     const handleNavigate = (route) => {
-        setActiveRoute(route);
         if (onNavigate) {
             onNavigate(route);
         }
+        navigate(route);
     };
+
+    // Check if user is authenticated - show login prompt instead of profile
+    if (!isAuthenticated) {
+        return (
+            <View style={styles.screenContainer}>
+                <SafeAreaView style={styles.container}>
+                    <View style={styles.loginPromptContainer}>
+                        <MaterialIcons
+                            name="lock"
+                            size={48}
+                            color="#ff6b35"
+                            style={styles.lockIcon}
+                        />
+                        <Text style={styles.modalTitle}>Login Required</Text>
+                        <Text style={styles.modalSubtitle}>
+                            Sign in to view your profile and manage addresses
+                        </Text>
+
+                        <TouchableOpacity
+                            style={styles.modalLoginButton}
+                            onPress={() => {
+                                handleNavigate('login');
+                            }}
+                        >
+                            <Text style={styles.modalLoginButtonText}>Login</Text>
+                        </TouchableOpacity>
+                    </View>
+                </SafeAreaView>
+                <BottomNavigation activeRoute={activeRoute} onNavigate={handleNavigate} />
+            </View>
+        );
+    }
 
     // Loading state
     if (loading) {
@@ -156,12 +193,161 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
+        paddingHorizontal: 20,
     },
     notLoggedInText: {
-        fontSize: 16,
-        color: '#999',
+        fontSize: 18,
+        color: '#333',
+        marginTop: 16,
+        fontWeight: '600',
+    },
+    notLoggedInSubtitle: {
+        fontSize: 14,
+        color: '#666',
+        marginTop: 8,
+        textAlign: 'center',
+    },
+    loginButton: {
+        marginTop: 24,
+        backgroundColor: '#FF6B35',
+        paddingVertical: 12,
+        paddingHorizontal: 32,
+        borderRadius: 8,
+    },
+    loginButtonText: {
+        color: '#fff',
+        fontSize: 14,
+        fontWeight: '600',
     },
     content: {
         flex: 1,
     },
+    emptyContainer: {
+        flex: 1,
+        backgroundColor: '#f8f8f8',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    emptyContent: {
+        alignItems: 'center',
+        gap: 16,
+    },
+    emptyTitle: {
+        fontSize: 20,
+        fontWeight: '700',
+        color: '#1a1a1a',
+    },
+    emptySubtitle: {
+        fontSize: 14,
+        color: '#666',
+        textAlign: 'center',
+        maxWidth: 280,
+    },
+    browseButton: {
+        backgroundColor: '#f0f0f0',
+        borderRadius: 8,
+        paddingVertical: 12,
+        paddingHorizontal: 24,
+        marginTop: 8,
+    },
+    browseButtonText: {
+        color: '#666',
+        fontSize: 14,
+        fontWeight: '600',
+    },
+    loginPromptButton: {
+        backgroundColor: '#ff6b35',
+        borderRadius: 8,
+        paddingVertical: 12,
+        paddingHorizontal: 24,
+        marginTop: 8,
+    },
+    loginPromptButtonText: {
+        color: '#fff',
+        fontSize: 14,
+        fontWeight: '600',
+    },
+    // Login prompt styles
+    loginPromptContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingHorizontal: 20,
+    },
+    // Modal styles
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingHorizontal: 20,
+    },
+    loginPromptBox: {
+        backgroundColor: '#fff',
+        borderRadius: 16,
+        padding: 24,
+        alignItems: 'center',
+        width: '100%',
+        maxWidth: 320,
+    },
+    lockIcon: {
+        marginBottom: 16,
+    },
+    modalTitle: {
+        fontSize: 20,
+        fontWeight: '700',
+        color: '#1a1a1a',
+        marginBottom: 8,
+    },
+    modalSubtitle: {
+        fontSize: 14,
+        color: '#666',
+        textAlign: 'center',
+        marginBottom: 24,
+        lineHeight: 20,
+    },
+    modalLoginButton: {
+        backgroundColor: '#ff6b35',
+        borderRadius: 8,
+        paddingVertical: 12,
+        paddingHorizontal: 32,
+        width: '100%',
+        alignItems: 'center',
+        marginBottom: 12,
+    },
+    modalLoginButtonText: {
+        color: '#fff',
+        fontSize: 16,
+        fontWeight: '600',
+    },
+    modalBackButton: {
+        borderWidth: 1,
+        borderColor: '#ff6b35',
+        borderRadius: 8,
+        paddingVertical: 12,
+        paddingHorizontal: 24,
+        width: '100%',
+        alignItems: 'center',
+        marginTop: 12,
+    },
+    modalBackButtonText: {
+        color: '#ff6b35',
+        fontSize: 14,
+        fontWeight: '600',
+    },
+    modalCloseButton: {
+        position: 'absolute',
+        top: 12,
+        right: 12,
+        width: 36,
+        height: 36,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    modalCloseButtonText: {
+        color: '#ff6b35',
+        fontSize: 14,
+        fontWeight: '600',
+    },
 });
+

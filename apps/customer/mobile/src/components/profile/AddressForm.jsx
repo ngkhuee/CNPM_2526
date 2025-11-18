@@ -1,5 +1,5 @@
 // components/profile/AddressForm.jsx
-import React from 'react';
+import React, { useState } from 'react';
 import {
     View,
     Text,
@@ -7,8 +7,39 @@ import {
     TextInput,
     TouchableOpacity,
     ActivityIndicator,
+    Modal,
+    FlatList,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
+
+// HCMC Districts data
+const HCMC_DISTRICTS = [
+    'District 1',
+    'District 2',
+    'District 3',
+    'District 4',
+    'District 5',
+    'District 6',
+    'District 7',
+    'District 8',
+    'District 9',
+    'District 10',
+    'District 11',
+    'District 12',
+    'Binh Tan',
+    'Binh Thanh',
+    'Can Tho',
+    'Cu Chi',
+    'Go Vap',
+    'Hoc Mon',
+    'Nha Be',
+    'Phu Nhuan',
+    'Tan Binh',
+    'Tan Phu',
+    'Thu Duc City',
+];
+
+const CITIES = ['Ho Chi Minh'];
 
 export default function AddressForm({
     newAddress,
@@ -19,6 +50,54 @@ export default function AddressForm({
     onCancel,
     onGetGPS,
 }) {
+    const [showCityPicker, setShowCityPicker] = useState(false);
+    const [showDistrictPicker, setShowDistrictPicker] = useState(false);
+
+    const renderPickerModal = (visible, onClose, title, items, selectedValue, onSelect) => (
+        <Modal
+            transparent
+            animationType="fade"
+            visible={visible}
+            onRequestClose={onClose}
+        >
+            <View style={styles.modalOverlay}>
+                <View style={styles.pickerContainer}>
+                    <View style={styles.pickerHeader}>
+                        <Text style={styles.pickerTitle}>{title}</Text>
+                        <TouchableOpacity onPress={onClose}>
+                            <MaterialIcons name="close" size={24} color="#666" />
+                        </TouchableOpacity>
+                    </View>
+                    <FlatList
+                        data={items}
+                        renderItem={({ item }) => (
+                            <TouchableOpacity
+                                style={[
+                                    styles.pickerItem,
+                                    selectedValue === item && styles.pickerItemSelected,
+                                ]}
+                                onPress={() => {
+                                    onSelect(item);
+                                    onClose();
+                                }}
+                            >
+                                <Text style={[
+                                    styles.pickerItemText,
+                                    selectedValue === item && styles.pickerItemTextSelected,
+                                ]}>
+                                    {item}
+                                </Text>
+                                {selectedValue === item && (
+                                    <MaterialIcons name="check" size={20} color="#FF6B35" />
+                                )}
+                            </TouchableOpacity>
+                        )}
+                        keyExtractor={(item) => item}
+                    />
+                </View>
+            </View>
+        </Modal>
+    );
     return (
         <View style={styles.addressForm}>
             <Text style={styles.formTitle}>Add New Address</Text>
@@ -26,23 +105,29 @@ export default function AddressForm({
             {/* City/Province */}
             <View style={styles.formGroup}>
                 <Text style={styles.label}>City/Province</Text>
-                <View style={styles.input}>
+                <TouchableOpacity
+                    style={styles.input}
+                    onPress={() => setShowCityPicker(true)}
+                >
                     <Text style={styles.selectText}>
                         {newAddress.city || 'Select city/province'}
                     </Text>
                     <MaterialIcons name="arrow-drop-down" size={24} color="#FF6B35" />
-                </View>
+                </TouchableOpacity>
             </View>
 
             {/* District */}
             <View style={styles.formGroup}>
                 <Text style={styles.label}>District</Text>
-                <View style={styles.input}>
+                <TouchableOpacity
+                    style={styles.input}
+                    onPress={() => setShowDistrictPicker(true)}
+                >
                     <Text style={styles.selectText}>
                         {newAddress.district || 'Select district'}
                     </Text>
                     <MaterialIcons name="arrow-drop-down" size={24} color="#FF6B35" />
-                </View>
+                </TouchableOpacity>
             </View>
 
             {/* Street Address */}
@@ -121,6 +206,26 @@ export default function AddressForm({
                     <Text style={styles.buttonSecondaryText}>Cancel</Text>
                 </TouchableOpacity>
             </View>
+
+            {/* City Picker Modal */}
+            {renderPickerModal(
+                showCityPicker,
+                () => setShowCityPicker(false),
+                'Select City',
+                CITIES,
+                newAddress.city,
+                (city) => onInputChange('city', city)
+            )}
+
+            {/* District Picker Modal */}
+            {renderPickerModal(
+                showDistrictPicker,
+                () => setShowDistrictPicker(false),
+                'Select District',
+                HCMC_DISTRICTS,
+                newAddress.district,
+                (district) => onInputChange('district', district)
+            )}
         </View>
     );
 }
@@ -234,6 +339,52 @@ const styles = StyleSheet.create({
     buttonSecondaryText: {
         color: '#666',
         fontSize: 14,
+        fontWeight: '600',
+    },
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        justifyContent: 'flex-end',
+    },
+    pickerContainer: {
+        backgroundColor: '#fff',
+        borderTopLeftRadius: 16,
+        borderTopRightRadius: 16,
+        maxHeight: '80%',
+    },
+    pickerHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingHorizontal: 16,
+        paddingVertical: 12,
+        borderBottomWidth: 1,
+        borderBottomColor: '#eee',
+    },
+    pickerTitle: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: '#333',
+    },
+    pickerItem: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingHorizontal: 16,
+        paddingVertical: 12,
+        borderBottomWidth: 1,
+        borderBottomColor: '#f0f0f0',
+    },
+    pickerItemSelected: {
+        backgroundColor: '#fff8f3',
+    },
+    pickerItemText: {
+        fontSize: 14,
+        color: '#666',
+        flex: 1,
+    },
+    pickerItemTextSelected: {
+        color: '#FF6B35',
         fontWeight: '600',
     },
 });

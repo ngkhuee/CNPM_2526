@@ -27,9 +27,8 @@ export const useAddress = (userId) => {
 
     const fetchAddresses = async () => {
         try {
-            // In production: const data = await addressService.getAddresses(userId);
-            const mockAddresses = addressService.getMockAddresses();
-            setAddresses(mockAddresses);
+            const data = await addressService.getAddresses(userId);
+            setAddresses(Array.isArray(data) ? data : (data.addresses || []));
         } catch (error) {
             console.error('Error fetching addresses:', error);
             Alert.alert('Error', 'Failed to load addresses');
@@ -51,12 +50,8 @@ export const useAddress = (userId) => {
             }
 
             setSaveLoading(true);
-            // In production: await addressService.addAddress(userId, newAddress);
-
-            const addressToAdd = {
-                id: Date.now().toString(),
-                ...newAddress,
-            };
+            const result = await addressService.addAddress(userId, newAddress);
+            const addressToAdd = result.id ? result : { id: Date.now().toString(), ...newAddress };
 
             setAddresses(prev => [...prev, addressToAdd]);
             resetAddressForm();
@@ -80,7 +75,7 @@ export const useAddress = (userId) => {
                     style: 'destructive',
                     onPress: async () => {
                         try {
-                            // In production: await addressService.deleteAddress(addressId);
+                            await addressService.deleteAddress(addressId);
                             setAddresses(prev => prev.filter(addr => addr.id !== addressId));
                             Alert.alert('Success', 'Address deleted successfully');
                         } catch (error) {
@@ -95,7 +90,7 @@ export const useAddress = (userId) => {
 
     const handleSetDefaultAddress = async (addressId) => {
         try {
-            // In production: await addressService.setDefaultAddress(userId, addressId);
+            await addressService.setDefaultAddress(userId, addressId);
             setAddresses(prev =>
                 prev.map(addr => ({
                     ...addr,

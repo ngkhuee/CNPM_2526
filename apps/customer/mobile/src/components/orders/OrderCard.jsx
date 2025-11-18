@@ -8,7 +8,7 @@ import {
     FlatList,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-import { orderService } from '../../services/orderService';
+import orderService from '../../services/orderService';
 
 export default function OrderCard({
     order,

@@ -1,7 +1,7 @@
 // hooks/useOrders.js
 import { useState, useEffect } from 'react';
 import { Alert } from 'react-native';
-import { orderService } from '../services/orderService';
+import orderService from '../services/orderService';
 
 export const useOrders = (userId) => {
     const [orders, setOrders] = useState([]);
@@ -17,12 +17,13 @@ export const useOrders = (userId) => {
     const fetchOrders = async () => {
         try {
             setLoading(true);
-            // In production: const data = await orderService.getOrders(userId);
-            const mockOrders = orderService.getMockOrders();
-            setOrders(mockOrders);
+            // Call real API
+            const ordersData = await orderService.getOrders();
+            setOrders(ordersData);
         } catch (error) {
             console.error('Error fetching orders:', error);
-            Alert.alert('Error', 'Failed to load orders');
+            // Fallback to empty array instead of mock
+            setOrders([]);
         } finally {
             setLoading(false);
         }

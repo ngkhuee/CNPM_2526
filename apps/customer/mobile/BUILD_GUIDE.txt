@@ -1,0 +1,161 @@
+BUILD GUIDE - YUMMY MOBILE APP
+==============================
+
+QUICK START:
+============
+
+Windows (PowerShell):
+  1. Open PowerShell in this folder
+  2. Run: .\build.ps1
+     - Build both APK & IPA
+  3. Run: .\build.ps1 -BuildType android
+     - Build only APK
+  4. Run: .\build.ps1 -BuildType ios
+     - Build only IPA
+
+Mac/Linux (Bash):
+  1. Open terminal in this folder
+  2. Run: chmod +x build.sh
+  3. Run: ./build.sh
+     - Build both APK & IPA
+  4. Run: ./build.sh android
+     - Build only APK
+  5. Run: ./build.sh ios
+     - Build only IPA
+
+
+REQUIREMENTS:
+=============
+
+✓ Node.js & npm installed
+✓ Expo CLI: npm install -g expo-cli
+✓ EAS CLI: npm install -g eas-cli
+✓ Android SDK (for APK build)
+✓ Xcode (for iOS IPA build - Mac only)
+
+
+FILES CREATED:
+==============
+
+build.ps1 (Windows PowerShell script)
+- Auto-installs dependencies
+- Checks tools
+- Builds APK & IPA
+- Shows progress
+
+build.sh (Mac/Linux Bash script)
+- Same as build.ps1
+- For Unix-like systems
+
+
+HOW IT WORKS:
+=============
+
+1. Install dependencies (npm install)
+2. Build Android APK using EAS
+3. Build iOS IPA using EAS
+4. Output files saved to: ./dist/
+
+Build time:
+  - Android: 10-20 minutes
+  - iOS: 15-25 minutes
+  - Total: 30-45 minutes (first time)
+
+
+AFTER CODE CHANGES:
+===================
+
+YES - You MUST rebuild APK & IPA:
+  ✓ Change any .js/.jsx code
+  ✓ Change .env or api.config.js
+  ✓ Update app.json
+  ✓ Add new packages
+
+REBUILD COMMAND:
+  Windows: .\build.ps1
+  Mac/Linux: ./build.sh
+
+Each rebuild takes same time as first build.
+
+
+OUTPUT FILES:
+=============
+
+Location: ./dist/
+
+Android: yummy-app-*.apk
+iOS: yummy-app-*.ipa
+
+You can:
+  ✓ Email APK to Android devices
+  ✓ Upload APK to Google Play Store
+  ✓ Email IPA to iOS devices (via adhoc)
+  ✓ Upload IPA to Apple App Store
+
+
+TROUBLESHOOTING:
+================
+
+❌ "expo not found"
+  → npm install -g expo-cli
+
+❌ "eas not found"
+  → npm install -g eas-cli
+
+❌ "execution policy" (Windows)
+  → Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+
+❌ Build fails with network error
+  → Check .env file
+  → Verify backend is running
+  → Check firewall
+
+❌ APK/IPA won't install
+  → Bundle ID mismatch (check app.json)
+  → Device incompatible
+  → Build cache corrupted → delete ./dist and rebuild
+
+
+BEFORE FIRST BUILD:
+===================
+
+1. ✓ Copy .env.example → .env
+2. ✓ Update IP in .env (if needed)
+3. ✓ Run npm install
+4. ✓ Test app with: npm start
+5. ✓ Then build: .\build.ps1
+
+
+TIPS:
+=====
+
+• First build takes longer (cloud server setup)
+• Subsequent builds are faster
+• Keep backend running while building
+• Don't modify files during build
+• Check internet connection (uploads files to cloud)
+• Save APK/IPA files in safe location
+
+
+NEXT STEPS:
+===========
+
+1. Set ExecutionPolicy (Windows only):
+   Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+
+2. Test mobile app locally:
+   npm start
+   Press 'a' for Android or 'i' for iOS
+
+3. Build APK & IPA:
+   .\build.ps1
+
+4. Test on devices:
+   - Android: Install APK on phone
+   - iOS: Use TestFlight or ad-hoc signing
+
+5. Deploy:
+   - Android: Upload to Google Play Store
+   - iOS: Upload to App Store
+
+Questions? Check API_CONFIG_GUIDE.md

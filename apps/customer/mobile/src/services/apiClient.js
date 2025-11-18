@@ -1,10 +1,11 @@
 /**
  * apiClient.js - Mobile specific API client
- * Dùng riêng cho React Native (không dùng shared-services)
- * Tránh `import.meta` error trong Hermes (React Native runtime)
+ * Used exclusively for React Native (not using shared-services)
+ * Avoids `import.meta` error in Hermes (React Native runtime)
  */
 
 import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import apiConfig from '../config/api.config';
 
 // Get base URL from centralized config
@@ -18,10 +19,22 @@ const apiClient = axios.create({
     },
 });
 
-// Interceptor để log requests (debug)
+// Request interceptor - attach token from AsyncStorage
 apiClient.interceptors.request.use(
-    (config) => {
+    async (config) => {
         console.log('[API Request]', config.method?.toUpperCase(), config.url);
+
+        // Get token from AsyncStorage and attach to header
+        try {
+            const token = await AsyncStorage.getItem('token');
+            if (token) {
+                config.headers.Authorization = `Bearer ${token}`;
+                console.log('[API Request] Token attached');
+            }
+        } catch (error) {
+            console.error('[API Request] Error getting token:', error);
+        }
+
         return config;
     },
     (error) => {
@@ -30,16 +43,34 @@ apiClient.interceptors.request.use(
     }
 );
 
-// Interceptor để log responses
+// Response interceptor - log responses and handle errors
 apiClient.interceptors.response.use(
     (response) => {
         console.log('[API Response]', response.status, response.config.url);
         return response.data;
     },
-    (error) => {
+    async (error) => {
         console.error('[API Response Error]', error.response?.status, error.message);
+
+        // Handle 401 - token expired or invalid
+        if (error.response?.status === 401) {
+            console.warn('[API Response] 401 Unauthorized - logging out');
+            try {
+                // Clear token and user from storage
+                await AsyncStorage.removeItem('token');
+                await AsyncStorage.removeItem('user');
+                await AsyncStorage.removeItem('cartItems');
+
+                // Trigger auth context logout (if needed)
+                // This would normally navigate back to login screen
+            } catch (clearError) {
+                console.error('[API Response] Error clearing storage:', clearError);
+            }
+        }
+
         return Promise.reject(error);
     }
 );
 
 export default apiClient;
+

@@ -1,17 +1,14 @@
 // services/profileService.js
-import axios from 'axios';
-import apiConfig from '../config/api.config';
-
-const API_BASE_URL = apiConfig.api.baseURL;
+import apiClient from './apiClient';
 
 export const profileService = {
     // Get user profile
     getUserProfile: async (userId) => {
         try {
-            const response = await axios.get(`${API_BASE_URL}/api/users/${userId}`);
-            return response.data;
+            const response = await apiClient.get(`/users/${userId}`);
+            return response;
         } catch (error) {
-            console.error('Error fetching user profile:', error);
+            console.error('[profileService.getUserProfile] Error:', error);
             throw error;
         }
     },
@@ -19,10 +16,10 @@ export const profileService = {
     // Update user profile
     updateUserProfile: async (userId, data) => {
         try {
-            const response = await axios.put(`${API_BASE_URL}/api/users/${userId}`, data);
-            return response.data;
+            const response = await apiClient.put(`/users/${userId}`, data);
+            return response;
         } catch (error) {
-            console.error('Error updating profile:', error);
+            console.error('[profileService.updateUserProfile] Error:', error);
             throw error;
         }
     },
@@ -43,10 +40,10 @@ export const addressService = {
     // Get user addresses
     getAddresses: async (userId) => {
         try {
-            const response = await axios.get(`${API_BASE_URL}/api/users/${userId}/addresses`);
-            return response.data;
+            const response = await apiClient.get(`/users/${userId}/addresses`);
+            return response;
         } catch (error) {
-            console.error('Error fetching addresses:', error);
+            console.error('[addressService.getAddresses] Error:', error);
             throw error;
         }
     },
@@ -54,10 +51,10 @@ export const addressService = {
     // Add new address
     addAddress: async (userId, addressData) => {
         try {
-            const response = await axios.post(`${API_BASE_URL}/api/users/${userId}/addresses`, addressData);
-            return response.data;
+            const response = await apiClient.post(`/users/${userId}/addresses`, addressData);
+            return response;
         } catch (error) {
-            console.error('Error adding address:', error);
+            console.error('[addressService.addAddress] Error:', error);
             throw error;
         }
     },
@@ -65,10 +62,10 @@ export const addressService = {
     // Update address
     updateAddress: async (addressId, addressData) => {
         try {
-            const response = await axios.put(`${API_BASE_URL}/api/addresses/${addressId}`, addressData);
-            return response.data;
+            const response = await apiClient.put(`/addresses/${addressId}`, addressData);
+            return response;
         } catch (error) {
-            console.error('Error updating address:', error);
+            console.error('[addressService.updateAddress] Error:', error);
             throw error;
         }
     },
@@ -76,9 +73,9 @@ export const addressService = {
     // Delete address
     deleteAddress: async (addressId) => {
         try {
-            await axios.delete(`${API_BASE_URL}/api/addresses/${addressId}`);
+            await apiClient.delete(`/addresses/${addressId}`);
         } catch (error) {
-            console.error('Error deleting address:', error);
+            console.error('[addressService.deleteAddress] Error:', error);
             throw error;
         }
     },
@@ -86,12 +83,15 @@ export const addressService = {
     // Set default address
     setDefaultAddress: async (userId, addressId) => {
         try {
-            const response = await axios.put(
-                `${API_BASE_URL}/api/users/${userId}/addresses/${addressId}/default`
-            );
-            return response.data;
+            // Update the target address to be default
+            const response = await apiClient.put(`/addresses/${addressId}`, {
+                is_default: true
+            });
+            // Optionally: reset other addresses to not be default
+            // For now, backend should handle this
+            return response;
         } catch (error) {
-            console.error('Error setting default address:', error);
+            console.error('[addressService.setDefaultAddress] Error:', error);
             throw error;
         }
     },
