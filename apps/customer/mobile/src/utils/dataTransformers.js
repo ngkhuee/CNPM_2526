@@ -30,13 +30,14 @@ export const transformFood = (food) => {
 
     return {
         id: food.id || '',
-        restaurant_id: food.restaurant_id || '',
+        restaurantId: food.restaurant_id || food.restaurantId || '',
         name: food.name || 'Unknown',
         description: food.description || '',
         price: food.price || 0,
         image: food.image || '/images/foods/default.png',
         rating: food.rating || 0,
-        is_available: food.is_available !== undefined ? food.is_available : true,
+        sold: food.sold || 0,
+        isAvailable: food.is_available !== undefined ? food.is_available : true,
         ...food
     };
 };

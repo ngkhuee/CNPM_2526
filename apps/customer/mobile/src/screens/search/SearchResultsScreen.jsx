@@ -14,13 +14,18 @@ import { MaterialIcons } from '@expo/vector-icons';
 import axios from 'axios';
 import FoodCard from '../home/components/FoodCard';
 import { transformFoods } from '../../utils/dataTransformers';
+import { useNavigateToRestaurant } from '../../hooks/useNavigateToRestaurant';
+import apiConfig from '../../config/api.config';
 
-const API_BASE = 'http://192.168.0.127:4000';
+const API_BASE = apiConfig.api.baseURL;
 
-export default function SearchResultsScreen({ searchQuery, onBack }) {
+export default function SearchResultsScreen({ searchQuery, onBack, onNavigate }) {
     const [foodList, setFoodList] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+
+    // Hook để navigate tới restaurant detail
+    const navigateToRestaurant = useNavigateToRestaurant(onNavigate);
 
     useEffect(() => {
         fetchSearchResults();
@@ -70,7 +75,7 @@ export default function SearchResultsScreen({ searchQuery, onBack }) {
                     <View key={rowIndex} style={styles.gridRow}>
                         {row.map(food => (
                             <View key={food.id} style={styles.gridItem}>
-                                <FoodCard item={food} onPress={() => { }} />
+                                <FoodCard item={food} onPress={navigateToRestaurant} />
                             </View>
                         ))}
                         {row.length < numColumns &&

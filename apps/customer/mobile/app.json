@@ -7,13 +7,15 @@
         "icon": "./assets/icon.png",
         "userInterfaceStyle": "light",
         "newArchEnabled": true,
+        "owner": "ngkhuee",
         "splash": {
             "image": "./assets/splash-icon.png",
             "resizeMode": "contain",
             "backgroundColor": "#ffffff"
         },
         "ios": {
-            "supportsTablet": true
+            "supportsTablet": true,
+            "bundleIdentifier": "com.yummy.app"
         },
         "android": {
             "adaptiveIcon": {
@@ -21,6 +23,7 @@
                 "backgroundColor": "#ffffff"
             },
             "edgeToEdgeEnabled": true,
+            "package": "com.yummy.app",
             "permissions": [
                 "android.permission.ACCESS_FINE_LOCATION",
                 "android.permission.ACCESS_COARSE_LOCATION"

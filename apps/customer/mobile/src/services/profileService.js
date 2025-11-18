@@ -1,7 +1,8 @@
 // services/profileService.js
 import axios from 'axios';
+import apiConfig from '../config/api.config';
 
-const API_BASE_URL = 'http://192.168.0.127:4000';
+const API_BASE_URL = apiConfig.api.baseURL;
 
 export const profileService = {
     // Get user profile

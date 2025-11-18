@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { formatRating } from '../../../shared/formatters';
+import { getRestaurantImageUrl } from '../../../shared/imageHelper';
 
 export default function RestaurantCard({ item, onPress }) {
     if (!item) {
@@ -9,7 +10,7 @@ export default function RestaurantCard({ item, onPress }) {
         return null;
     }
 
-    const imageUrl = `http://192.168.0.127:4000${item.image}`;
+    const imageUrl = getRestaurantImageUrl(item);
     const ratingValue = parseFloat(item.rating) || 0;
     const ratingText = formatRating(ratingValue);
 

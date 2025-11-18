@@ -1,17 +1,18 @@
 import React from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { getRestaurantImageUrl } from '../../../shared/imageHelper';
 
 export default function NearbyRestaurantCard({ item, onPress }) {
     if (!item) return null;
 
-    const imageUrl = `http://192.168.0.127:4000${item.image}`;
+    const imageUrl = getRestaurantImageUrl(item);
     const distance = item.distance || 0;
 
     return (
         <TouchableOpacity
             style={styles.card}
-            onPress={() => onPress?.(item)}
+            onPress={() => onPress?.(item.id)}
         >
             <View style={styles.imageContainer}>
                 <Image

@@ -1,10 +1,7 @@
 // Mobile-local image helper (no import.meta) — uses same back-end base used by app
-const API_BASE_URL = (() => {
-    if (typeof process !== 'undefined' && process.env?.REACT_APP_API_BASE_URL) {
-        return process.env.REACT_APP_API_BASE_URL;
-    }
-    return "http://192.168.0.127:4000";
-})();
+import apiConfig from '../config/api.config';
+
+const API_BASE_URL = apiConfig.api.baseURL;
 
 export const getImageUrl = (imagePath) => {
     if (!imagePath) return "";

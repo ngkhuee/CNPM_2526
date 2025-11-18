@@ -25,8 +25,11 @@ import SearchResultsScreen from '../search/SearchResultsScreen';
 import { transformFoods, transformRestaurants } from '../../utils/dataTransformers';
 import { getNearbyRestaurants } from '../../utils/locationUtils';
 import ErrorBoundary from '../../utils/ErrorBoundary';
+import { useNavigateToRestaurant } from '../../hooks/useNavigateToRestaurant';
+import { useNavigateToRestaurantOnly } from '../../hooks/useNavigateToRestaurantOnly';
+import apiConfig from '../../config/api.config';
 
-const API_BASE = 'http://192.168.0.127:4000';
+const API_BASE = apiConfig.api.baseURL;
 
 export default function HomeScreen({ onNavigate }) {
   const [foodList, setFoodList] = useState([]);
@@ -41,6 +44,10 @@ export default function HomeScreen({ onNavigate }) {
   const [showSearchOverlay, setShowSearchOverlay] = useState(false);
   const [showSearchResults, setShowSearchResults] = useState(false);
   const [searchSuggestions, setSearchSuggestions] = useState([]);
+
+  // Hook để navigate tới restaurant detail
+  const navigateToRestaurant = useNavigateToRestaurant(onNavigate);
+  const navigateToRestaurantOnly = useNavigateToRestaurantOnly(onNavigate);
 
   useEffect(() => {
     fetchData();
@@ -245,7 +252,7 @@ export default function HomeScreen({ onNavigate }) {
                 <ErrorBoundary>
                   <NearbyRestaurantCard
                     item={item}
-                    onPress={() => { }}
+                    onPress={navigateToRestaurantOnly}
                   />
                 </ErrorBoundary>
               )}
@@ -269,7 +276,7 @@ export default function HomeScreen({ onNavigate }) {
                     <ErrorBoundary>
                       <FoodCard
                         item={item}
-                        onPress={() => { }}
+                        onPress={navigateToRestaurant}
                       />
                     </ErrorBoundary>
                   </View>
@@ -294,7 +301,7 @@ export default function HomeScreen({ onNavigate }) {
                     <ErrorBoundary>
                       <FoodCard
                         item={item}
-                        onPress={() => { }}
+                        onPress={navigateToRestaurant}
                       />
                     </ErrorBoundary>
                   </View>
@@ -320,7 +327,7 @@ export default function HomeScreen({ onNavigate }) {
                   <ErrorBoundary>
                     <FoodCard
                       item={item}
-                      onPress={() => { }}
+                      onPress={navigateToRestaurant}
                     />
                   </ErrorBoundary>
                 </View>
@@ -339,7 +346,7 @@ export default function HomeScreen({ onNavigate }) {
             data={topRestaurants}
             keyExtractor={(item) => item.id?.toString()}
             renderItem={({ item }) => (
-              <RestaurantCard item={item} onPress={() => { }} />
+              <RestaurantCard item={item} onPress={navigateToRestaurantOnly} />
             )}
           />
         </View>

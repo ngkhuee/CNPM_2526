@@ -2,23 +2,30 @@ import React from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { formatCurrency, formatRating } from '../../../shared/formatters';
+import { getFoodImageUrl } from '../../../shared/imageHelper';
 
 export default function FoodCard({ item, onPress }) {
-    // console.log('[FoodCard] Item:', item);
-
     if (!item) {
         console.error('[FoodCard] Item is null/undefined!');
         return null;
     }
 
-    const imageUrl = `http://192.168.0.127:4000${item.image}`;
+    const imageUrl = getFoodImageUrl(item);
     const priceFormatted = formatCurrency(item.price || 0);
     const ratingValue = parseFloat(item.rating) || 0;
     const ratingFormatted = formatRating(ratingValue);
     const soldCount = parseInt(item.sold) || 0;
 
+    const handlePress = async () => {
+        console.log('[FoodCard] Pressed:', { id: item.id, name: item.name, restaurantId: item.restaurantId });
+        if (onPress && typeof onPress === 'function') {
+            // onPress là async function, nên await
+            await onPress(item);
+        }
+    };
+
     return (
-        <TouchableOpacity style={styles.card} onPress={() => onPress?.(item)}>
+        <TouchableOpacity style={styles.card} onPress={handlePress}>
             <View style={styles.imageContainer}>
                 <Image source={{ uri: imageUrl }} style={styles.image} />
                 {ratingValue > 0 ? (
