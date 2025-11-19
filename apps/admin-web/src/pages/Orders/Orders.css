@@ -20,8 +20,39 @@
   margin: 0;
 }
 
+.refresh-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background-color: #ff6b35;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.refresh-btn:hover:not(:disabled) {
+  background-color: #e55a28;
+  transform: translateY(-1px);
+}
+
+.refresh-btn:disabled {
+  background-color: #adb5bd;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.refresh-btn svg {
+  font-size: 18px;
+}
+
 .orders-filter {
   display: flex;
+  margin-bottom: 20px;
   gap: 10px;
 }
 
@@ -150,6 +181,11 @@
   color: #856404;
 }
 
+.status-paid {
+  background: #fff8e1;
+  color: #f57f17;
+}
+
 .status-confirmed {
   background: #cfe2ff;
   color: #084298;
@@ -176,6 +212,11 @@
 }
 
 .status-cancelled {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.status-rejected {
   background: #f8d7da;
   color: #721c24;
 }
@@ -260,6 +301,7 @@
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }

@@ -34,21 +34,6 @@ const OrderTable = ({ orders, onOrderSelect, getStatusBadgeClass }) => {
 
     return (
         <div className="orders-table-container">
-            <div style={{ marginBottom: "15px" }}>
-                <input
-                    type="text"
-                    placeholder="Search by Order ID..."
-                    value={searchId}
-                    onChange={(e) => setSearchId(e.target.value)}
-                    style={{
-                        padding: "8px 12px",
-                        borderRadius: "4px",
-                        border: "1px solid #ddd",
-                        minWidth: "150px",
-                        fontSize: "14px",
-                    }}
-                />
-            </div>
             <table className="orders-table">
                 <thead>
                     <tr>

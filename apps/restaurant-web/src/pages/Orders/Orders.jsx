@@ -40,6 +40,7 @@ const Orders = () => {
     const itemsPerPage = 10;
 
     useEffect(() => {
+        // New orders = 'paid' status (payment completed, waiting for restaurant confirmation)
         const paidOrders = restaurantOrders.filter((o) => o.status === "paid");
         setNewOrdersCount(paidOrders.length);
         if (paidOrders.length > 0) {

@@ -65,7 +65,7 @@ export const useCheckoutProcessing = () => {
             delivery_fee: deliveryFee,
             discount_amount: discountAmount,
             total_amount: totalAmount,
-            payment_method: checkoutData.paymentMethod || 'cash',
+            payment_method: 'momo',
             payment_status: 'pending',
             status: 'pending',
             customer: {

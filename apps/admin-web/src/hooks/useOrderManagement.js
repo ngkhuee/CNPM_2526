@@ -5,7 +5,6 @@ export const useOrderManagement = () => {
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState("all");
-    const [autoRefresh, setAutoRefresh] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
 
     const fetchOrders = useCallback(async (silent = false) => {
@@ -25,18 +24,6 @@ export const useOrderManagement = () => {
         fetchOrders();
     }, [fetchOrders]);
 
-    // Auto-refresh every 5 seconds
-    useEffect(() => {
-        if (!autoRefresh) return;
-
-        const intervalId = setInterval(() => {
-            console.log("Auto-refreshing orders...");
-            fetchOrders(true);
-        }, 5000);
-
-        return () => clearInterval(intervalId);
-    }, [autoRefresh, fetchOrders]);
-
     const handleManualRefresh = useCallback(async () => {
         setRefreshing(true);
         await fetchOrders();
@@ -46,6 +33,7 @@ export const useOrderManagement = () => {
     const getStatusBadgeClass = (status) => {
         const statusMap = {
             pending: "status-pending",
+            paid: "status-paid",
             confirmed: "status-confirmed",
             preparing: "status-preparing",
             ready: "status-ready",
@@ -58,11 +46,27 @@ export const useOrderManagement = () => {
 
     const getFilteredOrders = useCallback(() => {
         if (filter === "all") return orders;
+        if (filter === "delivering") {
+            // Delivering = all except delivered, cancelled, and rejected
+            return orders.filter((order) => order.status !== "delivered" && order.status !== "cancelled" && order.status !== "rejected");
+        }
+        if (filter === "cancelled") {
+            // Cancelled = both cancelled and rejected statuses
+            return orders.filter((order) => order.status === "cancelled" || order.status === "rejected");
+        }
         return orders.filter((order) => order.status === filter);
     }, [orders, filter]);
 
     const getStatusCount = useCallback((status) => {
         if (status === "all") return orders.length;
+        if (status === "delivering") {
+            // Delivering = all except delivered, cancelled, and rejected
+            return orders.filter((o) => o.status !== "delivered" && o.status !== "cancelled" && o.status !== "rejected").length;
+        }
+        if (status === "cancelled") {
+            // Cancelled = both cancelled and rejected statuses
+            return orders.filter((o) => o.status === "cancelled" || o.status === "rejected").length;
+        }
         return orders.filter((o) => o.status === status).length;
     }, [orders]);
 
@@ -71,8 +75,6 @@ export const useOrderManagement = () => {
         loading,
         filter,
         setFilter,
-        autoRefresh,
-        setAutoRefresh,
         refreshing,
         handleManualRefresh,
         getStatusBadgeClass,

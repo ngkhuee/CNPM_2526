@@ -1,75 +1,40 @@
 import React from "react";
+import { MdRefresh } from "react-icons/md";
 
-const OrderFilter = ({ filter, onFilterChange, getStatusCount, autoRefresh, onAutoRefreshChange, onRefresh, refreshing }) => {
+const OrderFilter = ({ filter, onFilterChange, getStatusCount, onRefresh, refreshing, searchId, onSearchChange }) => {
     return (
-        <div className="orders-header">
-            <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
+        <div>
+            <div className="orders-header">
                 <h2>Order Management</h2>
-                <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                    <button
-                        onClick={onRefresh}
-                        disabled={refreshing}
-                        style={{
-                            padding: "8px 12px",
-                            background: refreshing ? "#9e9e9e" : "#4caf50",
-                            color: "white",
-                            border: "none",
-                            borderRadius: "5px",
-                            cursor: refreshing ? "not-allowed" : "pointer",
-                            fontSize: "14px",
-                            fontWeight: "600",
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "6px",
-                        }}
-                    >
-                        <svg
-                            width="16"
-                            height="16"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            style={{
-                                animation: refreshing ? "spin 1s linear infinite" : "none",
-                            }}
-                        >
-                            <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2" />
-                        </svg>
-                        {refreshing ? "Refreshing..." : "Refresh"}
-                    </button>
-                    <label
-                        style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "6px",
-                            fontSize: "14px",
-                            cursor: "pointer",
-                            userSelect: "none",
-                        }}
-                    >
-                        <input
-                            type="checkbox"
-                            checked={autoRefresh}
-                            onChange={(e) => onAutoRefreshChange(e.target.checked)}
-                            style={{ cursor: "pointer" }}
-                        />
-                        <span>Auto-refresh (5s)</span>
-                    </label>
-                </div>
+                <button
+                    onClick={onRefresh}
+                    disabled={refreshing}
+                    className="refresh-btn"
+                >
+                    <MdRefresh /> {refreshing ? "Refreshing..." : "Refresh"}
+                </button>
             </div>
+
             <div className="orders-filter">
+                <input
+                    type="text"
+                    placeholder="Search by Order ID..."
+                    value={searchId}
+                    onChange={(e) => onSearchChange(e.target.value)}
+                    style={{
+                        padding: "8px 12px",
+                        borderRadius: "4px",
+                        border: "1px solid #ddd",
+                        marginRight: "10px",
+                        minWidth: "150px",
+                        fontSize: "14px",
+                    }}
+                />
                 <button
                     className={filter === "all" ? "active" : ""}
                     onClick={() => onFilterChange("all")}
                 >
                     All ({getStatusCount("all")})
-                </button>
-                <button
-                    className={filter === "pending" ? "active" : ""}
-                    onClick={() => onFilterChange("pending")}
-                >
-                    Pending ({getStatusCount("pending")})
                 </button>
                 <button
                     className={filter === "delivering" ? "active" : ""}
@@ -82,6 +47,12 @@ const OrderFilter = ({ filter, onFilterChange, getStatusCount, autoRefresh, onAu
                     onClick={() => onFilterChange("delivered")}
                 >
                     Delivered ({getStatusCount("delivered")})
+                </button>
+                <button
+                    className={filter === "cancelled" ? "active" : ""}
+                    onClick={() => onFilterChange("cancelled")}
+                >
+                    Cancelled/Rejected ({getStatusCount("cancelled")})
                 </button>
             </div>
         </div>

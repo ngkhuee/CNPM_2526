@@ -23,6 +23,8 @@ const mapOrderToFrontend = (
   discountAmount: order.discount_amount,
   totalAmount: order.total_amount,
   paymentMethod: order.payment_method,
+  paymentStatus: order.payment_status,
+  payment_status: order.payment_status,
   status: order.status,
   specialInstructions: order.special_instructions,
   estimatedDeliveryTime: order.estimated_delivery_time,
@@ -38,6 +40,7 @@ const mapOrderToFrontend = (
   customerName: user?.full_name || "N/A",
   customerPhone: user?.phone || address?.phone || "N/A",
   customerAddress: address?.full_address || address?.address || "N/A",
+  delivery_address: address?.full_address || address?.address || order.delivery_address || "N/A",
   // GPS coordinates
   pickup_gps: order.pickup_gps || restaurant?.location || null,
   dropoff_gps:
@@ -272,7 +275,7 @@ export const orderService = {
         delivery_fee: orderData.deliveryFee || 0,
         discount_amount: orderData.discountAmount || 0,
         total_amount: orderData.total_amount,
-        payment_method: orderData.payment_method || "online",
+        payment_method: orderData.payment_method || "momo",
         status: orderData.status || "pending",
         payment_status: orderData.paymentStatus || "pending",
         special_instructions: orderData.specialInstructions || "",

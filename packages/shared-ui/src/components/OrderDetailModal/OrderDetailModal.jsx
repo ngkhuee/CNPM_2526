@@ -12,6 +12,21 @@ export const OrderDetailModal = ({ isOpen, onClose, order }) => {
     }).format(v || 0);
   };
 
+  // Parse timestamps
+  const getFormattedDate = (dateStr) => {
+    if (!dateStr) return "Unknown";
+    try {
+      return new Date(dateStr).toLocaleString("vi-VN");
+    } catch {
+      return "Invalid date";
+    }
+  };
+
+  const orderPlacedTime = getFormattedDate(order.created_at || order.createdAt);
+  const completedTime = order.status === "completed"
+    ? getFormattedDate(order.updated_at || order.updatedAt)
+    : null;
+
   return (
     <Modal
       isOpen={isOpen}
@@ -47,6 +62,15 @@ export const OrderDetailModal = ({ isOpen, onClose, order }) => {
                   "N/A"}
               </span>
             </p>
+            <p>
+              <strong>Address:</strong>
+              <span>
+                {order.customer?.address ||
+                  order.delivery_address ||
+                  order.address ||
+                  "-"}
+              </span>
+            </p>
           </section>
 
           <section className="odm-section odm-half">
@@ -55,8 +79,12 @@ export const OrderDetailModal = ({ isOpen, onClose, order }) => {
               <strong>Name:</strong>
               <span>
                 {order.restaurant?.name || order.restaurantName || "N/A"}
-                {(order.restaurant?.address || order.restaurantAddress) &&
-                  ` (${order.restaurant?.address || order.restaurantAddress})`}
+              </span>
+            </p>
+            <p>
+              <strong>Address:</strong>
+              <span>
+                {order.restaurant?.address || order.restaurantAddress || "N/A"}
               </span>
             </p>
             <p>
@@ -74,156 +102,140 @@ export const OrderDetailModal = ({ isOpen, onClose, order }) => {
           </section>
         </div>
 
-        {/* Row 2: Payment Summary */}
-        <div className="odm-row">
-          <section className="odm-section odm-half">
-            <h4>Payment Summary</h4>
-            <p>
-              <strong>Subtotal:</strong>
-              <span className="odm-amount odm-subtotal">
-                {formatCurrency(
-                  order.subtotal || order.sub_total || order.total_amount
-                )}
-              </span>
-            </p>
-            <p>
-              <strong>Delivery Fee:</strong>
-              <span className="odm-amount odm-delivery-fee">
-                {formatCurrency(order.delivery_fee || order.deliveryFee)}
-              </span>
-            </p>
-            <p>
-              <strong>Discount:</strong>
-              <span className="odm-amount odm-discount">
-                {formatCurrency(
-                  order.discount_amount || order.discountAmount || 0
-                )}
-              </span>
-            </p>
-            <p>
-              <strong>Total:</strong>
-              <span className="odm-amount odm-total">
-                {formatCurrency(
-                  order.total_amount || order.total || order.totalAmount
-                )}
-              </span>
-            </p>
-          </section>
-
-          <section className="odm-section odm-half">
-            <h4>Order Info</h4>
-            <p>
-              <strong>Status:</strong>
-              <span className="odm-status-badge">
-                {order.status || "Unknown"}
-              </span>
-            </p>
-            <p>
-              <strong>Payment Method:</strong>
-              <span className="odm-payment-badge">
-                {order.payment_method || order.paymentMethod || "N/A"}
-              </span>
-            </p>
-            <p>
-              <strong>Payment Status:</strong>
-              <span>
-                {order.payment_status || order.paymentStatus || "N/A"}
-              </span>
-            </p>
-            <p>
-              <strong>Date:</strong>
-              <span>
-                {order.created_at || order.createdAt
-                  ? new Date(
-                    order.created_at || order.createdAt
-                  ).toLocaleString()
-                  : "Unknown"}
-              </span>
-            </p>
-          </section>
-        </div>
-
-        {/* Row 3: Items */}
+        {/* Row 2: Order Status (with Order Info merged) */}
         <section className="odm-section">
-          <h4>Order Items</h4>
-          <ul>
-            {order.items && order.items.length > 0 ? (
-              order.items.map((it, idx) => (
-                <li key={idx}>
-                  <span>
-                    <strong>{it.name}</strong> × {it.quantity}
-                  </span>
-                  <span className="value-highlight">
+          <h4>Order Status</h4>
+          <p>
+            <strong>Status:</strong>
+            <span className="odm-status-badge">
+              {order.status || "Unknown"}
+            </span>
+          </p>
+          <p>
+            <strong>Payment Method:</strong>
+            <span className="odm-payment-badge">
+              {order.payment_method || order.paymentMethod || "N/A"}
+            </span>
+          </p>
+          <p>
+            <strong>Payment Status:</strong>
+            <span>
+              {order.payment_status || order.paymentStatus || "N/A"}
+            </span>
+          </p>
+          <p>
+            <strong>Order Placed:</strong>
+            <span>{orderPlacedTime}</span>
+          </p>
+          {completedTime && (
+            <p>
+              <strong>Completed:</strong>
+              <span>{completedTime}</span>
+            </p>
+          )}
+        </section>
+
+        {/* Row 3: Order & Payment Info combined */}
+        <section className="odm-section">
+          <h4>Order Summary</h4>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "30px" }}>
+            <div style={{ paddingLeft: "15px" }} >
+              <h5 style={{ marginBottom: "10px" }} >Items</h5>
+              <ul>
+                {order.items && order.items.length > 0 ? (
+                  order.items.map((it, idx) => (
+                    <li key={idx}>
+                      <span>
+                        <strong>{it.name}</strong> × {it.quantity}
+                      </span>
+                      <span className="value-highlight">
+                        {formatCurrency(
+                          it.subtotal || it.unit_price || it.unitPrice
+                        )}
+                      </span>
+                    </li>
+                  ))
+                ) : (
+                  <li>No items</li>
+                )}
+              </ul>
+            </div>
+            <div>
+              <h5 style={{ marginBottom: "10px" }} >Payment Details</h5>
+              <div style={{ paddingLeft: "20x" }} >
+                <p>
+                  <strong>Subtotal:</strong>
+                  <span className="odm-amount" style={{ color: "#000" }} >
                     {formatCurrency(
-                      it.subtotal || it.unit_price || it.unitPrice
+                      order.subtotal || order.sub_total || 0
                     )}
                   </span>
-                </li>
-              ))
-            ) : (
-              <li>No items</li>
-            )}
-          </ul>
+                </p>
+                <p>
+                  <strong>Delivery Fee:</strong>
+                  <span className="odm-amount" style={{ color: "#000" }} >
+                    {formatCurrency(order.delivery_fee || order.deliveryFee || 0)}
+                  </span>
+                </p>
+                <p>
+                  <strong>Discount:</strong>
+                  <span className="odm-amount odm-discount">
+                    -{formatCurrency(
+                      order.discount_amount || order.discountAmount || 0
+                    )}
+                  </span>
+                </p>
+                <p style={{ borderTop: "1px solid #ddd", paddingTop: "8px", marginTop: "8px" }}>
+                  <strong>Total:</strong>
+                  <span className="odm-amount odm-total">
+                    {formatCurrency(
+                      order.total_amount || order.totalPrice || order.totalAmount || 0
+                    )}
+                  </span>
+                </p>
+              </div>
+            </div>
+          </div>
         </section>
 
         {/* Row 4: Delivery Info */}
-        <div className="odm-row">
-          <section className="odm-section odm-half">
-            <h4>Delivery Address</h4>
-            <p>
-              <strong>Address:</strong>
-              <span>
-                {order.customer?.address ||
-                  order.delivery_address ||
-                  order.address ||
-                  (order.addressId || order.address_id
-                    ? `Address ID: ${order.addressId || order.address_id}`
-                    : "-")}
-              </span>
-            </p>
-            <p>
-              <strong>Phone:</strong>
-              <span>
-                {order.customer?.phone ||
-                  order.user?.phone ||
-                  "N/A"}
-              </span>
-            </p>
-            <p>
-              <strong>Estimated Delivery:</strong>
-              <span>
-                {order.estimated_delivery_time ||
-                  order.estimatedDeliveryTime ||
-                  "Not specified"}
-              </span>
-            </p>
-          </section>
-
-          <section className="odm-section odm-half">
-            <h4>Additional Info</h4>
-            <p>
-              <strong>Drone:</strong>
-              <span className="value-highlight">
-                {order.drone_id || order.droneId || "Not assigned"}
-              </span>
-            </p>
+        <section className="odm-section">
+          <h4>Delivery Info</h4>
+          <p>
+            <strong>Drone:</strong>
+            <span>
+              {order.drone_id || order.droneId
+                ? `${order.drone_id || order.droneId} - ${order.drone_name || order.droneName || ""}`.trim()
+                : "Not assigned"}
+            </span>
+          </p>
+          <p>
+            <strong>Restaurant Address:</strong>
+            <span>
+              {order.restaurant?.address || order.restaurantAddress || "N/A"}
+            </span>
+          </p>
+          <p>
+            <strong>Customer Address:</strong>
+            <span>
+              {order.customer?.address ||
+                order.delivery_address ||
+                order.address ||
+                "N/A"}
+            </span>
+          </p>
+          {(order.special_instructions || order.specialInstructions) && (
             <p>
               <strong>Special Instructions:</strong>
               <span>
-                {order.special_instructions ||
-                  order.specialInstructions ||
-                  "None"}
+                {order.special_instructions || order.specialInstructions}
               </span>
             </p>
-            <p>
-              <strong>Order Number:</strong>
-              <span className="value-highlight">
-                {order.order_number || order.orderNumber || order.id}
-              </span>
-            </p>
-          </section>
-        </div>
+          )}
+        </section>
       </div>
     </Modal>
   );
-}; export default OrderDetailModal;
+};
+
+export default OrderDetailModal;

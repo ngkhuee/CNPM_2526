@@ -8,14 +8,13 @@ import "./Orders.css";
 const Orders = () => {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [detailOpen, setDetailOpen] = useState(false);
+  const [searchId, setSearchId] = useState("");
 
   const {
     orders,
     loading,
     filter,
     setFilter,
-    autoRefresh,
-    setAutoRefresh,
     refreshing,
     handleManualRefresh,
     getStatusBadgeClass,
@@ -32,7 +31,10 @@ const Orders = () => {
     return <div className="orders-page">Loading...</div>;
   }
 
-  const filteredOrders = getFilteredOrders();
+  const filteredOrders = getFilteredOrders().filter((order) => {
+    if (!searchId) return true;
+    return order.id.toString().includes(searchId);
+  });
 
   return (
     <div className="orders-page">
@@ -40,10 +42,10 @@ const Orders = () => {
         filter={filter}
         onFilterChange={setFilter}
         getStatusCount={getStatusCount}
-        autoRefresh={autoRefresh}
-        onAutoRefreshChange={setAutoRefresh}
         onRefresh={handleManualRefresh}
         refreshing={refreshing}
+        searchId={searchId}
+        onSearchChange={setSearchId}
       />
 
       <OrderTable

@@ -64,10 +64,10 @@ const MoMoPaymentScreen = ({ orderId }) => {
             setPaymentStatus('completed');
             showToast('success', 'Payment successful!');
 
-            // Update order payment status
+            // Update order status to 'paid' (payment completed, waiting for restaurant confirmation)
             await orderService.updateOrder(order.id, {
                 payment_status: 'completed',
-                status: 'confirmed',
+                status: 'paid',
             });
 
             setTimeout(() => {

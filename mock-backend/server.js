@@ -938,7 +938,7 @@ server.post("/orders", (req, res) => {
     delivery_fee: orderData.delivery_fee || 0,
     discount_amount: orderData.discount_amount || 0,
     total_amount: orderData.total_amount || 0,
-    payment_method: orderData.payment_method || "online",
+    payment_method: orderData.payment_method || "momo",
     payment_status: orderData.payment_status || "pending",
     status: orderData.status || "pending",
     special_instructions: orderData.special_instructions || "",
