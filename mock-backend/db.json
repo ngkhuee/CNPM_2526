@@ -1577,8 +1577,8 @@
       "discount_amount": 162900,
       "total_amount": 938100,
       "payment_method": "card",
-      "payment_status": "pending",
-      "status": "pending",
+      "payment_status": "completed",
+      "status": "confirmed",
       "special_instructions": "",
       "customer": {
         "name": "ngoc",
@@ -1996,16 +1996,6 @@
       "restaurant_id": "r3",
       "items": [
         {
-          "item_id": "item_1763546594069_29u91ve7w",
-          "food_id": 12,
-          "name": "Pepperoni Pizza",
-          "price": 215000,
-          "image": "/images/foods/food_12.png",
-          "quantity": 2,
-          "note": "",
-          "subtotal": 430000
-        },
-        {
           "item_id": "item_1763546628790_7daqgj9es",
           "food_id": 9,
           "name": "Pizza Spicy Garlic Shrimp",
@@ -2014,16 +2004,6 @@
           "quantity": 1,
           "note": "",
           "subtotal": 254000
-        },
-        {
-          "item_id": "item_1763546635897_2y6u4h7iy",
-          "food_id": 11,
-          "name": "Full Hamburger",
-          "price": 52000,
-          "image": "/images/foods/food_11.png",
-          "quantity": 2,
-          "note": "",
-          "subtotal": 104000
         },
         {
           "item_id": "item_1763546649974_ddh8a3c2v",
@@ -2036,8 +2016,8 @@
           "subtotal": 298000
         }
       ],
-      "updated_at": "2025-11-19T10:04:46.611Z",
-      "total": 1086000,
+      "updated_at": "2025-11-19T13:17:46.942Z",
+      "total": 552000,
       "restaurant_name": "Pizza 4P's"
     }
   ],

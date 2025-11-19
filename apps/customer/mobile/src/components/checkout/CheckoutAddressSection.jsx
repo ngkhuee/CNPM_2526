@@ -39,7 +39,8 @@ export const CheckoutAddressSection = ({
         if (onRequestGPS) {
             try {
                 await onRequestGPS();
-                setShowManualInput(false);
+                // Keep showManualInput true so user can edit the GPS address
+                setShowManualInput(true);
             } catch (error) {
                 Alert.alert('GPS Error', error.message || 'Failed to get GPS location');
             }

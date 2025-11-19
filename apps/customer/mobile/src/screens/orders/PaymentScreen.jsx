@@ -24,23 +24,37 @@ const PaymentScreen = ({ orderId }) => {
     const [order, setOrder] = useState(null);
     const [loading, setLoading] = useState(true);
 
+    console.log('[PaymentScreen] Rendered with orderId:', orderId);
+
     useEffect(() => {
+        console.log('[PaymentScreen] useEffect called, orderId:', orderId);
+        if (!orderId) {
+            console.log('[PaymentScreen] ERROR: orderId is null/undefined!');
+            navigate('orders');
+            return;
+        }
         fetchOrder();
     }, [orderId]);
 
     const fetchOrder = async () => {
         try {
+            console.log('[PaymentScreen] Fetching order with id:', orderId);
             setLoading(true);
             const data = await orderService.getOrderDetail(orderId);
+            console.log('[PaymentScreen] Order fetched:', data);
             setOrder(data);
 
             // Route to specific payment screen based on payment method
-            if (data.payment_method === 'momo') {
+            // Note: transformOrder returns paymentMethod (camelCase)
+            console.log('[PaymentScreen] Routing based on paymentMethod:', data.paymentMethod);
+            if (data.paymentMethod === 'momo') {
+                console.log('[PaymentScreen] Navigating to momoPayment');
                 navigate('momoPayment', { orderId: data.id });
-            } else if (data.payment_method === 'card') {
+            } else if (data.paymentMethod === 'card') {
+                console.log('[PaymentScreen] Navigating to cardPayment');
                 navigate('cardPayment', { orderId: data.id });
             } else {
-                // Default fallback
+                console.log('[PaymentScreen] Unknown payment method, navigating to orders');
                 navigate('orders');
             }
         } catch (error) {

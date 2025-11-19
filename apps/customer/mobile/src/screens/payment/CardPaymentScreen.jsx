@@ -43,12 +43,16 @@ const CardPaymentScreen = ({ orderId }) => {
         cvv: '',
     });
 
+    console.log('[CardPaymentScreen] Rendered with orderId:', orderId);
+
     useEffect(() => {
+        console.log('[CardPaymentScreen] useEffect called, orderId:', orderId);
         fetchOrder();
     }, [orderId]);
 
     const fetchOrder = async () => {
         try {
+            console.log('[CardPaymentScreen] Fetching order with id:', orderId);
             setLoading(true);
             const data = await orderService.getOrderDetail(orderId);
             setOrder(data);
@@ -205,16 +209,16 @@ const CardPaymentScreen = ({ orderId }) => {
                             <View style={styles.infoRow}>
                                 <Text style={styles.infoLabel}>Delivery:</Text>
                                 <Text style={styles.infoValue}>
-                                    ₫{(order.delivery_fee || 0).toLocaleString('vi-VN')}
+                                    ₫{(order.deliveryFee || 0).toLocaleString('vi-VN')}
                                 </Text>
                             </View>
-                            {order.discount_amount > 0 && (
+                            {order.discountAmount > 0 && (
                                 <View style={[styles.infoRow, styles.discountRow]}>
                                     <Text style={[styles.infoLabel, styles.discountLabel]}>
                                         Discount:
                                     </Text>
                                     <Text style={[styles.infoValue, styles.discountValue]}>
-                                        -₫{(order.discount_amount || 0).toLocaleString('vi-VN')}
+                                        -₫{(order.discountAmount || 0).toLocaleString('vi-VN')}
                                     </Text>
                                 </View>
                             )}
@@ -222,7 +226,7 @@ const CardPaymentScreen = ({ orderId }) => {
                             <View style={styles.infoRow}>
                                 <Text style={styles.infoLabel}>Total Amount:</Text>
                                 <Text style={styles.totalValue}>
-                                    ₫{(order.total_amount || 0).toLocaleString('vi-VN')}
+                                    ₫{(order.totalPrice || 0).toLocaleString('vi-VN')}
                                 </Text>
                             </View>
                         </View>
@@ -384,7 +388,7 @@ const CardPaymentScreen = ({ orderId }) => {
                             <MaterialIcons name="check-circle" size={64} color="#1976d2" />
                             <Text style={styles.successTitle}>Payment Successful!</Text>
                             <Text style={styles.successText}>
-                                ₫{(order.total_amount || 0).toLocaleString('vi-VN')} charged
+                                ₫{(order.totalPrice || 0).toLocaleString('vi-VN')} charged
                             </Text>
                             <Text style={styles.successSubtext}>
                                 Your order has been confirmed. The restaurant will start preparing your food

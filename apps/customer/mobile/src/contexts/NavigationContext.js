@@ -55,13 +55,20 @@ export const NavigationProvider = ({ children }) => {
      */
     const navigate = useCallback((route, params = {}) => {
         console.log('[NavigationContext] Navigating to:', route, 'with params:', params);
+
+        // Update state FIRST (synchronously in state batch)
+        setNavigationStateInternal((prev) => {
+            const newState = { ...prev };
+            if (params.orderId !== undefined) newState.orderId = params.orderId;
+            if (params.restaurantId !== undefined) newState.targetRestaurantId = params.restaurantId;
+            if (params.foodId !== undefined) newState.highlightedFoodId = params.foodId;
+            if (params.navigationData !== undefined) newState.navigationData = params.navigationData;
+            console.log('[NavigationContext] Updated navigationState:', newState);
+            return newState;
+        });
+
+        // Then set active route
         setActiveRouteInternal(route);
-        if (params.orderId) {
-            setNavigationStateInternal((prev) => ({
-                ...prev,
-                orderId: params.orderId,
-            }));
-        }
     }, []);
 
     const value = {

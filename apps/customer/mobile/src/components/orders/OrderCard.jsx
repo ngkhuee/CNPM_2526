@@ -1,5 +1,5 @@
 // components/orders/OrderCard.jsx
-import React from 'react';
+import React, { useState, useContext } from 'react';
 import {
     View,
     Text,
@@ -8,6 +8,7 @@ import {
     FlatList,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
+import { NavigationContext } from '../../contexts/NavigationContext';
 import orderService from '../../services/orderService';
 
 export default function OrderCard({
@@ -16,10 +17,14 @@ export default function OrderCard({
     onRetry,
     onViewDetails,
 }) {
+    const { navigate } = useContext(NavigationContext);
+    const [expandedItems, setExpandedItems] = useState(false);
     const statusColor = orderService.getStatusColor(order.status);
     const statusText = orderService.getStatusText(order.status);
     const canCancel = orderService.canCancelOrder(order.status);
     const isCompleted = order.status === 'completed';
+    const isPending = order.status === 'pending';
+    const isPaid = order.paymentStatus === 'completed' || order.paymentStatus === 'success';
 
     // Safe date handling - check if createdAt exists
     let dateString = '';
@@ -74,15 +79,32 @@ export default function OrderCard({
                         {order.items?.length || 0} item{(order.items?.length || 0) > 1 ? 's' : ''}
                     </Text>
                 </View>
-                {order.items?.slice(0, 2).map((item, idx) => (
+                {order.items?.slice(0, expandedItems ? undefined : 2).map((item, idx) => (
                     <Text key={idx} style={styles.itemName}>
                         • {item.quantity}x {item.name}
                     </Text>
                 ))}
-                {(order.items?.length || 0) > 2 && (
-                    <Text style={styles.moreItems}>
-                        + {(order.items?.length || 0) - 2} more item{((order.items?.length || 0) - 2) > 1 ? 's' : ''}
-                    </Text>
+                {(order.items?.length || 0) > 2 && !expandedItems && (
+                    <TouchableOpacity
+                        style={styles.moreItemsButton}
+                        onPress={() => setExpandedItems(true)}
+                    >
+                        <Text style={styles.moreItems}>
+                            + {(order.items?.length || 0) - 2} more item{((order.items?.length || 0) - 2) > 1 ? 's' : ''}
+                        </Text>
+                        <MaterialIcons name="expand-more" size={16} color="#999" />
+                    </TouchableOpacity>
+                )}
+                {expandedItems && (order.items?.length || 0) > 2 && (
+                    <TouchableOpacity
+                        style={styles.moreItemsButton}
+                        onPress={() => setExpandedItems(false)}
+                    >
+                        <Text style={styles.moreItems}>
+                            Show less
+                        </Text>
+                        <MaterialIcons name="expand-less" size={16} color="#999" />
+                    </TouchableOpacity>
                 )}
             </View>
 
@@ -111,6 +133,15 @@ export default function OrderCard({
                     </Text>
                 </View>
                 <View style={styles.actions}>
+                    {isPending && !isPaid && (
+                        <TouchableOpacity
+                            style={[styles.actionBtn, styles.paymentBtn]}
+                            onPress={() => navigate('payment', { orderId: order.id })}
+                        >
+                            <MaterialIcons name="payment" size={16} color="#fff" />
+                            <Text style={styles.paymentBtnText}>Pay Now</Text>
+                        </TouchableOpacity>
+                    )}
                     {canCancel && (
                         <TouchableOpacity
                             style={[styles.actionBtn, styles.cancelBtn]}
@@ -200,11 +231,19 @@ const styles = StyleSheet.create({
         color: '#555',
         marginBottom: 4,
     },
+    moreItemsButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: 8,
+        paddingHorizontal: 4,
+        marginTop: 4,
+        borderRadius: 4,
+    },
     moreItems: {
         fontSize: 12,
-        color: '#999',
-        fontStyle: 'italic',
-        marginTop: 4,
+        color: '#FF6B35',
+        fontWeight: '600',
+        marginRight: 4,
     },
     deliveryInfo: {
         paddingHorizontal: 12,
@@ -261,6 +300,16 @@ const styles = StyleSheet.create({
         fontSize: 12,
         fontWeight: '600',
         color: '#f44336',
+    },
+    paymentBtn: {
+        borderColor: '#FF6B35',
+        backgroundColor: '#FF6B35',
+    },
+    paymentBtnText: {
+        marginLeft: 4,
+        fontSize: 12,
+        fontWeight: '600',
+        color: '#fff',
     },
     retryBtn: {
         borderColor: '#FF6B35',

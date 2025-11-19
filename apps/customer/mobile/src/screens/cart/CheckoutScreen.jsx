@@ -168,6 +168,10 @@ const CheckoutScreen = () => {
             newErrors.address = 'Delivery address is required';
         }
 
+        if (!checkoutData.paymentMethod || !['card', 'momo'].includes(checkoutData.paymentMethod)) {
+            newErrors.paymentMethod = 'Please select a payment method';
+        }
+
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
@@ -312,8 +316,13 @@ const CheckoutScreen = () => {
 
             showToast('success', 'Order placed successfully!');
 
+            // Add a small delay to ensure cart state is updated before navigating
+            await new Promise(resolve => setTimeout(resolve, 500));
+
             // Navigate to payment screen
+            console.log('[CheckoutScreen] About to navigate to payment with orderId:', order.id);
             navigate('payment', { orderId: order.id });
+            console.log('[CheckoutScreen] Navigation call completed');
         } catch (error) {
             console.error('[CheckoutScreen] Order placement error:', error);
             showToast('error', error.message || 'Failed to place order');

@@ -228,23 +228,23 @@ const OrderDetailScreen = ({ orderId }) => {
                     <View style={styles.summaryRow}>
                         <Text style={styles.summaryLabel}>Delivery Fee</Text>
                         <Text style={styles.summaryValue}>
-                            ₫{order.delivery_fee?.toLocaleString('vi-VN')}
+                            ₫{order.deliveryFee?.toLocaleString('vi-VN')}
                         </Text>
                     </View>
-                    {order.discount_amount > 0 && (
+                    {order.discountAmount > 0 && (
                         <View style={[styles.summaryRow, styles.discountRow]}>
                             <Text style={styles.discountLabel}>
                                 Discount {order.promo_code && `(${order.promo_code})`}
                             </Text>
                             <Text style={styles.discountValue}>
-                                -₫{order.discount_amount?.toLocaleString('vi-VN')}
+                                -₫{order.discountAmount?.toLocaleString('vi-VN')}
                             </Text>
                         </View>
                     )}
                     <View style={[styles.summaryRow, styles.totalRow]}>
                         <Text style={styles.totalLabel}>Total</Text>
                         <Text style={styles.totalValue}>
-                            ₫{order.total_amount?.toLocaleString('vi-VN')}
+                            ₫{order.totalPrice?.toLocaleString('vi-VN')}
                         </Text>
                     </View>
                 </View>

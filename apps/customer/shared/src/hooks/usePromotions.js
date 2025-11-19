@@ -63,34 +63,39 @@ export const usePromotions = (restaurantId = null) => {
   };
 
   // Validate promotion code
-  const validatePromotion = (code, orderTotal) => {
+  const validatePromotion = (code, orderTotal, restaurantId) => {
     const promo = promotions.find(
       (p) =>
         p.code?.toUpperCase() === code.toUpperCase() && p.status === "active"
     );
 
     if (!promo) {
-      return { valid: false, message: "Mã khuyến mãi không hợp lệ" };
+      return { valid: false, message: "This promotion is invalid" };
     }
 
-    if (promo.minOrderValue && orderTotal < promo.minOrderValue) {
+    // Check if promotion applies to this restaurant
+    if (promo.scope === "restaurant" && promo.restaurant_id !== restaurantId) {
+      return { valid: false, message: "This promotion does not apply to this restaurant" };
+    }
+
+    if (promo.min_order_value && orderTotal < promo.min_order_value) {
       return {
         valid: false,
-        message: `Đơn hàng tối thiểu ${promo.minOrderValue.toLocaleString()}₫`,
+        message: `Minimum order value ₫${(promo.min_order_value || 0).toLocaleString('vi-VN')}`,
       };
     }
 
     // Check if promotion is within date range
     const now = new Date();
-    const startDate = new Date(promo.startDate);
-    const endDate = new Date(promo.endDate);
+    const startDate = new Date(promo.start_date);
+    const endDate = new Date(promo.end_date);
 
     if (now < startDate) {
-      return { valid: false, message: "Khuyến mãi chưa bắt đầu" };
+      return { valid: false, message: "Promotion has not started yet" };
     }
 
     if (now > endDate) {
-      return { valid: false, message: "Khuyến mãi đã hết hạn" };
+      return { valid: false, message: "Promotion has expired" };
     }
 
     return { valid: true, promotion: promo };
