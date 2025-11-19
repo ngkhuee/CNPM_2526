@@ -42,10 +42,10 @@ export const useCheckoutProcessing = () => {
         if (appliedPromo) {
             if (appliedPromo.type === 'percentage') {
                 discountAmount = (subtotal * appliedPromo.value) / 100;
-                if (appliedPromo.maxDiscount && discountAmount > appliedPromo.maxDiscount) {
-                    discountAmount = appliedPromo.maxDiscount;
+                if (appliedPromo.max_discount && discountAmount > appliedPromo.max_discount) {
+                    discountAmount = appliedPromo.max_discount;
                 }
-            } else if (appliedPromo.type === 'fixed') {
+            } else if (appliedPromo.type === 'fixed' || appliedPromo.type === 'fixed_amount') {
                 discountAmount = appliedPromo.value;
             }
             discountAmount = Math.min(discountAmount, subtotal);

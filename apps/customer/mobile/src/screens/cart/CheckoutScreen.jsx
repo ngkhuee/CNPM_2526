@@ -15,6 +15,8 @@ import {
     ActivityIndicator,
     Alert,
     TextInput,
+    Modal,
+    FlatList,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 
@@ -36,6 +38,7 @@ import { useGeolocation } from '../../hooks/useGeolocation';
 import { usePromotions } from '../../hooks/usePromotions';
 import { useSettings } from '../../hooks/useSettings';
 import { useCheckoutProcessing } from '../../hooks/useCheckoutProcessing';
+import { useOrderAutoCancel } from '../../hooks/useOrderAutoCancel';
 
 // Services
 import { showToast } from '../../utils/toastHelper';
@@ -47,19 +50,30 @@ const CheckoutScreen = () => {
     const { user } = useContext(AuthContext);
 
     // Refresh cart from AsyncStorage when component mounts
+    // IMPORTANT: Only fetch if cart is empty/null
+    // If cart is already populated (from RestaurantDetail sync), use it directly
     useEffect(() => {
-        if (fetchCart) {
-            fetchCart();
-            console.log('[CheckoutScreen] Fetched cart on mount');
+        if (!cart || !cart.items || cart.items.length === 0) {
+            if (fetchCart) {
+                fetchCart();
+                console.log('[CheckoutScreen] Fetched cart from AsyncStorage on mount');
+            }
+        } else {
+            console.log('[CheckoutScreen] Cart already populated, skipping fetch');
+            console.log('[CheckoutScreen] Current cart:', {
+                restaurant_id: cart.restaurant_id,
+                items: cart.items.length,
+            });
         }
     }, [fetchCart]);
 
     // Hooks
     const { addresses, handleGetGPS: requestGPSLocation } = useAddress(user?.id);
     const { location, address: gpsAddress, loading: gpsLoading, requestLocation } = useGeolocation();
-    const { promotions, validatePromotion, calculateDiscount } = usePromotions();
+    const { promotions, getApplicablePromotions, validatePromotion, calculateDiscount } = usePromotions();
     const { deliveryFee } = useSettings();
     const { processCheckoutOrder, loading: processingOrder } = useCheckoutProcessing();
+    const { startAutoCancel } = useOrderAutoCancel();
 
     // Form State
     const [checkoutData, setCheckoutData] = useState({
@@ -68,7 +82,7 @@ const CheckoutScreen = () => {
         email: user?.email || '',
         address: '',
         addressId: null,
-        paymentMethod: 'cash',
+        paymentMethod: 'card',
         gps: null,
         specialInstructions: '',
     });
@@ -79,6 +93,8 @@ const CheckoutScreen = () => {
     const [appliedPromo, setAppliedPromo] = useState(null);
     const [errors, setErrors] = useState({});
     const [touched, setTouched] = useState({});
+    const [showPromosModal, setShowPromosModal] = useState(false);
+    const [applicablePromos, setApplicablePromos] = useState([]);
 
     // GPS Location effect
     useEffect(() => {
@@ -92,6 +108,20 @@ const CheckoutScreen = () => {
         }
     }, [gpsAddress, location]);
 
+    // Load applicable promotions for current restaurant
+    useEffect(() => {
+        if (cart?.restaurant_id) {
+            const promos = getApplicablePromotions(cart.restaurant_id);
+            console.log('[CheckoutScreen] Applicable promotions:', {
+                restaurantId: cart.restaurant_id,
+                allPromotions: promotions.length,
+                applicablePromos: promos.length,
+                promosList: promos.map(p => ({ code: p.code, type: p.type, status: p.status, scope: p.scope, restaurant_id: p.restaurant_id }))
+            });
+            setApplicablePromos(promos);
+        }
+    }, [cart?.restaurant_id, promotions]);
+
     // Calculate totals
     const subtotal = cart?.items?.reduce(
         (sum, item) => sum + (item.price * item.quantity),
@@ -101,6 +131,15 @@ const CheckoutScreen = () => {
     const fee = deliveryFee || 25000;
     const discount = appliedPromo ? calculateDiscount(appliedPromo, subtotal) : 0;
     const total = subtotal + fee - discount;
+
+    // Debug log
+    console.log('[CheckoutScreen] Totals:', {
+        appliedPromo: appliedPromo ? { code: appliedPromo.code, type: appliedPromo.type, value: appliedPromo.value } : null,
+        subtotal,
+        discount,
+        fee,
+        total,
+    });
 
     /**
      * Validate form fields
@@ -186,7 +225,7 @@ const CheckoutScreen = () => {
             return;
         }
 
-        const validation = validatePromotion(promoCode, subtotal);
+        const validation = validatePromotion(promoCode, subtotal, cart.restaurant_id);
         if (validation.valid) {
             setAppliedPromo(validation.promotion);
             showToast('success', `Promo applied: ${validation.promotion.code}`);
@@ -203,6 +242,17 @@ const CheckoutScreen = () => {
         setAppliedPromo(null);
         setPromoCode('');
         showToast('success', 'Promo removed');
+    };
+
+    /**
+     * Handle apply promo from list
+     */
+    const handleApplyPromoFromList = (promo) => {
+        console.log('[CheckoutScreen] Applying promo from list:', promo);
+        setAppliedPromo(promo);
+        setPromoCode(promo.code);
+        setShowPromosModal(false);
+        showToast('success', `Promo applied: ${promo.code}`);
     };
 
     /**
@@ -244,6 +294,10 @@ const CheckoutScreen = () => {
 
             console.log('[CheckoutScreen] Order created:', order);
 
+            // Start 30-minute auto-cancel timer for pending orders
+            console.log('[CheckoutScreen] Starting 30-minute auto-cancel timer for order:', order.id);
+            startAutoCancel(order.id, 30 * 60 * 1000); // 30 minutes
+
             // Clear current restaurant cart (CHỈ xóa giỏ hiện tại)
             // Nếu có giỏ từ restaurant khác, auto-switch sang
             await clearCurrentRestaurantCart();
@@ -258,14 +312,8 @@ const CheckoutScreen = () => {
 
             showToast('success', 'Order placed successfully!');
 
-            // Navigate to payment or orders based on payment method
-            if (checkoutData.paymentMethod === 'cash') {
-                // Cash on delivery - go directly to tracking
-                navigate('tracking', { orderId: order.id });
-            } else {
-                // Go to payment screen
-                navigate('payment', { orderId: order.id });
-            }
+            // Navigate to payment screen
+            navigate('payment', { orderId: order.id });
         } catch (error) {
             console.error('[CheckoutScreen] Order placement error:', error);
             showToast('error', error.message || 'Failed to place order');
@@ -355,11 +403,29 @@ const CheckoutScreen = () => {
                         </View>
                     ) : (
                         <View style={styles.promoInputContainer}>
+                            {/* Show Promotions Button */}
+                            {applicablePromos.length > 0 && (
+                                <TouchableOpacity
+                                    style={styles.showPromosButton}
+                                    onPress={() => {
+                                        console.log('[CheckoutScreen] Opening promos modal with:', applicablePromos);
+                                        setShowPromosModal(true);
+                                    }}
+                                >
+                                    <MaterialIcons name="local-offer" size={18} color="#ff6b35" />
+                                    <Text style={styles.showPromosText}>
+                                        View Available Promotions ({applicablePromos.length})
+                                    </Text>
+                                    <MaterialIcons name="arrow-drop-down" size={20} color="#ff6b35" />
+                                </TouchableOpacity>
+                            )}
+
+                            {/* Promo Code Input */}
                             <View style={styles.promoInputGroup}>
                                 <MaterialIcons name="card-giftcard" size={18} color="#ff6b35" />
                                 <TextInput
                                     style={styles.promoInput}
-                                    placeholder="Enter promo code"
+                                    placeholder="Or enter promo code"
                                     placeholderTextColor="#aaa"
                                     value={promoCode}
                                     onChangeText={setPromoCode}
@@ -383,7 +449,7 @@ const CheckoutScreen = () => {
                         <Text style={styles.sectionTitle}>Payment Method</Text>
                     </View>
 
-                    {['cash', 'card', 'momo'].map(method => (
+                    {['card', 'momo'].map(method => (
                         <TouchableOpacity
                             key={method}
                             style={[
@@ -398,7 +464,6 @@ const CheckoutScreen = () => {
                                 color={checkoutData.paymentMethod === method ? '#ff6b35' : '#ccc'}
                             />
                             <Text style={styles.paymentOptionText}>
-                                {method === 'cash' && 'Cash on Delivery'}
                                 {method === 'card' && 'Card Payment'}
                                 {method === 'momo' && 'MoMo Wallet'}
                             </Text>
@@ -440,6 +505,64 @@ const CheckoutScreen = () => {
                     )}
                 </TouchableOpacity>
             </View>
+
+            {/* Promotions Modal */}
+            <Modal
+                visible={showPromosModal}
+                transparent
+                animationType="slide"
+                onRequestClose={() => setShowPromosModal(false)}
+            >
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalContent}>
+                        {/* Modal Header */}
+                        <View style={styles.modalHeader}>
+                            <Text style={styles.modalTitle}>Available Promotions ({applicablePromos.length})</Text>
+                            <TouchableOpacity onPress={() => setShowPromosModal(false)}>
+                                <MaterialIcons name="close" size={24} color="#666" />
+                            </TouchableOpacity>
+                        </View>
+
+                        {/* Promotions List */}
+                        <FlatList
+                            data={applicablePromos}
+                            keyExtractor={(item) => item.id?.toString() || item.code}
+                            showsVerticalScrollIndicator={true}
+                            renderItem={({ item }) => (
+                                <TouchableOpacity
+                                    style={styles.promoItem}
+                                    onPress={() => handleApplyPromoFromList(item)}
+                                >
+                                    <View style={styles.promoItemContent}>
+                                        <Text style={styles.promoItemCode}>{item.code}</Text>
+                                        <Text style={styles.promoItemName}>{item.name}</Text>
+                                        <Text style={styles.promoItemDesc}>{item.description}</Text>
+                                        <View style={styles.promoItemFooter}>
+                                            <Text style={styles.promoItemValue}>
+                                                {item.type === 'percentage'
+                                                    ? `${item.value}% off`
+                                                    : `₫${item.value.toLocaleString('vi-VN')} off`}
+                                            </Text>
+                                            {item.minOrderValue > 0 && (
+                                                <Text style={styles.promoItemMinOrder}>
+                                                    Min: ₫{item.minOrderValue.toLocaleString('vi-VN')}
+                                                </Text>
+                                            )}
+                                        </View>
+                                    </View>
+                                    <MaterialIcons name="chevron-right" size={24} color="#ff6b35" />
+                                </TouchableOpacity>
+                            )}
+                            ListEmptyComponent={
+                                <View style={styles.emptyPromos}>
+                                    <MaterialIcons name="local-offer" size={48} color="#ddd" />
+                                    <Text style={styles.emptyPromosText}>No promotions available</Text>
+                                </View>
+                            }
+                        />
+                    </View>
+                </View>
+            </Modal>
         </SafeAreaView>
     );
 };
@@ -494,8 +617,8 @@ const styles = StyleSheet.create({
         backgroundColor: '#f0f8f5',
         borderRadius: 8,
         padding: 12,
-        borderLeftWidth: 4,
-        borderLeftColor: '#4caf50',
+        // borderLeftWidth: 4,
+        // borderLeftColor: '#4caf50',
     },
     promoAppliedContent: {
         flexDirection: 'row',
@@ -611,6 +734,105 @@ const styles = StyleSheet.create({
     backButtonText: {
         color: '#fff',
         fontWeight: '600',
+    },
+    // Promotion modal styles
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        justifyContent: 'flex-end',
+    },
+    modalContent: {
+        backgroundColor: '#fff',
+        borderTopLeftRadius: 16,
+        borderTopRightRadius: 16,
+        maxHeight: '80%',
+        paddingTop: 0,
+    },
+    modalHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingHorizontal: 16,
+        paddingVertical: 16,
+        borderBottomWidth: 1,
+        borderBottomColor: '#eee',
+    },
+    modalTitle: {
+        fontSize: 18,
+        fontWeight: '700',
+        color: '#1a1a1a',
+    },
+    promoItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        paddingHorizontal: 16,
+        paddingVertical: 12,
+        borderBottomWidth: 1,
+        borderBottomColor: '#f5f5f5',
+    },
+    promoItemContent: {
+        flex: 1,
+    },
+    promoItemCode: {
+        fontSize: 14,
+        fontWeight: '700',
+        color: '#ff6b35',
+        marginBottom: 4,
+    },
+    promoItemName: {
+        fontSize: 13,
+        fontWeight: '600',
+        color: '#1a1a1a',
+        marginBottom: 2,
+    },
+    promoItemDesc: {
+        fontSize: 12,
+        color: '#666',
+        marginBottom: 6,
+    },
+    promoItemFooter: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 12,
+    },
+    promoItemValue: {
+        fontSize: 12,
+        fontWeight: '700',
+        color: '#4caf50',
+    },
+    promoItemMinOrder: {
+        fontSize: 11,
+        color: '#999',
+    },
+    emptyPromos: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingVertical: 60,
+        gap: 12,
+    },
+    emptyPromosText: {
+        fontSize: 14,
+        color: '#999',
+    },
+    showPromosButton: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingHorizontal: 12,
+        paddingVertical: 10,
+        borderWidth: 1,
+        borderColor: '#ff6b35',
+        borderRadius: 8,
+        marginBottom: 12,
+        gap: 8,
+    },
+    showPromosText: {
+        flex: 1,
+        fontSize: 13,
+        fontWeight: '600',
+        color: '#ff6b35',
+        textAlign: 'center',
     },
 });
 

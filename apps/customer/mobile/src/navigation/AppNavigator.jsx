@@ -12,7 +12,8 @@ import FoodDetailScreen from '../screens/restaurant/FoodDetailScreen';
 import CartScreen from '../screens/cart/CartScreen';
 import CheckoutScreen from '../screens/cart/CheckoutScreen';
 import PaymentScreen from '../screens/orders/PaymentScreen';
-import CashPaymentScreen from '../screens/orders/CashPaymentScreen';
+import MoMoPaymentScreen from '../screens/payment/MoMoPaymentScreen';
+import CardPaymentScreen from '../screens/payment/CardPaymentScreen';
 import TrackingScreen from '../screens/orders/TrackingScreen';
 import OrderDetailScreen from '../screens/orders/OrderDetailScreen';
 import ReviewScreen from '../screens/orders/ReviewScreen';
@@ -75,8 +76,10 @@ function AppStack({ activeScreen, selectedFood, setSelectedFood }) {
                 return <CheckoutScreen />;
             case 'payment':
                 return <PaymentScreen orderId={orderId} />;
-            case 'cashPayment':
-                return <CashPaymentScreen orderId={orderId} />;
+            case 'momoPayment':
+                return <MoMoPaymentScreen orderId={orderId} />;
+            case 'cardPayment':
+                return <CardPaymentScreen orderId={orderId} />;
             case 'tracking':
                 return <TrackingScreen orderId={orderId} />;
             case 'order-detail':

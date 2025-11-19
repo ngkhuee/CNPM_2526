@@ -105,6 +105,7 @@ export default function CategoryFilter({
                     showsHorizontalScrollIndicator={false}
                     contentContainerStyle={styles.listContent}
                     scrollEnabled={categories.length > 4}
+                    nestedScrollEnabled={true}
                     style={{ flex: 1 }}
                 />
             </View>

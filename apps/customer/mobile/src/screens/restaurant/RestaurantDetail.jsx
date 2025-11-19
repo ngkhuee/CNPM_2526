@@ -10,6 +10,7 @@ import {
     TouchableOpacity,
     ActivityIndicator,
     SafeAreaView,
+    Animated,
 } from 'react-native';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { NavigationContext } from '../../contexts/NavigationContext';
@@ -80,6 +81,35 @@ export default function RestaurantDetail({ onNavigate, onSelectFood }) {
     }, [pendingLocalCart, setLocalCartState]);
 
     /**
+     * CRITICAL: Sync local cart to global cart when screen mounts or restaurant changes
+     * This ensures backend knows which restaurant is currently active
+     * So when adding items, backend doesn't auto-clear the current restaurant's cart
+     * Use merge=false because local cart from AsyncStorage is the latest state
+     */
+    useEffect(() => {
+        const syncCartToGlobal = async () => {
+            if (localCart && localCart.items && localCart.items.length > 0) {
+                const restaurantId = localCart.restaurant_id || targetRestaurantId;
+                if (restaurantId) {
+                    try {
+                        if (cartContext?.syncLocalCartToGlobal) {
+                            await cartContext.syncLocalCartToGlobal(localCart, false);
+                            console.log('[RestaurantDetail] Synced local cart to global on mount:', restaurantId);
+                        }
+                        if (cartContext?.setLastActive) {
+                            await cartContext.setLastActive(restaurantId);
+                        }
+                    } catch (error) {
+                        console.error('[RestaurantDetail] Error syncing cart on mount:', error.message);
+                    }
+                }
+            }
+        };
+
+        syncCartToGlobal();
+    }, [targetRestaurantId]); // Run when restaurant changes
+
+    /**
      * Save cart to AsyncStorage when component unmounts
      * Use empty dependency array to avoid loop - only run once on unmount
      */
@@ -110,7 +140,7 @@ export default function RestaurantDetail({ onNavigate, onSelectFood }) {
                 await cartContext.saveLocalCart(restaurantId, updatedCart);
             }
             if (cartContext?.syncLocalCartToGlobal) {
-                await cartContext.syncLocalCartToGlobal(updatedCart, true);
+                await cartContext.syncLocalCartToGlobal(updatedCart, false);
             }
             // CRITICAL: Set this as last active restaurant so checkout can fetch it
             if (cartContext?.setLastActive) {
@@ -139,9 +169,40 @@ export default function RestaurantDetail({ onNavigate, onSelectFood }) {
         }
     };
 
-    const handleNavigateToCheckout = () => {
-        if (onNavigate) {
-            onNavigate('checkout');
+    const handleNavigateToCheckout = async () => {
+        // CRITICAL: Sync local cart to global cart BEFORE navigating to checkout
+        // This ensures CheckoutScreen gets the correct restaurant's cart
+        try {
+            const restaurantId = localCart?.restaurant_id || restaurant?.id;
+            if (localCart && localCart.items && localCart.items.length > 0) {
+                // Save to AsyncStorage
+                if (cartContext?.saveLocalCart) {
+                    await cartContext.saveLocalCart(restaurantId, localCart);
+                    console.log('[RestaurantDetail] Saved local cart to AsyncStorage before checkout:', restaurantId);
+                }
+
+                // Sync to global cart - MUST complete before navigation
+                if (cartContext?.syncLocalCartToGlobal) {
+                    await cartContext.syncLocalCartToGlobal(localCart, false);
+                    console.log('[RestaurantDetail] Synced local cart to global cart before checkout');
+                }
+
+                // Set as last active restaurant - MUST complete before navigation
+                if (cartContext?.setLastActive) {
+                    await cartContext.setLastActive(restaurantId);
+                    console.log('[RestaurantDetail] Set last active restaurant before checkout:', restaurantId);
+                }
+            } else {
+                console.warn('[RestaurantDetail] Local cart empty or no items when navigating to checkout');
+            }
+        } catch (error) {
+            console.error('[RestaurantDetail] Error syncing cart before checkout:', error.message);
+            // Continue navigation even if sync fails - CheckoutScreen can handle it
+        } finally {
+            // Navigate after all async operations complete
+            if (onNavigate) {
+                onNavigate('checkout');
+            }
         }
     };
 
@@ -255,7 +316,15 @@ export default function RestaurantDetail({ onNavigate, onSelectFood }) {
                     <SectionList
                         ref={sectionListRef}
                         sections={groupedFoods}
-                        keyExtractor={(item, index) => item?.id?.toString() || `empty-${index}`}
+                        keyExtractor={(item, index) => {
+                            // For items with id, use the id
+                            if (item?.id) {
+                                return item.id.toString();
+                            }
+                            // For placeholder items (null), create unique key
+                            // This prevents duplicate key warnings when multiple sections have no foods
+                            return `placeholder-${Math.random().toString(36).substr(2, 9)}`;
+                        }}
                         renderItem={renderFoodItem}
                         renderSectionHeader={renderSectionHeader}
                         ListHeaderComponent={renderListHeader}
@@ -307,7 +376,7 @@ export default function RestaurantDetail({ onNavigate, onSelectFood }) {
                     <MiniCartBubble
                         totalItems={getTotalItems()}
                         onPress={() => setShowCartModal(true)}
-                        animatedScale={bubbleAnimation.scale}
+                        animatedScale={bubbleAnimation?.scale || new Animated.Value(1)}
                     />
                 </>
             ) : (

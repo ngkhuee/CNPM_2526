@@ -49,12 +49,16 @@ export const usePromotions = (restaurantId = null) => {
       if (promo.status !== "active") return false;
 
       // Admin/system promotions (scope = "system", restaurant_id = null) - apply to all restaurants
-      if (promo.scope === "system" || !promo.restaurant_id) {
+      if (promo.scope === "system" && !promo.restaurant_id) {
         return true;
       }
 
       // Restaurant-specific promotions (scope = "restaurant") - only for that restaurant
-      return promo.restaurant_id === restId;
+      if (promo.scope === "restaurant" && promo.restaurant_id === restId) {
+        return true;
+      }
+
+      return false;
     });
   };
 

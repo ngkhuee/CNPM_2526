@@ -209,6 +209,27 @@ export const updateOrderStatus = async (orderId, status) => {
 };
 
 /**
+ * Generic update order method
+ * 
+ * @param {string} orderId - ID của order
+ * @param {Object} data - Data to update
+ * @returns {Object} Response từ API
+ */
+export const updateOrder = async (orderId, data) => {
+    try {
+        console.log('[orderService.updateOrder] Updating order:', { orderId, data });
+
+        const response = await apiClient.patch(`/orders/${orderId}`, data);
+
+        console.log('[orderService.updateOrder] Success:', response);
+        return response;
+    } catch (error) {
+        console.error('[orderService.updateOrder] Error:', error.message);
+        throw error;
+    }
+};
+
+/**
  * Xóa order
  * 
  * @param {string} orderId - ID của order
@@ -305,6 +326,7 @@ export default {
     getOrderDetail,
     submitOrder,
     cancelOrder,
+    updateOrder,
     updateOrderStatus,
     deleteOrder,
     getMockOrders,

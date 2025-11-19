@@ -52,7 +52,7 @@ export const useRestaurantCart = (restaurant, initialCart, pendingCart, clearPen
 
             // Sync to Global Cart via CartContext
             if (cartContext?.syncLocalCartToGlobal) {
-                await cartContext.syncLocalCartToGlobal(updatedCart, true);
+                await cartContext.syncLocalCartToGlobal(updatedCart, false);
                 console.log('[useRestaurantCart] Synced to global cart');
             }
 
@@ -79,6 +79,17 @@ export const useRestaurantCart = (restaurant, initialCart, pendingCart, clearPen
             }
 
             const restaurantId = foodItem.restaurant_id || restaurant?.id;
+
+            // CRITICAL: Save local cart BEFORE adding to backend
+            // This ensures if local cart has items and backend auto-clears it,
+            // the items are still preserved in AsyncStorage for later recovery
+            if (localCart && localCart.items && localCart.items.length > 0) {
+                if (cartContext?.saveLocalCart) {
+                    await cartContext.saveLocalCart(restaurantId, localCart);
+                    console.log('[useRestaurantCart] Pre-saved local cart to AsyncStorage before add:', restaurantId);
+                }
+            }
+
             const updatedCart = await cartContext.addItem(
                 restaurantId,
                 foodItem.id,
@@ -87,12 +98,23 @@ export const useRestaurantCart = (restaurant, initialCart, pendingCart, clearPen
             );
 
             if (updatedCart) {
+                // Update local cart with API response
+                // Note: Backend may have auto-cleared old items if adding from different restaurant
+                // Old items are still saved in AsyncStorage (pre-saved above)
                 setLocalCart(updatedCart);
 
-                // Sync to AsyncStorage for backup
+                // Sync updated cart to AsyncStorage
                 if (cartContext?.saveLocalCart) {
                     await cartContext.saveLocalCart(restaurantId, updatedCart);
-                    console.log('[useRestaurantCart] Saved to AsyncStorage:', restaurantId);
+                    console.log('[useRestaurantCart] Saved updated cart to AsyncStorage:', restaurantId);
+                }
+
+                // IMPORTANT: Sync to global cart to ensure backend knows current active restaurant
+                // This prevents auto-clear issues when switching restaurants quickly
+                // Use merge=false because backend has already handled merging/clearing logic
+                if (cartContext?.syncLocalCartToGlobal) {
+                    await cartContext.syncLocalCartToGlobal(updatedCart, false);
+                    console.log('[useRestaurantCart] Synced updated cart to global');
                 }
 
                 // Set as last active restaurant

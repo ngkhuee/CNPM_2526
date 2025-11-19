@@ -20,6 +20,10 @@ export const usePromotions = (restaurantId = null) => {
                 setError(null);
                 const data = await promotionService.getAll();
                 if (isActive) {
+                    console.log('[usePromotions] Loaded promotions:', {
+                        total: data.length,
+                        promos: data.map(p => ({ code: p.code, status: p.status, scope: p.scope, restaurant_id: p.restaurant_id }))
+                    });
                     setPromotions(data);
                 }
             } catch (err) {
@@ -52,26 +56,40 @@ export const usePromotions = (restaurantId = null) => {
             return promotions.filter(p => p.status === 'active');
         }
 
-        return promotions.filter(promo => {
-            if (promo.status !== 'active') return false;
+        const result = promotions.filter(promo => {
+            if (promo.status !== 'active') {
+                console.log(`[usePromotions] Filtered out ${promo.code} - status: ${promo.status}`);
+                return false;
+            }
 
-            // System promotions (no restaurant_id) - apply to all
-            if (!promo.restaurant_id) {
+            // Admin/system promotions (scope = "system", restaurant_id = null) - apply to all restaurants
+            if (promo.scope === 'system' && !promo.restaurant_id) {
+                console.log(`[usePromotions] Included ${promo.code} - system/all restaurants`);
                 return true;
             }
 
-            // Restaurant-specific promotions
-            return promo.restaurant_id === restId;
+            // Restaurant-specific promotions (scope = "restaurant") - only for that restaurant
+            if (promo.scope === 'restaurant' && promo.restaurant_id === restId) {
+                console.log(`[usePromotions] Included ${promo.code} - for restaurant ${restId}`);
+                return true;
+            }
+
+            console.log(`[usePromotions] Filtered out ${promo.code} - scope=${promo.scope}, rest_id=${promo.restaurant_id}, needed=${restId}`);
+            return false;
         });
+
+        console.log(`[usePromotions.getApplicablePromotions] Total: ${result.length} from ${promotions.length} for rest ${restId}`);
+        return result;
     };
 
     /**
      * Validate promotion code
      * @param {string} code - Promotion code
      * @param {number} orderTotal - Order total
+     * @param {string} restaurantId - Current restaurant ID to validate scope
      * @returns {Object} {valid, message, promotion}
      */
-    const validatePromotion = (code, orderTotal) => {
+    const validatePromotion = (code, orderTotal, restaurantId) => {
         const promo = promotions.find(
             p => p.code?.toUpperCase() === code.toUpperCase() && p.status === 'active'
         );
@@ -80,17 +98,22 @@ export const usePromotions = (restaurantId = null) => {
             return { valid: false, message: 'Invalid promotion code' };
         }
 
-        if (promo.minOrderValue && orderTotal < promo.minOrderValue) {
+        // Check if promotion applies to this restaurant
+        if (promo.scope === 'restaurant' && promo.restaurant_id !== restaurantId) {
+            return { valid: false, message: 'This promotion is not available for this restaurant' };
+        }
+
+        if (promo.min_order_value && orderTotal < promo.min_order_value) {
             return {
                 valid: false,
-                message: `Minimum order: $${(promo.minOrderValue / 100).toFixed(2)}`,
+                message: `Minimum order: ₫${(promo.min_order_value || 0).toLocaleString('vi-VN')}`,
             };
         }
 
         // Check date range
         const now = new Date();
-        const startDate = new Date(promo.startDate);
-        const endDate = new Date(promo.endDate);
+        const startDate = new Date(promo.start_date);
+        const endDate = new Date(promo.end_date);
 
         if (now < startDate) {
             return { valid: false, message: 'Promotion not started yet' };
@@ -116,10 +139,10 @@ export const usePromotions = (restaurantId = null) => {
         if (promo.type === 'percentage') {
             discount = (subtotal * promo.value) / 100;
             // Apply max discount if set
-            if (promo.maxDiscount && discount > promo.maxDiscount) {
-                discount = promo.maxDiscount;
+            if (promo.max_discount && discount > promo.max_discount) {
+                discount = promo.max_discount;
             }
-        } else if (promo.type === 'fixed') {
+        } else if (promo.type === 'fixed' || promo.type === 'fixed_amount') {
             discount = promo.value;
         }
 

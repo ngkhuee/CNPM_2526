@@ -48,6 +48,38 @@ const CartScreen = ({ onNavigate }) => {
         }
     }, [globalCart]);
 
+    // Check if user is authenticated - show login prompt instead of cart
+    if (!isAuthenticated) {
+        return (
+            <View style={styles.screenContainer}>
+                <SafeAreaView style={styles.container}>
+                    <View style={styles.loginPromptContainer}>
+                        <MaterialIcons
+                            name="lock"
+                            size={48}
+                            color="#ff6b35"
+                            style={styles.lockIcon}
+                        />
+                        <Text style={styles.modalTitle}>Login Required</Text>
+                        <Text style={styles.modalSubtitle}>
+                            Sign in to view and manage your cart
+                        </Text>
+
+                        <TouchableOpacity
+                            style={styles.modalLoginButton}
+                            onPress={() => {
+                                navigate('login');
+                            }}
+                        >
+                            <Text style={styles.modalLoginButtonText}>Login</Text>
+                        </TouchableOpacity>
+                    </View>
+                </SafeAreaView>
+                <BottomNavigation activeRoute={activeRoute} onNavigate={onNavigate} />
+            </View>
+        );
+    }
+
     // Lấy số item
     const cartItems = localCart?.items || [];
     const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);

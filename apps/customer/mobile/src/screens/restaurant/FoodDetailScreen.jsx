@@ -58,6 +58,9 @@ export default function FoodDetailScreen({ foodItem, onNavigate }) {
     const [showCartModal, setShowCartModal] = useState(false);
     const [showLoginModal, setShowLoginModal] = useState(false);
 
+    // Keep track of latest localCart for cleanup
+    const localCartRef = useRef(localCart);
+
     // Fetch reviews on mount
     useEffect(() => {
         if (foodItem?.id) {
@@ -96,16 +99,51 @@ export default function FoodDetailScreen({ foodItem, onNavigate }) {
     }, [foodItem?.restaurant_id, pendingLocalCart]);
 
     /**
+     * CRITICAL: Sync local cart to global cart when screen mounts or food item changes
+     * This ensures backend knows which restaurant is currently active
+     * Use merge=false because local cart from AsyncStorage is the latest state
+     */
+    useEffect(() => {
+        const syncCartToGlobal = async () => {
+            if (localCart && localCart.items && localCart.items.length > 0) {
+                const restaurantId = localCart.restaurant_id || foodItem?.restaurant_id;
+                if (restaurantId) {
+                    try {
+                        if (cartContext?.syncLocalCartToGlobal) {
+                            await cartContext.syncLocalCartToGlobal(localCart, false);
+                            console.log('[FoodDetailScreen] Synced local cart to global on mount:', restaurantId);
+                        }
+                        if (cartContext?.setLastActive) {
+                            await cartContext.setLastActive(restaurantId);
+                        }
+                    } catch (error) {
+                        console.error('[FoodDetailScreen] Error syncing cart on mount:', error.message);
+                    }
+                }
+            }
+        };
+
+        syncCartToGlobal();
+    }, [foodItem?.restaurant_id]); // Run when food item changes
+
+    // Keep track of latest localCart for cleanup
+    useEffect(() => {
+        localCartRef.current = localCart;
+    }, [localCart]);
+
+    /**
      * Save cart to AsyncStorage when component unmounts
+     * Use ref to capture latest cart state
      */
     useEffect(() => {
         return () => {
             // Save current cart when leaving this screen
-            if (localCart && localCart.items && localCart.items.length > 0) {
-                const restaurantId = localCart.restaurant_id || foodItem?.restaurant_id;
+            // Use ref to get latest cart, not stale closure value
+            if (localCartRef.current && localCartRef.current.items && localCartRef.current.items.length > 0) {
+                const restaurantId = localCartRef.current.restaurant_id || foodItem?.restaurant_id;
                 if (restaurantId) {
-                    AsyncStorage.setItem(`cart_restaurant_${restaurantId}`, JSON.stringify(localCart));
-                    console.log('[FoodDetailScreen] Saved cart on unmount:', restaurantId);
+                    AsyncStorage.setItem(`cart_restaurant_${restaurantId}`, JSON.stringify(localCartRef.current));
+                    console.log('[FoodDetailScreen] Saved cart on unmount:', restaurantId, 'items:', localCartRef.current.items.length);
                 }
             }
         };
@@ -157,6 +195,43 @@ export default function FoodDetailScreen({ foodItem, onNavigate }) {
     };
 
     /**
+     * Handle checkout from CartModal
+     * Sync local cart to global cart BEFORE navigating
+     */
+    const handleCheckout = async () => {
+        try {
+            const restaurantId = localCart?.restaurant_id || foodItem?.restaurant_id;
+            if (localCart && localCart.items && localCart.items.length > 0) {
+                // Save to AsyncStorage
+                if (cartContext?.saveLocalCart) {
+                    await cartContext.saveLocalCart(restaurantId, localCart);
+                    console.log('[FoodDetailScreen] Saved local cart to AsyncStorage before checkout:', restaurantId);
+                }
+
+                // Sync to global cart - MUST complete before navigation
+                if (cartContext?.syncLocalCartToGlobal) {
+                    await cartContext.syncLocalCartToGlobal(localCart, false);
+                    console.log('[FoodDetailScreen] Synced local cart to global cart before checkout');
+                }
+
+                // Set as last active restaurant - MUST complete before navigation
+                if (cartContext?.setLastActive) {
+                    await cartContext.setLastActive(restaurantId);
+                    console.log('[FoodDetailScreen] Set last active restaurant before checkout:', restaurantId);
+                }
+            } else {
+                console.warn('[FoodDetailScreen] Local cart empty or no items when navigating to checkout');
+            }
+        } catch (error) {
+            console.error('[FoodDetailScreen] Error syncing cart before checkout:', error.message);
+            // Continue navigation even if sync fails - CheckoutScreen can handle it
+        } finally {
+            // Navigate after all async operations complete
+            navigate('checkout');
+        }
+    };
+
+    /**
      * Handle cart changes from CartModal (update quantity, remove item)
      * Updates local cart + AsyncStorage + Global cart
      */
@@ -170,12 +245,14 @@ export default function FoodDetailScreen({ foodItem, onNavigate }) {
                 await cartContext.saveLocalCart(restaurantId, updatedCart);
             }
             if (cartContext?.syncLocalCartToGlobal) {
-                await cartContext.syncLocalCartToGlobal(updatedCart, true);
+                await cartContext.syncLocalCartToGlobal(updatedCart, false);
             }
             // CRITICAL: Set this as last active restaurant so checkout can fetch it
             if (cartContext?.setLastActive) {
                 await cartContext.setLastActive(restaurantId);
             }
+            // Update pendingLocalCart so RestaurantDetail gets latest cart if user navigates back
+            setNavigationState({ pendingLocalCart: updatedCart });
         }
     };
 
@@ -223,6 +300,16 @@ export default function FoodDetailScreen({ foodItem, onNavigate }) {
                 // Sync to AsyncStorage for backup
                 if (cartContext?.saveLocalCart) {
                     await cartContext.saveLocalCart(restaurantId, updatedCart);
+                    console.log('[FoodDetailScreen] Saved updated cart to AsyncStorage:', restaurantId, 'items:', updatedCart.items.length);
+                } else {
+                    console.warn('[FoodDetailScreen] saveLocalCart not available');
+                }
+
+                // IMPORTANT: Sync to global cart to ensure backend knows current active restaurant
+                // Use merge=false because backend has already handled merging/clearing logic
+                if (cartContext?.syncLocalCartToGlobal) {
+                    await cartContext.syncLocalCartToGlobal(updatedCart, false);
+                    console.log('[FoodDetailScreen] Synced cart to global after add');
                 }
 
                 // Set as last active restaurant
@@ -230,15 +317,15 @@ export default function FoodDetailScreen({ foodItem, onNavigate }) {
                     await cartContext.setLastActive(restaurantId);
                 }
 
+                // CRITICAL: Update pendingLocalCart in NavigationContext so RestaurantDetail can get it
+                // when user navigates back (even without explicit navigation)
+                setNavigationState({ pendingLocalCart: updatedCart });
+                console.log('[FoodDetailScreen] Updated pendingLocalCart in NavigationContext');
+
                 // Trigger bubble animation
-                bubbleAnimation.current.setValue(0);
-                Animated.sequence([
-                    Animated.timing(bubbleAnimation.current, {
-                        toValue: 1,
-                        duration: 800,
-                        useNativeDriver: true,
-                    }),
-                ]).start();
+                if (bubbleAnimation?.current?.pulse) {
+                    bubbleAnimation.current.pulse();
+                }
             }
         } catch (error) {
             console.error('[FoodDetailScreen] Error adding to cart:', error);
@@ -463,16 +550,18 @@ export default function FoodDetailScreen({ foodItem, onNavigate }) {
                 onClose={() => setShowCartModal(false)}
                 onCheckout={() => {
                     setShowCartModal(false);
-                    navigate('checkout');
+                    handleCheckout();
                 }}
             />
 
             {/* Mini Cart Bubble */}
-            <MiniCartBubble
-                totalItems={localCart.items.reduce((sum, item) => sum + item.quantity, 0)}
-                onPress={() => setShowCartModal(true)}
-                animatedScale={bubbleAnimation.scale}
-            />
+            {bubbleAnimation?.current?.scale && (
+                <MiniCartBubble
+                    totalItems={localCart.items.reduce((sum, item) => sum + item.quantity, 0)}
+                    onPress={() => setShowCartModal(true)}
+                    animatedScale={bubbleAnimation.current.scale}
+                />
+            )}
 
             {/* Login Modal */}
             <Modal
