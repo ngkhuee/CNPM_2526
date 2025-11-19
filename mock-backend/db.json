@@ -18,7 +18,7 @@
       "id": "u2",
       "email": "user1@yummy.com",
       "password": "123456",
-      "name": "User1",
+      "full_name": "User1",
       "phone": "0902222222",
       "avatar": "/images/avatars/user.png",
       "gender": "Nam",
@@ -148,21 +148,24 @@
       "updated_at": "2025-11-06T11:39:13.178Z"
     },
     {
-      "id": "u1762957623609",
       "email": "ngoc123@test.com",
       "password": "123",
-      "name": "ngoc",
-      "phone": "",
-      "role": "customer",
+      "phone": "0987654321",
+      "gender": "Male",
+      "dob": "2016-02-10",
+      "avatar": "",
+      "id": "u1762957623609",
+      "roles": [
+        "customer"
+      ],
       "status": "active",
-      "createdAt": "2025-11-12T14:27:03.609Z"
+      "full_name": "ngoc",
+      "created_at": "2025-11-06T11:39:13.178Z",
+      "updated_at": "2025-11-19T05:59:38.601Z",
+      "name": "ngoc"
     }
   ],
   "addresses": [
-    {
-      "is_default": true,
-      "id": "addr1"
-    },
     {
       "user_id": "u2",
       "address_line": "456 Nguyễn Thị Minh Khai, Phường Sài Gòn",
@@ -177,15 +180,57 @@
       "id": "Z-Zk4Cz"
     },
     {
-      "city": "Ho Chi Minh",
-      "district": "District 4",
+      "user_id": "u1762957623609",
       "address_line": "123abc",
+      "district": "District 4",
+      "city": "Ho Chi Minh",
+      "phone": "",
       "note": "",
-      "isDefault": true,
       "lat": null,
       "lng": null,
-      "userId": "u1762957623609",
+      "is_default": true,
+      "created_at": "2025-11-06T04:24:47.640Z",
       "id": "fQzDEg1"
+    },
+    {
+      "user_id": "u1762957623609",
+      "address_line": "Công Ty TNHH Magnon Việt Nam, Lầu 7, Hẻm 18A Nguyễn Thị Minh Khai, Khu phố 10, Phường Sài Gòn, Thành phố Thủ Đức",
+      "district": "District 2",
+      "city": "Ho Chi Minh",
+      "phone": "",
+      "note": "",
+      "lat": 10.7867717,
+      "lng": 106.7001404,
+      "is_default": false,
+      "created_at": "2025-11-19T04:39:18.438Z",
+      "updated_at": "2025-11-19T04:39:18.438Z",
+      "id": "9HzSNcv"
+    },
+    {
+      "user_id": "u1762957623609",
+      "address_line": "undefined, District 1, Ho Chi Minh",
+      "district": "District 1",
+      "city": "Ho Chi Minh",
+      "phone": "",
+      "note": "",
+      "lat": null,
+      "lng": null,
+      "is_default": false,
+      "created_at": "2025-11-17T03:11:54.671Z",
+      "id": "VKHUyAF"
+    },
+    {
+      "user_id": "u1762957623609",
+      "address_line": "Công Ty TNHH Magnon Việt Nam, Lầu 7, Hẻm 18A Nguyễn Thị Minh Khai, Khu phố 10, Phường Sài Gòn, Thành phố Thủ Đức",
+      "district": "Thành phố Thủ Đức",
+      "city": "TP.HCM",
+      "phone": "",
+      "note": "",
+      "lat": 10.7867717,
+      "lng": 106.7001404,
+      "is_default": true,
+      "created_at": "2025-11-19T04:39:18.438Z",
+      "id": "d2UrnEb"
     }
   ],
   "restaurants": [
@@ -1201,7 +1246,7 @@
     },
     {
       "user_id": "u1762957623609",
-      "restaurant_id": "undefined",
+      "restaurant_id": "r2",
       "address_id": "d2UrnEb",
       "items": [
         {
@@ -1421,6 +1466,76 @@
       "created_at": "2025-11-17T07:36:04.252Z",
       "updated_at": "2025-11-17T09:20:35.142Z",
       "id": "eo0DvHL",
+      "cancellation_reason": "Auto-cancelled: Payment not completed within 30 minutes"
+    },
+    {
+      "items": [
+        {
+          "name": "Texas Fried Chicken",
+          "quantity": 1,
+          "unit_price": 95000,
+          "subtotal": 95000
+        },
+        {
+          "name": "Chicken Wrap",
+          "quantity": 1,
+          "unit_price": 79000,
+          "subtotal": 79000
+        }
+      ],
+      "subtotal": 174000,
+      "delivery_fee": 0,
+      "discount_amount": 0,
+      "total_amount": 189000,
+      "payment_method": "card",
+      "status": "cancelled",
+      "payment_status": "pending",
+      "special_instructions": "",
+      "customer": {
+        "name": "ngoc",
+        "phone": "0987654321",
+        "address": "123abc"
+      },
+      "promotion_code": null,
+      "order_number": "ORD-1763523486305",
+      "created_at": "2025-11-19T03:38:06.305Z",
+      "updated_at": "2025-11-19T05:42:22.576Z",
+      "id": "Ll8NU8d",
+      "cancellation_reason": "Auto-cancelled: Payment not completed within 30 minutes"
+    },
+    {
+      "items": [
+        {
+          "name": "Chicken Wrap",
+          "quantity": 3,
+          "unit_price": 79000,
+          "subtotal": 237000
+        },
+        {
+          "name": "Texas Fried Chicken",
+          "quantity": 1,
+          "unit_price": 95000,
+          "subtotal": 95000
+        }
+      ],
+      "subtotal": 332000,
+      "delivery_fee": 0,
+      "discount_amount": 0,
+      "total_amount": 347000,
+      "payment_method": "card",
+      "status": "cancelled",
+      "payment_status": "pending",
+      "special_instructions": "",
+      "customer": {
+        "name": "ngoc",
+        "phone": "0123456789",
+        "address": "123abc"
+      },
+      "promotion_code": null,
+      "order_number": "ORD-1763526825314",
+      "created_at": "2025-11-19T04:33:45.314Z",
+      "updated_at": "2025-11-19T05:42:22.576Z",
+      "id": "hb17BCY",
       "cancellation_reason": "Auto-cancelled: Payment not completed within 30 minutes"
     }
   ],
@@ -1781,11 +1896,42 @@
     {
       "id": 1,
       "user_id": "u1762957623609",
-      "restaurant_id": null,
-      "items": [],
-      "updated_at": "2025-11-17T07:36:04.414Z",
-      "total": 0,
-      "restaurant_name": null
+      "restaurant_id": "r6",
+      "items": [
+        {
+          "item_id": "item_1763537573363_8zgo8d7gh",
+          "food_id": 19,
+          "name": "Blueberry Cake",
+          "price": 89000,
+          "image": "/images/foods/food_19.png",
+          "quantity": 3,
+          "note": "",
+          "subtotal": 267000
+        },
+        {
+          "item_id": "item_1763537758136_vhfreypb9",
+          "food_id": 20,
+          "name": "Cheese Cake",
+          "price": 75000,
+          "image": "/images/foods/food_20.png",
+          "quantity": 2,
+          "note": "",
+          "subtotal": 150000
+        },
+        {
+          "item_id": "item_1763538044129_z7umg15pm",
+          "food_id": 21,
+          "name": "Vegetable Salad",
+          "price": 129000,
+          "image": "/images/foods/food_21.png",
+          "quantity": 1,
+          "note": "",
+          "subtotal": 129000
+        }
+      ],
+      "updated_at": "2025-11-19T07:40:44.129Z",
+      "total": 546000,
+      "restaurant_name": "Burger King"
     }
   ],
   "withdrawals": [

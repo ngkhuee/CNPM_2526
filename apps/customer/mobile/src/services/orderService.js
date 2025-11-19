@@ -6,15 +6,68 @@
 import apiClient from './apiClient';
 
 /**
+ * Transform order từ snake_case (API) sang camelCase (App)
+ */
+const transformOrder = (order) => {
+    if (!order) return null;
+
+    // Map restaurant IDs to names (for demo purposes)
+    const restaurantNames = {
+        'r1': 'Belga Pizza',
+        'r2': 'Lotteria',
+        'r3': 'Pizza 4P\'s',
+        'r4': 'Texas Chicken',
+        'r5': 'Subway',
+        'r6': 'Burger King',
+    };
+
+    return {
+        id: order.id,
+        status: order.status,
+        totalPrice: order.total_amount || 0,
+        createdAt: order.created_at,
+        updatedAt: order.updated_at,
+        restaurantId: order.restaurant_id,
+        restaurantName: order.restaurant?.name || restaurantNames[order.restaurant_id] || 'Unknown Restaurant',
+        deliveryAddress: order.customer?.address || (order.delivery_address || ''),
+        items: (order.items || []).map(item => ({
+            id: item.menu_id,
+            foodId: item.menu_id,
+            name: item.name,
+            quantity: item.quantity,
+            price: item.unit_price,
+        })),
+        paymentMethod: order.payment_method,
+        paymentStatus: order.payment_status,
+        subtotal: order.subtotal || 0,
+        deliveryFee: order.delivery_fee || 0,
+        discountAmount: order.discount_amount || 0,
+        customerName: order.customer?.name,
+        customerPhone: order.customer?.phone,
+        specialInstructions: order.special_instructions,
+    };
+};
+
+/**
  * Lấy danh sách orders của user
+ * Gọi API với filter user_id từ token
  * 
- * @returns {Array} Danh sách orders
+ * @returns {Array} Danh sách orders của user hiện tại
  */
 export const getOrders = async () => {
     try {
+        // API endpoint tự động lọc orders theo user_id từ token
         const response = await apiClient.get('/orders');
         console.log('[orderService.getOrders] Response:', response);
-        return response;
+
+        // Transform orders từ snake_case sang camelCase
+        const transformedOrders = Array.isArray(response)
+            ? response.map(transformOrder)
+            : response.orders?.map(transformOrder) || [];
+
+        console.log('[orderService.getOrders] Transformed:', transformedOrders.length, 'orders');
+
+        return transformedOrders;
     } catch (error) {
         console.error('[orderService.getOrders] Error:', error.message);
         throw error;
@@ -31,7 +84,7 @@ export const getOrderDetail = async (orderId) => {
     try {
         const response = await apiClient.get(`/orders/${orderId}`);
         console.log('[orderService.getOrderDetail] Response:', response);
-        return response;
+        return transformOrder(response);
     } catch (error) {
         console.error('[orderService.getOrderDetail] Error:', error.message);
         throw error;
@@ -42,31 +95,72 @@ export const getOrderDetail = async (orderId) => {
  * Tạo order từ giỏ hàng
  * 
  * @param {Object} orderData - Dữ liệu order
- * @param {string} orderData.cart_id - ID giỏ hàng
- * @param {string} orderData.delivery_address - Địa chỉ giao hàng
- * @param {string} orderData.phone_number - Số điện thoại
- * @param {string} orderData.payment_method - Phương thức thanh toán (cash, card)
+ * @param {string} orderData.restaurantId - ID nhà hàng
+ * @param {Array} orderData.items - Mảng items trong order
+ * @param {number} orderData.subtotal - Tổng tiền hàng
+ * @param {number} orderData.deliveryFee - Phí giao hàng
+ * @param {number} orderData.discountAmount - Tổng tiền giảm
+ * @param {number} orderData.total_amount - Tổng tiền cuối cùng
+ * @param {string} orderData.payment_method - Phương thức thanh toán (cash, online)
+ * @param {Object} orderData.customer - Dữ liệu khách hàng {name, phone, address}
  * @param {string} orderData.promo_code - Mã khuyến mãi (tuỳ chọn)
- * @param {number} orderData.total - Tổng tiền
  * @returns {Object} Order đã tạo
  */
 export const submitOrder = async (orderData) => {
     try {
         console.log('[orderService.submitOrder] Submitting order:', orderData);
 
-        const response = await apiClient.post('/orders', {
-            cart_id: orderData.cart_id,
-            delivery_address: orderData.delivery_address,
-            phone_number: orderData.phone_number,
-            payment_method: orderData.payment_method,
-            promo_code: orderData.promo_code || '',
-            total: orderData.total,
-        });
+        // Map frontend format to backend schema (match web's orderService)
+        const backendPayload = {
+            restaurant_id: orderData.restaurantId || orderData.restaurant_id,
+            items: (orderData.items || []).map(item => ({
+                menu_id: item.foodId || item.food_id || item.id || item.menu_id, // Support multiple field names
+                name: item.name,
+                quantity: item.quantity,
+                unit_price: item.price || item.unit_price,
+                subtotal: (item.price || item.unit_price) * item.quantity,
+            })),
+            subtotal: orderData.subtotal,
+            delivery_fee: orderData.deliveryFee || orderData.delivery_fee || 0,
+            discount_amount: orderData.discountAmount || orderData.discount_amount || 0,
+            total_amount: orderData.total_amount || orderData.totalAmount,
+            payment_method: orderData.payment_method || orderData.paymentMethod || 'online',
+            status: orderData.status || 'pending',
+            payment_status: orderData.payment_status || orderData.paymentStatus || 'pending',
+            special_instructions: orderData.special_instructions || orderData.specialInstructions || '',
+            customer: {
+                name: orderData.customer?.name || 'Customer',
+                phone: orderData.customer?.phone || '',
+                address: orderData.customer?.address || '',
+                email: orderData.customer?.email || '',
+            },
+            delivery_address: orderData.delivery_address || orderData.deliveryAddress,
+            delivery_address_id: orderData.delivery_address_id || orderData.deliveryAddressId,
+            dropoff_gps: orderData.dropoff_gps || orderData.gps,
+            promotion_code: orderData.promotion_code || orderData.promoCode || null,
+            promotion_id: orderData.promotion_id || orderData.promotionId || null,
+            order_number: orderData.order_number || `ORD-${Date.now()}`,
+            created_at: orderData.created_at || new Date().toISOString(),
+            updated_at: orderData.updated_at || new Date().toISOString(),
+        };
+
+        // Remove undefined/null values
+        Object.keys(backendPayload).forEach(
+            key => backendPayload[key] === undefined && delete backendPayload[key]
+        );
+
+        console.log('[orderService.submitOrder] Backend payload:', backendPayload);
+
+        const response = await apiClient.post('/orders', backendPayload);
 
         console.log('[orderService.submitOrder] Success:', response);
-        return response;
+        return transformOrder(response);
     } catch (error) {
         console.error('[orderService.submitOrder] Error:', error.message);
+        // Log detailed error response for debugging
+        if (error.response?.data) {
+            console.error('[orderService.submitOrder] Backend error response:', error.response.data);
+        }
         throw error;
     }
 };

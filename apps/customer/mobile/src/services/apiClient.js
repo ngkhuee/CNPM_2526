@@ -50,21 +50,34 @@ apiClient.interceptors.response.use(
         return response.data;
     },
     async (error) => {
-        console.error('[API Response Error]', error.response?.status, error.message);
+        const status = error.response?.status;
+        const message = error.response?.data?.message || error.message;
 
-        // Handle 401 - token expired or invalid
-        if (error.response?.status === 401) {
-            console.warn('[API Response] 401 Unauthorized - logging out');
-            try {
-                // Clear token and user from storage
-                await AsyncStorage.removeItem('token');
-                await AsyncStorage.removeItem('user');
-                await AsyncStorage.removeItem('cartItems');
+        console.error('[API Response Error]', status, message);
 
-                // Trigger auth context logout (if needed)
-                // This would normally navigate back to login screen
-            } catch (clearError) {
-                console.error('[API Response] Error clearing storage:', clearError);
+        // Log full error data for debugging
+        if (error.response?.data) {
+            console.error('[API Response] Backend error data:', error.response.data);
+        }
+
+        // Handle 401 - token expired or invalid credentials
+        if (status === 401) {
+            // Don't auto-logout for /auth/* endpoints (401 is normal for invalid credentials)
+            const isAuthEndpoint = error.config?.url?.includes('/auth/');
+
+            if (!isAuthEndpoint) {
+                console.warn('[API Response] 401 Unauthorized - token may be expired');
+                try {
+                    // Clear token and user from storage
+                    await AsyncStorage.removeItem('token');
+                    await AsyncStorage.removeItem('user');
+                    await AsyncStorage.removeItem('cartItems');
+
+                    // Trigger auth context logout (if needed)
+                    // This would normally navigate back to login screen
+                } catch (clearError) {
+                    console.error('[API Response] Error clearing storage:', clearError);
+                }
             }
         }
 

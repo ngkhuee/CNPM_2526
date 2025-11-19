@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useRef } from 'react';
 import {
     View,
     Text,
@@ -10,8 +10,10 @@ import {
     ActivityIndicator,
     FlatList,
     Modal,
+    Animated,
 } from 'react-native';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { NavigationContext } from '../../contexts/NavigationContext';
 import { CartContext } from '../../contexts/CartContext';
 import { AuthContext } from '../../contexts/AuthContext';
@@ -19,8 +21,11 @@ import LoginAuthScreen from '../auth/LoginAuthScreen';
 import { formatCurrency, formatRating } from '../../shared/formatters';
 import { reviewService } from '../../services/reviewService';
 import { getFoodImageUrl } from '../../shared/imageHelper';
+import { isRestaurantOpen } from '../../utils/hoursHelper';
 import { showToast } from '../../utils/toastHelper';
-import SwitchRestaurantModal from '../../components/SwitchRestaurantModal';
+import { createBubbleAnimation } from '../../utils/animationHelpers';
+import { MiniCartBubble } from '../../components/MiniCartBubble';
+import { CartModal } from '../../components/CartModal';
 
 /**
  * FoodDetailScreen - Product detail page (based on web version)
@@ -29,15 +34,28 @@ import SwitchRestaurantModal from '../../components/SwitchRestaurantModal';
  * NO: like button, preparation time, availability, total price
  */
 export default function FoodDetailScreen({ foodItem, onNavigate }) {
-    const { resetNavigationState, navigate } = useContext(NavigationContext);
-    const { addItem, canAddFromRestaurant, getCurrentRestaurantName, clearCart } = useContext(CartContext);
+    const { resetNavigationState, navigate, pendingLocalCart, setNavigationState, selectedRestaurant } = useContext(NavigationContext);
+    const cartContext = useContext(CartContext);
+    const { addItem, canAddFromRestaurant, getCurrentRestaurantName, clearCart } = cartContext;
     const { isAuthenticated } = useContext(AuthContext);
+
+    // Use pendingLocalCart from context (passed from RestaurantDetail)
+    // This ensures we keep the current restaurant's cart items
+    const [localCart, setLocalCart] = useState(pendingLocalCart || {
+        items: [],
+        restaurant_id: foodItem?.restaurant_id,
+        restaurant_name: null,
+        total: 0,
+    });
+
+    const bubbleAnimation = useRef(createBubbleAnimation());
+
+    // UI state
     const [quantity, setQuantity] = useState(1);
     const [isAdding, setIsAdding] = useState(false);
     const [reviews, setReviews] = useState([]);
     const [reviewsLoading, setReviewsLoading] = useState(true);
-    const [showSwitchModal, setShowSwitchModal] = useState(false);
-    const [pendingAddItem, setPendingAddItem] = useState(null);
+    const [showCartModal, setShowCartModal] = useState(false);
     const [showLoginModal, setShowLoginModal] = useState(false);
 
     // Fetch reviews on mount
@@ -46,6 +64,52 @@ export default function FoodDetailScreen({ foodItem, onNavigate }) {
             fetchReviews();
         }
     }, [foodItem?.id]);
+
+    /**
+     * Restore cart from AsyncStorage if pendingLocalCart not provided
+     */
+    useEffect(() => {
+        const restoreCartFromStorage = async () => {
+            if (pendingLocalCart && pendingLocalCart.items && pendingLocalCart.items.length > 0) {
+                // Already have pendingLocalCart from navigation
+                console.log('[FoodDetailScreen] Using pendingLocalCart:', pendingLocalCart);
+                return;
+            }
+
+            // Try to restore from AsyncStorage
+            const restaurantId = foodItem?.restaurant_id;
+            if (restaurantId) {
+                try {
+                    const cartJson = await AsyncStorage.getItem(`cart_restaurant_${restaurantId}`);
+                    if (cartJson) {
+                        const savedCart = JSON.parse(cartJson);
+                        console.log('[FoodDetailScreen] Restored cart from AsyncStorage:', restaurantId);
+                        setLocalCart(savedCart);
+                    }
+                } catch (err) {
+                    console.error('[FoodDetailScreen] Error restoring cart:', err.message);
+                }
+            }
+        };
+
+        restoreCartFromStorage();
+    }, [foodItem?.restaurant_id, pendingLocalCart]);
+
+    /**
+     * Save cart to AsyncStorage when component unmounts
+     */
+    useEffect(() => {
+        return () => {
+            // Save current cart when leaving this screen
+            if (localCart && localCart.items && localCart.items.length > 0) {
+                const restaurantId = localCart.restaurant_id || foodItem?.restaurant_id;
+                if (restaurantId) {
+                    AsyncStorage.setItem(`cart_restaurant_${restaurantId}`, JSON.stringify(localCart));
+                    console.log('[FoodDetailScreen] Saved cart on unmount:', restaurantId);
+                }
+            }
+        };
+    }, []);
 
     const fetchReviews = async () => {
         try {
@@ -83,93 +147,111 @@ export default function FoodDetailScreen({ foodItem, onNavigate }) {
     const soldCount = parseInt(foodItem.sold) || 0;
 
     const handleBack = () => {
+        // Save localCart to context before navigating
+        if (localCart.items.length > 0) {
+            setNavigationState({ pendingLocalCart: localCart });
+        }
         if (onNavigate) {
             onNavigate('restaurant');
         }
     };
 
+    /**
+     * Handle cart changes from CartModal (update quantity, remove item)
+     * Updates local cart + AsyncStorage + Global cart
+     */
+    const handleCartChange = async (updatedCart) => {
+        setLocalCart(updatedCart);
+
+        // Sync to AsyncStorage + Global cart
+        const restaurantId = updatedCart.restaurant_id || foodItem?.restaurant_id;
+        if (restaurantId && updatedCart.items && updatedCart.items.length > 0) {
+            if (cartContext?.saveLocalCart) {
+                await cartContext.saveLocalCart(restaurantId, updatedCart);
+            }
+            if (cartContext?.syncLocalCartToGlobal) {
+                await cartContext.syncLocalCartToGlobal(updatedCart, true);
+            }
+            // CRITICAL: Set this as last active restaurant so checkout can fetch it
+            if (cartContext?.setLastActive) {
+                await cartContext.setLastActive(restaurantId);
+            }
+        }
+    };
+
     const handleAddToCart = async () => {
-        // Check if user is authenticated first
         if (!isAuthenticated) {
             setShowLoginModal(true);
+            return;
+        }
+
+        // Check if restaurant is open using data from context
+        if (selectedRestaurant && !isRestaurantOpen(selectedRestaurant.openingHours)) {
+            showToast('error', 'This restaurant is currently closed');
             return;
         }
 
         try {
             setIsAdding(true);
 
-            // Kiểm tra xem có thể thêm từ restaurant này không
-            if (!canAddFromRestaurant(foodItem.restaurant_id)) {
-                // Khác restaurant - hiển thị modal
-                console.log('[FoodDetailScreen] Different restaurant, show modal');
-                setPendingAddItem({
-                    restaurant_id: foodItem.restaurant_id,
-                    food_id: foodItem.id,
-                    quantity,
-                });
-                setShowSwitchModal(true);
-                setIsAdding(false);
-                return;
-            }
+            // Get restaurant ID - fallback to selectedRestaurant if foodItem doesn't have it
+            const restaurantId = foodItem.restaurant_id || selectedRestaurant?.id;
 
-            // Cùng restaurant hoặc giỏ rỗng - thêm vào giỏ
-            await addItem(
-                foodItem.restaurant_id,
-                foodItem.id,
+            // Log foodItem để debug
+            console.log('[FoodDetailScreen] foodItem:', {
+                id: foodItem.id,
+                restaurant_id: foodItem.restaurant_id,
+                selectedRestaurantId: selectedRestaurant?.id,
+                finalRestaurantId: restaurantId,
+                name: foodItem.name,
+                price: foodItem.price,
+            });
+
+            // Add to API backend cart
+            // Parse food_id to number to match backend schema
+            const updatedCart = await cartContext.addItem(
+                restaurantId,
+                parseInt(foodItem.id) || foodItem.id,
                 quantity,
                 ''
             );
 
-            console.log('[FoodDetailScreen] Added to cart:', {
-                foodId: foodItem.id,
-                quantity
-            });
+            if (updatedCart) {
+                setLocalCart(updatedCart);
+                showToast('success', `${foodItem.name} added to cart!`);
 
-            showToast('success', `Added ${quantity} item(s) to cart!`);
-            setQuantity(1);
+                // Sync to AsyncStorage for backup
+                if (cartContext?.saveLocalCart) {
+                    await cartContext.saveLocalCart(restaurantId, updatedCart);
+                }
+
+                // Set as last active restaurant
+                if (cartContext?.setLastActive) {
+                    await cartContext.setLastActive(restaurantId);
+                }
+
+                // Trigger bubble animation
+                bubbleAnimation.current.setValue(0);
+                Animated.sequence([
+                    Animated.timing(bubbleAnimation.current, {
+                        toValue: 1,
+                        duration: 800,
+                        useNativeDriver: true,
+                    }),
+                ]).start();
+            }
         } catch (error) {
-            console.error('[FoodDetailScreen] Error adding to cart:', error.message);
-            showToast('error', 'Failed to add item: ' + error.message);
+            console.error('[FoodDetailScreen] Error adding to cart:', error);
+
+            // If API fails, fallback to local cart
+            if (error.message?.includes('different restaurant')) {
+                showToast('error', 'Cart already has items from another restaurant');
+                setShowCartModal(true);
+            } else {
+                showToast('error', 'Failed to add to cart');
+            }
         } finally {
             setIsAdding(false);
-        }
-    };
-
-    /**
-     * Xử lý checkout từ modal - đi đến checkout
-     */
-    const handleModalCheckout = () => {
-        setShowSwitchModal(false);
-        setPendingAddItem(null);
-        navigate('checkout');
-    };
-
-    /**
-     * Xử lý clear cart và thêm item mới từ modal
-     */
-    const handleModalClearAndAdd = async () => {
-        try {
-            await clearCart();
-
-            // Thêm item từ restaurant mới
-            if (pendingAddItem) {
-                await addItem(
-                    pendingAddItem.restaurant_id,
-                    pendingAddItem.food_id,
-                    pendingAddItem.quantity,
-                    ''
-                );
-
-                console.log('[FoodDetailScreen] Cleared and added new item');
-                showToast('success', 'Cart updated with new restaurant');
-            }
-
-            setShowSwitchModal(false);
-            setPendingAddItem(null);
-            setQuantity(1);
-        } catch (error) {
-            console.error('[FoodDetailScreen] Error in handleModalClearAndAdd:', error.message);
-            showToast('error', 'Error: ' + error.message);
         }
     };
 
@@ -373,17 +455,23 @@ export default function FoodDetailScreen({ foodItem, onNavigate }) {
                 </TouchableOpacity>
             </View>
 
-            {/* Switch Restaurant Modal */}
-            <SwitchRestaurantModal
-                visible={showSwitchModal}
-                currentRestaurant={getCurrentRestaurantName()}
-                newRestaurant={foodItem?.restaurant_name}
-                onCheckout={handleModalCheckout}
-                onClearAndAdd={handleModalClearAndAdd}
-                onCancel={() => {
-                    setShowSwitchModal(false);
-                    setPendingAddItem(null);
+            {/* Cart Modal */}
+            <CartModal
+                visible={showCartModal}
+                localCart={localCart}
+                setLocalCart={handleCartChange}
+                onClose={() => setShowCartModal(false)}
+                onCheckout={() => {
+                    setShowCartModal(false);
+                    navigate('checkout');
                 }}
+            />
+
+            {/* Mini Cart Bubble */}
+            <MiniCartBubble
+                totalItems={localCart.items.reduce((sum, item) => sum + item.quantity, 0)}
+                onPress={() => setShowCartModal(true)}
+                animatedScale={bubbleAnimation.scale}
             />
 
             {/* Login Modal */}

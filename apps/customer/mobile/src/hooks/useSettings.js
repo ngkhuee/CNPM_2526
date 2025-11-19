@@ -7,7 +7,7 @@ import { useState, useEffect } from 'react';
 import { settingsService } from '../services/settingsService';
 
 export const useSettings = () => {
-    const [deliveryFee, setDeliveryFee] = useState(2.00); // Default fallback in USD
+    const [deliveryFee, setDeliveryFee] = useState(15000); // Default fallback in VND (15,000 VND)
     const [settings, setSettings] = useState({});
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -29,7 +29,7 @@ export const useSettings = () => {
                 if (isActive) {
                     console.error('[useSettings] Error fetching settings:', err);
                     setError(err.message || 'Failed to fetch settings');
-                    // Keep default delivery fee on error
+                    // Keep default delivery fee (15000 VND) on error
                 }
             } finally {
                 if (isActive) {

@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef, useContext } from 'react';
+// screens/restaurant/RestaurantDetail.jsx - REFACTORED VERSION
+import React, { useState, useContext, useEffect } from 'react';
 import {
     View,
     Text,
@@ -12,167 +13,113 @@ import {
 } from 'react-native';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { NavigationContext } from '../../contexts/NavigationContext';
+import { CartContext } from '../../contexts/CartContext';
 import RestaurantSearchBar from './components/RestaurantSearchBar';
 import CategoryFilter from './components/CategoryFilter';
 import RestaurantFoodCard from './components/RestaurantFoodCard';
-import { restaurantDetailService } from '../../services/restaurantDetailService';
-import { categoryService } from '../../services/categoryService';
-import { reviewService } from '../../services/reviewService';
-import { formatRating } from '../../shared/formatters';
-import { isRestaurantOpen, getTodayHours } from '../../utils/hoursHelper';
-import { getRestaurantImageUrl, getRestaurantBannerUrl } from '../../shared/imageHelper';
+import { MiniCartBubble } from '../../components/MiniCartBubble';
+import { CartModal } from '../../components/CartModal';
+import { RestaurantHeader } from '../../components/restaurant/RestaurantHeader';
+import { RestaurantHeaderCompact } from '../../components/restaurant/RestaurantHeaderCompact';
+import { RestaurantTabs } from '../../components/restaurant/RestaurantTabs';
+import { ReviewsList } from '../../components/restaurant/ReviewsList';
+import { useRestaurantDetail } from '../../hooks/useRestaurantDetail';
+import { useRestaurantCart } from '../../hooks/useRestaurantCart';
+import { useRestaurantScroll } from '../../hooks/useRestaurantScroll';
+import { useFoodSearch } from '../../hooks/useFoodSearch';
+import { useLocalCart } from '../../hooks/useLocalCart';
 
-/**
- * RestaurantDetail - Shopee-style restaurant page
- * - Sticky header (search + category filter) using SectionList
- * - Foods grouped by category
- * - Category highlight on scroll
- * - Click category button → scroll to section (bookmark style)
- */
 export default function RestaurantDetail({ onNavigate, onSelectFood }) {
-    const { targetRestaurantId, highlightedFoodId, resetNavigationState } =
-        useContext(NavigationContext);
+    const navigationContext = useContext(NavigationContext);
+    const cartContext = useContext(CartContext);
 
-    const [restaurant, setRestaurant] = useState(null);
-    const [allFoods, setAllFoods] = useState([]);
-    const [filteredFoods, setFilteredFoods] = useState([]);
-    const [categories, setCategories] = useState([]);
-    const [reviews, setReviews] = useState([]);
-    const [searchQuery, setSearchQuery] = useState('');
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
-    const [currentCategoryId, setCurrentCategoryId] = useState(null);
-    const [showStickyHeader, setShowStickyHeader] = useState(false);
-    const [activeTab, setActiveTab] = useState('menu'); // 'menu' or 'reviews'
-    const [avgRating, setAvgRating] = useState(0);
-    const sectionListRef = useRef(null);
-    const sectionIndexMap = useRef({});
+    const {
+        targetRestaurantId,
+        highlightedFoodId,
+        resetNavigationState,
+        pendingLocalCart,
+        setNavigationState,
+    } = navigationContext;
 
-    // Fetch data on mount
+    // Custom hooks
+    const { restaurant, allFoods, categories, reviews, avgRating, loading, error, refetch } =
+        useRestaurantDetail(targetRestaurantId);
+
+    const { localCart: initialLocalCart, setLocalCart } = useLocalCart(targetRestaurantId);
+
+    const { localCart, setLocalCart: setLocalCartState, handleAddToCart, getTotalItems, bubbleAnimation } =
+        useRestaurantCart(
+            restaurant,
+            initialLocalCart,
+            pendingLocalCart,
+            () => setNavigationState({ pendingLocalCart: null }),
+            cartContext  // Pass CartContext để sync
+        );
+
+    const { searchQuery, setSearchQuery, filteredFoods } = useFoodSearch(allFoods);
+
+    const {
+        currentCategoryId,
+        showStickyHeader,
+        sectionListRef,
+        handleScrollToCategory,
+        handleViewableItemsChanged,
+        handleScroll,
+    } = useRestaurantScroll(categories, allFoods, highlightedFoodId);
+
+    // UI state
+    const [activeTab, setActiveTab] = useState('menu');
+    const [showCartModal, setShowCartModal] = useState(false);
+
+    // Restore cart when coming back from FoodDetailScreen
     useEffect(() => {
-        if (targetRestaurantId) {
-            fetchRestaurantData();
+        if (pendingLocalCart && Object.keys(pendingLocalCart).length > 0) {
+            setLocalCartState(pendingLocalCart);
+            console.log('[RestaurantDetail] Restored cart from FoodDetailScreen:', pendingLocalCart.items.length, 'items');
         }
-    }, [targetRestaurantId]);
+    }, [pendingLocalCart, setLocalCartState]);
 
-    // Filter foods based on search query only (not category)
+    /**
+     * Save cart to AsyncStorage when component unmounts
+     * Use empty dependency array to avoid loop - only run once on unmount
+     */
     useEffect(() => {
-        let result = [...allFoods];
-
-        // Filter by search query
-        if (searchQuery.trim()) {
-            result = result.filter((food) =>
-                food.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                (food.description &&
-                    food.description.toLowerCase().includes(searchQuery.toLowerCase()))
-            );
-        }
-
-        setFilteredFoods(result);
-    }, [searchQuery, allFoods]);
-
-    // Auto-scroll to highlighted food when it's set
-    useEffect(() => {
-        if (highlightedFoodId && sectionListRef.current && allFoods.length > 0) {
-            const foodIndex = allFoods.findIndex((f) => f.id === highlightedFoodId);
-            if (foodIndex >= 0) {
-                // Find which category this food belongs to
-                const food = allFoods[foodIndex];
-                const categoryIndex = categories.findIndex((c) => c.id === food.categoryId);
-                if (categoryIndex >= 0) {
-                    // Scroll to the food's category section
-                    setTimeout(() => {
-                        sectionListRef.current?.scrollToLocation({
-                            sectionIndex: categoryIndex,
-                            itemIndex: allFoods.filter((f) => f.categoryId === food.categoryId).indexOf(food),
-                            animated: true,
-                        });
-                    }, 300);
+        return () => {
+            // Save current cart when leaving this screen
+            if (localCart && localCart.items && localCart.items.length > 0) {
+                const restaurantId = localCart.restaurant_id || targetRestaurantId;
+                if (restaurantId) {
+                    cartContext?.saveLocalCart(restaurantId, localCart);
+                    console.log('[RestaurantDetail] Saved cart on unmount:', restaurantId);
                 }
             }
-        }
-    }, [highlightedFoodId, allFoods, categories]);
+        };
+    }, []); // Empty dependency - only run cleanup on unmount
 
-    const fetchRestaurantData = async () => {
-        try {
-            setLoading(true);
-            setError(null);
+    /**
+     * Handle cart changes from CartModal (update quantity, remove item)
+     * Updates local cart + AsyncStorage + Global cart
+     */
+    const handleCartChange = async (updatedCart) => {
+        setLocalCartState(updatedCart);
 
-            // Fetch restaurant & foods
-            const { restaurant: restaurantData, foods: foodsData } =
-                await restaurantDetailService.getRestaurantWithFoods(targetRestaurantId);
-
-            setRestaurant(restaurantData);
-            setAllFoods(foodsData);
-
-            // Fetch categories for this restaurant
-            const categoriesData = await categoryService.getByRestaurant(targetRestaurantId);
-            setCategories(categoriesData);
-
-            // Fetch reviews for this restaurant
-            const reviewsData = await reviewService.getByRestaurant(targetRestaurantId);
-            if (reviewsData && reviewsData.length > 0) {
-                const sorted = reviewsData.sort(
-                    (a, b) => new Date(b.created_at) - new Date(a.created_at)
-                );
-                const avg = sorted.reduce((sum, r) => sum + (r.rating || 0), 0) / sorted.length;
-                setAvgRating(Number(avg.toFixed(1)));
-                setReviews(sorted);
+        // Sync to AsyncStorage + Global cart
+        const restaurantId = updatedCart.restaurant_id || restaurant?.id;
+        if (restaurantId && updatedCart.items && updatedCart.items.length > 0) {
+            if (cartContext?.saveLocalCart) {
+                await cartContext.saveLocalCart(restaurantId, updatedCart);
             }
-
-            console.log('[RestaurantDetail] Data loaded:', {
-                restaurant: restaurantData?.name,
-                foods: foodsData?.length,
-                categories: categoriesData?.length,
-                reviews: reviewsData?.length,
-            });
-        } catch (err) {
-            console.error('[RestaurantDetail] Fetch error:', err);
-            setError(err.message || 'Failed to load restaurant');
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const handleFoodPress = (food) => {
-        onSelectFood(food);
-        if (onNavigate) {
-            onNavigate('food-detail');
-        }
-    };
-
-    // Scroll to category section by index
-    const handleScrollToCategory = (categoryId) => {
-        console.log('[RestaurantDetail] Scrolling to category:', categoryId);
-        const sectionIndex = sectionIndexMap.current[categoryId];
-        if (sectionIndex !== undefined && sectionListRef.current) {
-            sectionListRef.current.scrollToLocation({
-                sectionIndex,
-                itemIndex: 0,
-                animated: true,
-            });
-        }
-    };
-
-    // Track which section is visible + detect sticky trigger
-    const handleViewableItemsChanged = useRef(({ viewableItems }) => {
-        if (viewableItems.length > 0) {
-            const firstViewable = viewableItems[0];
-            if (firstViewable.section?.categoryId) {
-                setCurrentCategoryId(firstViewable.section.categoryId);
+            if (cartContext?.syncLocalCartToGlobal) {
+                await cartContext.syncLocalCartToGlobal(updatedCart, true);
+            }
+            // CRITICAL: Set this as last active restaurant so checkout can fetch it
+            if (cartContext?.setLastActive) {
+                await cartContext.setLastActive(restaurantId);
             }
         }
-    });
-
-    // Detect when user scrolls to top to show sticky header
-    const handleScroll = (event) => {
-        const scrollY = event.nativeEvent.contentOffset.y;
-        // Sticky header appears when scrolled past restaurant info section
-        // Threshold is around the height of banner + restaurant info section
-        const STICKY_THRESHOLD = 280; // Approx height of banner + restaurant info
-        setShowStickyHeader(scrollY > STICKY_THRESHOLD);
     };
 
+    // Navigation handlers
     const handleBack = () => {
         resetNavigationState();
         if (onNavigate) {
@@ -180,6 +127,25 @@ export default function RestaurantDetail({ onNavigate, onSelectFood }) {
         }
     };
 
+    const handleFoodPress = (food) => {
+        onSelectFood(food);
+        // Pass current cart to FoodDetailScreen so it can add items to the same cart
+        setNavigationState({
+            selectedRestaurant: restaurant,
+            pendingLocalCart: localCart
+        });
+        if (onNavigate) {
+            onNavigate('food-detail');
+        }
+    };
+
+    const handleNavigateToCheckout = () => {
+        if (onNavigate) {
+            onNavigate('checkout');
+        }
+    };
+
+    // Loading state
     if (loading) {
         return (
             <SafeAreaView style={styles.container}>
@@ -195,6 +161,7 @@ export default function RestaurantDetail({ onNavigate, onSelectFood }) {
         );
     }
 
+    // Error state
     if (error || !restaurant) {
         return (
             <SafeAreaView style={styles.container}>
@@ -204,13 +171,8 @@ export default function RestaurantDetail({ onNavigate, onSelectFood }) {
                     </TouchableOpacity>
                 </View>
                 <View style={styles.errorContainer}>
-                    <Text style={styles.errorText}>
-                        {error || 'Restaurant not found'}
-                    </Text>
-                    <TouchableOpacity
-                        style={styles.retryBtn}
-                        onPress={fetchRestaurantData}
-                    >
+                    <Text style={styles.errorText}>{error || 'Restaurant not found'}</Text>
+                    <TouchableOpacity style={styles.retryBtn} onPress={refetch}>
                         <Text style={styles.retryBtnText}>Retry</Text>
                     </TouchableOpacity>
                 </View>
@@ -218,204 +180,56 @@ export default function RestaurantDetail({ onNavigate, onSelectFood }) {
         );
     }
 
-    const imageUrl = getRestaurantImageUrl(restaurant);
-    const bannerUrl = getRestaurantBannerUrl(restaurant);
-    const rating = formatRating(restaurant.rating);
-    const isOpen = isRestaurantOpen(restaurant.openingHours);
-    const todayHours = getTodayHours(restaurant.openingHours);
+    // Group foods by category for SectionList
+    const groupedFoods = categories.map((category, index) => {
+        const categoryFoods = filteredFoods.filter((food) => food.categoryId === category.id);
+        return {
+            title: category.name,
+            categoryId: category.id,
+            data: categoryFoods.length > 0 ? categoryFoods : [null],
+        };
+    });
 
-    // Group foods by category for SectionList (keep all categories even if empty)
-    const groupedFoods = categories
-        .map((category, index) => {
-            sectionIndexMap.current[category.id] = index;
-            const categoryFoods = filteredFoods.filter((food) => food.categoryId === category.id);
-            return {
-                title: category.name,
-                categoryId: category.id,
-                // If no foods, include a placeholder; otherwise use actual foods
-                data: categoryFoods.length > 0 ? categoryFoods : [null],
-            };
-        });
-
-    // Header component - EVERYTHING (Restaurant Info + Tabs + Search)
+    // Render list header
     const renderListHeader = () => (
         <>
-            {/* Header with Back Button */}
             <View style={styles.headerRow}>
                 <TouchableOpacity style={styles.backBtn} onPress={handleBack}>
                     <MaterialIcons name="arrow-back" size={24} color="#fff" />
                 </TouchableOpacity>
             </View>
 
-            {/* Banner & Restaurant Info */}
-            <Image source={{ uri: bannerUrl }} style={styles.banner} />
+            <RestaurantHeader restaurant={restaurant} />
+            <RestaurantTabs activeTab={activeTab} onTabChange={setActiveTab} />
 
-            <View style={styles.restaurantInfo}>
-                <View style={styles.infoHeader}>
-                    <Image source={{ uri: imageUrl }} style={styles.restaurantImage} />
-                    <View style={styles.infoContent}>
-                        <Text style={styles.restaurantName}>{restaurant.name}</Text>
-                        <View style={styles.ratingRow}>
-                            <MaterialIcons name="star" size={14} color="#ffc107" />
-                            <Text style={styles.ratingText}>{rating}</Text>
-                            <Text style={styles.reviewCount}>
-                                ({restaurant.totalReviews})
-                            </Text>
-                        </View>
-                        <Text style={styles.category}>{restaurant.primaryCategory}</Text>
-                    </View>
-                </View>
-
-                {/* Quick Info */}
-                <View style={styles.quickInfo}>
-                    <View style={styles.quickInfoItem}>
-                        <MaterialIcons name="schedule" size={16} color="#ff6b35" />
-                        <Text style={styles.quickInfoText}>
-                            {restaurant.deliveryTimeMinutes} mins
-                        </Text>
-                    </View>
-                    <View style={styles.quickInfoItem}>
-                        <MaterialIcons name="location-on" size={16} color="#ff6b35" />
-                        <Text style={styles.quickInfoText} numberOfLines={1}>
-                            {restaurant.address}
-                        </Text>
-                    </View>
-                </View>
-
-                {/* Opening Hours & Status */}
-                <View style={styles.statusSection}>
-                    <View style={[styles.statusBadge, isOpen ? styles.statusOpen : styles.statusClosed]}>
-                        <MaterialIcons
-                            name={isOpen ? "check-circle" : "cancel"}
-                            size={16}
-                            color="#fff"
-                        />
-                        <Text style={styles.statusText}>
-                            {isOpen ? 'Open Now' : 'Closed'}
-                        </Text>
-                    </View>
-                    {todayHours && (
-                        <Text style={styles.hoursText}>
-                            {todayHours.open} - {todayHours.close}
-                        </Text>
-                    )}
-                </View>
-
-                {/* Description */}
-                {restaurant.description && (
-                    <Text style={styles.description}>{restaurant.description}</Text>
-                )}
-
-                {/* Closed Notice Banner */}
-                {!isOpen && (
-                    <View style={styles.closedBanner}>
-                        <MaterialIcons name="info" size={20} color="#ff9800" />
-                        <View style={styles.closedBannerText}>
-                            <Text style={styles.closedBannerTitle}>Currently Closed</Text>
-                            {todayHours && (
-                                <Text style={styles.closedBannerSubtitle}>
-                                    Opens at {todayHours.open}
-                                </Text>
-                            )}
-                        </View>
-                    </View>
-                )}
-
-                {/* Blocked Restaurant Banner */}
-                {restaurant.status === 'blocked' && (
-                    <View style={styles.blockedBanner}>
-                        <MaterialIcons name="lock" size={20} color="#d32f2f" />
-                        <Text style={styles.blockedText}>Restaurant is closed</Text>
-                    </View>
-                )}
-            </View>
-
-            {/* Tab Buttons */}
-            <View style={styles.tabContainer}>
-                <TouchableOpacity
-                    style={[styles.tabButton, activeTab === 'menu' && styles.tabButtonActive]}
-                    onPress={() => setActiveTab('menu')}
-                >
-                    <MaterialIcons
-                        name="restaurant-menu"
-                        size={18}
-                        color={activeTab === 'menu' ? '#ff6b35' : '#999'}
-                    />
-                    <Text style={[styles.tabText, activeTab === 'menu' && styles.tabTextActive]}>
-                        Menu
-                    </Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                    style={[styles.tabButton, activeTab === 'reviews' && styles.tabButtonActive]}
-                    onPress={() => setActiveTab('reviews')}
-                >
-                    <MaterialIcons
-                        name="rate-review"
-                        size={18}
-                        color={activeTab === 'reviews' ? '#ff6b35' : '#999'}
-                    />
-                    <Text style={[styles.tabText, activeTab === 'reviews' && styles.tabTextActive]}>
-                        Reviews
-                    </Text>
-                </TouchableOpacity>
-            </View>
-
-            {/* Search Bar - Only for Menu tab */}
             {activeTab === 'menu' && (
-                <RestaurantSearchBar
-                    restaurantName={restaurant.name}
-                    searchQuery={searchQuery}
-                    onSearchChange={setSearchQuery}
-                />
-            )}
-
-            {/* Category Filter - Only for Menu tab */}
-            {activeTab === 'menu' && categories.length > 0 && (
-                <CategoryFilter
-                    categories={categories}
-                    currentCategoryId={currentCategoryId}
-                    onSelectCategory={handleScrollToCategory}
-                />
+                <>
+                    <RestaurantSearchBar
+                        restaurantName={restaurant.name}
+                        searchQuery={searchQuery}
+                        onSearchChange={setSearchQuery}
+                    />
+                    {categories.length > 0 && (
+                        <CategoryFilter
+                            categories={categories}
+                            currentCategoryId={currentCategoryId}
+                            onSelectCategory={handleScrollToCategory}
+                        />
+                    )}
+                </>
             )}
         </>
     );
 
-    // Render stars for reviews
-    const renderStars = (rating) => {
-        return (
-            <View style={styles.starsContainer}>
-                {[1, 2, 3, 4, 5].map((star) =>
-                    star <= rating ? (
-                        <MaterialIcons
-                            key={star}
-                            name="star"
-                            size={14}
-                            color="#ffc107"
-                        />
-                    ) : (
-                        <MaterialIcons
-                            key={star}
-                            name="star-border"
-                            size={14}
-                            color="#ddd"
-                        />
-                    )
-                )}
-            </View>
-        );
-    };
-
-    // Render category section header (with sticky support)
+    // Render section header
     const renderSectionHeader = ({ section }) => (
         <View style={styles.sectionHeader}>
             <Text style={styles.categoryTitle}>{section.title}</Text>
         </View>
     );
 
-    // Render food item (or empty message for sections with no food)
-    const renderFoodItem = ({ item, section }) => {
-        // If section is empty, show "No food" message
+    // Render food item
+    const renderFoodItem = ({ item }) => {
         if (!item) {
             return (
                 <View style={styles.noFoodContainer}>
@@ -429,75 +243,8 @@ export default function RestaurantDetail({ onNavigate, onSelectFood }) {
                 item={item}
                 onPress={handleFoodPress}
                 isHighlighted={item.id === highlightedFoodId}
+                onAddToCart={handleAddToCart}
             />
-        );
-    };
-
-    // Render review item
-    const renderReviewItem = ({ item }) => (
-        <View style={styles.reviewItem}>
-            {/* Review Header */}
-            <View style={styles.reviewHeader}>
-                <View style={styles.reviewUserInfo}>
-                    <Text style={styles.reviewUserName}>{item.user?.name || 'Anonymous'}</Text>
-                    {renderStars(item.rating || 0)}
-                </View>
-                <Text style={styles.reviewDate}>
-                    {new Date(item.created_at).toLocaleDateString('vi-VN')}
-                </Text>
-            </View>
-
-            {/* Food Name */}
-            {item.food_name && (
-                <Text style={styles.foodNameTag}>{item.food_name}</Text>
-            )}
-
-            {/* Review Comment */}
-            <Text style={styles.reviewComment}>{item.comment}</Text>
-
-            {/* Restaurant Reply */}
-            {item.restaurant_reply && (
-                <View style={styles.restaurantReply}>
-                    <View style={styles.replyHeader}>
-                        <MaterialIcons name="reply" size={14} color="#ff6b35" />
-                        <Text style={styles.replyLabel}>Restaurant's Reply</Text>
-                    </View>
-                    <Text style={styles.replyText}>{item.restaurant_reply}</Text>
-                </View>
-            )}
-        </View>
-    );
-
-    // Render reviews section content
-    const renderReviewsContent = () => {
-        if (reviews.length === 0) {
-            return (
-                <View style={styles.emptyReviewsContainer}>
-                    <MaterialIcons name="rate-review" size={32} color="#ccc" />
-                    <Text style={styles.emptyReviewsText}>No reviews yet</Text>
-                    <Text style={styles.emptyReviewsSubtext}>Be the first to review this restaurant</Text>
-                </View>
-            );
-        }
-
-        return (
-            <>
-                {/* Reviews Header with Rating */}
-                <View style={styles.reviewsHeaderContainer}>
-                    <View style={styles.ratingBadge}>
-                        <MaterialIcons name="star" size={16} color="#ffc107" />
-                        <Text style={styles.ratingValue}>{avgRating}</Text>
-                        <Text style={styles.reviewCountBadge}>({reviews.length})</Text>
-                    </View>
-                </View>
-
-                {/* Reviews List */}
-                {reviews.map((review) => (
-                    <View key={review.id}>
-                        {renderReviewItem({ item: review })}
-                    </View>
-                ))}
-            </>
         );
     };
 
@@ -508,7 +255,7 @@ export default function RestaurantDetail({ onNavigate, onSelectFood }) {
                     <SectionList
                         ref={sectionListRef}
                         sections={groupedFoods}
-                        keyExtractor={(item, index) => (item?.id?.toString() || `empty-${index}`)}
+                        keyExtractor={(item, index) => item?.id?.toString() || `empty-${index}`}
                         renderItem={renderFoodItem}
                         renderSectionHeader={renderSectionHeader}
                         ListHeaderComponent={renderListHeader}
@@ -516,9 +263,7 @@ export default function RestaurantDetail({ onNavigate, onSelectFood }) {
                         scrollEventThrottle={16}
                         onScroll={handleScroll}
                         onViewableItemsChanged={handleViewableItemsChanged.current}
-                        viewabilityConfig={{
-                            itemVisiblePercentThreshold: 50,
-                        }}
+                        viewabilityConfig={{ itemVisiblePercentThreshold: 50 }}
                         stickySectionHeadersEnabled={true}
                         ListEmptyComponent={
                             filteredFoods.length === 0 ? (
@@ -530,17 +275,14 @@ export default function RestaurantDetail({ onNavigate, onSelectFood }) {
                         }
                     />
 
-                    {/* Floating Sticky Header for Search + Category - Only visible after scrolling past restaurant info */}
+                    {/* Floating sticky header */}
                     {showStickyHeader && (
                         <View style={styles.floatingHeader} pointerEvents="box-none">
-                            {/* Search Bar */}
                             <RestaurantSearchBar
                                 restaurantName={restaurant.name}
                                 searchQuery={searchQuery}
                                 onSearchChange={setSearchQuery}
                             />
-
-                            {/* Category Filter */}
                             {categories.length > 0 && (
                                 <CategoryFilter
                                     categories={categories}
@@ -550,72 +292,38 @@ export default function RestaurantDetail({ onNavigate, onSelectFood }) {
                             )}
                         </View>
                     )}
+
+                    <CartModal
+                        visible={showCartModal}
+                        localCart={localCart}
+                        setLocalCart={handleCartChange}
+                        onClose={() => setShowCartModal(false)}
+                        onCheckout={() => {
+                            setShowCartModal(false);
+                            handleNavigateToCheckout();
+                        }}
+                    />
+
+                    <MiniCartBubble
+                        totalItems={getTotalItems()}
+                        onPress={() => setShowCartModal(true)}
+                        animatedScale={bubbleAnimation.scale}
+                    />
                 </>
             ) : (
-                // Reviews Tab Content
                 <SafeAreaView style={styles.container}>
                     <ScrollView style={styles.reviewsTabContainer} showsVerticalScrollIndicator={false}>
-                        {/* Header */}
                         <View style={styles.headerRow}>
                             <TouchableOpacity style={styles.backBtn} onPress={handleBack}>
                                 <MaterialIcons name="arrow-back" size={24} color="#fff" />
                             </TouchableOpacity>
                         </View>
 
-                        {/* Banner & Restaurant Info */}
-                        <Image source={{ uri: bannerUrl }} style={styles.banner} />
+                        <RestaurantHeaderCompact restaurant={restaurant} />
+                        <RestaurantTabs activeTab={activeTab} onTabChange={setActiveTab} />
 
-                        <View style={styles.restaurantInfo}>
-                            <View style={styles.infoHeader}>
-                                <Image source={{ uri: imageUrl }} style={styles.restaurantImage} />
-                                <View style={styles.infoContent}>
-                                    <Text style={styles.restaurantName}>{restaurant.name}</Text>
-                                    <View style={styles.ratingRow}>
-                                        <MaterialIcons name="star" size={14} color="#ffc107" />
-                                        <Text style={styles.ratingText}>{rating}</Text>
-                                        <Text style={styles.reviewCount}>
-                                            ({restaurant.totalReviews})
-                                        </Text>
-                                    </View>
-                                    <Text style={styles.category}>{restaurant.primaryCategory}</Text>
-                                </View>
-                            </View>
-                        </View>
-
-                        {/* Tab Buttons */}
-                        <View style={styles.tabContainer}>
-                            <TouchableOpacity
-                                style={[styles.tabButton, activeTab === 'menu' && styles.tabButtonActive]}
-                                onPress={() => setActiveTab('menu')}
-                            >
-                                <MaterialIcons
-                                    name="restaurant-menu"
-                                    size={18}
-                                    color={activeTab === 'menu' ? '#ff6b35' : '#999'}
-                                />
-                                <Text style={[styles.tabText, activeTab === 'menu' && styles.tabTextActive]}>
-                                    Menu
-                                </Text>
-                            </TouchableOpacity>
-
-                            <TouchableOpacity
-                                style={[styles.tabButton, activeTab === 'reviews' && styles.tabButtonActive]}
-                                onPress={() => setActiveTab('reviews')}
-                            >
-                                <MaterialIcons
-                                    name="rate-review"
-                                    size={18}
-                                    color={activeTab === 'reviews' ? '#ff6b35' : '#999'}
-                                />
-                                <Text style={[styles.tabText, activeTab === 'reviews' && styles.tabTextActive]}>
-                                    Reviews
-                                </Text>
-                            </TouchableOpacity>
-                        </View>
-
-                        {/* Reviews Content */}
                         <View style={styles.reviewsContent}>
-                            {renderReviewsContent()}
+                            <ReviewsList reviews={reviews} avgRating={avgRating} />
                         </View>
 
                         <View style={{ height: 30 }} />
@@ -627,13 +335,8 @@ export default function RestaurantDetail({ onNavigate, onSelectFood }) {
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: '#f5f5f5',
-    },
-    sectionListContent: {
-        paddingBottom: 20,
-    },
+    container: { flex: 1, backgroundColor: '#f5f5f5' },
+    sectionListContent: { paddingBottom: 20 },
     headerRow: {
         position: 'absolute',
         top: 0,
@@ -642,7 +345,7 @@ const styles = StyleSheet.create({
         zIndex: 10,
         paddingHorizontal: 12,
         paddingVertical: 8,
-        paddingTop: 28, // 8 + 20px for camera notch offset
+        paddingTop: 28,
         backgroundColor: 'transparent',
     },
     backBtn: {
@@ -653,137 +356,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
     },
-    banner: {
-        width: '100%',
-        height: 200,
-        backgroundColor: '#eee',
-    },
-    restaurantInfo: {
-        backgroundColor: '#fff',
-        paddingHorizontal: 12,
-        paddingVertical: 12,
-        borderBottomWidth: 1,
-        borderBottomColor: '#eee',
-    },
-    infoHeader: {
-        flexDirection: 'row',
-        alignItems: 'flex-start',
-        marginBottom: 12,
-    },
-    restaurantImage: {
-        width: 60,
-        height: 60,
-        borderRadius: 8,
-        marginRight: 12,
-        backgroundColor: '#eee',
-    },
-    infoContent: {
-        flex: 1,
-    },
-    restaurantName: {
-        fontSize: 16,
-        fontWeight: '700',
-        color: '#333',
-        marginBottom: 4,
-    },
-    ratingRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: 4,
-    },
-    ratingText: {
-        fontSize: 12,
-        fontWeight: '600',
-        color: '#333',
-        marginLeft: 4,
-    },
-    reviewCount: {
-        fontSize: 12,
-        color: '#999',
-        marginLeft: 4,
-    },
-    category: {
-        fontSize: 12,
-        color: '#999',
-    },
-    quickInfo: {
-        gap: 8,
-    },
-    quickInfoItem: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    quickInfoText: {
-        fontSize: 12,
-        color: '#666',
-        marginLeft: 8,
-        flex: 1,
-    },
-    statusSection: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 12,
-        marginHorizontal: 12,
-        marginTop: 12,
-    },
-    statusBadge: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingHorizontal: 12,
-        paddingVertical: 6,
-        borderRadius: 20,
-        gap: 6,
-    },
-    statusOpen: {
-        backgroundColor: '#4CAF50',
-    },
-    statusClosed: {
-        backgroundColor: '#f44336',
-    },
-    statusText: {
-        fontSize: 12,
-        color: '#fff',
-        fontWeight: '600',
-    },
-    hoursText: {
-        fontSize: 12,
-        color: '#666',
-        fontWeight: '500',
-    },
-    description: {
-        fontSize: 13,
-        color: '#666',
-        lineHeight: 18,
-        marginHorizontal: 12,
-        marginTop: 12,
-    },
-    closedBanner: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: '#fff3e0',
-        borderWidth: 1,
-        borderColor: '#ffb74d',
-        borderRadius: 6,
-        paddingHorizontal: 12,
-        paddingVertical: 10,
-        marginHorizontal: 12,
-        marginTop: 12,
-        gap: 10,
-    },
-    closedBannerText: {
-        flex: 1,
-    },
-    closedBannerTitle: {
-        fontSize: 13,
-        fontWeight: '600',
-        color: '#e65100',
-    },
-    closedBannerSubtitle: {
-        fontSize: 12,
-        color: '#ef6c00',
-        marginTop: 2,
-    },
-    // Floating sticky header (above SectionList)
+    banner: { width: '100%', height: 200, backgroundColor: '#eee' },
     floatingHeader: {
         position: 'absolute',
         top: 0,
@@ -795,9 +368,6 @@ const styles = StyleSheet.create({
         borderBottomColor: '#eee',
         elevation: 3,
     },
-    stickyHeaderContainer: {
-        backgroundColor: '#fff',
-    },
     sectionHeader: {
         paddingHorizontal: 12,
         paddingVertical: 10,
@@ -805,253 +375,21 @@ const styles = StyleSheet.create({
         borderTopWidth: 1,
         borderTopColor: '#eee',
     },
-    categoryTitle: {
-        fontSize: 14,
-        fontWeight: '700',
-        color: '#333',
-    },
-    emptyContainer: {
-        alignItems: 'center',
-        paddingVertical: 40,
-    },
-    emptyText: {
-        fontSize: 14,
-        color: '#999',
-        marginTop: 12,
-    },
-    noFoodContainer: {
-        alignItems: 'center',
-        paddingVertical: 32,
-        paddingHorizontal: 20,
-    },
-    noFoodText: {
-        fontSize: 13,
-        color: '#999',
-        marginTop: 8,
-        fontStyle: 'italic',
-    },
-    blockedBanner: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: '#ffebee',
-        borderWidth: 1,
-        borderColor: '#ef5350',
-        borderRadius: 6,
-        paddingHorizontal: 12,
-        paddingVertical: 10,
-        marginHorizontal: 12,
-        marginTop: 12,
-        gap: 8,
-    },
-    blockedText: {
-        fontSize: 13,
-        color: '#d32f2f',
-        fontWeight: '600',
-    },
-    loadingContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    errorContainer: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        paddingHorizontal: 20,
-    },
-    errorText: {
-        fontSize: 14,
-        color: '#d32f2f',
-        textAlign: 'center',
-        marginBottom: 16,
-    },
-    retryBtn: {
-        backgroundColor: '#ff6b35',
-        paddingHorizontal: 24,
-        paddingVertical: 12,
-        borderRadius: 20,
-    },
-    retryBtnText: {
-        color: '#fff',
-        fontWeight: '600',
-        fontSize: 14,
-    },
-    // Tab styles
-    tabContainer: {
-        flexDirection: 'row',
+    categoryTitle: { fontSize: 14, fontWeight: '700', color: '#333' },
+    emptyContainer: { alignItems: 'center', paddingVertical: 40 },
+    emptyText: { fontSize: 14, color: '#999', marginTop: 12 },
+    noFoodContainer: { alignItems: 'center', paddingVertical: 32, paddingHorizontal: 20 },
+    noFoodText: { fontSize: 13, color: '#999', marginTop: 8, fontStyle: 'italic' },
+    loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+    errorContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 20 },
+    errorText: { fontSize: 14, color: '#d32f2f', textAlign: 'center', marginBottom: 16 },
+    retryBtn: { backgroundColor: '#ff6b35', paddingHorizontal: 24, paddingVertical: 12, borderRadius: 20 },
+    retryBtnText: { color: '#fff', fontWeight: '600', fontSize: 14 },
+    reviewsTabContainer: { flex: 1, backgroundColor: '#f8f8f8' },
+    reviewsContent: {
         backgroundColor: '#fff',
-        borderTopWidth: 1,
-        borderTopColor: '#eee',
-        justifyContent: 'space-around',
-    },
-    tabButton: {
-        flex: 1,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        paddingVertical: 14,
-        gap: 6,
-        borderBottomWidth: 2,
-        borderBottomColor: 'transparent',
-    },
-    tabButtonActive: {
-        borderBottomColor: '#ff6b35',
-    },
-    tabText: {
-        fontSize: 13,
-        fontWeight: '600',
-        color: '#999',
-    },
-    tabTextActive: {
-        color: '#ff6b35',
-    },
-    reviewsTabContainer: {
-        flex: 1,
-        backgroundColor: '#f8f8f8',
-    },
-    quickReviewHeader: {
-        flexDirection: 'row',
-        backgroundColor: '#fff',
-        paddingHorizontal: 12,
-        paddingVertical: 12,
-        borderBottomWidth: 1,
-        borderBottomColor: '#eee',
-        alignItems: 'center',
-    },
-    smallRestaurantImage: {
-        width: 50,
-        height: 50,
-        borderRadius: 8,
-        marginRight: 12,
-        backgroundColor: '#eee',
-    },
-    quickInfoReview: {
-        flex: 1,
-    },
-    restaurantNameReview: {
-        fontSize: 14,
-        fontWeight: '700',
-        color: '#333',
-        marginBottom: 4,
-    },
-    ratingRowReview: {
-        flexDirection: 'row',
-        alignItems: 'center',
-    },
-    ratingTextReview: {
-        fontSize: 12,
-        fontWeight: '600',
-        color: '#333',
-        marginLeft: 4,
-    },
-    reviewCountText: {
-        fontSize: 12,
-        color: '#999',
-        marginLeft: 4,
-    },
-    reviewsContentContainer: {
-        backgroundColor: '#fff',
-        borderTopWidth: 1,
-        borderTopColor: '#eee',
-        paddingHorizontal: 12,
-        paddingVertical: 12,
+        paddingHorizontal: 16,
+        paddingVertical: 16,
         marginTop: 8,
-    },
-    reviewsHeaderContainer: {
-        marginBottom: 16,
-    },
-    ratingBadge: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 4,
-    },
-    ratingValue: {
-        fontSize: 13,
-        fontWeight: '600',
-        color: '#333',
-    },
-    reviewCountBadge: {
-        fontSize: 12,
-        color: '#999',
-    },
-    reviewItem: {
-        paddingVertical: 12,
-        borderBottomWidth: 1,
-        borderBottomColor: '#f5f5f5',
-    },
-    reviewHeader: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'flex-start',
-        marginBottom: 8,
-    },
-    reviewUserInfo: {
-        flex: 1,
-    },
-    reviewUserName: {
-        fontSize: 13,
-        fontWeight: '600',
-        color: '#333',
-        marginBottom: 4,
-    },
-    starsContainer: {
-        flexDirection: 'row',
-        gap: 2,
-    },
-    reviewDate: {
-        fontSize: 11,
-        color: '#999',
-    },
-    foodNameTag: {
-        fontSize: 12,
-        color: '#ff6b35',
-        fontWeight: '500',
-        marginBottom: 6,
-    },
-    reviewComment: {
-        fontSize: 12,
-        color: '#666',
-        lineHeight: 16,
-        marginBottom: 8,
-    },
-    restaurantReply: {
-        backgroundColor: '#f5f5f5',
-        borderLeftWidth: 3,
-        borderLeftColor: '#ff6b35',
-        paddingHorizontal: 10,
-        paddingVertical: 8,
-        borderRadius: 4,
-        marginTop: 8,
-    },
-    replyHeader: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 6,
-        marginBottom: 6,
-    },
-    replyLabel: {
-        fontSize: 11,
-        fontWeight: '600',
-        color: '#ff6b35',
-    },
-    replyText: {
-        fontSize: 12,
-        color: '#333',
-        lineHeight: 16,
-    },
-    emptyReviewsContainer: {
-        alignItems: 'center',
-        paddingVertical: 32,
-    },
-    emptyReviewsText: {
-        fontSize: 13,
-        fontWeight: '500',
-        color: '#999',
-        marginTop: 8,
-    },
-    emptyReviewsSubtext: {
-        fontSize: 12,
-        color: '#bbb',
-        marginTop: 4,
     },
 });

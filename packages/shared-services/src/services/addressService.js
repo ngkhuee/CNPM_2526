@@ -22,15 +22,12 @@ export const addressService = {
     try {
       const newAddress = {
         user_id: addressData.userId,
-        full_address: addressData.addressLine,
-        address_line: addressData.addressLine,
-        street: addressData.street || "",
-        ward: addressData.ward || "",
+        address_line: addressData.addressLine || addressData.address_line,
         district: addressData.district || "",
         city: addressData.city || "",
         phone: addressData.phone || "",
-        latitude: addressData.lat || null,
-        longitude: addressData.lng || null,
+        lat: addressData.lat || null,
+        lng: addressData.lng || null,
         is_default: addressData.isDefault || false,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
@@ -43,10 +40,34 @@ export const addressService = {
 
   async update(id, addressData) {
     try {
-      return await apiClient.patch(ENDPOINTS.ADDRESSES.BY_ID(id), {
-        ...addressData,
+      const updatePayload = {
         updated_at: new Date().toISOString(),
-      });
+      };
+
+      // Map all possible field names to snake_case
+      if (addressData.addressLine || addressData.address_line) {
+        updatePayload.address_line = addressData.addressLine || addressData.address_line;
+      }
+      if (addressData.district) {
+        updatePayload.district = addressData.district;
+      }
+      if (addressData.city) {
+        updatePayload.city = addressData.city;
+      }
+      if (addressData.phone) {
+        updatePayload.phone = addressData.phone;
+      }
+      if (addressData.lat !== undefined) {
+        updatePayload.lat = addressData.lat;
+      }
+      if (addressData.lng !== undefined) {
+        updatePayload.lng = addressData.lng;
+      }
+      if (addressData.isDefault !== undefined || addressData.is_default !== undefined) {
+        updatePayload.is_default = addressData.isDefault !== undefined ? addressData.isDefault : addressData.is_default;
+      }
+
+      return await apiClient.patch(ENDPOINTS.ADDRESSES.BY_ID(id), updatePayload);
     } catch (error) {
       throw error;
     }

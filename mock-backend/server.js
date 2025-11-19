@@ -10,29 +10,30 @@ const fs = require("fs");
 require("dotenv").config();
 const PORT = process.env.PORT || 4000;
 
-// // Auto-save changes to db.json
-// const saveDb = () => {
-//   const db = router.db.getState();
-//   fs.writeFileSync(
-//     path.join(__dirname, "db.json"),
-//     JSON.stringify(db, null, 2),
-//     "utf-8"
-//   );
-// };
+// Auto-save changes to db.json
+const saveDb = () => {
+  const db = router.db.getState();
+  fs.writeFileSync(
+    path.join(__dirname, "db.json"),
+    JSON.stringify(db, null, 2),
+    "utf-8"
+  );
+  console.log("[DB] Auto-saved changes to db.json");
+};
 
-// // Save database every 10 seconds if there are changes
-// let saveInterval = setInterval(() => {
-//   saveDb();
-// }, 10000);
+// Save database every 5 seconds if there are changes
+let saveInterval = setInterval(() => {
+  saveDb();
+}, 5000);
 
-// // Save on server shutdown
-// process.on("SIGINT", () => {
-//   console.log("\nSaving database before shutdown...");
-//   clearInterval(saveInterval);
-//   saveDb();
-//   console.log("Database saved. Shutting down...");
-//   process.exit(0);
-// });
+// Save on server shutdown
+process.on("SIGINT", () => {
+  console.log("\nSaving database before shutdown...");
+  clearInterval(saveInterval);
+  saveDb();
+  console.log("Database saved. Shutting down...");
+  process.exit(0);
+});
 
 // Middlewares
 server.use(middlewares);
@@ -196,7 +197,34 @@ server.post("/auth/login", (req, res) => {
   const { email, password } = req.body;
   const db = router.db;
 
-  const user = db.get("users").find({ email, password }).value();
+  // Validation: Check empty fields
+  if (!email || !email.trim()) {
+    return res.status(400).json({
+      success: false,
+      message: "Email is required",
+      fieldError: "email"
+    });
+  }
+
+  if (!password || !password.trim()) {
+    return res.status(400).json({
+      success: false,
+      message: "Password is required",
+      fieldError: "password"
+    });
+  }
+
+  // Validation: Check email format
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email.trim())) {
+    return res.status(400).json({
+      success: false,
+      message: "Invalid email format",
+      fieldError: "email"
+    });
+  }
+
+  const user = db.get("users").find({ email: email.trim(), password }).value();
 
   if (user) {
     const token = generateToken(user);
@@ -218,29 +246,96 @@ server.post("/auth/login", (req, res) => {
 
 // Auth - Register
 server.post("/auth/register", (req, res) => {
-  const { email, password, name, phone } = req.body;
+  const { email, password, confirmPassword, name, phone } = req.body;
   const db = router.db;
 
+  // Validation: Check empty fields
+  if (!email || !email.trim()) {
+    return res.status(400).json({
+      success: false,
+      message: "Email is required",
+      fieldError: "email"
+    });
+  }
+
+  if (!password || !password.trim()) {
+    return res.status(400).json({
+      success: false,
+      message: "Password is required",
+      fieldError: "password"
+    });
+  }
+
+  if (!name || !name.trim()) {
+    return res.status(400).json({
+      success: false,
+      message: "Name is required",
+      fieldError: "name"
+    });
+  }
+
+  // Validation: Check email format
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email.trim())) {
+    return res.status(400).json({
+      success: false,
+      message: "Invalid email format",
+      fieldError: "email"
+    });
+  }
+
+  // Validation: Check password length
+  // if (password.length < 6) {
+  //   return res.status(400).json({
+  //     success: false,
+  //     message: "Password must be at least 6 characters",
+  //     fieldError: "password"
+  //   });
+  // }
+
+  // Validation: Check password confirmation
+  if (confirmPassword && password !== confirmPassword) {
+    return res.status(400).json({
+      success: false,
+      message: "Passwords do not match",
+      fieldError: "confirmPassword"
+    });
+  }
+
+  // Validation: Check phone format (if provided)
+  if (phone && phone.trim()) {
+    const phoneRegex = /^[0-9]{10,11}$/;
+    if (!phoneRegex.test(phone.replace(/\s+/g, ''))) {
+      return res.status(400).json({
+        success: false,
+        message: "Phone number must be 10-11 digits",
+        fieldError: "phone"
+      });
+    }
+  }
+
   // Check if email exists
-  const existingUser = db.get("users").find({ email }).value();
+  const existingUser = db.get("users").find({ email: email.trim() }).value();
 
   if (existingUser) {
     return res.status(400).json({
       success: false,
       message: "Email already exists",
+      fieldError: "email"
     });
   }
 
   // Create new user
   const newUser = {
     id: `u${Date.now()}`,
-    email,
+    email: email.trim(),
     password,
-    name,
-    phone: phone || "",
-    role: "customer",
+    name: name.trim(),
+    phone: (phone && phone.trim()) || "",
+    roles: ["customer"],
     status: "active",
-    createdAt: new Date().toISOString(),
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
   };
 
   db.get("users").push(newUser).write();
@@ -499,40 +594,71 @@ server.post("/users/register-owner", (req, res) => {
 // Apply auth middleware (after custom routes)
 server.use(validateToken);
 
-// ========== AUTO-CANCEL PENDING ORDERS (Before cart endpoints) ==========
-// Check and auto-cancel pending orders older than 30 minutes
-server.post("/orders/check-pending-expiry", (req, res) => {
+// ========== USER PROFILE UPDATE ENDPOINT ==========
+// Update user profile (name, phone, gender, dob, avatar, email)
+server.put("/users/:id", (req, res) => {
   const db = router.db;
-  const orders = db.get("orders").value();
-  const PENDING_TIMEOUT = 30 * 60 * 1000; // 30 minutes in milliseconds
-  const now = Date.now();
+  const userId = req.params.id;
+  const updateData = req.body;
 
-  let cancelledCount = 0;
+  console.log(`[PUT /users/:id] Updating user ${userId} with:`, updateData);
 
-  orders.forEach((order) => {
-    if (order.status === "pending") {
-      const createdAt = new Date(order.created_at).getTime();
-      const timeDiff = now - createdAt;
+  // Validate auth - must be the same user or admin
+  if (req.user?.id !== userId && !req.user?.roles?.includes('admin')) {
+    return res.status(403).json({
+      success: false,
+      message: "Unauthorized: Can only update own profile",
+    });
+  }
 
-      // If order is pending for more than 30 minutes, cancel it
-      if (timeDiff > PENDING_TIMEOUT) {
-        order.status = "cancelled";
-        order.cancellation_reason = "Auto-cancelled: Payment not completed within 30 minutes";
-        order.updated_at = new Date().toISOString();
-        cancelledCount++;
-      }
+  // Find user
+  const user = db.get("users").find({ id: userId }).value();
+
+  if (!user) {
+    return res.status(404).json({
+      success: false,
+      message: "User not found",
+    });
+  }
+
+  // Allowed fields to update
+  const allowedFields = ["name", "phone", "gender", "dob", "avatar", "email", "full_name"];
+
+  // Validate email uniqueness if email is being updated
+  if (updateData.email && updateData.email !== user.email) {
+    const existingEmail = db.get("users").find({ email: updateData.email }).value();
+    if (existingEmail) {
+      return res.status(400).json({
+        success: false,
+        message: "Email already in use",
+      });
+    }
+  }
+
+  // Update only allowed fields
+  const updates = {};
+  allowedFields.forEach((field) => {
+    if (updateData.hasOwnProperty(field)) {
+      updates[field] = updateData[field];
     }
   });
 
-  // Write changes back to db
-  if (cancelledCount > 0) {
-    db.set("orders", orders).write();
-  }
+  // Add metadata
+  updates.updated_at = new Date().toISOString();
+
+  // Perform update
+  const updatedUser = { ...user, ...updates };
+  db.get("users").find({ id: userId }).assign(updatedUser).write();
+
+  console.log(`[PUT /users/:id] Updated user:`, updatedUser);
+
+  // Return updated user without password
+  const { password: _, ...userWithoutPassword } = updatedUser;
 
   res.json({
     success: true,
-    message: `${cancelledCount} pending orders auto-cancelled`,
-    cancelled_count: cancelledCount,
+    user: userWithoutPassword,
+    message: "Profile updated successfully",
   });
 });
 
@@ -612,12 +738,12 @@ server.post("/carts/add", (req, res) => {
   }
 
   // Check if cart has items from different restaurant
+  // If yes, auto-clear cart and switch to new restaurant
   if (cart.items.length > 0 && cart.restaurant_id !== restaurant_id) {
-    return res.status(400).json({
-      success: false,
-      message: "Cannot add items from different restaurant. Please clear your cart first.",
-      current_restaurant_id: cart.restaurant_id,
-    });
+    console.log(`[carts/add] Cart has items from different restaurant (${cart.restaurant_id}), auto-clearing for new restaurant (${restaurant_id})`);
+    // Auto-clear: reset to new restaurant
+    cart.items = [];
+    cart.restaurant_id = restaurant_id;
   }
 
   // Update restaurant_id if cart is empty
@@ -778,6 +904,66 @@ server.delete("/carts/clear", (req, res) => {
   }
 
   res.json(cart || { user_id: userId, items: [], restaurant_id: null, restaurant_name: null, total: 0 });
+});
+
+// ========== CUSTOM ORDER CREATION ENDPOINT ==========
+// POST /orders - Create new order with auto-populated user_id from token
+server.post("/orders", (req, res) => {
+  const userId = req.user?.id;
+  if (!userId) {
+    return res.status(401).json({
+      success: false,
+      message: "Unauthorized: Token required",
+    });
+  }
+
+  const db = router.db;
+  const orderData = req.body;
+
+  // Validate required fields
+  if (!orderData.restaurant_id || !Array.isArray(orderData.items) || orderData.items.length === 0) {
+    return res.status(400).json({
+      success: false,
+      message: "restaurant_id and items are required",
+    });
+  }
+
+  // Auto-populate user_id from token
+  const newOrder = {
+    id: `ord_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+    user_id: userId, // Auto-populate from token
+    restaurant_id: orderData.restaurant_id,
+    items: orderData.items || [],
+    subtotal: orderData.subtotal || 0,
+    delivery_fee: orderData.delivery_fee || 0,
+    discount_amount: orderData.discount_amount || 0,
+    total_amount: orderData.total_amount || 0,
+    payment_method: orderData.payment_method || "online",
+    payment_status: orderData.payment_status || "pending",
+    status: orderData.status || "pending",
+    special_instructions: orderData.special_instructions || "",
+    customer: orderData.customer || {},
+    delivery_address: orderData.delivery_address,
+    delivery_address_id: orderData.delivery_address_id,
+    dropoff_gps: orderData.dropoff_gps,
+    promotion_code: orderData.promotion_code,
+    promotion_id: orderData.promotion_id,
+    order_number: orderData.order_number || `ORD-${Date.now()}`,
+    created_at: orderData.created_at || new Date().toISOString(),
+    updated_at: orderData.updated_at || new Date().toISOString(),
+  };
+
+  // Add to database
+  db.get("orders").push(newOrder).write();
+
+  console.log("[POST /orders] Order created:", {
+    orderId: newOrder.id,
+    userId,
+    restaurantId: newOrder.restaurant_id,
+    items: newOrder.items.length,
+  });
+
+  res.status(201).json(newOrder);
 });
 
 // Use default router

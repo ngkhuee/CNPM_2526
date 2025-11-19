@@ -10,7 +10,7 @@ import { getFoodImageUrl } from '../../../shared/imageHelper';
  * Shows: image + name + description + sold count + price + badges + add button
  * Support highlight animation when navigated from home/search
  */
-export default function RestaurantFoodCard({ item, onPress, isHighlighted = false }) {
+export default function RestaurantFoodCard({ item, onPress, isHighlighted = false, onAddToCart }) {
     const scaleAnim = useRef(new Animated.Value(1)).current;
     const [hasAnimated, setHasAnimated] = useState(false);
 
@@ -98,7 +98,7 @@ export default function RestaurantFoodCard({ item, onPress, isHighlighted = fals
                             <Text style={styles.price}>{priceFormatted}</Text>
                             <TouchableOpacity
                                 style={styles.addButton}
-                                onPress={() => console.log('Add to cart:', item.id)}
+                                onPress={() => onAddToCart?.(item)}
                             >
                                 <MaterialIcons name="add" size={22} color="#fff" />
                             </TouchableOpacity>

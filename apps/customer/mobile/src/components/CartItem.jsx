@@ -12,30 +12,56 @@ import {
     StyleSheet,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
+import { getImageUrl } from '../shared/imageHelper';
 
 const CartItem = ({ item, onUpdateQuantity, onRemove }) => {
+    // Support multiple ID fields: item_id (API), menu_id, food_id, id
+    const itemId = item.item_id || item.menu_id || item.food_id || item.id;
+
     const handleDecrease = () => {
         const newQuantity = item.quantity - 1;
-        onUpdateQuantity(item.id, newQuantity);
+        onUpdateQuantity(itemId, newQuantity);
     };
 
     const handleIncrease = () => {
         const newQuantity = item.quantity + 1;
-        onUpdateQuantity(item.id, newQuantity);
+        onUpdateQuantity(itemId, newQuantity);
     };
 
     const handleRemove = () => {
-        onRemove(item.id);
+        onRemove(itemId);
     };
 
     const itemTotal = item.price * item.quantity;
+    const imageUrl = getImageUrl(item.image);
+
+    // Debug image URL
+    console.log('[CartItem] Image data:', {
+        itemName: item.name,
+        itemImage: item.image,
+        generatedUrl: imageUrl,
+        isValid: !!imageUrl,
+    });
 
     return (
         <View style={styles.container}>
             {/* Image */}
             <Image
-                source={{ uri: item.image || 'https://via.placeholder.com/80' }}
+                source={{ uri: imageUrl || 'https://via.placeholder.com/80' }}
                 style={styles.image}
+                onError={(error) => {
+                    console.error('[CartItem] Image load error:', {
+                        itemName: item.name,
+                        url: imageUrl,
+                        error: error.nativeEvent,
+                    });
+                }}
+                onLoad={() => {
+                    console.log('[CartItem] Image loaded successfully:', {
+                        itemName: item.name,
+                        url: imageUrl,
+                    });
+                }}
             />
 
             {/* Content */}
@@ -45,7 +71,7 @@ const CartItem = ({ item, onUpdateQuantity, onRemove }) => {
                     <Text style={styles.name} numberOfLines={2}>
                         {item.name}
                     </Text>
-                    <Text style={styles.price}>${item.price.toFixed(2)}</Text>
+                    <Text style={styles.price}>₫{item.price.toLocaleString('vi-VN')}</Text>
                 </View>
 
                 {/* Note */}
@@ -78,7 +104,7 @@ const CartItem = ({ item, onUpdateQuantity, onRemove }) => {
 
                     {/* Total & Remove */}
                     <View style={styles.rightSection}>
-                        <Text style={styles.total}>${itemTotal.toFixed(2)}</Text>
+                        <Text style={styles.total}>₫{itemTotal.toLocaleString('vi-VN')}</Text>
                         <TouchableOpacity
                             onPress={handleRemove}
                             style={styles.removeButton}

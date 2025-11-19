@@ -11,6 +11,11 @@ import RestaurantDetail from '../screens/restaurant/RestaurantDetail';
 import FoodDetailScreen from '../screens/restaurant/FoodDetailScreen';
 import CartScreen from '../screens/cart/CartScreen';
 import CheckoutScreen from '../screens/cart/CheckoutScreen';
+import PaymentScreen from '../screens/orders/PaymentScreen';
+import CashPaymentScreen from '../screens/orders/CashPaymentScreen';
+import TrackingScreen from '../screens/orders/TrackingScreen';
+import OrderDetailScreen from '../screens/orders/OrderDetailScreen';
+import ReviewScreen from '../screens/orders/ReviewScreen';
 
 /**
  * AppNavigator - Main navigation component
@@ -45,9 +50,14 @@ export default function AppNavigator() {
 /**
  * AppStack - Main application screens
  * Contains: Home, Restaurant, Food Detail, Cart, Checkout, Orders, Profile
+ * 
+ * NOTE: 
+ * - RestaurantDetail & FoodDetailScreen have their own MiniCartBubble (shows LOCAL cart)
+ * - HomeScreen can have GlobalCartBubble (shows global cart from current active restaurant)
+ * - CartScreen doesn't need bubble
  */
 function AppStack({ activeScreen, selectedFood, setSelectedFood }) {
-    const { navigate } = useContext(NavigationContext);
+    const { navigate, orderId } = useContext(NavigationContext);
 
     const renderScreen = () => {
         switch (activeScreen) {
@@ -63,6 +73,16 @@ function AppStack({ activeScreen, selectedFood, setSelectedFood }) {
                 return <CartScreen onNavigate={navigate} />;
             case 'checkout':
                 return <CheckoutScreen />;
+            case 'payment':
+                return <PaymentScreen orderId={orderId} />;
+            case 'cashPayment':
+                return <CashPaymentScreen orderId={orderId} />;
+            case 'tracking':
+                return <TrackingScreen orderId={orderId} />;
+            case 'order-detail':
+                return <OrderDetailScreen orderId={orderId} />;
+            case 'review':
+                return <ReviewScreen orderId={orderId} />;
             case 'orders':
                 return <OrdersScreen onNavigate={navigate} />;
             case 'profile':

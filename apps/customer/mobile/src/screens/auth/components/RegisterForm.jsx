@@ -48,6 +48,19 @@ export const RegisterForm = ({ formData, updateField, toggleTerms, onSubmit, loa
             </View>
 
             <View style={styles.inputGroup}>
+                <Text style={styles.label}>Confirm Password</Text>
+                <TextInput
+                    style={styles.input}
+                    placeholder="Confirm your password"
+                    placeholderTextColor="#999"
+                    secureTextEntry={true}
+                    editable={!loading}
+                    value={formData.confirmPassword}
+                    onChangeText={(text) => updateField('confirmPassword', text)}
+                />
+            </View>
+
+            <View style={styles.inputGroup}>
                 <Text style={styles.label}>Phone (Optional)</Text>
                 <TextInput
                     style={styles.input}

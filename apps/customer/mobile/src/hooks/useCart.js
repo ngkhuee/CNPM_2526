@@ -7,6 +7,7 @@
 import { useState, useEffect, useCallback, useContext } from 'react';
 import { AuthContext } from '../contexts/AuthContext';
 import { cartService } from '../services/cartService';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export const useCart = () => {
     const { isAuthenticated } = useContext(AuthContext);
@@ -26,15 +27,36 @@ export const useCart = () => {
     }, [isAuthenticated]);
 
     /**
-     * Fetch cart from API
+     * Fetch cart from API backend (single restaurant cart)
+     * This ensures cart is synced across all devices via db.json
+     * 404 is normal when cart doesn't exist yet (first time user)
      */
     const fetchCart = useCallback(async () => {
         try {
             setLoading(true);
             setError(null);
+
+            // Fetch from API backend
             const data = await cartService.getCart();
-            setCart(data);
-            console.log('[useCart] Fetched cart:', data);
+
+            if (data) {
+                console.log('[useCart.fetchCart] Loaded cart from API:', data);
+                setCart(data);
+
+                // Also sync to AsyncStorage as backup
+                try {
+                    await AsyncStorage.setItem(`cart_restaurant_${data.restaurant_id}`, JSON.stringify(data));
+                    if (data.restaurant_id) {
+                        await AsyncStorage.setItem('lastActiveRestaurantId', data.restaurant_id);
+                    }
+                } catch (storageErr) {
+                    console.warn('[useCart.fetchCart] Error saving cart to AsyncStorage:', storageErr.message);
+                }
+            } else {
+                // Cart doesn't exist yet - this is normal on first app load
+                console.log('[useCart.fetchCart] Cart is empty (first load or cleared)');
+                setCart(null);
+            }
         } catch (err) {
             console.error('[useCart.fetchCart] Error:', err.message);
             setError(err.message);
@@ -42,9 +64,7 @@ export const useCart = () => {
         } finally {
             setLoading(false);
         }
-    }, []);
-
-    /**
+    }, []);    /**
      * Thêm item vào giỏ hàng
      * 
      * @param {string} restaurant_id - ID nhà hàng
@@ -60,18 +80,38 @@ export const useCart = () => {
                 setError(null);
                 console.log('[useCart.addItem] Adding:', { restaurant_id, food_id, quantity, note });
 
+                // Validate inputs
+                if (!restaurant_id || !food_id) {
+                    throw new Error('restaurant_id and food_id are required');
+                }
+
                 const updatedCart = await cartService.addItem({
                     restaurant_id,
-                    food_id,
+                    food_id: parseInt(food_id) || food_id, // Ensure food_id is number
                     quantity,
                     note,
                 });
 
                 setCart(updatedCart);
+
+                // Sync to AsyncStorage as backup
+                if (updatedCart) {
+                    try {
+                        await AsyncStorage.setItem(`cart_restaurant_${updatedCart.restaurant_id}`, JSON.stringify(updatedCart));
+                        await AsyncStorage.setItem('lastActiveRestaurantId', updatedCart.restaurant_id);
+                    } catch (storageErr) {
+                        console.warn('[useCart.addItem] Error saving to AsyncStorage:', storageErr.message);
+                    }
+                }
+
                 console.log('[useCart.addItem] Success, cart:', updatedCart);
                 return updatedCart;
             } catch (err) {
                 console.error('[useCart.addItem] Error:', err.message);
+                // Log backend error details if available
+                if (err.response?.data) {
+                    console.error('[useCart.addItem] Backend error:', err.response.data);
+                }
                 setError(err.message);
                 throw err;
             }
@@ -92,6 +132,20 @@ export const useCart = () => {
 
             const updatedCart = await cartService.removeItem(item_id);
             setCart(updatedCart);
+
+            // Sync to AsyncStorage as backup
+            if (updatedCart) {
+                try {
+                    if (updatedCart.items.length > 0) {
+                        await AsyncStorage.setItem(`cart_restaurant_${updatedCart.restaurant_id}`, JSON.stringify(updatedCart));
+                    } else {
+                        await AsyncStorage.removeItem(`cart_restaurant_${updatedCart.restaurant_id}`);
+                    }
+                } catch (storageErr) {
+                    console.warn('[useCart.removeItem] Error updating AsyncStorage:', storageErr.message);
+                }
+            }
+
             console.log('[useCart.removeItem] Success, cart:', updatedCart);
             return updatedCart;
         } catch (err) {
@@ -121,6 +175,16 @@ export const useCart = () => {
             });
 
             setCart(updatedCart);
+
+            // Sync to AsyncStorage as backup
+            if (updatedCart) {
+                try {
+                    await AsyncStorage.setItem(`cart_restaurant_${updatedCart.restaurant_id}`, JSON.stringify(updatedCart));
+                } catch (storageErr) {
+                    console.warn('[useCart.updateItem] Error updating AsyncStorage:', storageErr.message);
+                }
+            }
+
             console.log('[useCart.updateItem] Success, cart:', updatedCart);
             return updatedCart;
         } catch (err) {
@@ -141,12 +205,25 @@ export const useCart = () => {
             const clearedCart = await cartService.clearCart();
 
             // Set giỏ trống
-            setCart({
+            const emptyCart = {
                 items: [],
                 restaurant_id: null,
                 restaurant_name: null,
                 total: 0,
-            });
+            };
+            setCart(emptyCart);
+
+            // Clear from AsyncStorage
+            try {
+                const keys = await AsyncStorage.getAllKeys();
+                const cartKeys = keys.filter(k => k.startsWith('cart_restaurant_'));
+                if (cartKeys.length > 0) {
+                    await AsyncStorage.multiRemove(cartKeys);
+                }
+                await AsyncStorage.removeItem('lastActiveRestaurantId');
+            } catch (storageErr) {
+                console.warn('[useCart.clearCart] Error clearing AsyncStorage:', storageErr.message);
+            }
 
             console.log('[useCart.clearCart] Success, cart cleared');
             return clearedCart;
@@ -156,6 +233,161 @@ export const useCart = () => {
             throw err;
         }
     }, []);
+
+    /**
+     * Xóa CHỈ items của restaurant hiện tại
+     * Nếu có items từ restaurant khác, switch sang nó
+     * 
+     * Use case: Sau khi thanh toán giỏ B, auto-switch sang giỏ A (nếu có)
+     */
+    const clearCurrentRestaurantCart = useCallback(async () => {
+        try {
+            setError(null);
+            console.log('[useCart.clearCurrentRestaurantCart] Clearing current restaurant cart');
+
+            if (!cart || !cart.restaurant_id) {
+                console.log('[useCart.clearCurrentRestaurantCart] Cart empty, nothing to clear');
+                return;
+            }
+
+            const currentRestaurantId = cart.restaurant_id;
+
+            // Remove from AsyncStorage
+            try {
+                await AsyncStorage.removeItem(`cart_restaurant_${currentRestaurantId}`);
+                console.log(`[useCart.clearCurrentRestaurantCart] Removed from AsyncStorage: ${currentRestaurantId}`);
+            } catch (storageErr) {
+                console.error(`[useCart.clearCurrentRestaurantCart] Error removing from storage:`, storageErr.message);
+            }
+
+            const remainingItems = cart.items.filter(
+                item => item.restaurant_id && item.restaurant_id !== currentRestaurantId
+            );
+
+            console.log(`[useCart.clearCurrentRestaurantCart] Current restaurant: ${currentRestaurantId}, remaining items: ${remainingItems.length}`);
+
+            if (remainingItems.length > 0) {
+                // Có items từ restaurant khác, switch sang nó
+                const newRestaurantId = remainingItems[0].restaurant_id;
+                const newRestaurantName = remainingItems[0].restaurant_name;
+
+                setCart({
+                    items: remainingItems,
+                    restaurant_id: newRestaurantId,
+                    restaurant_name: newRestaurantName,
+                    total: remainingItems.reduce((sum, item) => sum + (item.price * item.quantity), 0),
+                });
+
+                // Update lastActiveRestaurantId in AsyncStorage
+                try {
+                    await AsyncStorage.setItem('lastActiveRestaurantId', newRestaurantId);
+                    console.log(`[useCart.clearCurrentRestaurantCart] Updated lastActiveRestaurantId to ${newRestaurantId}`);
+                } catch (storageErr) {
+                    console.error('[useCart.clearCurrentRestaurantCart] Error updating lastActive:', storageErr.message);
+                }
+
+                console.log(`[useCart.clearCurrentRestaurantCart] Switched to restaurant ${newRestaurantId}`);
+            } else {
+                // Không còn items nào, xóa sạch
+                setCart({
+                    items: [],
+                    restaurant_id: null,
+                    restaurant_name: null,
+                    total: 0,
+                });
+
+                // Clear lastActiveRestaurantId
+                try {
+                    await AsyncStorage.removeItem('lastActiveRestaurantId');
+                    console.log('[useCart.clearCurrentRestaurantCart] Cleared lastActiveRestaurantId');
+                } catch (storageErr) {
+                    console.error('[useCart.clearCurrentRestaurantCart] Error clearing lastActive:', storageErr.message);
+                }
+
+                console.log('[useCart.clearCurrentRestaurantCart] No remaining items, cleared cart');
+            }
+        } catch (err) {
+            console.error('[useCart.clearCurrentRestaurantCart] Error:', err.message);
+            setError(err.message);
+            throw err;
+        }
+    }, [cart]);
+
+    /**
+     * Sync local cart (from screen) → global cart
+     * 
+     * @param {Object} localCart - Local cart data (from RestaurantDetail, FoodDetailScreen)
+     * @param {boolean} merge - Merge với global cart (default: true cho same restaurant, false cho khác restaurant)
+     */
+    const syncLocalCartToGlobal = useCallback(async (localCart, merge = true) => {
+        try {
+            setError(null);
+            console.log('[useCart.syncLocalCartToGlobal] Syncing local cart:', localCart);
+
+            if (!localCart || !localCart.items || localCart.items.length === 0) {
+                console.log('[useCart.syncLocalCartToGlobal] Local cart empty, skipping sync');
+                return;
+            }
+
+            const localRestaurantId = localCart.restaurant_id;
+
+            // Nếu global cart khác restaurant, clear nó trước
+            if (cart && cart.restaurant_id && cart.restaurant_id !== localRestaurantId) {
+                console.log('[useCart.syncLocalCartToGlobal] Different restaurant, clearing global cart');
+                merge = false;
+            }
+
+            if (merge && cart && cart.restaurant_id === localRestaurantId) {
+                // Merge: Thêm items từ local vào global
+                const mergedItems = [...(cart.items || [])];
+
+                for (const localItem of localCart.items) {
+                    const existingIndex = mergedItems.findIndex(
+                        item => (item.id || item.menu_id) === (localItem.id || localItem.menu_id)
+                    );
+
+                    if (existingIndex >= 0) {
+                        mergedItems[existingIndex].quantity += localItem.quantity;
+                    } else {
+                        mergedItems.push(localItem);
+                    }
+                }
+
+                const newTotal = mergedItems.reduce(
+                    (sum, item) => sum + (item.price * item.quantity),
+                    0
+                );
+
+                setCart({
+                    items: mergedItems,
+                    restaurant_id: localRestaurantId,
+                    restaurant_name: localCart.restaurant_name || cart.restaurant_name,
+                    total: newTotal,
+                });
+
+                console.log('[useCart.syncLocalCartToGlobal] Merged, global cart now has', mergedItems.length, 'items');
+            } else {
+                // Replace: Thay toàn bộ global cart bằng local cart
+                const newTotal = localCart.items.reduce(
+                    (sum, item) => sum + (item.price * item.quantity),
+                    0
+                );
+
+                setCart({
+                    items: localCart.items,
+                    restaurant_id: localRestaurantId,
+                    restaurant_name: localCart.restaurant_name,
+                    total: newTotal,
+                });
+
+                console.log('[useCart.syncLocalCartToGlobal] Replaced, global cart now has', localCart.items.length, 'items');
+            }
+        } catch (err) {
+            console.error('[useCart.syncLocalCartToGlobal] Error:', err.message);
+            setError(err.message);
+            throw err;
+        }
+    }, [cart]);
 
     /**
      * Kiểm tra có thể thêm item từ restaurant này không
@@ -232,6 +464,8 @@ export const useCart = () => {
         removeItem,
         updateItem,
         clearCart,
+        clearCurrentRestaurantCart,
+        syncLocalCartToGlobal,
         fetchCart,
 
         // Helpers

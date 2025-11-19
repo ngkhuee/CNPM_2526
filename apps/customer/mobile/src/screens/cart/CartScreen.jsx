@@ -1,9 +1,4 @@
-/**
- * CartScreen.jsx - Màn hình hiển thị giỏ hàng
- * Danh sách item, tổng tiền, checkout button, promotions
- */
-
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import {
     View,
     Text,
@@ -11,74 +6,113 @@ import {
     TouchableOpacity,
     StyleSheet,
     SafeAreaView,
-    ScrollView,
+    ActivityIndicator,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-import { CartContext } from '../../contexts/CartContext';
 import { NavigationContext } from '../../contexts/NavigationContext';
 import { AuthContext } from '../../contexts/AuthContext';
+import { CartContext } from '../../contexts/CartContext';
 import BottomNavigation from '../../components/BottomNavigation';
 import CartItem from '../../components/CartItem';
-import { calculateCartTotals } from '../../utils/cartHelpers';
-import { usePromotions } from '../../hooks/usePromotions';
-import { useSettings } from '../../hooks/useSettings';
+import { formatCurrency } from '../../shared/formatters';
+import { showToast } from '../../utils/toastHelper';
 
 const CartScreen = ({ onNavigate }) => {
-    const { cart, loading, removeItem, updateItem } = useContext(CartContext);
     const { navigate, activeRoute } = useContext(NavigationContext);
     const { isAuthenticated } = useContext(AuthContext);
+    const cartContext = useContext(CartContext);
 
-    // Promotions and settings hooks
-    const { promotions, loading: loadingPromos, getApplicablePromotions } = usePromotions(cart?.restaurant_id);
-    const { deliveryFee: deliveryFeeValue } = useSettings();
+    // Get global cart from CartContext
+    const globalCart = cartContext?.cart || { items: [], total: 0 };
+    const fetchCart = cartContext?.fetchCart;
+    const saveLocalCart = cartContext?.saveLocalCart;
 
-    // Promo state
-    const [appliedPromotion, setAppliedPromotion] = useState(null);
-    const [showPromoList, setShowPromoList] = useState(false);
+    // Local state để quản lý display (independent from global cart sync issues)
+    const [localCart, setLocalCart] = useState(null);
 
-    // Lấy số item và tổng tiền
-    const cartItems = cart?.items || [];
+    // Initialize local cart from global cart on mount
+    useEffect(() => {
+        if (fetchCart) {
+            fetchCart();
+            console.log('[CartScreen] Fetched cart from AsyncStorage on mount');
+        }
+    }, [fetchCart]);
+
+    // Sync global cart to local state
+    useEffect(() => {
+        if (globalCart && globalCart.items && globalCart.items.length > 0) {
+            setLocalCart(globalCart);
+            console.log('[CartScreen] Synced global cart to local state:', globalCart);
+        } else if (!localCart) {
+            setLocalCart({ items: [], total: 0, restaurant_id: null, restaurant_name: null });
+        }
+    }, [globalCart]);
+
+    // Lấy số item
+    const cartItems = localCart?.items || [];
     const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
-    const subtotal = cartItems.reduce(
-        (sum, item) => sum + (item.price * item.quantity),
-        0
-    );
-
-    // Get applicable promotions for current restaurant
-    const applicablePromotions = cart?.restaurant_id
-        ? getApplicablePromotions(cart.restaurant_id)
-        : promotions.filter(p => p.status === "active");
-
-    // Calculate totals with promotion
-    const { discountAmount, deliveryFee, total } = calculateCartTotals(
-        subtotal,
-        appliedPromotion,
-        deliveryFeeValue
-    );
 
     /**
      * Xử lý khi user click xóa item
+     * Call API backend to remove from cart
      */
-    const handleRemoveItem = async (itemId) => {
+    const handleRemoveItem = async (itemMenuId) => {
         try {
-            await removeItem(itemId);
-        } catch (err) {
-            console.error('[CartScreen.handleRemoveItem] Error:', err.message);
+            // Find item by any ID field (item_id, menu_id, food_id, id)
+            const item = globalCart.items?.find(
+                i => i.item_id === itemMenuId || (i.menu_id || i.food_id || i.id) === itemMenuId
+            );
+
+            if (!item || !item.item_id) {
+                showToast('error', 'Item not found');
+                return;
+            }
+
+            // Call API to remove item
+            const updatedCart = await cartContext.removeItem(item.item_id);
+
+            if (updatedCart) {
+                setLocalCart(updatedCart);
+                showToast('success', 'Item removed');
+                console.log('[CartScreen] Item removed from API:', itemMenuId);
+            }
+        } catch (error) {
+            console.error('[CartScreen] Error removing item:', error.message);
+            showToast('error', 'Failed to remove item');
         }
     };
 
     /**
      * Xử lý khi user cập nhật số lượng item
+     * Call API backend to update item quantity
      */
-    const handleUpdateQuantity = async (itemId, quantity) => {
+    const handleUpdateQuantity = async (itemMenuId, quantity) => {
+        if (quantity <= 0) {
+            await handleRemoveItem(itemMenuId);
+            return;
+        }
+
         try {
-            if (quantity <= 0) {
-                await handleRemoveItem(itemId);
-            } else {
-                await updateItem(itemId, quantity);
+            // Find item by any ID field (item_id, menu_id, food_id, id)
+            const item = globalCart.items?.find(
+                i => i.item_id === itemMenuId || (i.menu_id || i.food_id || i.id) === itemMenuId
+            );
+
+            if (!item || !item.item_id) {
+                showToast('error', 'Item not found');
+                return;
             }
-        } catch (err) {
-            console.error('[CartScreen.handleUpdateQuantity] Error:', err.message);
+
+            // Call API to update item quantity
+            const updatedCart = await cartContext.updateItem(item.item_id, quantity, '');
+
+            if (updatedCart) {
+                setLocalCart(updatedCart);
+                console.log('[CartScreen] Item quantity updated via API:', { itemMenuId, quantity });
+            }
+        } catch (error) {
+            console.error('[CartScreen] Error updating item:', error.message);
+            showToast('error', 'Failed to update item');
         }
     };
 
@@ -94,103 +128,24 @@ const CartScreen = ({ onNavigate }) => {
     );
 
     /**
-     * Render footer - tổng tiền, promotions, checkout button
+     * Render footer - tổng tiền, checkout button (simplified)
      */
     const renderFooter = () => {
         if (cartItems.length === 0) return null;
 
+        const subtotal = cartItems.reduce(
+            (sum, item) => sum + (item.price * item.quantity),
+            0
+        );
+
         return (
             <View style={styles.footer}>
-                {/* Promotions Section */}
-                {applicablePromotions.length > 0 && (
-                    <View style={styles.promoSection}>
-                        <TouchableOpacity
-                            style={styles.promoButton}
-                            onPress={() => setShowPromoList(!showPromoList)}
-                        >
-                            <MaterialIcons name="local-offer" size={18} color="#ff6b35" />
-                            <View style={styles.promoButtonText}>
-                                <Text style={styles.promoLabel}>
-                                    {appliedPromotion ? 'Promo Applied' : 'Available Promotions'}
-                                </Text>
-                                <Text style={styles.promoValue}>
-                                    {appliedPromotion
-                                        ? appliedPromotion.code
-                                        : `${applicablePromotions.length} offers`}
-                                </Text>
-                            </View>
-                            <MaterialIcons
-                                name={showPromoList ? "expand-less" : "expand-more"}
-                                size={20}
-                                color="#666"
-                            />
-                        </TouchableOpacity>
-
-                        {showPromoList && (
-                            <View style={styles.promoList}>
-                                {applicablePromotions.map((promo) => (
-                                    <TouchableOpacity
-                                        key={promo.id}
-                                        style={[
-                                            styles.promoItem,
-                                            appliedPromotion?.id === promo.id && styles.promoItemActive
-                                        ]}
-                                        onPress={() => {
-                                            setAppliedPromotion(promo);
-                                            setShowPromoList(false);
-                                        }}
-                                    >
-                                        <View style={styles.promoItemContent}>
-                                            <Text style={styles.promoCode}>{promo.code}</Text>
-                                            <Text style={styles.promoDesc}>{promo.description}</Text>
-                                        </View>
-                                        {appliedPromotion?.id === promo.id && (
-                                            <MaterialIcons name="check-circle" size={20} color="#ff6b35" />
-                                        )}
-                                    </TouchableOpacity>
-                                ))}
-                                {appliedPromotion && (
-                                    <TouchableOpacity
-                                        style={styles.promoItem}
-                                        onPress={() => {
-                                            setAppliedPromotion(null);
-                                            setShowPromoList(false);
-                                        }}
-                                    >
-                                        <Text style={styles.promoCode}>Remove Promo</Text>
-                                    </TouchableOpacity>
-                                )}
-                            </View>
-                        )}
-                    </View>
-                )}
-
-                {/* Summary */}
+                {/* Summary - only show total */}
                 <View style={styles.summary}>
-                    <View style={styles.summaryRow}>
-                        <Text style={styles.summaryLabel}>Subtotal:</Text>
-                        <Text style={styles.summaryValue}>
-                            ${subtotal.toFixed(2)}
-                        </Text>
-                    </View>
-                    {discountAmount > 0 && (
-                        <View style={[styles.summaryRow, styles.discountRow]}>
-                            <Text style={styles.discountLabel}>Discount:</Text>
-                            <Text style={styles.discountValue}>
-                                -${discountAmount.toFixed(2)}
-                            </Text>
-                        </View>
-                    )}
-                    <View style={styles.summaryRow}>
-                        <Text style={styles.summaryLabel}>Delivery:</Text>
-                        <Text style={styles.summaryValue}>
-                            ${deliveryFee.toFixed(2)}
-                        </Text>
-                    </View>
-                    <View style={[styles.summaryRow, styles.totalRow]}>
-                        <Text style={styles.totalLabel}>Total:</Text>
+                    <View style={styles.totalRow}>
+                        <Text style={styles.totalLabel}>Total</Text>
                         <Text style={styles.totalValue}>
-                            ${total.toFixed(2)}
+                            {formatCurrency(subtotal)}
                         </Text>
                     </View>
                 </View>
@@ -198,9 +153,15 @@ const CartScreen = ({ onNavigate }) => {
                 {/* Checkout Button */}
                 <TouchableOpacity
                     style={styles.checkoutButton}
-                    onPress={() => onNavigate('checkout')}
+                    onPress={() => {
+                        // Save final cart before checkout
+                        if (saveLocalCart && localCart.restaurant_id) {
+                            saveLocalCart(localCart.restaurant_id, localCart);
+                        }
+                        onNavigate('checkout');
+                    }}
                 >
-                    <MaterialIcons name="arrow-forward" size={20} color="#fff" />
+                    {/* <MaterialIcons name="arrow-forward" size={20} color="#fff" /> */}
                     <Text style={styles.checkoutText}>Proceed to Checkout</Text>
                 </TouchableOpacity>
 
@@ -211,40 +172,6 @@ const CartScreen = ({ onNavigate }) => {
                 >
                     <Text style={styles.continueText}>Continue Shopping</Text>
                 </TouchableOpacity>
-            </View>
-        );
-    };
-
-    /**
-     * Check if user is authenticated - show login prompt instead of cart
-     */
-    if (!isAuthenticated) {
-        return (
-            <View style={styles.screenContainer}>
-                <SafeAreaView style={styles.container}>
-                    <View style={styles.loginPromptContainer}>
-                        <MaterialIcons
-                            name="lock"
-                            size={48}
-                            color="#ff6b35"
-                            style={styles.lockIcon}
-                        />
-                        <Text style={styles.modalTitle}>Login Required</Text>
-                        <Text style={styles.modalSubtitle}>
-                            Sign in to add items to your cart and checkout
-                        </Text>
-
-                        <TouchableOpacity
-                            style={styles.modalLoginButton}
-                            onPress={() => {
-                                onNavigate('login');
-                            }}
-                        >
-                            <Text style={styles.modalLoginButtonText}>Login</Text>
-                        </TouchableOpacity>
-                    </View>
-                </SafeAreaView>
-                <BottomNavigation activeRoute={activeRoute} onNavigate={onNavigate} />
             </View>
         );
     };
@@ -293,14 +220,14 @@ const CartScreen = ({ onNavigate }) => {
                 {/* Restaurant Info */}
                 <View style={styles.restaurantInfo}>
                     <MaterialIcons name="restaurant" size={20} color="#ff6b35" />
-                    <Text style={styles.restaurantName}>{cart?.restaurant_name}</Text>
+                    <Text style={styles.restaurantName}>{localCart?.restaurant_name || 'Your Cart'}</Text>
                 </View>
 
                 {/* Items List */}
                 <FlatList
                     data={cartItems}
                     renderItem={renderItem}
-                    keyExtractor={(item) => item.id}
+                    keyExtractor={(item) => (item.item_id || item.menu_id || item.food_id || item.id || Math.random().toString()).toString()}
                     scrollEnabled={true}
                     ListFooterComponent={renderFooter}
                     onEndReachedThreshold={0.1}
@@ -318,7 +245,13 @@ const styles = StyleSheet.create({
     },
     container: {
         flex: 1,
+        paddingTop: 35,
         backgroundColor: '#f8f8f8',
+    },
+    loadingContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     header: {
         flexDirection: 'row',

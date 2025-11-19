@@ -2,12 +2,12 @@
  * cartService.js - Mobile specific cart API service
  * Gọi API backend để quản lý giỏ hàng
  * 
- * API Endpoints:
- * GET /carts - Lấy giỏ hàng hiện tại
- * POST /carts/add - Thêm item vào giỏ
- * PATCH /carts/item/:id - Cập nhật item (qty, note)
- * DELETE /carts/item/:id - Xóa item khỏi giỏ
- * DELETE /carts/clear - Xóa toàn bộ giỏ
+ * API Endpoints (với /api prefix):
+ * GET /api/carts - Lấy giỏ hàng hiện tại
+ * POST /api/carts/add - Thêm item vào giỏ
+ * PATCH /api/carts/item/:id - Cập nhật item (qty, note)
+ * DELETE /api/carts/item/:id - Xóa item khỏi giỏ
+ * DELETE /api/carts/clear - Xóa toàn bộ giỏ
  */
 
 import apiClient from './apiClient';
@@ -44,6 +44,8 @@ export const cartService = {
      */
     async addItem({ restaurant_id, food_id, quantity = 1, note = '' }) {
         try {
+            console.log('[cartService.addItem] Params:', { restaurant_id, food_id, quantity, note });
+
             const response = await apiClient.post('/carts/add', {
                 restaurant_id,
                 food_id,

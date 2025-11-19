@@ -39,6 +39,7 @@ export { useRestaurantHours, getTodayHours, isRestaurantOpen } from "./hooks/use
 // Profile form hooks (web + mobile)
 export { useProfileForm } from "./hooks/useProfileForm";
 export { useAddressForm } from "./hooks/useAddressForm";
+export { useAutoRefreshProfile } from "./hooks/useAutoRefreshProfile";
 
 // Existing hooks
 export { useReview } from "./hooks/useReview";

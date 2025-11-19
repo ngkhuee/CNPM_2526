@@ -28,46 +28,16 @@ export const AuthProvider = ({ children }) => {
                 if (savedToken && savedUserStr) {
                     const savedUser = JSON.parse(savedUserStr);
 
-                    // Set user and token
+                    // Restore user and token from storage
+                    // Don't validate with API call to avoid unnecessary requests
+                    console.log('[AuthContext] Restoring user from storage:', savedUser.email);
                     setToken(savedToken);
                     setUser(savedUser);
-
-                    // Validate user status from backend (non-blocking)
-                    try {
-                        const API_BASE_URL = apiConfig.api.baseURL;
-                        const userResponse = await fetch(
-                            `${API_BASE_URL}/users/${savedUser.id}`,
-                            {
-                                headers: {
-                                    Authorization: `Bearer ${savedToken}`,
-                                },
-                            }
-                        );
-
-                        if (userResponse.ok) {
-                            const userData = await userResponse.json();
-
-                            // Check if account is blocked or inactive
-                            if (userData.status === 'blocked' || userData.status !== 'active') {
-                                console.warn('Account is blocked or inactive, logging out...');
-                                // Clear storage and state directly
-                                await storage.removeItem('token');
-                                await storage.removeItem('user');
-                                await storage.removeItem('cartItems');
-                                setToken('');
-                                setUser(null);
-                            }
-                        } else {
-                            console.warn('Cannot validate user status on init, continuing...');
-                        }
-                    } catch (error) {
-                        console.error('Error validating user status on init:', error);
-                    }
                 }
 
                 setInitialized(true);
             } catch (error) {
-                console.error('Error initializing auth:', error);
+                console.error('[AuthContext] Error initializing auth:', error);
                 setInitialized(true);
             }
         };
@@ -168,7 +138,24 @@ export const AuthProvider = ({ children }) => {
             }
         } catch (error) {
             console.error('[AuthContext] Login error:', error.message);
-            return { success: false, message: error.message };
+
+            // Handle specific error cases
+            let errorMessage = error.message || 'Login failed';
+
+            // 401 Unauthorized = Invalid email/password
+            if (error.response?.status === 401) {
+                errorMessage = 'Invalid email or password. Please try again.';
+            }
+            // Network errors
+            else if (error.code === 'ECONNABORTED' || !error.response) {
+                errorMessage = 'Network error. Please check your connection and try again.';
+            }
+            // Other HTTP errors
+            else if (error.response?.status) {
+                errorMessage = error.response.data?.message || `Error: ${error.response.status}`;
+            }
+
+            return { success: false, message: errorMessage };
         } finally {
             setLoading(false);
         }
@@ -182,6 +169,7 @@ export const AuthProvider = ({ children }) => {
                 name: userData.name,
                 email: userData.email,
                 password: userData.password,
+                confirmPassword: userData.confirmPassword,
                 phone: userData.phone || '',
             });
 
@@ -203,7 +191,28 @@ export const AuthProvider = ({ children }) => {
             }
         } catch (error) {
             console.error('[AuthContext] Register error:', error.message);
-            return { success: false, message: error.message };
+
+            // Handle specific error cases
+            let errorMessage = error.message || 'Registration failed';
+
+            // Handle field validation errors
+            if (error.response?.data?.fieldError) {
+                errorMessage = error.response.data.message || 'Validation error';
+            }
+            // Email already exists
+            else if (error.response?.status === 400 && error.response.data?.message?.includes('Email')) {
+                errorMessage = 'This email is already registered. Please use another email or login.';
+            }
+            // Other HTTP errors
+            else if (error.response?.status) {
+                errorMessage = error.response.data?.message || `Error: ${error.response.status}`;
+            }
+            // Network errors
+            else if (error.code === 'ECONNABORTED' || !error.response) {
+                errorMessage = 'Network error. Please check your connection and try again.';
+            }
+
+            return { success: false, message: errorMessage };
         } finally {
             setLoading(false);
         }

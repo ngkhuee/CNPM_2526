@@ -9,7 +9,10 @@ import React, { createContext, useState, useCallback } from 'react';
  * - highlightedFoodId: ID food cần highlight
  * - isNavigating: Flag để trigger navigation
  * - navigationData: Extra data nếu cần
- */
+    * - pendingLocalCart: Local cart từ RestaurantDetail/FoodDetailScreen
+    * - selectedRestaurant: Restaurant object khi vào FoodDetailScreen (để check opening hours)
+    * - orderId: Order ID cho Payment/Tracking/OrderDetail/Review screens
+    */
 export const NavigationContext = createContext(null);
 
 export const NavigationProvider = ({ children }) => {
@@ -19,9 +22,10 @@ export const NavigationProvider = ({ children }) => {
         highlightedFoodId: null,
         isNavigating: false,
         navigationData: null,
-    });
-
-    // Wrapper để có thể log hoặc validate trước khi set state
+        pendingLocalCart: null,
+        selectedRestaurant: null,
+        orderId: null,
+    });    // Wrapper để có thể log hoặc validate trước khi set state
     const setNavigationState = useCallback((newState) => {
         console.log('[NavigationContext] Setting state:', newState);
         setNavigationStateInternal((prev) => ({
@@ -38,16 +42,26 @@ export const NavigationProvider = ({ children }) => {
             highlightedFoodId: null,
             isNavigating: false,
             navigationData: null,
+            pendingLocalCart: null,
+            selectedRestaurant: null,
+            orderId: null,
         });
     }, []);
 
     /**
      * Navigate đến screen khác
      * @param {string} route - Tên route ('home', 'cart', 'checkout', etc)
+     * @param {Object} params - Optional params (orderId, restaurantId, etc)
      */
-    const navigate = useCallback((route) => {
-        console.log('[NavigationContext] Navigating to:', route);
+    const navigate = useCallback((route, params = {}) => {
+        console.log('[NavigationContext] Navigating to:', route, 'with params:', params);
         setActiveRouteInternal(route);
+        if (params.orderId) {
+            setNavigationStateInternal((prev) => ({
+                ...prev,
+                orderId: params.orderId,
+            }));
+        }
     }, []);
 
     const value = {

@@ -19,7 +19,6 @@ export const useAuth = () => {
                         {
                             text: 'OK',
                             onPress: () => {
-                                // Logout to clear any partial session
                                 logout();
                             }
                         }
@@ -34,7 +33,6 @@ export const useAuth = () => {
                         {
                             text: 'OK',
                             onPress: () => {
-                                // Logout to clear any partial session
                                 logout();
                             }
                         }
@@ -49,11 +47,24 @@ export const useAuth = () => {
                         {
                             text: 'OK',
                             onPress: () => {
-                                // Logout to clear any partial session
                                 logout();
                             }
                         }
                     ],
+                    { cancelable: false }
+                );
+            } else if (response.fieldError) {
+                // Handle field-level validation errors
+                const fieldLabels = {
+                    email: 'Email',
+                    password: 'Password',
+                    name: 'Name',
+                    phone: 'Phone'
+                };
+                Alert.alert(
+                    'Validation Error',
+                    response.message,
+                    [{ text: 'OK' }],
                     { cancelable: false }
                 );
             } else {
@@ -73,7 +84,12 @@ export const useAuth = () => {
         const response = await register(userData);
 
         if (!response.success) {
-            Alert.alert('Registration Failed', response.message || 'Unable to create account');
+            // Handle field-level validation errors from backend
+            if (response.fieldError) {
+                Alert.alert('Validation Error', response.message || 'Validation failed');
+            } else {
+                Alert.alert('Registration Failed', response.message || 'Unable to create account');
+            }
             return false;
         }
 

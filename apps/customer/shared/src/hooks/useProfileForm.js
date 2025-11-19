@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { storage } from "shared-services";
+import { storage, authService } from "shared-services";
+import { useAutoRefreshProfile } from "./useAutoRefreshProfile";
 
 /**
  * Custom hook for profile form management (web + mobile)
@@ -19,11 +20,24 @@ export const useProfileForm = (user, setUser) => {
     });
     const [loading, setLoading] = useState(false);
 
+    // Auto-refresh profile từ backend khi app focus
+    useAutoRefreshProfile(user?.id, (updatedUser) => {
+        setUser(updatedUser);
+        setFormData({
+            name: updatedUser.name || updatedUser.fullName || "",
+            email: updatedUser.email || "",
+            phone: updatedUser.phone || "",
+            gender: updatedUser.gender || "",
+            dob: updatedUser.dob || "",
+            avatar: updatedUser.avatar || "",
+        });
+    });
+
     // Initialize form with user data
     useEffect(() => {
         if (user) {
             setFormData({
-                name: user.name || "",
+                name: user.name || user.fullName || "",
                 email: user.email || "",
                 phone: user.phone || "",
                 gender: user.gender || "",
@@ -40,13 +54,26 @@ export const useProfileForm = (user, setUser) => {
     const handleSaveProfile = async () => {
         try {
             setLoading(true);
-            // Update user info via API (you'd need to implement this endpoint)
-            // For now, just update storage
-            const updatedUser = { ...user, ...formData };
-            setUser(updatedUser);
-            await storage.setItem("user", JSON.stringify(updatedUser));
-            setEditing(false);
-            return { success: true, message: "Cập nhật thông tin thành công!" };
+            // Map frontend field names to backend format
+            const profileUpdateData = {
+                full_name: formData.name,
+                email: formData.email,
+                phone: formData.phone,
+                gender: formData.gender,
+                dob: formData.dob,
+                avatar: formData.avatar,
+            };
+
+            // Call API to update profile using shared authService
+            const response = await authService.updateProfile(user.id, profileUpdateData);
+            if (response.success && response.user) {
+                // Update AuthContext with response from server
+                setUser(response.user);
+                setEditing(false);
+                return { success: true, message: "Cập nhật thông tin thành công!" };
+            } else {
+                return { success: false, message: response.message || "Lỗi cập nhật thông tin" };
+            }
         } catch (error) {
             console.error("Error updating profile:", error);
             return { success: false, message: "Lỗi cập nhật thông tin" };
@@ -64,3 +91,4 @@ export const useProfileForm = (user, setUser) => {
         handleSaveProfile,
     };
 };
+

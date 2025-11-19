@@ -35,6 +35,7 @@ export default function LoginAuthScreen({ onBackPress }) {
                 name: registerForm.formData.name,
                 email: registerForm.formData.email,
                 password: registerForm.formData.password,
+                confirmPassword: registerForm.formData.confirmPassword,
                 phone: registerForm.formData.phone,
             },
             () => {

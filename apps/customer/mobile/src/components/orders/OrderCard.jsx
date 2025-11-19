@@ -21,9 +21,26 @@ export default function OrderCard({
     const canCancel = orderService.canCancelOrder(order.status);
     const isCompleted = order.status === 'completed';
 
-    const orderDate = new Date(order.createdAt);
-    const dateString = orderDate.toLocaleDateString('vi-VN');
-    const timeString = orderDate.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+    // Safe date handling - check if createdAt exists
+    let dateString = '';
+    let timeString = '';
+
+    if (order.createdAt) {
+        try {
+            const orderDate = new Date(order.createdAt);
+            dateString = orderDate.toLocaleDateString('vi-VN');
+            timeString = orderDate.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+        } catch (e) {
+            console.error('Date parsing error:', e);
+            dateString = 'Invalid Date';
+            timeString = '';
+        }
+    }
+
+    // Safe price handling
+    const displayPrice = order.totalPrice && typeof order.totalPrice === 'number'
+        ? order.totalPrice.toLocaleString('vi-VN')
+        : '0';
 
     return (
         <TouchableOpacity
@@ -54,17 +71,17 @@ export default function OrderCard({
                 <View style={styles.itemsHeader}>
                     <MaterialIcons name="shopping-bag" size={16} color="#666" />
                     <Text style={styles.itemsLabel}>
-                        {order.items.length} item{order.items.length > 1 ? 's' : ''}
+                        {order.items?.length || 0} item{(order.items?.length || 0) > 1 ? 's' : ''}
                     </Text>
                 </View>
-                {order.items.slice(0, 2).map((item, idx) => (
+                {order.items?.slice(0, 2).map((item, idx) => (
                     <Text key={idx} style={styles.itemName}>
                         • {item.quantity}x {item.name}
                     </Text>
                 ))}
-                {order.items.length > 2 && (
+                {(order.items?.length || 0) > 2 && (
                     <Text style={styles.moreItems}>
-                        + {order.items.length - 2} more item{order.items.length - 2 > 1 ? 's' : ''}
+                        + {(order.items?.length || 0) - 2} more item{((order.items?.length || 0) - 2) > 1 ? 's' : ''}
                     </Text>
                 )}
             </View>
@@ -74,13 +91,13 @@ export default function OrderCard({
                 <View style={styles.infoRow}>
                     <MaterialIcons name="location-on" size={16} color="#FF6B35" />
                     <Text style={styles.infoText} numberOfLines={1}>
-                        {order.deliveryAddress}
+                        {order.deliveryAddress || 'No address'}
                     </Text>
                 </View>
                 <View style={styles.infoRow}>
                     <MaterialIcons name="schedule" size={16} color="#FF6B35" />
                     <Text style={styles.infoText}>
-                        {dateString} • {timeString}
+                        {dateString || 'Date unavailable'} {timeString ? `• ${timeString}` : ''}
                     </Text>
                 </View>
             </View>
@@ -90,7 +107,7 @@ export default function OrderCard({
                 <View>
                     <Text style={styles.totalLabel}>Total</Text>
                     <Text style={styles.totalPrice}>
-                        {order.totalPrice.toLocaleString('vi-VN')}₫
+                        {displayPrice}₫
                     </Text>
                 </View>
                 <View style={styles.actions}>

@@ -2,10 +2,10 @@
 import { useState, useEffect, useContext } from 'react';
 import { Alert } from 'react-native';
 import { AuthContext } from '../contexts/AuthContext';
-import { profileService } from '../services/profileService';
+import { authService } from '../services/authService';
 
 export const useProfile = () => {
-    const { user: authUser, logout } = useContext(AuthContext);
+    const { user: authUser, setUser: setAuthUser, logout } = useContext(AuthContext);
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
     const [editing, setEditing] = useState(false);
@@ -37,20 +37,6 @@ export const useProfile = () => {
                     dob: authUser.dob || '',
                     avatar: authUser.avatar || '',
                 });
-            } else {
-                // Fallback to mock for testing
-                const storedUser = profileService.getMockUser();
-                if (storedUser) {
-                    setUser(storedUser);
-                    setFormData({
-                        name: storedUser.name || '',
-                        email: storedUser.email || '',
-                        phone: storedUser.phone || '',
-                        gender: storedUser.gender || 'Male',
-                        dob: storedUser.dob || '',
-                        avatar: storedUser.avatar || '',
-                    });
-                }
             }
         } catch (error) {
             console.error('Error fetching user data:', error);
@@ -71,11 +57,18 @@ export const useProfile = () => {
         try {
             setSaveLoading(true);
             if (user?.id) {
-                await profileService.updateUserProfile(user.id, formData);
+                // Call shared authService to update profile via API
+                const response = await authService.updateProfile(user.id, formData);
+                if (response.success && response.user) {
+                    // Update both local state and AuthContext from API response
+                    setUser(response.user);
+                    setAuthUser(response.user);
+                    setEditing(false);
+                    Alert.alert('Success', 'Profile updated successfully');
+                } else {
+                    Alert.alert('Error', response.message || 'Failed to save profile');
+                }
             }
-            setUser(prev => ({ ...prev, ...formData }));
-            setEditing(false);
-            Alert.alert('Success', 'Profile updated successfully');
         } catch (error) {
             console.error('Error saving profile:', error);
             Alert.alert('Error', 'Failed to save profile');
