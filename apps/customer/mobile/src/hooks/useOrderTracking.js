@@ -1,4 +1,4 @@
-// hooks/useOrderTracking.js - Quản lý order tracking data & polling
+// hooks/useOrderTracking.js - Quản lý order tracking data & adaptive polling
 import { useState, useEffect } from 'react';
 import { Alert } from 'react-native';
 import * as orderService from '../services/orderService';
@@ -27,18 +27,51 @@ export const useOrderTracking = (orderId, onNavigate) => {
         }
     };
 
-    // Auto-refresh effect
+    // Get adaptive polling interval based on order status
+    const getPollingInterval = (status) => {
+        switch (status) {
+            case 'delivering':
+                return 5000; // 5 seconds - fast updates during delivery
+            case 'pending':
+            case 'confirmed':
+            case 'preparing':
+                return 15000; // 15 seconds - medium during preparation
+            case 'ready':
+                return 30000; // 30 seconds - slower when waiting for pickup
+            case 'delivered':
+            case 'cancelled':
+                return null; // Stop polling
+            default:
+                return 15000;
+        }
+    };
+
+    // Auto-refresh effect with adaptive polling
     useEffect(() => {
         if (!orderId) return;
 
         fetchOrder(true);
 
-        if (autoRefreshEnabled) {
-            const id = setInterval(() => fetchOrder(false), 5000);
-            setIntervalId(id);
-            return () => clearInterval(id);
+        if (autoRefreshEnabled && order?.status) {
+            const interval = getPollingInterval(order.status);
+
+            if (interval) {
+                console.log(`[useOrderTracking] Starting ${order.status} polling every ${interval}ms`);
+                const id = setInterval(() => fetchOrder(false), interval);
+                setIntervalId(id);
+                return () => clearInterval(id);
+            } else {
+                console.log(`[useOrderTracking] Stopping polling for status: ${order.status}`);
+                if (intervalId) {
+                    clearInterval(intervalId);
+                    setIntervalId(null);
+                }
+            }
+        } else if (intervalId) {
+            clearInterval(intervalId);
+            setIntervalId(null);
         }
-    }, [orderId, autoRefreshEnabled]);
+    }, [orderId, autoRefreshEnabled, order?.status]);
 
     const handleRefresh = () => {
         setRefreshing(true);

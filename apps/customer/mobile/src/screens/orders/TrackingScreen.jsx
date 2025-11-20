@@ -13,8 +13,8 @@ import {
 import { MaterialIcons } from '@expo/vector-icons';
 import { NavigationContext } from '../../contexts/NavigationContext';
 import { useOrderTracking } from '../../hooks/useOrderTracking';
-import { useOrderStatus, ORDER_TIMELINE } from '../../hooks/useOrderStatus';
-import { useDeliveryCompletion } from '../../hooks/useDeliveryCompletion';
+import { useDeliveryTracking, ORDER_TIMELINE } from '../../hooks/useDeliveryTracking';
+import apiClient from '../../services/apiClient';
 import { OrderStatusHeader } from '../../components/tracking/OrderStatusHeader';
 import { OrderTimeline } from '../../components/tracking/OrderTimeline';
 import { DeliveryInfo } from '../../components/tracking/DeliveryInfo';
@@ -28,8 +28,10 @@ const TrackingScreen = ({ orderId }) => {
     const [autoRefreshEnabled, setAutoRefreshEnabled] = useState(true);
     const [simulatingDelivery, setSimulatingDelivery] = useState(false);
 
-    // Custom hooks
+    // Custom hooks - useOrderTracking with adaptive polling
     const { order, loading, refreshing, handleRefresh, setAutoRefresh } = useOrderTracking(orderId, navigate);
+
+    // Unified delivery tracking hook (consolidates arrival detection + confirmation)
     const {
         currentStatusIndex,
         isDelivered,
@@ -38,12 +40,20 @@ const TrackingScreen = ({ orderId }) => {
         droneArrived,
         handleConfirmDelivery,
         handleCloseArrivedPopup,
-    } = useOrderStatus(order, () => handleRefresh());
+        showConfirmButton,
+        autoConfirmCountdown,
+    } = useDeliveryTracking(order, () => handleRefresh());
 
-    const { showConfirmButton, autoConfirmCountdown, handleManualConfirm } = useDeliveryCompletion(
-        order,
-        () => handleRefresh()
-    );
+    // Auto-navigate when delivered
+    React.useEffect(() => {
+        if (isDelivered) {
+            const timer = setTimeout(() => {
+                console.log('[TrackingScreen] Auto-navigating to orders after delivery');
+                navigate('orders');
+            }, 3000);
+            return () => clearTimeout(timer);
+        }
+    }, [isDelivered, navigate]);
 
     // Handle auto-refresh toggle
     const handleAutoRefreshToggle = () => {
@@ -61,30 +71,20 @@ const TrackingScreen = ({ orderId }) => {
         navigate('review', { orderId: order?.id });
     };
 
-    // Trigger drone delivery simulation
+    // Trigger drone delivery simulation using apiClient (with token)
     const handleSimulateDelivery = async () => {
         console.log('[TrackingScreen] Starting simulation for order:', orderId);
         setSimulatingDelivery(true);
         try {
-            const API_BASE_URL = 'http://localhost:4000';
-            const url = `${API_BASE_URL}/orders/${orderId}/simulate-delivery`;
+            const url = `/orders/${orderId}/simulate-delivery`;
             console.log('[TrackingScreen] POST to:', url);
-            const response = await fetch(
-                url,
-                { method: 'POST', headers: { 'Content-Type': 'application/json' } }
-            );
-            console.log('[TrackingScreen] Response status:', response.status);
-            if (response.ok) {
-                const data = await response.json();
-                console.log('[TrackingScreen] Simulation started:', data);
-                Alert.alert('Success', 'Drone delivery simulation started! Check logs for progress.');
-                handleRefresh();
-            } else {
-                Alert.alert('Error', `Failed to start delivery simulation (${response.status})`);
-            }
+            const data = await apiClient.post(url);
+            console.log('[TrackingScreen] Simulation started:', data);
+            Alert.alert('Success', 'Drone delivery simulation started!');
+            handleRefresh();
         } catch (error) {
             console.error('[TrackingScreen] Simulate error:', error);
-            Alert.alert('Error', 'Error: ' + error.message);
+            Alert.alert('Error', error.response?.data?.message || 'Failed to start simulation');
         } finally {
             setSimulatingDelivery(false);
         }
@@ -180,8 +180,8 @@ const TrackingScreen = ({ orderId }) => {
                 {/* Order Details (with items merged) */}
                 <OrderDetails order={order} />
 
-                {/* Confirm Delivery Button - Show when drone arrived at customer location (UI state) */}
-                {droneArrived && order?.status === 'delivering' && (
+                {/* Confirm Delivery Button - Show after drone arrived and popup dismissed */}
+                {showConfirmButton && !isDelivered && (
                     <View style={styles.confirmSection}>
                         <TouchableOpacity
                             style={styles.confirmButton}
@@ -191,10 +191,11 @@ const TrackingScreen = ({ orderId }) => {
                             <MaterialIcons name="check-circle" size={24} color="#fff" />
                             <Text style={styles.confirmButtonText}>Confirm Delivery Received</Text>
                         </TouchableOpacity>
-                        <Text style={styles.confirmNote}>
-                            Your order has arrived! Please confirm receipt.{'\n'}
-                            Auto-confirmed in 10 minutes if not manually confirmed.
-                        </Text>
+                        {autoConfirmCountdown !== null && (
+                            <Text style={styles.confirmNote}>
+                                Auto-confirmed in {Math.floor(autoConfirmCountdown / 60)}:{String(autoConfirmCountdown % 60).padStart(2, '0')} min
+                            </Text>
+                        )}
                     </View>
                 )}
 
@@ -204,15 +205,12 @@ const TrackingScreen = ({ orderId }) => {
                     isDelivered={isDelivered}
                     onConfirmDelivery={handleConfirmDelivery}
                     onReview={handleReview}
-                    showConfirmButton={showConfirmButton}
-                    autoConfirmCountdown={autoConfirmCountdown}
-                    onManualConfirm={handleManualConfirm}
                 />
             </ScrollView>
 
             {/* Arrived Popup */}
             <ArrivedPopup
-                visible={showArrivedPopup}
+                visible={showArrivedPopup && !isDelivered}
                 onClose={handleCloseArrivedPopup}
             />
         </SafeAreaView>

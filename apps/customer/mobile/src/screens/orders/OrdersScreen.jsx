@@ -34,7 +34,7 @@ export default function OrdersScreen({ onNavigate }) {
         handleCancelOrder,
         handleRetryOrder,
         refetch,
-    } = useOrders(user?.id || 'user-1'); // Pass user ID from auth context
+    } = useOrders(user?.id || null); // Pass user ID from auth context (null if not authenticated)
 
     const handleRefresh = async () => {
         setIsRefreshing(true);

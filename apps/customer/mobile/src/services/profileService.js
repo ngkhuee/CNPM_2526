@@ -40,7 +40,7 @@ export const addressService = {
     // Get user addresses
     getAddresses: async (userId) => {
         try {
-            const response = await apiClient.get(`/users/${userId}/addresses`);
+            const response = await apiClient.get(`/addresses?user_id=${userId}`);
             return response;
         } catch (error) {
             console.error('[addressService.getAddresses] Error:', error);

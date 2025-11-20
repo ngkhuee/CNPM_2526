@@ -330,12 +330,15 @@ export default function FoodDetailScreen({ foodItem, onNavigate }) {
         } catch (error) {
             console.error('[FoodDetailScreen] Error adding to cart:', error);
 
-            // If API fails, fallback to local cart
+            // If API fails, show specific error message
             if (error.message?.includes('different restaurant')) {
                 showToast('error', 'Cart already has items from another restaurant');
                 setShowCartModal(true);
+            } else if (error.message?.includes('401') || error.message?.includes('Unauthorized')) {
+                setShowLoginModal(true);
+                showToast('error', 'Please login to add items to cart');
             } else {
-                showToast('error', 'Failed to add to cart');
+                showToast('error', `Failed to add to cart: ${error.message || 'Unknown error'}`);
             }
         } finally {
             setIsAdding(false);

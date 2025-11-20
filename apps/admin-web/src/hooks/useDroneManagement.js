@@ -87,7 +87,7 @@ export const useDroneManagement = (onSuccess) => {
         });
       } else {
         // Create new drone with default location (warehouse)
-        await droneService.createDrone({
+        const newDrone = await droneService.createDrone({
           identifier: droneForm.identifier,
           status: "available",
           latitude: 10.77,
@@ -98,14 +98,21 @@ export const useDroneManagement = (onSuccess) => {
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         });
+        console.log("[saveDrone] New drone created:", newDrone);
       }
       setShowDroneModal(false);
+      setDroneForm({
+        identifier: "",
+        address: "",
+        latitude: "",
+        longitude: "",
+      });
       onSuccess?.();
     } catch (err) {
       console.error("Failed to save drone:", err);
-      alert("Failed to save drone");
+      alert(`Failed to save drone: ${err.message || err}`);
     }
-  }, [droneForm, editingDrone, onSuccess]);
+  }, [droneForm.identifier, editingDrone, onSuccess]);
 
   // Delete drone (only when not delivering)
   const handleDeleteDrone = useCallback(
@@ -168,10 +175,10 @@ export const useDroneManagement = (onSuccess) => {
     setLocationCoords(
       drone.latitude && drone.longitude
         ? {
-            lat: drone.latitude,
-            lng: drone.longitude,
-            updated_at: new Date().toISOString(), // Always show current time
-          }
+          lat: drone.latitude,
+          lng: drone.longitude,
+          updated_at: new Date().toISOString(), // Always show current time
+        }
         : null
     );
     setShowLocation(true);

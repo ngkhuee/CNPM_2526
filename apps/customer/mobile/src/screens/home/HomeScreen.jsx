@@ -8,6 +8,7 @@ import {
   ActivityIndicator,
   TouchableOpacity,
   SafeAreaView,
+  Alert,
 } from 'react-native';
 import { useContext } from 'react';
 import axios from 'axios';
@@ -30,6 +31,7 @@ import { getNearbyRestaurants } from '../../utils/locationUtils';
 import ErrorBoundary from '../../utils/ErrorBoundary';
 import { useNavigateToRestaurant } from '../../hooks/useNavigateToRestaurant';
 import { useNavigateToRestaurantOnly } from '../../hooks/useNavigateToRestaurantOnly';
+import { useGeolocation } from '../../hooks/useGeolocation';
 import apiConfig from '../../config/api.config';
 
 const API_BASE = apiConfig.api.baseURL;
@@ -48,10 +50,41 @@ export default function HomeScreen({ onNavigate }) {
   const [showSearchResults, setShowSearchResults] = useState(false);
   const [searchSuggestions, setSearchSuggestions] = useState([]);
   const [drawerVisible, setDrawerVisible] = useState(false);
+  const [gpsLoading, setGpsLoading] = useState(true);
+
+  // GPS Geolocation hook
+  const { location, address: gpsAddress, loading: gpsLoading2, requestLocation } = useGeolocation();
 
   // Hook để navigate tới restaurant detail
   const navigateToRestaurant = useNavigateToRestaurant(onNavigate);
   const navigateToRestaurantOnly = useNavigateToRestaurantOnly(onNavigate);
+
+  // Request GPS on mount
+  useEffect(() => {
+    const initLocation = async () => {
+      setGpsLoading(true);
+      console.log('[HomeScreen] Requesting GPS location on mount...');
+      await requestLocation();
+      setGpsLoading(false);
+    };
+
+    initLocation();
+  }, []);
+
+  // Update address and nearby restaurants when GPS location changes
+  useEffect(() => {
+    if (gpsAddress) {
+      console.log('[HomeScreen] GPS location obtained:', gpsAddress);
+      setAddress(gpsAddress);
+
+      // Calculate nearby restaurants
+      if (location && restaurantList.length > 0) {
+        const nearby = getNearbyRestaurants(restaurantList, location, 5);
+        console.log('[HomeScreen] Nearby restaurants:', nearby.length);
+        setNearbyRestaurants(nearby);
+      }
+    }
+  }, [gpsAddress, location, restaurantList]);
 
   useEffect(() => {
     fetchData();
@@ -100,8 +133,18 @@ export default function HomeScreen({ onNavigate }) {
 
   const topRestaurants = restaurantList.slice(0, 6);
 
-  const handleLocationPress = () => {
-    console.log('Location pressed - GPS pending');
+  // Handle location button press - request GPS
+  const handleLocationPress = async () => {
+    console.log('[HomeScreen] Location button pressed - requesting GPS...');
+    setGpsLoading(true);
+    try {
+      await requestLocation();
+    } catch (err) {
+      console.error('[HomeScreen] Error requesting location:', err);
+      Alert.alert('Error', 'Failed to get location. Please check your GPS settings.');
+    } finally {
+      setGpsLoading(false);
+    }
   };
 
   const handleSearchPress = (query) => {
@@ -122,15 +165,7 @@ export default function HomeScreen({ onNavigate }) {
   };
 
   const handleSearchFocus = () => {
-    setShowSearchOverlay(true);
-
-    // Show random suggestions if search is empty
-    if (searchQuery.trim() === '') {
-      const randomItems = foodList
-        .sort(() => Math.random() - 0.5)
-        .slice(0, 5);
-      setSearchSuggestions(randomItems);
-    }
+    setShowSearchOverlay(false);
   };
 
   const handleSearchBlur = () => {

@@ -21,8 +21,8 @@ import * as orderService from '../../services/orderService';
 import { showToast } from '../../utils/toastHelper';
 import { useOrderAutoCancel } from '../../hooks/useOrderAutoCancel';
 
-// Demo QR Code (base64 PNG - simple demo QR)
-const DEMO_QR = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGQAAABkCAIAAAD/gqEfAAAA2klEQVR4nO3YMQrCQBRG4TRYO3srb2VvZW8hWNjaWNhYWAm2NpZiI1hYWKhgY2OjmMKFhRZeEJaZN3wz8zszb4oQQgghhBBCCCGEEEIIIYQQQgghhBBCCCGEEEIIIYQQQgghhBBCCCGEEEIIIYQQQkgqlUpVKhWr1Uqv15PL5aRSKWUyGY1GA8MwDMMwDAMAwzAIBALZbJZSqZRSKpVKaRgGQRAEi8Ui7Xa71+tRs9lUpVJRo9FQIpFQq9XScZxsNkupVIpSqZRSqZRSqZRSqZRSqZRSqZRS/AvxeFwqlQKBQDKZVKlUUiKRoGazSc1mk06nQxAEwWAwoHQ6TS6XU61WU61Wo+FwSI1GQ5VKhX6/T41GQxAEQRAEQRAEQRAEQRAEQRAE+S/+AFu3VKwRLx9/AAAAAElFTkSuQmCC';
+// Demo QR Code (base64 PNG - valid 1x1 transparent PNG placeholder)
+const DEMO_QR = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
 
 const MoMoPaymentScreen = ({ orderId }) => {
     const { navigate } = useContext(NavigationContext);

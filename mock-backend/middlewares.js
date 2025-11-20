@@ -28,7 +28,6 @@ const validateToken = (req, res, next) => {
     "/menus",
     "/drones",
     "/settings",
-    "/addresses",
     "/payments",
     "/notifications",
     "/reviews", // GET reviews is public
@@ -45,15 +44,9 @@ const validateToken = (req, res, next) => {
     return next();
   }
 
-  // Allow GET /orders (for tracking)
-  if (req.method === "GET" && requestPath.startsWith("/orders")) {
-    return next();
-  }
+  // Note: GET /orders requires token - removed from public routes for security
 
-  // Allow GET /users (for view profile)
-  if (req.method === "GET" && requestPath.startsWith("/users")) {
-    return next();
-  }
+  // Note: GET /users requires token - removed from public routes for security
 
   // Allow GET /auth/login and POST for register (public)
   if (req.method === "GET" && requestPath === "/auth/login") {

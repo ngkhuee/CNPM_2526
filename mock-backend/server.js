@@ -1128,6 +1128,24 @@ server.post("/orders/:id/simulate-delivery", (req, res) => {
   });
 });
 
+// ========== ADDRESSES ENDPOINT - Filter by User ==========
+// GET /addresses - Return only addresses belonging to authenticated user
+server.get("/addresses", (req, res, next) => {
+  const db = router.db;
+  const userId = req.user?.id;
+
+  if (!userId) {
+    // No authenticated user - return empty array or 401
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
+  // Get all addresses and filter by user_id
+  let addresses = db.get("addresses").value() || [];
+  addresses = addresses.filter(addr => addr.user_id === userId);
+
+  res.json(addresses);
+});
+
 // Use default router
 server.use(router);
 
