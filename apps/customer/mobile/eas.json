@@ -24,6 +24,10 @@
             },
             "ios": {
                 "buildConfiguration": "Release"
+            },
+            "env": {
+                "EXPO_PUBLIC_ENV": "production",
+                "EXPO_PUBLIC_API_URL": "https://yummy-backend-3t5z.onrender.com"
             }
         }
     },
