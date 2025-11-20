@@ -9,6 +9,7 @@ export default function Header({
     onSearchFocus,
     onSearchBlur,
     onSearchSubmit,
+    onMenuPress,
 }) {
     const [searchFocused, setSearchFocused] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
@@ -44,7 +45,10 @@ export default function Header({
         <View style={styles.headerContainer}>
             {/* Top row: Menu, Location, Avatar */}
             <View style={styles.topRow}>
-                <TouchableOpacity style={styles.menuBtn}>
+                <TouchableOpacity
+                    style={styles.menuBtn}
+                    onPress={onMenuPress}
+                >
                     <MaterialIcons name="menu" size={24} color="#333" />
                 </TouchableOpacity>
 

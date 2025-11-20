@@ -252,6 +252,14 @@ export const useCart = () => {
 
             const currentRestaurantId = cart.restaurant_id;
 
+            // Call API to clear backend cart
+            try {
+                await cartService.clearCart();
+                console.log('[useCart.clearCurrentRestaurantCart] Backend cart cleared via API');
+            } catch (apiErr) {
+                console.error('[useCart.clearCurrentRestaurantCart] Error clearing backend cart:', apiErr.message);
+            }
+
             // Remove from AsyncStorage
             try {
                 await AsyncStorage.removeItem(`cart_restaurant_${currentRestaurantId}`);

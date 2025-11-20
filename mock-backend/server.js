@@ -966,6 +966,165 @@ server.post("/orders", (req, res) => {
   res.status(201).json(newOrder);
 });
 
+// ========== CUSTOM GET ORDERS ENDPOINT WITH RESTAURANT DATA ==========
+// Intercept GET /orders and /orders/:id to include restaurant data
+server.get("/orders/:id", (req, res, next) => {
+  const db = router.db;
+  const orderId = req.params.id;
+
+  const order = db.get("orders").find({ id: orderId }).value();
+  if (!order) {
+    return next(); // Let default router handle 404
+  }
+
+  // Enrich order with restaurant data
+  const restaurant = db.get("restaurants").find({ id: order.restaurant_id }).value();
+
+  const enrichedOrder = {
+    ...order,
+    restaurant: restaurant ? {
+      id: restaurant.id,
+      name: restaurant.name,
+      address: restaurant.address,
+      phone: restaurant.phone,
+      email: restaurant.email,
+      image: restaurant.image,
+    } : null,
+  };
+
+  res.json(enrichedOrder);
+});
+
+// GET /orders - List orders with restaurant data
+server.get("/orders", (req, res, next) => {
+  const db = router.db;
+  const userId = req.user?.id;
+  const restaurantId = req.query.restaurant_id;
+
+  // Filter orders by user_id from token OR restaurant_id from query param
+  let orders = db.get("orders").value() || [];
+
+  if (restaurantId) {
+    // Admin panel requesting orders for specific restaurant
+    orders = orders.filter(order => order.restaurant_id === restaurantId);
+  } else if (userId) {
+    // Customer requesting their own orders
+    orders = orders.filter(order => order.user_id === userId);
+  }
+
+  // Enrich each order with restaurant data
+  const enrichedOrders = orders.map(order => {
+    const restaurant = db.get("restaurants").find({ id: order.restaurant_id }).value();
+    return {
+      ...order,
+      restaurant: restaurant ? {
+        id: restaurant.id,
+        name: restaurant.name,
+        address: restaurant.address,
+        phone: restaurant.phone,
+        email: restaurant.email,
+        image: restaurant.image,
+      } : null,
+    };
+  });
+
+  res.json(enrichedOrders);
+});
+
+// ========== SIMULATE DRONE DELIVERY ENDPOINT ==========
+// POST /orders/:id/simulate-delivery - Trigger drone movement simulation
+server.post("/orders/:id/simulate-delivery", (req, res) => {
+  const db = router.db;
+  const orderId = req.params.id;
+
+  const order = db.get("orders").find({ id: orderId }).value();
+  if (!order) {
+    return res.status(404).json({ error: "Order not found" });
+  }
+
+  if (!order.drone_id) {
+    return res.status(400).json({ error: "Order has no drone assigned" });
+  }
+
+  // Set order to delivering status with mock GPS movement
+  // Ensure consistent format: use both latitude/longitude AND lat/lng for compatibility
+  const pickup = order.pickup_gps || { latitude: 10.776, longitude: 106.7 };
+  const dropoff = order.dropoff_gps || { latitude: 10.7867657, longitude: 106.7001391 };
+
+  // Normalize to ensure we have latitude/longitude format
+  const pickupLat = pickup.latitude || pickup.lat || 10.776;
+  const pickupLng = pickup.longitude || pickup.lng || 106.7;
+  const dropoffLat = dropoff.latitude || dropoff.lat || 10.7867657;
+  const dropoffLng = dropoff.longitude || dropoff.lng || 106.7001391;
+
+  // Update order to delivering
+  db.get("orders")
+    .find({ id: orderId })
+    .assign({
+      status: "delivering",
+      current_gps: {
+        latitude: pickupLat,
+        longitude: pickupLng,
+      },
+      updated_at: new Date().toISOString(),
+    })
+    .write();
+
+  console.log(`[SIMULATE DELIVERY] Starting simulation for order ${orderId}`);
+  console.log(`[SIMULATE DELIVERY] From: (${pickupLat}, ${pickupLng}) To: (${dropoffLat}, ${dropoffLng})`);
+
+  // Simulate progressive movement from pickup to dropoff in steps
+  const steps = 8;
+  const interval = 2000; // 2 seconds per step
+
+  for (let i = 1; i <= steps; i++) {
+    setTimeout(() => {
+      const progress = i / steps;
+      const currentLat = pickupLat + (dropoffLat - pickupLat) * progress;
+      const currentLng = pickupLng + (dropoffLng - pickupLng) * progress;
+
+      db.get("orders")
+        .find({ id: orderId })
+        .assign({
+          current_gps: {
+            latitude: currentLat,
+            longitude: currentLng,
+          },
+          updated_at: new Date().toISOString(),
+        })
+        .write();
+
+      console.log(`[SIMULATE DELIVERY] Step ${i}/${steps}: (${currentLat.toFixed(6)}, ${currentLng.toFixed(6)})`);
+
+      // Last step - mark as delivered
+      if (i === steps) {
+        setTimeout(() => {
+          db.get("orders")
+            .find({ id: orderId })
+            .assign({
+              status: "delivered",
+              current_gps: {
+                latitude: dropoffLat,
+                longitude: dropoffLng,
+              },
+              updated_at: new Date().toISOString(),
+            })
+            .write();
+          console.log(`[SIMULATE DELIVERY] Delivery complete for order ${orderId}`);
+        }, 1000);
+      }
+    }, i * interval);
+  }
+
+  res.json({
+    success: true,
+    message: "Drone delivery simulation started",
+    orderId,
+    steps,
+    interval,
+  });
+});
+
 // Use default router
 server.use(router);
 

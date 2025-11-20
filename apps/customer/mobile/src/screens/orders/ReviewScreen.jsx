@@ -1,6 +1,6 @@
 /**
  * ReviewScreen.jsx
- * Allow user to submit review for delivered order
+ * Allow user to submit reviews for individual items in a delivered order
  */
 
 import React, { useContext, useState, useEffect } from 'react';
@@ -14,28 +14,34 @@ import {
     SafeAreaView,
     ActivityIndicator,
     Alert,
+    FlatList,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { NavigationContext } from '../../contexts/NavigationContext';
 import { AuthContext } from '../../contexts/AuthContext';
-import { orderService } from '../../services/orderService';
+import * as orderService from '../../services/orderService';
 import { reviewService } from '../../services/reviewService';
+import { useReview } from '../../hooks/useReview';
 import { showToast } from '../../utils/toastHelper';
 
 const ReviewScreen = ({ orderId }) => {
     const { navigate } = useContext(NavigationContext);
     const { user } = useContext(AuthContext);
+    const { submitReview, getReviewedFoodIds } = useReview();
 
     const [order, setOrder] = useState(null);
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
 
-    const [rating, setRating] = useState(0);
+    const [reviewedFoods, setReviewedFoods] = useState({});
+    const [selectedItem, setSelectedItem] = useState(null);
+    const [showReviewModal, setShowReviewModal] = useState(false);
+    const [rating, setRating] = useState(5);
     const [comment, setComment] = useState('');
-    const [errors, setErrors] = useState({});
 
     useEffect(() => {
         fetchOrder();
+        checkReviewedItems();
     }, [orderId]);
 
     const fetchOrder = async () => {
@@ -44,62 +50,79 @@ const ReviewScreen = ({ orderId }) => {
             const data = await orderService.getOrderDetail(orderId);
             if (data.status !== 'delivered') {
                 Alert.alert('Error', 'Can only review delivered orders');
-                navigate('orders');
+                navigate('order-detail', { orderId: orderId });
                 return;
             }
             setOrder(data);
         } catch (error) {
             console.error('[ReviewScreen] Error fetching order:', error);
             Alert.alert('Error', 'Failed to load order');
-            navigate('orders');
+            navigate('order-detail', { orderId: orderId });
         } finally {
             setLoading(false);
         }
     };
 
-    const validateForm = () => {
-        const newErrors = {};
-
-        if (rating === 0) {
-            newErrors.rating = 'Please select a rating';
+    const checkReviewedItems = async () => {
+        if (!user?.id) return;
+        try {
+            const reviewed = await getReviewedFoodIds(user.id);
+            setReviewedFoods(reviewed);
+        } catch (error) {
+            console.error('[ReviewScreen] Error checking reviewed items:', error);
         }
+    };
 
-        if (!comment.trim()) {
-            newErrors.comment = 'Please write a review';
-        } else if (comment.trim().length < 10) {
-            newErrors.comment = 'Review must be at least 10 characters';
-        }
-
-        setErrors(newErrors);
-        return Object.keys(newErrors).length === 0;
+    const handleOpenReview = (item) => {
+        setSelectedItem(item);
+        setShowReviewModal(true);
+        setRating(5);
+        setComment('');
     };
 
     const handleSubmitReview = async () => {
-        if (!validateForm()) {
+        if (!selectedItem || !order || !user) return;
+
+        if (rating === 0) {
+            Alert.alert('Error', 'Please select a rating');
+            return;
+        }
+
+        if (!comment.trim() || comment.trim().length < 10) {
+            Alert.alert('Error', 'Review must be at least 10 characters');
             return;
         }
 
         try {
             setSubmitting(true);
 
-            const reviewData = {
-                order_id: order.id,
-                user_id: user?.id,
-                restaurant_id: order.restaurant_id,
-                rating: rating,
-                comment: comment.trim(),
-                created_at: new Date().toISOString(),
-            };
+            const result = await submitReview({
+                foodId: selectedItem.foodId,
+                userId: user.id,
+                restaurantId: order?.restaurant_id || order?.restaurantId,
+                orderId: order.id,
+                rating,
+                comment,
+            });
 
-            await reviewService.create(reviewData);
+            if (result.success) {
+                showToast('success', 'Review submitted!');
+                setShowReviewModal(false);
 
-            showToast('success', 'Review submitted successfully!');
-            setTimeout(() => {
-                navigate('order-detail', { orderId: order.id });
-            }, 1500);
+                // Update reviewedFoods state
+                const reviewKey = `${selectedItem.foodId}_${order.id}`;
+                setReviewedFoods(prev => ({
+                    ...prev,
+                    [reviewKey]: true,
+                }));
+
+                setSelectedItem(null);
+            } else {
+                Alert.alert('Error', result.message || 'Failed to submit review');
+            }
         } catch (error) {
             console.error('[ReviewScreen] Error submitting review:', error);
-            showToast('error', 'Failed to submit review');
+            Alert.alert('Error', 'Failed to submit review');
         } finally {
             setSubmitting(false);
         }
@@ -131,7 +154,7 @@ const ReviewScreen = ({ orderId }) => {
                 <TouchableOpacity onPress={() => navigate('order-detail', { orderId: order.id })}>
                     <MaterialIcons name="arrow-back" size={24} color="#1a1a1a" />
                 </TouchableOpacity>
-                <Text style={styles.headerTitle}>Write Review</Text>
+                <Text style={styles.headerTitle}>Rate Items</Text>
                 <View style={{ width: 24 }} />
             </View>
 
@@ -147,128 +170,147 @@ const ReviewScreen = ({ orderId }) => {
                     </View>
                 </View>
 
-                {/* Rating Section */}
+                {/* Items List */}
                 <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>How was your experience?</Text>
-                    <View style={styles.ratingContainer}>
-                        {[1, 2, 3, 4, 5].map(star => (
-                            <TouchableOpacity
-                                key={star}
-                                onPress={() => {
-                                    setRating(star);
-                                    setErrors(prev => ({ ...prev, rating: null }));
-                                }}
-                                style={styles.starButton}
-                            >
-                                <MaterialIcons
-                                    name={star <= rating ? 'star' : 'star-outline'}
-                                    size={48}
-                                    color={star <= rating ? '#ffc107' : '#ddd'}
-                                />
-                            </TouchableOpacity>
-                        ))}
-                    </View>
-                    {rating > 0 && (
-                        <Text style={styles.ratingLabel}>
-                            {rating === 1 && 'Poor'}
-                            {rating === 2 && 'Fair'}
-                            {rating === 3 && 'Good'}
-                            {rating === 4 && 'Very Good'}
-                            {rating === 5 && 'Excellent'}
-                        </Text>
-                    )}
-                    {errors.rating && (
-                        <Text style={styles.errorText}>{errors.rating}</Text>
-                    )}
-                </View>
+                    <Text style={styles.sectionTitle}>Rate Each Item</Text>
+                    {order.items && order.items.length > 0 ? (
+                        <View style={styles.itemsContainer}>
+                            {order.items.map((item, idx) => {
+                                const reviewKey = `${item.foodId}_${order.id}`;
+                                const isReviewed = reviewedFoods[reviewKey];
 
-                {/* Comment Section */}
-                <View style={styles.section}>
-                    <View style={styles.commentHeader}>
-                        <Text style={styles.sectionTitle}>Your Review</Text>
-                        <Text style={styles.charCount}>
-                            {comment.length}/500
-                        </Text>
-                    </View>
-                    <TextInput
-                        style={[
-                            styles.commentInput,
-                            errors.comment && styles.inputError
-                        ]}
-                        placeholder="Share your experience with this order (What did you like? What could be improved?)"
-                        placeholderTextColor="#aaa"
-                        value={comment}
-                        onChangeText={(text) => {
-                            if (text.length <= 500) {
-                                setComment(text);
-                                if (errors.comment) {
-                                    setErrors(prev => ({ ...prev, comment: null }));
-                                }
-                            }
-                        }}
-                        multiline
-                        numberOfLines={6}
-                        textAlignVertical="top"
-                    />
-                    {errors.comment && (
-                        <Text style={styles.errorText}>{errors.comment}</Text>
+                                return (
+                                    <View key={idx} style={styles.itemCard}>
+                                        <View style={styles.itemInfo}>
+                                            <Text style={styles.itemName}>{item.name || item.food_name}</Text>
+                                            <Text style={styles.itemQuantity}>Qty: {item.quantity}</Text>
+                                        </View>
+                                        {isReviewed ? (
+                                            <View style={styles.reviewedBadge}>
+                                                <MaterialIcons name="check-circle" size={20} color="#4caf50" />
+                                                <Text style={styles.reviewedText}>Reviewed</Text>
+                                            </View>
+                                        ) : (
+                                            <TouchableOpacity
+                                                style={styles.reviewButton}
+                                                onPress={() => handleOpenReview(item)}
+                                            >
+                                                <MaterialIcons name="star" size={16} color="#fff" />
+                                                <Text style={styles.reviewButtonText}>Rate</Text>
+                                            </TouchableOpacity>
+                                        )}
+                                    </View>
+                                );
+                            })}
+                        </View>
+                    ) : (
+                        <Text style={styles.noItemsText}>No items in this order</Text>
                     )}
-                </View>
-
-                {/* Review Highlights */}
-                <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>What did you think about?</Text>
-                    <View style={styles.highlightsContainer}>
-                        {['Food Quality', 'Packaging', 'Delivery Speed', 'Restaurant Service'].map(
-                            (highlight) => (
-                                <TouchableOpacity
-                                    key={highlight}
-                                    style={styles.highlightTag}
-                                >
-                                    <MaterialIcons name="add-circle-outline" size={18} color="#ff6b35" />
-                                    <Text style={styles.highlightText}>{highlight}</Text>
-                                </TouchableOpacity>
-                            )
-                        )}
-                    </View>
                 </View>
 
                 {/* Info Notice */}
                 <View style={styles.noticeSection}>
                     <MaterialIcons name="info" size={20} color="#1976d2" />
                     <Text style={styles.noticeText}>
-                        Your review helps other customers and helps the restaurant improve their service.
+                        Your reviews help other customers and the restaurant improve their service.
                     </Text>
                 </View>
             </ScrollView>
 
-            {/* Submit Button */}
-            <View style={styles.bottomContainer}>
-                <TouchableOpacity
-                    style={[
-                        styles.submitButton,
-                        (submitting || rating === 0) && { opacity: 0.7 }
-                    ]}
-                    onPress={handleSubmitReview}
-                    disabled={submitting || rating === 0}
-                >
-                    {submitting ? (
-                        <ActivityIndicator color="#fff" size="small" />
-                    ) : (
-                        <>
-                            <MaterialIcons name="send" size={18} color="#fff" />
-                            <Text style={styles.submitButtonText}>Submit Review</Text>
-                        </>
-                    )}
-                </TouchableOpacity>
-            </View>
+            {/* Review Modal */}
+            {showReviewModal && selectedItem && (
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modal}>
+                        <View style={styles.modalHeader}>
+                            <Text style={styles.modalTitle}>Rate {selectedItem.name}</Text>
+                            <TouchableOpacity onPress={() => setShowReviewModal(false)}>
+                                <MaterialIcons name="close" size={24} color="#1a1a1a" />
+                            </TouchableOpacity>
+                        </View>
+
+                        <ScrollView style={styles.modalContent} showsVerticalScrollIndicator={false}>
+                            {/* Rating Section */}
+                            <View style={styles.ratingSection}>
+                                <Text style={styles.ratingLabel}>How was this item?</Text>
+                                <View style={styles.starsContainer}>
+                                    {[1, 2, 3, 4, 5].map(star => (
+                                        <TouchableOpacity
+                                            key={star}
+                                            onPress={() => setRating(star)}
+                                            style={styles.starButton}
+                                        >
+                                            <MaterialIcons
+                                                name={star <= rating ? 'star' : 'star-outline'}
+                                                size={40}
+                                                color={star <= rating ? '#ffc107' : '#ddd'}
+                                            />
+                                        </TouchableOpacity>
+                                    ))}
+                                </View>
+                                {rating > 0 && (
+                                    <Text style={styles.ratingValue}>
+                                        {rating === 1 && '⭐ Poor'}
+                                        {rating === 2 && '⭐⭐ Fair'}
+                                        {rating === 3 && '⭐⭐⭐ Good'}
+                                        {rating === 4 && '⭐⭐⭐⭐ Very Good'}
+                                        {rating === 5 && '⭐⭐⭐⭐⭐ Excellent'}
+                                    </Text>
+                                )}
+                            </View>
+
+                            {/* Comment Section */}
+                            <View style={styles.commentSection}>
+                                <Text style={styles.commentLabel}>Your Comment</Text>
+                                <TextInput
+                                    style={styles.commentInput}
+                                    placeholder="Share your experience with this dish..."
+                                    placeholderTextColor="#aaa"
+                                    value={comment}
+                                    onChangeText={setComment}
+                                    multiline
+                                    numberOfLines={4}
+                                    textAlignVertical="top"
+                                    maxLength={500}
+                                />
+                                <Text style={styles.charCount}>{comment.length}/500</Text>
+                            </View>
+                        </ScrollView>
+
+                        {/* Modal Actions */}
+                        <View style={styles.modalActions}>
+                            <TouchableOpacity
+                                style={styles.cancelButton}
+                                onPress={() => setShowReviewModal(false)}
+                            >
+                                <Text style={styles.cancelButtonText}>Cancel</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={[
+                                    styles.submitButton,
+                                    (submitting || rating === 0) && { opacity: 0.6 }
+                                ]}
+                                onPress={handleSubmitReview}
+                                disabled={submitting || rating === 0}
+                            >
+                                {submitting ? (
+                                    <ActivityIndicator color="#fff" size="small" />
+                                ) : (
+                                    <Text style={styles.submitButtonText}>Submit</Text>
+                                )}
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+            )}
         </SafeAreaView>
     );
 };
 
+
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        paddingTop: 40,
         backgroundColor: '#f8f8f8',
     },
     header: {
@@ -318,69 +360,62 @@ const styles = StyleSheet.create({
         color: '#999',
         marginTop: 4,
     },
-    ratingContainer: {
-        flexDirection: 'row',
-        justifyContent: 'space-around',
-        alignItems: 'center',
-        marginVertical: 12,
+    itemsContainer: {
+        gap: 12,
     },
-    starButton: {
-        padding: 8,
-    },
-    ratingLabel: {
-        textAlign: 'center',
-        fontSize: 16,
-        fontWeight: '600',
-        color: '#ff6b35',
-        marginTop: 8,
-    },
-    commentHeader: {
+    itemCard: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: 12,
-    },
-    charCount: {
-        fontSize: 12,
-        color: '#999',
-    },
-    commentInput: {
-        borderWidth: 1,
-        borderColor: '#ddd',
+        backgroundColor: '#f9f9f9',
         borderRadius: 8,
         paddingHorizontal: 12,
-        paddingVertical: 10,
+        paddingVertical: 12,
+        borderWidth: 1,
+        borderColor: '#eee',
+    },
+    itemInfo: {
+        flex: 1,
+    },
+    itemName: {
         fontSize: 14,
+        fontWeight: '600',
         color: '#1a1a1a',
-        minHeight: 120,
     },
-    inputError: {
-        borderColor: '#e53935',
-        backgroundColor: '#ffebee',
-    },
-    errorText: {
+    itemQuantity: {
         fontSize: 12,
-        color: '#e53935',
+        color: '#999',
         marginTop: 4,
     },
-    highlightsContainer: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        gap: 8,
-    },
-    highlightTag: {
+    reviewButton: {
         flexDirection: 'row',
         alignItems: 'center',
         gap: 6,
-        backgroundColor: '#fff3e0',
-        borderRadius: 8,
+        backgroundColor: '#ff6b35',
+        borderRadius: 6,
         paddingHorizontal: 12,
         paddingVertical: 8,
     },
-    highlightText: {
+    reviewButtonText: {
+        color: '#fff',
         fontSize: 12,
-        color: '#ff6b35',
-        fontWeight: '500',
+        fontWeight: '600',
+    },
+    reviewedBadge: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 6,
+    },
+    reviewedText: {
+        fontSize: 12,
+        color: '#4caf50',
+        fontWeight: '600',
+    },
+    noItemsText: {
+        fontSize: 14,
+        color: '#999',
+        textAlign: 'center',
+        paddingVertical: 20,
     },
     noticeSection: {
         backgroundColor: '#e3f2fd',
@@ -399,32 +434,127 @@ const styles = StyleSheet.create({
         color: '#1565c0',
         flex: 1,
     },
-    bottomContainer: {
+    modalOverlay: {
+        ...StyleSheet.absoluteFill,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        justifyContent: 'flex-end',
+    },
+    modal: {
+        backgroundColor: '#fff',
+        borderTopLeftRadius: 16,
+        borderTopRightRadius: 16,
+        maxHeight: '90%',
+        paddingBottom: 20,
+    },
+    modalHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
         paddingHorizontal: 16,
         paddingVertical: 12,
-        backgroundColor: '#fff',
-        borderTopWidth: 1,
-        borderTopColor: '#eee',
+        borderBottomWidth: 1,
+        borderBottomColor: '#eee',
     },
-    submitButton: {
-        backgroundColor: '#ff6b35',
-        borderRadius: 8,
-        paddingVertical: 14,
+    modalTitle: {
+        fontSize: 18,
+        fontWeight: '700',
+        color: '#1a1a1a',
+    },
+    modalContent: {
+        paddingHorizontal: 16,
+        paddingVertical: 16,
+    },
+    ratingSection: {
+        marginBottom: 20,
+    },
+    ratingLabel: {
+        fontSize: 14,
+        fontWeight: '600',
+        color: '#1a1a1a',
+        marginBottom: 12,
+    },
+    starsContainer: {
         flexDirection: 'row',
+        justifyContent: 'space-around',
         alignItems: 'center',
-        justifyContent: 'center',
-        gap: 8,
+        marginBottom: 12,
     },
-    submitButtonText: {
-        color: '#fff',
+    starButton: {
+        padding: 8,
+    },
+    ratingValue: {
+        textAlign: 'center',
         fontSize: 16,
         fontWeight: '600',
+        color: '#ff6b35',
+    },
+    commentSection: {
+        marginBottom: 20,
+    },
+    commentLabel: {
+        fontSize: 14,
+        fontWeight: '600',
+        color: '#1a1a1a',
+        marginBottom: 8,
+    },
+    commentInput: {
+        borderWidth: 1,
+        borderColor: '#ddd',
+        borderRadius: 8,
+        paddingHorizontal: 12,
+        paddingVertical: 10,
+        fontSize: 14,
+        color: '#1a1a1a',
+        minHeight: 100,
+        textAlignVertical: 'top',
+    },
+    charCount: {
+        fontSize: 12,
+        color: '#999',
+        marginTop: 4,
+        textAlign: 'right',
+    },
+    modalActions: {
+        flexDirection: 'row',
+        gap: 12,
+        paddingHorizontal: 16,
+        borderTopWidth: 1,
+        borderTopColor: '#eee',
+        paddingTop: 12,
+    },
+    cancelButton: {
+        flex: 1,
+        backgroundColor: '#f0f0f0',
+        borderRadius: 8,
+        paddingVertical: 12,
+        alignItems: 'center',
+    },
+    cancelButtonText: {
+        fontSize: 14,
+        fontWeight: '600',
+        color: '#666',
+    },
+    submitButton: {
+        flex: 1,
+        backgroundColor: '#ff6b35',
+        borderRadius: 8,
+        paddingVertical: 12,
+        alignItems: 'center',
+    },
+    submitButtonText: {
+        fontSize: 14,
+        fontWeight: '600',
+        color: '#fff',
     },
     errorContainer: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
         gap: 16,
+    },
+    errorText: {
+        fontSize: 14,
+        color: '#e53935',
     },
 });
 

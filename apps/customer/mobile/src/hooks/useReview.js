@@ -1,11 +1,12 @@
-import { useCallback } from "react";
-import { reviewService } from "shared-services";
-
 /**
- * Custom hook for managing food reviews
- * Handles review submission and rating management
- * Shared between web and mobile customer apps
+ * useReview.js - Mobile specific hook
+ * Handles food reviews for individual items in orders
+ * Uses local reviewService instead of shared-services
  */
+
+import { useCallback } from 'react';
+import { reviewService } from '../services/reviewService';
+
 export const useReview = () => {
     /**
      * Submit review for a food item
@@ -19,21 +20,21 @@ export const useReview = () => {
             if (!foodId || !userId || !orderId) {
                 return {
                     success: false,
-                    message: "Missing required fields: foodId, userId, orderId",
+                    message: 'Missing required fields: foodId, userId, orderId',
                 };
             }
 
             if (rating < 1 || rating > 5) {
                 return {
                     success: false,
-                    message: "Rating must be between 1 and 5",
+                    message: 'Rating must be between 1 and 5',
                 };
             }
 
             if (!comment || comment.trim().length === 0) {
                 return {
                     success: false,
-                    message: "Comment cannot be empty",
+                    message: 'Comment cannot be empty',
                 };
             }
 
@@ -47,17 +48,17 @@ export const useReview = () => {
                     comment: comment.trim(),
                 });
 
-                console.log("Review submitted successfully:", review);
+                console.log('[useReview] Review submitted successfully:', review);
                 return {
                     success: true,
                     review: review,
-                    message: "Thank you for your review!",
+                    message: 'Thank you for your review!',
                 };
             } catch (error) {
-                console.error("Error submitting review:", error);
+                console.error('[useReview] Error submitting review:', error);
                 return {
                     success: false,
-                    message: error.message || "Error submitting review",
+                    message: error.message || 'Error submitting review',
                 };
             }
         },
@@ -75,7 +76,7 @@ export const useReview = () => {
                 reviews: reviews,
             };
         } catch (error) {
-            console.error("Error fetching user reviews:", error);
+            console.error('[useReview] Error fetching user reviews:', error);
             return {
                 success: false,
                 reviews: [],
@@ -104,7 +105,7 @@ export const useReview = () => {
 
             return reviewed;
         } catch (error) {
-            console.error("Error checking reviewed foods:", error);
+            console.error('[useReview] Error checking reviewed foods:', error);
             return {};
         }
     }, []);

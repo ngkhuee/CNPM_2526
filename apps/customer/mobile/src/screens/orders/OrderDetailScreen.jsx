@@ -16,7 +16,7 @@ import {
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { NavigationContext } from '../../contexts/NavigationContext';
-import { orderService } from '../../services/orderService';
+import * as orderService from '../../services/orderService';
 import { showToast } from '../../utils/toastHelper';
 
 const ORDER_STATUS_LABELS = {
@@ -289,6 +289,7 @@ const OrderDetailScreen = ({ orderId }) => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        paddingTop: 40,
         backgroundColor: '#f8f8f8',
     },
     header: {

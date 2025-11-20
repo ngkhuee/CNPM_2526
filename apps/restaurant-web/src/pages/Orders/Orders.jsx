@@ -83,10 +83,18 @@ const Orders = () => {
     const handleMarkReady = async (orderId) => {
         try {
             await updateOrderStatus(orderId, "ready");
-            toast.success("Order is ready for delivery!");
-            droneSimulation.autoTriggerDelivery(orderId).catch((error) => {
-                console.error("Failed to start drone delivery:", error);
-            });
+
+            // Assign drone if not already assigned
+            const droneAssignmentResult = await assignDroneToOrder(orderId);
+
+            if (droneAssignmentResult.success || droneAssignmentResult.message === "Order confirmed but no drones available") {
+                toast.success("Order is ready for delivery!");
+                droneSimulation.autoTriggerDelivery(orderId).catch((error) => {
+                    console.error("Failed to start drone delivery:", error);
+                });
+            } else {
+                toast.error("Failed to assign drone to order");
+            }
         } catch (error) {
             console.error("Error marking order as ready:", error);
             toast.error("Failed to mark order as ready");

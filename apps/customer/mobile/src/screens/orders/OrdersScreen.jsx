@@ -45,17 +45,18 @@ export default function OrdersScreen({ onNavigate }) {
         }
     };
 
-    const handleNavigate = (route) => {
+    const handleNavigate = (route, params) => {
         if (onNavigate) {
-            onNavigate(route);
+            onNavigate(route, params);
         }
-        navigate(route);
+        navigate(route, params);
     };
 
     const handleViewOrderDetails = (orderId) => {
         const order = allOrders.find(o => o.id === orderId);
-        // In production, would navigate to order detail screen
-        console.log('View order details:', orderId, order);
+        if (order) {
+            handleNavigate('order-detail', { orderId: orderId });
+        }
     };
 
     // Check if user is authenticated - show login prompt instead of orders

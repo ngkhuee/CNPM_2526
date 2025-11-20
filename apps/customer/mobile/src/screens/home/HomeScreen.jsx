@@ -14,6 +14,7 @@ import axios from 'axios';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { NavigationContext } from '../../contexts/NavigationContext';
 import Header from '../../components/Header';
+import MenuDrawer from '../../components/MenuDrawer';
 import SearchOverlay from '../../components/SearchOverlay';
 import HomeHero from './components/HomeHero';
 import FoodCard from './components/FoodCard';
@@ -46,6 +47,7 @@ export default function HomeScreen({ onNavigate }) {
   const [showSearchOverlay, setShowSearchOverlay] = useState(false);
   const [showSearchResults, setShowSearchResults] = useState(false);
   const [searchSuggestions, setSearchSuggestions] = useState([]);
+  const [drawerVisible, setDrawerVisible] = useState(false);
 
   // Hook để navigate tới restaurant detail
   const navigateToRestaurant = useNavigateToRestaurant(onNavigate);
@@ -175,6 +177,25 @@ export default function HomeScreen({ onNavigate }) {
     navigate(route);
   };
 
+  const handleMenuPress = () => {
+    setDrawerVisible(true);
+  };
+
+  const handleCloseDrawer = () => {
+    setDrawerVisible(false);
+  };
+
+  const handleDrawerNavigate = (screen) => {
+    setDrawerVisible(false);
+
+    if (screen === 'register-restaurant') {
+      navigate('register-restaurant');
+    } else if (screen === 'profile') {
+      navigate('profile');
+    }
+    // Add more cases as needed
+  };
+
   // Show search results if requested
   if (showSearchResults && searchQuery) {
     return (
@@ -195,6 +216,7 @@ export default function HomeScreen({ onNavigate }) {
           onSearchFocus={handleSearchFocus}
           onSearchBlur={handleSearchBlur}
           onSearchSubmit={handleSearchSubmit}
+          onMenuPress={handleMenuPress}
         />
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#ff6b35" />
@@ -214,6 +236,7 @@ export default function HomeScreen({ onNavigate }) {
           onSearchFocus={handleSearchFocus}
           onSearchBlur={handleSearchBlur}
           onSearchSubmit={handleSearchSubmit}
+          onMenuPress={handleMenuPress}
         />
         <View style={styles.errorContainer}>
           <Text style={styles.errorText}>Error: {error}</Text>
@@ -234,6 +257,7 @@ export default function HomeScreen({ onNavigate }) {
         onSearchFocus={handleSearchFocus}
         onSearchBlur={handleSearchBlur}
         onSearchSubmit={handleSearchSubmit}
+        onMenuPress={handleMenuPress}
       />
       <SearchOverlay
         visible={showSearchOverlay}
@@ -241,6 +265,11 @@ export default function HomeScreen({ onNavigate }) {
         suggestions={searchSuggestions}
         onClose={handleCloseSearchOverlay}
         onSelectSuggestion={handleSelectSuggestion}
+      />
+      <MenuDrawer
+        isVisible={drawerVisible}
+        onClose={handleCloseDrawer}
+        onNavigate={handleDrawerNavigate}
       />
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* Hero Banner */}

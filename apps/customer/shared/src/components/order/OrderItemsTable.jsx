@@ -30,6 +30,9 @@ const OrderItemsTable = ({
             <tbody>
                 {items.map((item, i) => {
                     console.log("OrderItemsTable - Item:", item);
+                    // Check if this specific item in this order has been reviewed
+                    const reviewKey = `${item.foodId}_${orderId}`;
+                    const isReviewedInThisOrder = reviewedFoods[reviewKey];
                     return (
                         <tr key={i}>
                             <td>{item.name}</td>
@@ -43,7 +46,7 @@ const OrderItemsTable = ({
                             </td>
                             {canReviewThisOrder && (
                                 <td>
-                                    {reviewedFoods[item.foodId] ? (
+                                    {isReviewedInThisOrder ? (
                                         <button
                                             style={{
                                                 background: "#6c757d",

@@ -1,12 +1,14 @@
 // hooks/useOrderTracking.js - Quản lý order tracking data & polling
 import { useState, useEffect } from 'react';
 import { Alert } from 'react-native';
-import { orderService } from '../services/orderService';
+import * as orderService from '../services/orderService';
 
 export const useOrderTracking = (orderId, onNavigate) => {
     const [order, setOrder] = useState(null);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
+    const [autoRefreshEnabled, setAutoRefreshEnabled] = useState(true);
+    const [intervalId, setIntervalId] = useState(null);
 
     const fetchOrder = async (showLoading = false) => {
         try {
@@ -25,19 +27,26 @@ export const useOrderTracking = (orderId, onNavigate) => {
         }
     };
 
-    // Auto-refresh every 5 seconds
+    // Auto-refresh effect
     useEffect(() => {
         if (!orderId) return;
 
         fetchOrder(true);
-        const interval = setInterval(() => fetchOrder(false), 5000);
-        
-        return () => clearInterval(interval);
-    }, [orderId]);
+
+        if (autoRefreshEnabled) {
+            const id = setInterval(() => fetchOrder(false), 5000);
+            setIntervalId(id);
+            return () => clearInterval(id);
+        }
+    }, [orderId, autoRefreshEnabled]);
 
     const handleRefresh = () => {
         setRefreshing(true);
         fetchOrder(false);
+    };
+
+    const setAutoRefresh = (enabled) => {
+        setAutoRefreshEnabled(enabled);
     };
 
     return {
@@ -46,5 +55,6 @@ export const useOrderTracking = (orderId, onNavigate) => {
         refreshing,
         handleRefresh,
         refetch: fetchOrder,
+        setAutoRefresh,
     };
 };

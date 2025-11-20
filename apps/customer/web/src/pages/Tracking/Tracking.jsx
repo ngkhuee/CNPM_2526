@@ -31,6 +31,7 @@ const Tracking = () => {
 
   const [refreshing, setRefreshing] = useState(false);
   const [autoRefreshEnabled, setAutoRefreshEnabled] = useState(true);
+  const [simulatingDelivery, setSimulatingDelivery] = useState(false);
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -41,6 +42,31 @@ const Tracking = () => {
       alert("Failed to refresh order data");
     } finally {
       setRefreshing(false);
+    }
+  };
+
+  // Trigger drone delivery simulation
+  const handleSimulateDelivery = async () => {
+    setSimulatingDelivery(true);
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_BASE_URL || "http://localhost:4000"}/orders/${id}/simulate-delivery`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+      if (response.ok) {
+        alert("Drone delivery simulation started!");
+        await refreshTracking();
+      } else {
+        alert("Failed to start delivery simulation");
+      }
+    } catch (error) {
+      console.error("Simulation error:", error);
+      alert("Error: " + error.message);
+    } finally {
+      setSimulatingDelivery(false);
     }
   };
 
@@ -74,8 +100,17 @@ const Tracking = () => {
   const errorState = <TrackingLoadingError loading={loading} error={error} orderId={id} />;
   if (loading || error || !order) return errorState;
 
-  const pickupGPS = order.pickup_gps || { lat: 10.776, lng: 106.7 };
-  const dropoffGPS = order.dropoff_gps || { lat: 10.7729, lng: 106.6981 };
+  // Handle both lat/lng and latitude/longitude formats
+  const normalizeGPS = (gps) => {
+    if (!gps) return { lat: 10.776, lng: 106.7 };
+    return {
+      lat: gps.lat || gps.latitude || 10.776,
+      lng: gps.lng || gps.longitude || 106.7,
+    };
+  };
+
+  const pickupGPS = normalizeGPS(order.pickup_gps);
+  const dropoffGPS = normalizeGPS(order.dropoff_gps);
 
   return (
     <div className="tracking-page">
@@ -106,6 +141,9 @@ const Tracking = () => {
         autoRefreshEnabled={autoRefreshEnabled}
         onRefresh={handleRefresh}
         onToggleAutoRefresh={() => setAutoRefreshEnabled(!autoRefreshEnabled)}
+        orderStatus={order?.status}
+        onSimulateDelivery={handleSimulateDelivery}
+        simulatingDelivery={simulatingDelivery}
       />
 
       {/* Order Timeline */}
@@ -190,11 +228,12 @@ const Tracking = () => {
             title="Delivery Map"
             width="100%"
             height="450"
-            style={{ border: 0, borderRadius: "8px" }}
-            loading="lazy"
-            src={`https://www.openstreetmap.org/export/embed.html?bbox=${dropoffGPS.lng - 0.02
-              },${dropoffGPS.lat - 0.02},${dropoffGPS.lng + 0.02},${dropoffGPS.lat + 0.02
-              }&layer=mapnik&marker=${dropoffGPS.lat},${dropoffGPS.lng}`}
+            frameBorder="0"
+            scrolling="no"
+            marginHeight="0"
+            marginWidth="0"
+            src={`https://www.openstreetmap.org/export/embed.html?bbox=${dropoffGPS.lng - 0.02},${dropoffGPS.lat - 0.02},${dropoffGPS.lng + 0.02},${dropoffGPS.lat + 0.02}&layer=mapnik&marker=${dropoffGPS.lat},${dropoffGPS.lng}`}
+            style={{ border: "1px solid #ccc", borderRadius: 8 }}
           />
         </div>
 

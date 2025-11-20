@@ -4,6 +4,7 @@ import { AuthContext } from '../contexts/AuthContext';
 import { NavigationContext } from '../contexts/NavigationContext';
 import SplashScreen from '../screens/auth/SplashScreen';
 import LoginAuthScreen from '../screens/auth/LoginAuthScreen';
+import RegisterRestaurantScreen from '../screens/auth/RegisterRestaurantScreen';
 import HomeScreen from '../screens/home/HomeScreen';
 import OrdersScreen from '../screens/orders/OrdersScreen';
 import ProfileScreen from '../screens/profile/ProfileScreen';
@@ -64,6 +65,8 @@ function AppStack({ activeScreen, selectedFood, setSelectedFood }) {
         switch (activeScreen) {
             case 'login':
                 return <LoginAuthScreen onBackPress={() => navigate('home')} />;
+            case 'register-restaurant':
+                return <RegisterRestaurantScreen onNavigate={navigate} />;
             case 'home':
                 return <HomeScreen onNavigate={navigate} />;
             case 'restaurant':

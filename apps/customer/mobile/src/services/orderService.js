@@ -11,42 +11,63 @@ import apiClient from './apiClient';
 const transformOrder = (order) => {
     if (!order) return null;
 
-    // Map restaurant IDs to names (for demo purposes)
-    const restaurantNames = {
-        'r1': 'Belga Pizza',
-        'r2': 'Lotteria',
-        'r3': 'Pizza 4P\'s',
-        'r4': 'Texas Chicken',
-        'r5': 'Subway',
-        'r6': 'Burger King',
-    };
-
     return {
         id: order.id,
         status: order.status,
-        totalPrice: order.total_amount || 0,
+        totalPrice: order.total_amount || order.totalPrice || 0,
         createdAt: order.created_at,
+        created_at: order.created_at,
         updatedAt: order.updated_at,
+        updated_at: order.updated_at,
         restaurantId: order.restaurant_id,
-        restaurantName: order.restaurant?.name || restaurantNames[order.restaurant_id] || 'Unknown Restaurant',
+        restaurant_id: order.restaurant_id,
+        restaurantName: order.restaurant?.name || 'Unknown Restaurant',
+        restaurant_name: order.restaurant?.name || 'Unknown Restaurant',
+        restaurantAddress: order.restaurant?.address || '',
+        restaurant_address: order.restaurant?.address || '',
         deliveryAddress: order.customer?.address || (order.delivery_address || ''),
         delivery_address: order.customer?.address || (order.delivery_address || ''),
         items: (order.items || []).map(item => ({
             id: item.menu_id,
             foodId: item.menu_id,
+            menu_id: item.menu_id,
             name: item.name,
             quantity: item.quantity,
-            price: item.unit_price,
+            price: item.unit_price || item.price,
+            unit_price: item.unit_price || item.price,
+            subtotal: item.subtotal || (item.quantity * (item.unit_price || item.price || 0)),
         })),
         paymentMethod: order.payment_method,
         paymentStatus: order.payment_status,
         payment_status: order.payment_status,
         subtotal: order.subtotal || 0,
         deliveryFee: order.delivery_fee || 0,
+        delivery_fee: order.delivery_fee || 0,
         discountAmount: order.discount_amount || 0,
-        customerName: order.customer?.name,
-        customerPhone: order.customer?.phone,
+        discount_amount: order.discount_amount || 0,
+        customer: order.customer || {
+            name: order.customerName,
+            phone: order.customerPhone,
+            address: order.delivery_address,
+            email: order.customer?.email,
+            id: order.customer?.id,
+        },
+        customerName: order.customer?.name || order.customerName,
+        customerPhone: order.customer?.phone || order.customerPhone,
         specialInstructions: order.special_instructions,
+        special_instructions: order.special_instructions,
+        // Tracking fields
+        drone_id: order.drone_id,
+        droneId: order.drone_id,
+        estimated_delivery_time: order.estimated_delivery_time,
+        estimatedDeliveryTime: order.estimated_delivery_time,
+        pickup_gps: order.pickup_gps,
+        dropoff_gps: order.dropoff_gps || order.delivery_gps,
+        current_gps: order.current_gps,
+        order_number: order.order_number,
+        orderNumber: order.order_number,
+        promo_code: order.promo_code || order.promotion_code,
+        promotion_code: order.promo_code || order.promotion_code,
     };
 };
 
@@ -60,7 +81,7 @@ export const getOrders = async () => {
     try {
         // API endpoint tự động lọc orders theo user_id từ token
         const response = await apiClient.get('/orders');
-        console.log('[orderService.getOrders] Response:', response);
+        // console.log('[orderService.getOrders] Response:', response);
 
         // Transform orders từ snake_case sang camelCase
         const transformedOrders = Array.isArray(response)

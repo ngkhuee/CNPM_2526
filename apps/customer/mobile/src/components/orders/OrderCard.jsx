@@ -47,6 +47,9 @@ export default function OrderCard({
         ? order.totalPrice.toLocaleString('vi-VN')
         : '0';
 
+    // Can track order
+    const canTrackOrder = ['paid', 'confirmed', 'preparing', 'ready', 'delivering'].includes(order.status);
+
     return (
         <TouchableOpacity
             style={styles.card}
@@ -133,6 +136,15 @@ export default function OrderCard({
                     </Text>
                 </View>
                 <View style={styles.actions}>
+                    {canTrackOrder && (
+                        <TouchableOpacity
+                            style={[styles.actionBtn, styles.trackBtn]}
+                            onPress={() => navigate('tracking', { orderId: order.id })}
+                        >
+                            <MaterialIcons name="location-on" size={16} color="#1976d2" />
+                            <Text style={styles.trackBtnText}>Track</Text>
+                        </TouchableOpacity>
+                    )}
                     {isPending && !isPaid && (
                         <TouchableOpacity
                             style={[styles.actionBtn, styles.paymentBtn]}
@@ -320,5 +332,15 @@ const styles = StyleSheet.create({
         fontSize: 12,
         fontWeight: '600',
         color: '#FF6B35',
+    },
+    trackBtn: {
+        borderColor: '#1976d2',
+        backgroundColor: '#e3f2fd',
+    },
+    trackBtnText: {
+        marginLeft: 4,
+        fontSize: 12,
+        fontWeight: '600',
+        color: '#1976d2',
     },
 });

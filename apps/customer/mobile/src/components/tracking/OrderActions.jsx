@@ -3,7 +3,22 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 
-export const OrderActions = ({ order, isDelivered, onConfirmDelivery, onReview }) => {
+const formatCountdown = (seconds) => {
+    if (!seconds) return '';
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+};
+
+export const OrderActions = ({
+    order,
+    isDelivered,
+    onConfirmDelivery,
+    onReview,
+    showConfirmButton,
+    autoConfirmCountdown,
+    onManualConfirm,
+}) => {
     if (isDelivered) {
         return (
             <View style={styles.deliveredSection}>
@@ -20,7 +35,36 @@ export const OrderActions = ({ order, isDelivered, onConfirmDelivery, onReview }
         );
     }
 
-    if (order.status === 'delivering') {
+    // Show confirm button when drone arrives
+    if (showConfirmButton && order?.status === 'delivering') {
+        return (
+            <View style={styles.confirmSection}>
+                <View style={styles.alertBox}>
+                    <MaterialIcons name="info" size={20} color="#ff6b35" />
+                    <View style={styles.alertContent}>
+                        <Text style={styles.alertTitle}>Delivery Arrived!</Text>
+                        <Text style={styles.alertText}>
+                            Your order has arrived at the delivery location.
+                        </Text>
+                        {autoConfirmCountdown && (
+                            <Text style={styles.countdownText}>
+                                Auto-confirm in {formatCountdown(autoConfirmCountdown)}
+                            </Text>
+                        )}
+                    </View>
+                </View>
+                <TouchableOpacity
+                    style={styles.confirmButton}
+                    onPress={onManualConfirm || onConfirmDelivery}
+                >
+                    <MaterialIcons name="check-circle" size={20} color="#fff" />
+                    <Text style={styles.confirmButtonText}>Confirm Receipt</Text>
+                </TouchableOpacity>
+            </View>
+        );
+    }
+
+    if (order?.status === 'delivering') {
         return (
             <View style={styles.confirmSection}>
                 <Text style={styles.confirmText}>
@@ -43,13 +87,44 @@ const styles = StyleSheet.create({
         paddingHorizontal: 16,
         paddingVertical: 16,
         marginBottom: 8,
-        alignItems: 'center',
     },
     confirmText: {
         fontSize: 13,
         color: '#666',
         textAlign: 'center',
         marginBottom: 12,
+    },
+    alertBox: {
+        backgroundColor: '#fff9e6',
+        borderRadius: 8,
+        paddingHorizontal: 12,
+        paddingVertical: 10,
+        flexDirection: 'row',
+        alignItems: 'flex-start',
+        gap: 10,
+        marginBottom: 12,
+        borderLeftWidth: 4,
+        borderLeftColor: '#ff6b35',
+    },
+    alertContent: {
+        flex: 1,
+    },
+    alertTitle: {
+        fontSize: 14,
+        fontWeight: '600',
+        color: '#ff6b35',
+        marginBottom: 4,
+    },
+    alertText: {
+        fontSize: 12,
+        color: '#666',
+        marginBottom: 6,
+    },
+    countdownText: {
+        fontSize: 12,
+        fontWeight: '600',
+        color: '#ff6b35',
+        fontFamily: 'monospace',
     },
     confirmButton: {
         backgroundColor: '#ff6b35',
@@ -58,6 +133,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 24,
         flexDirection: 'row',
         alignItems: 'center',
+        justifyContent: 'center',
         gap: 8,
     },
     confirmButtonText: {

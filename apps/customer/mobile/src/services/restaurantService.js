@@ -1,6 +1,6 @@
 /**
  * restaurantService.js - Mobile specific restaurant service
- * Lấy dữ liệu nhà hàng từ API (db.json)
+ * Lấy dữ liệu nhà hàng từ API (db.json) + đăng kí nhà hàng mới
  */
 
 import apiClient from './apiClient';
@@ -97,6 +97,96 @@ export const restaurantService = {
             }));
         } catch (error) {
             console.error('[restaurantService.getMenu] Error:', error);
+            throw error;
+        }
+    },
+
+    /**
+     * Validate if email already exists
+     * @param {string} email - Email to check
+     * @returns {object} { valid: boolean, message: string }
+     */
+    async validateEmails(email) {
+        try {
+            // Fetch all users
+            const usersResponse = await apiClient.get('/users');
+            const users = usersResponse || [];
+
+            // Check if email exists in users
+            const existingUser = users.find((u) => u.email === email);
+            if (existingUser) {
+                return {
+                    valid: false,
+                    message: 'This email is already registered as a customer account. Please use a different email.',
+                };
+            }
+
+            // Fetch all restaurants
+            const restaurantsResponse = await apiClient.get('/restaurants');
+            const restaurants = restaurantsResponse || [];
+
+            // Check if email exists in restaurants
+            const existingRestaurant = restaurants.find(
+                (r) => r.email === email || r.ownerEmail === email
+            );
+            if (existingRestaurant) {
+                return {
+                    valid: false,
+                    message: 'This email is already registered. Please use a different email.',
+                };
+            }
+
+            return {
+                valid: true,
+                message: 'Email is available',
+            };
+        } catch (error) {
+            console.error('Error validating emails:', error);
+            throw error;
+        }
+    },
+
+    /**
+     * Register new restaurant
+     * @param {object} restaurantData - Restaurant information
+     * @returns {object} { success, restaurant, message }
+     */
+    async registerRestaurant(restaurantData) {
+        try {
+            const response = await apiClient.post('/restaurants/register', restaurantData);
+            return response;
+        } catch (error) {
+            console.error('Error registering restaurant:', error);
+            throw error;
+        }
+    },
+
+    /**
+     * Register restaurant owner user
+     * @param {object} userData - Owner user information
+     * @returns {object} { success, user, message }
+     */
+    async registerOwner(userData) {
+        try {
+            const response = await apiClient.post('/users/register-owner', userData);
+            return response;
+        } catch (error) {
+            console.error('Error registering owner:', error);
+            throw error;
+        }
+    },
+
+    /**
+     * Check registration status
+     * @param {string} userId - User ID
+     * @returns {object} user object with status
+     */
+    async checkRegistrationStatus(userId) {
+        try {
+            const response = await apiClient.get(`/users/${userId}`);
+            return response;
+        } catch (error) {
+            console.error('Error checking status:', error);
             throw error;
         }
     },

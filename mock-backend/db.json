@@ -163,6 +163,21 @@
       "created_at": "2025-11-06T11:39:13.178Z",
       "updated_at": "2025-11-19T05:59:38.601Z",
       "name": "ngoc"
+    },
+    {
+      "id": "u_1763609829636",
+      "email": "mynewres@yummy.com",
+      "password": "123456",
+      "full_name": "New res",
+      "phone": "0123456789",
+      "avatar": "/images/avatars/restaurant_owner.png",
+      "roles": [
+        "restaurant_owner"
+      ],
+      "restaurant_id": "r_1763609829636",
+      "status": "pending",
+      "created_at": "2025-11-20T03:37:09.636Z",
+      "updated_at": "2025-11-20T03:37:09.636Z"
     }
   ],
   "addresses": [
@@ -621,6 +636,37 @@
       "status": "pending",
       "created_at": "2025-11-06T11:39:13.178Z",
       "updated_at": "2025-11-06T11:39:13.178Z"
+    },
+    {
+      "id": "r_1763609829636",
+      "name": "My new restaurant",
+      "owner_id": "u_1763609829636",
+      "description": "No description provided",
+      "address": "123abc quan 1 hcm",
+      "latitude": 10.762622,
+      "longitude": 106.660172,
+      "phone": "0123456789",
+      "email": "mynewres@yummy.com",
+      "image": "/images/restaurants/default.png",
+      "banner_image": "/images/restaurants/default.png",
+      "primary_category": "Other",
+      "rating": 0,
+      "total_reviews": 0,
+      "is_open": false,
+      "opening_hours": {
+        "monday": "09:00-22:00",
+        "tuesday": "09:00-22:00",
+        "wednesday": "09:00-22:00",
+        "thursday": "09:00-22:00",
+        "friday": "09:00-23:00",
+        "saturday": "09:00-23:00",
+        "sunday": "09:00-22:00"
+      },
+      "delivery_time_minutes": 30,
+      "min_order_amount": 50000,
+      "status": "pending",
+      "created_at": "2025-11-20T03:37:09.636Z",
+      "updated_at": "2025-11-20T03:37:09.636Z"
     }
   ],
   "categories": [
@@ -1543,7 +1589,7 @@
       "total_amount": 938100,
       "payment_method": "card",
       "payment_status": "completed",
-      "status": "confirmed",
+      "status": "delivered",
       "special_instructions": "",
       "customer": {
         "name": "ngoc",
@@ -1560,7 +1606,136 @@
       "promotion_id": "p3",
       "order_number": "ORD-1763551412663",
       "created_at": "2025-11-19T11:23:32.653Z",
-      "updated_at": "2025-11-19T11:23:32.663Z"
+      "updated_at": "2025-11-20T01:50:13.426Z",
+      "drone_id": "drone2",
+      "actual_delivery_time": "2025-11-20T01:50:13.426Z"
+    },
+    {
+      "id": "ord_1763617223543_qtt9s71ox",
+      "user_id": "u1762957623609",
+      "restaurant_id": "r3",
+      "items": [
+        {
+          "menu_id": 9,
+          "name": "Pizza Spicy Garlic Shrimp",
+          "quantity": 1,
+          "unit_price": 254000,
+          "subtotal": 254000
+        },
+        {
+          "menu_id": 10,
+          "name": "Pizza Burrata Parma Ham",
+          "quantity": 1,
+          "unit_price": 298000,
+          "subtotal": 298000
+        }
+      ],
+      "subtotal": 552000,
+      "delivery_fee": 15000,
+      "discount_amount": 15000,
+      "total_amount": 552000,
+      "payment_method": "momo",
+      "payment_status": "completed",
+      "status": "delivered",
+      "special_instructions": "",
+      "customer": {
+        "name": "ngoc",
+        "phone": "0987654321",
+        "address": "Đường Nguyễn Thị Minh Khai, Việt Nam",
+        "email": "ngoc123@test.com"
+      },
+      "delivery_address": "Đường Nguyễn Thị Minh Khai, Việt Nam",
+      "dropoff_gps": {
+        "latitude": 10.7867589,
+        "longitude": 106.7001333
+      },
+      "promotion_code": "FREEDELIV",
+      "promotion_id": "p4",
+      "order_number": "ORD-1763617224892",
+      "created_at": "2025-11-20T05:40:24.885Z",
+      "updated_at": "2025-11-20T05:41:43.577Z",
+      "drone_id": "drone4",
+      "actual_delivery_time": "2025-11-20T05:41:43.577Z"
+    },
+    {
+      "id": "ord_1763617563450_dxvdkuosw",
+      "user_id": "u1762957623609",
+      "restaurant_id": "r6",
+      "items": [
+        {
+          "menu_id": 20,
+          "name": "Cheese Cake",
+          "quantity": 1,
+          "unit_price": 75000,
+          "subtotal": 75000
+        }
+      ],
+      "subtotal": 75000,
+      "delivery_fee": 15000,
+      "discount_amount": 0,
+      "total_amount": 90000,
+      "payment_method": "momo",
+      "payment_status": "completed",
+      "status": "delivered",
+      "special_instructions": "",
+      "customer": {
+        "name": "ngoc",
+        "phone": "0987654321",
+        "address": "Đường Nguyễn Thị Minh Khai, Việt Nam",
+        "email": "ngoc123@test.com"
+      },
+      "delivery_address": "Đường Nguyễn Thị Minh Khai, Việt Nam",
+      "dropoff_gps": {
+        "latitude": 10.7867589,
+        "longitude": 106.7001333
+      },
+      "promotion_code": null,
+      "promotion_id": null,
+      "order_number": "ORD-1763617564734",
+      "created_at": "2025-11-20T05:46:04.728Z",
+      "updated_at": "2025-11-20T05:48:03.936Z",
+      "drone_id": "drone5",
+      "actual_delivery_time": "2025-11-20T05:48:03.936Z"
+    },
+    {
+      "id": "ord_1763618297545_ttj5upigj",
+      "user_id": "u1762957623609",
+      "restaurant_id": "r3",
+      "items": [
+        {
+          "menu_id": 10,
+          "name": "Pizza Burrata Parma Ham",
+          "quantity": 1,
+          "unit_price": 298000,
+          "subtotal": 298000
+        }
+      ],
+      "subtotal": 298000,
+      "delivery_fee": 15000,
+      "discount_amount": 0,
+      "total_amount": 313000,
+      "payment_method": "momo",
+      "payment_status": "completed",
+      "status": "delivered",
+      "special_instructions": "",
+      "customer": {
+        "name": "ngoc",
+        "phone": "0987654321",
+        "address": "Đường Nguyễn Thị Minh Khai, Việt Nam",
+        "email": "ngoc123@test.com"
+      },
+      "delivery_address": "Đường Nguyễn Thị Minh Khai, Việt Nam",
+      "dropoff_gps": {
+        "latitude": 10.7867589,
+        "longitude": 106.7001333
+      },
+      "promotion_code": null,
+      "promotion_id": null,
+      "order_number": "ORD-1763618298815",
+      "created_at": "2025-11-20T05:58:18.808Z",
+      "updated_at": "2025-11-20T05:59:58.818Z",
+      "drone_id": "drone5",
+      "actual_delivery_time": "2025-11-20T05:59:58.818Z"
     }
   ],
   "order_tracking": [
@@ -1827,6 +2002,19 @@
       "images": [],
       "restaurant_reply": null,
       "id": "6vOzapG"
+    },
+    {
+      "food_id": 12,
+      "user_id": "u1762957623609",
+      "restaurant_id": "r3",
+      "order_id": "ord_1763551413623_wglcddcqr",
+      "rating": 4,
+      "comment": "Ngon......",
+      "created_at": "2025-11-20T05:35:44.742Z",
+      "updated_at": "2025-11-20T05:35:44.742Z",
+      "images": [],
+      "restaurant_reply": null,
+      "id": "7A1ID_A"
     }
   ],
   "drones": [
@@ -1850,19 +2038,19 @@
     {
       "id": "drone2",
       "identifier": "Drone 2",
-      "status": "available",
+      "status": "busy",
       "battery_level": 65,
-      "latitude": 10.7867574,
-      "longitude": 106.700124,
+      "latitude": null,
+      "longitude": null,
       "current_location": {
         "lat": 10.77,
         "lng": 106.68
       },
       "max_weight_kg": 5,
-      "assigned_order_id": null,
+      "assigned_order_id": "ord_1763617223543_qtt9s71ox",
       "last_maintenance": "2025-10-28T00:00:00.000Z",
       "created_at": "2025-01-01T00:00:00.000Z",
-      "updated_at": "2025-11-13T15:59:18.424Z"
+      "updated_at": "2025-11-20T05:40:54.937Z"
     },
     {
       "id": "drone3",
@@ -1884,27 +2072,27 @@
     {
       "id": "drone4",
       "identifier": "Drone 4",
-      "status": "available",
+      "status": "busy",
       "battery_level": 90,
-      "latitude": 10.776,
-      "longitude": 106.7,
+      "latitude": null,
+      "longitude": null,
       "current_location": {
         "lat": 10.776,
         "lng": 106.7
       },
       "max_weight_kg": 5,
-      "assigned_order_id": null,
+      "assigned_order_id": "ord_1763617563450_dxvdkuosw",
       "last_maintenance": "2025-11-02T00:00:00.000Z",
       "created_at": "2025-01-15T00:00:00.000Z",
-      "updated_at": "2025-11-06T00:00:00.000Z"
+      "updated_at": "2025-11-20T05:47:29.175Z"
     },
     {
       "id": "drone5",
       "identifier": "Drone 5",
       "status": "available",
       "battery_level": 78,
-      "latitude": 10.8,
-      "longitude": 106.7,
+      "latitude": null,
+      "longitude": null,
       "current_location": {
         "lat": 10.774,
         "lng": 106.705
@@ -1913,7 +2101,7 @@
       "assigned_order_id": null,
       "last_maintenance": "2025-10-30T00:00:00.000Z",
       "created_at": "2025-02-01T00:00:00.000Z",
-      "updated_at": "2025-11-17T04:03:27.316Z"
+      "updated_at": "2025-11-20T05:59:58.893Z"
     }
   ],
   "settings": [
@@ -1958,44 +2146,14 @@
     {
       "id": 1,
       "user_id": "u1762957623609",
-      "restaurant_id": "r3",
-      "items": [
-        {
-          "item_id": "item_1763546628790_7daqgj9es",
-          "food_id": 9,
-          "name": "Pizza Spicy Garlic Shrimp",
-          "price": 254000,
-          "image": "/images/foods/food_5.png",
-          "quantity": 1,
-          "note": "",
-          "subtotal": 254000
-        },
-        {
-          "item_id": "item_1763546649974_ddh8a3c2v",
-          "food_id": 10,
-          "name": "Pizza Burrata Parma Ham",
-          "price": 298000,
-          "image": "/images/foods/food_6.png",
-          "quantity": 1,
-          "note": "",
-          "subtotal": 298000
-        }
-      ],
-      "updated_at": "2025-11-19T13:17:46.942Z",
-      "total": 552000,
-      "restaurant_name": "Pizza 4P's"
+      "restaurant_id": null,
+      "items": [],
+      "updated_at": "2025-11-20T05:58:17.711Z",
+      "total": 0,
+      "restaurant_name": null
     }
   ],
   "withdrawals": [
-    {
-      "id": "w_1731385200000",
-      "restaurant_id": "r1",
-      "amount": 5000000,
-      "status": "approved",
-      "created_at": "2025-11-12T02:00:00.000Z",
-      "updated_at": "2025-11-12T03:00:00.000Z",
-      "approved_at": "2025-11-12T03:00:00.000Z"
-    },
     {
       "id": "w_1731398600000",
       "restaurant_id": "r1",
@@ -2004,15 +2162,6 @@
       "created_at": "2025-11-12T05:30:00.000Z",
       "updated_at": "2025-11-12T05:30:00.000Z",
       "approved_at": null
-    },
-    {
-      "id": "w_1731408900000",
-      "restaurant_id": "r2",
-      "amount": 7000000,
-      "status": "approved",
-      "created_at": "2025-11-12T08:15:00.000Z",
-      "updated_at": "2025-11-12T08:45:00.000Z",
-      "approved_at": "2025-11-12T08:45:00.000Z"
     },
     {
       "id": "w_1762995491741",
@@ -2031,6 +2180,15 @@
       "created_at": "2025-11-13T23:42:43.989Z",
       "updated_at": "2025-11-13T23:42:43.989Z",
       "approved_at": null
+    },
+    {
+      "id": "w_1763610783755",
+      "restaurant_id": "r3",
+      "amount": 1000000,
+      "status": "approved",
+      "created_at": "2025-11-20T03:53:03.755Z",
+      "updated_at": "2025-11-20T03:53:14.560Z",
+      "approved_at": "2025-11-20T03:53:14.560Z"
     }
   ],
   "restaurant_balances": [
