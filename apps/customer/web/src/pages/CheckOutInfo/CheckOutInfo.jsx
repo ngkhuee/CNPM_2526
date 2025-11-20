@@ -13,7 +13,8 @@ import {
   useSettings,
   calculateCartTotals,
 } from "customer-shared";
-import { formatCurrency } from "shared-utils";
+import { formatCurrency, isRestaurantOpen } from "shared-utils";
+import { restaurantService } from "shared-services";
 import { useNavigate } from "react-router-dom";
 import { MdError, MdSave } from "react-icons/md";
 import {
@@ -147,6 +148,19 @@ const CheckoutInfo = () => {
 
     if (!isValid) {
       alert("Please fill in all required fields correctly");
+      return;
+    }
+
+    // Check if restaurant is still open
+    try {
+      const restaurant = await restaurantService.getById(cart.restaurant_id);
+      if (!isRestaurantOpen(restaurant.opening_hours)) {
+        alert("Sorry, this restaurant is currently closed. Please check the opening hours.");
+        return;
+      }
+    } catch (error) {
+      console.error("Error checking restaurant status:", error);
+      alert("Error verifying restaurant status. Please try again.");
       return;
     }
 

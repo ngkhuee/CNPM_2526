@@ -42,6 +42,8 @@ import { useOrderAutoCancel } from '../../hooks/useOrderAutoCancel';
 
 // Services
 import { showToast } from '../../utils/toastHelper';
+import { restaurantService } from '../../services/restaurantService';
+import { isRestaurantOpen } from '../../utils/hoursHelper';
 
 const CheckoutScreen = () => {
     const cartContext = useContext(CartContext);
@@ -275,6 +277,18 @@ const CheckoutScreen = () => {
         }
 
         try {
+            // Check if restaurant is still open
+            try {
+                const restaurant = await restaurantService.getById(cart.restaurant_id);
+                if (!isRestaurantOpen(restaurant.opening_hours)) {
+                    showToast('error', 'Sorry, this restaurant is currently closed. Please check the opening hours.');
+                    return;
+                }
+            } catch (error) {
+                console.error('[CheckoutScreen] Error checking restaurant status:', error);
+                showToast('error', 'Error verifying restaurant status. Please try again.');
+                return;
+            }
             // Prepare final checkout data
             const finalCheckoutData = {
                 ...checkoutData,

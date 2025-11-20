@@ -909,6 +909,37 @@ server.delete("/carts/clear", (req, res) => {
   res.json(cart || { user_id: userId, items: [], restaurant_id: null, restaurant_name: null, total: 0 });
 });
 
+// Helper function to check if restaurant is open
+const isRestaurantOpenHelper = (openingHours) => {
+  if (!openingHours || typeof openingHours !== "object") {
+    return true;
+  }
+
+  const DAYS_OF_WEEK = [
+    "sunday",
+    "monday",
+    "tuesday",
+    "wednesday",
+    "thursday",
+    "friday",
+    "saturday",
+  ];
+
+  const now = new Date();
+  const dayOfWeek = DAYS_OF_WEEK[now.getDay()];
+  const currentTime = `${String(now.getHours()).padStart(2, "0")}:${String(
+    now.getMinutes()
+  ).padStart(2, "0")}`;
+
+  const dayHours = openingHours[dayOfWeek];
+
+  if (!dayHours || !dayHours.open || !dayHours.close) {
+    return false;
+  }
+
+  return currentTime >= dayHours.open && currentTime < dayHours.close;
+};
+
 // ========== CUSTOM ORDER CREATION ENDPOINT ==========
 // POST /orders - Create new order with auto-populated user_id from token
 server.post("/orders", (req, res) => {
@@ -928,6 +959,23 @@ server.post("/orders", (req, res) => {
     return res.status(400).json({
       success: false,
       message: "restaurant_id and items are required",
+    });
+  }
+
+  // Check if restaurant is open
+  const restaurant = db.get("restaurants").find({ id: orderData.restaurant_id }).value();
+  if (!restaurant) {
+    return res.status(404).json({
+      success: false,
+      message: "Restaurant not found",
+    });
+  }
+
+  if (!isRestaurantOpenHelper(restaurant.opening_hours)) {
+    return res.status(400).json({
+      success: false,
+      message: `Restaurant is currently closed. Opening hours: ${JSON.stringify(restaurant.opening_hours)}`,
+      code: "RESTAURANT_CLOSED",
     });
   }
 

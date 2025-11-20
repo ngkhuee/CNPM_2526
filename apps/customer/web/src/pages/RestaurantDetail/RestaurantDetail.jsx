@@ -93,6 +93,12 @@ const RestaurantDetail = () => {
    * Check if can add from current restaurant, show dialog if switching
    */
   const handleAddToCart = async (foodId, quantity = 1) => {
+    // Check if restaurant is open
+    if (!isOpen) {
+      alert("Sorry, this restaurant is currently closed. Please check the opening hours.");
+      return;
+    }
+
     try {
       const can = canAddFromRestaurant(restaurant.id);
 
