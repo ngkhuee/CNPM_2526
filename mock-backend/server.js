@@ -110,13 +110,16 @@ server.post("/upload", upload.single("file"), (req, res) => {
 
     const category = req.body.category || "other";
     const imagePath = `/images/${category}/${req.file.filename}`;
+    const protocol = req.protocol || "http";
+    const host = req.get("host") || `localhost:${PORT}`;
+    const imageUrl = `${protocol}://${host}${imagePath}`;
 
     res.json({
       success: true,
       message: "File uploaded successfully",
       filename: req.file.filename,
       path: imagePath,
-      url: `http://localhost:${PORT}${imagePath}`,
+      url: imageUrl,
     });
   } catch (error) {
     res.status(500).json({
