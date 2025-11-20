@@ -24,12 +24,80 @@ const DroneForm = ({
                         id="drone-name"
                         className="form-input"
                         placeholder="Enter drone identifier (e.g., DRONE-001)"
-                        value={formData.identifier}
+                        value={formData?.identifier || ""}
                         onChange={(e) =>
-                            onFormChange("identifier", e.target.value)
+                            onFormChange({
+                                ...formData,
+                                identifier: e.target.value,
+                            })
                         }
                     />
                 </div>
+
+                {!editingDrone && (
+                    <>
+                        <div className="form-group">
+                            <label htmlFor="drone-address">Location Address</label>
+                            <div style={{ display: "flex", gap: "8px" }}>
+                                <input
+                                    id="drone-address"
+                                    className="form-input"
+                                    placeholder="Enter address (e.g., Warehouse HCM)"
+                                    value={formData?.address || ""}
+                                    onChange={(e) =>
+                                        onFormChange({
+                                            ...formData,
+                                            address: e.target.value,
+                                        })
+                                    }
+                                />
+                                <button
+                                    onClick={onGeocodeAddress}
+                                    disabled={geocoding}
+                                    className="btn-secondary"
+                                    style={{ minWidth: "120px" }}
+                                >
+                                    {geocoding ? "Geocoding..." : "Search"}
+                                </button>
+                            </div>
+                        </div>
+
+                        <div style={{ display: "flex", gap: "16px" }}>
+                            <div className="form-group" style={{ flex: 1 }}>
+                                <label htmlFor="drone-lat">Latitude</label>
+                                <input
+                                    id="drone-lat"
+                                    className="form-input"
+                                    placeholder="Latitude"
+                                    value={formData?.latitude || ""}
+                                    onChange={(e) =>
+                                        onFormChange({
+                                            ...formData,
+                                            latitude: e.target.value,
+                                        })
+                                    }
+                                    disabled={geocoding}
+                                />
+                            </div>
+                            <div className="form-group" style={{ flex: 1 }}>
+                                <label htmlFor="drone-lng">Longitude</label>
+                                <input
+                                    id="drone-lng"
+                                    className="form-input"
+                                    placeholder="Longitude"
+                                    value={formData?.longitude || ""}
+                                    onChange={(e) =>
+                                        onFormChange({
+                                            ...formData,
+                                            longitude: e.target.value,
+                                        })
+                                    }
+                                    disabled={geocoding}
+                                />
+                            </div>
+                        </div>
+                    </>
+                )}
 
                 <div className="form-actions">
                     <button onClick={onSave} className="btn-primary">

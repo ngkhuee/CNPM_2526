@@ -1036,6 +1036,7 @@ server.get("/orders", (req, res, next) => {
 
 // ========== SIMULATE DRONE DELIVERY ENDPOINT ==========
 // POST /orders/:id/simulate-delivery - Trigger drone movement simulation
+// Drone moves from pickup_gps to dropoff_gps, then order status becomes "arrived"
 server.post("/orders/:id/simulate-delivery", (req, res) => {
   const db = router.db;
   const orderId = req.params.id;
@@ -1077,8 +1078,8 @@ server.post("/orders/:id/simulate-delivery", (req, res) => {
   console.log(`[SIMULATE DELIVERY] From: (${pickupLat}, ${pickupLng}) To: (${dropoffLat}, ${dropoffLng})`);
 
   // Simulate progressive movement from pickup to dropoff in steps
-  const steps = 8;
-  const interval = 2000; // 2 seconds per step
+  const steps = 10;
+  const interval = 1500; // 1.5 seconds per step
 
   for (let i = 1; i <= steps; i++) {
     setTimeout(() => {
@@ -1099,13 +1100,13 @@ server.post("/orders/:id/simulate-delivery", (req, res) => {
 
       console.log(`[SIMULATE DELIVERY] Step ${i}/${steps}: (${currentLat.toFixed(6)}, ${currentLng.toFixed(6)})`);
 
-      // Last step - mark as delivered
+      // Last step - mark as arrived (not delivered yet)
       if (i === steps) {
         setTimeout(() => {
           db.get("orders")
             .find({ id: orderId })
             .assign({
-              status: "delivered",
+              status: "arrived",
               current_gps: {
                 latitude: dropoffLat,
                 longitude: dropoffLng,
@@ -1113,8 +1114,8 @@ server.post("/orders/:id/simulate-delivery", (req, res) => {
               updated_at: new Date().toISOString(),
             })
             .write();
-          console.log(`[SIMULATE DELIVERY] Delivery complete for order ${orderId}`);
-        }, 1000);
+          console.log(`[SIMULATE DELIVERY] Drone arrived at destination for order ${orderId}`);
+        }, 500);
       }
     }, i * interval);
   }

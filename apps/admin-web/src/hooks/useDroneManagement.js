@@ -74,6 +74,7 @@ export const useDroneManagement = (onSuccess) => {
   // Save drone (create or update)
   const saveDrone = useCallback(async () => {
     try {
+      // Validation
       if (!droneForm.identifier || droneForm.identifier.trim() === "") {
         alert("Please enter drone name");
         return;
@@ -85,14 +86,18 @@ export const useDroneManagement = (onSuccess) => {
           identifier: droneForm.identifier,
           updated_at: new Date().toISOString(),
         });
+        console.log("[saveDrone] Drone updated:", editingDrone.id);
       } else {
-        // Create new drone with default location (warehouse)
+        // Create new drone
+        const latitude = droneForm.latitude ? parseFloat(droneForm.latitude) : 10.77;
+        const longitude = droneForm.longitude ? parseFloat(droneForm.longitude) : 106.68;
+
         const newDrone = await droneService.createDrone({
-          identifier: droneForm.identifier,
+          identifier: droneForm.identifier.trim(),
           status: "available",
-          latitude: 10.77,
-          longitude: 106.68,
-          current_location: "Warehouse HCM",
+          latitude: latitude,
+          longitude: longitude,
+          current_location: droneForm.address || "Warehouse HCM",
           max_weight_kg: 5,
           assigned_order_id: null,
           created_at: new Date().toISOString(),
@@ -100,6 +105,7 @@ export const useDroneManagement = (onSuccess) => {
         });
         console.log("[saveDrone] New drone created:", newDrone);
       }
+
       setShowDroneModal(false);
       setDroneForm({
         identifier: "",
@@ -112,7 +118,7 @@ export const useDroneManagement = (onSuccess) => {
       console.error("Failed to save drone:", err);
       alert(`Failed to save drone: ${err.message || err}`);
     }
-  }, [droneForm.identifier, editingDrone, onSuccess]);
+  }, [droneForm, editingDrone, onSuccess]);
 
   // Delete drone (only when not delivering)
   const handleDeleteDrone = useCallback(

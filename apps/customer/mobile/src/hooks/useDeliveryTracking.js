@@ -16,15 +16,11 @@ export const ORDER_TIMELINE = [
 ];
 
 export const useDeliveryTracking = (order, onRefetch) => {
-    // UI state for arrival detection (order stays in "delivering")
-    const [uiArrivedState, setUiArrivedState] = useState(false);
+    // UI state for arrival popup
     const [showArrivedPopup, setShowArrivedPopup] = useState(false);
-    const [showConfirmButton, setShowConfirmButton] = useState(false);
-    const [autoConfirmCountdown, setAutoConfirmCountdown] = useState(null);
 
     // Timers
     const autoDeliveryTimerRef = useRef(null);
-    const countdownIntervalRef = useRef(null);
 
     // Calculate distance between two GPS points (in km)
     const calculateDistance = (lat1, lon1, lat2, lon2) => {
@@ -41,84 +37,42 @@ export const useDeliveryTracking = (order, onRefetch) => {
         return R * c;
     };
 
-    // Check if drone has arrived at dropoff location
-    const isDroneAtDropoff = () => {
-        if (!order?.status || order.status !== 'delivering') return false;
-        if (!order?.current_gps || !order?.dropoff_gps) return false;
-
-        const lat1 = order.current_gps.lat || order.current_gps.latitude;
-        const lon1 = order.current_gps.lng || order.current_gps.longitude;
-        const lat2 = order.dropoff_gps.lat || order.dropoff_gps.latitude;
-        const lon2 = order.dropoff_gps.lng || order.dropoff_gps.longitude;
-
-        if (!lat1 || !lon1 || !lat2 || !lon2) return false;
-
-        const distance = calculateDistance(lat1, lon1, lat2, lon2);
-        console.log('[useDeliveryTracking] Distance to dropoff:', distance.toFixed(3), 'km');
-
-        // Within 100m = arrived
-        return distance < 0.1;
-    };
-
     // Get current status index for timeline
     const getStatusIndex = () => {
-        if (uiArrivedState && order?.status === 'delivering') {
-            return 5; // Arrived position
-        }
-
         const statusMap = {
             pending: 0,
             confirmed: 1,
             preparing: 2,
             ready: 3,
             delivering: 4,
+            arrived: 5,
             delivered: 6,
         };
 
         return statusMap[order?.status] || 0;
     };
 
-    // Auto-detect drone arrival
+    // Auto-detect drone arrival - trigger popup when order becomes "arrived"
     useEffect(() => {
-        if (order?.status === 'delivering' && !uiArrivedState) {
-            if (isDroneAtDropoff()) {
-                console.log('[useDeliveryTracking] DRONE ARRIVED at dropoff');
-                setUiArrivedState(true);
-                setShowArrivedPopup(true);
-                startAutoDeliveryTimer();
-            }
+        if (order?.status === 'arrived' && !showArrivedPopup) {
+            console.log('[useDeliveryTracking] Order status changed to ARRIVED, showing popup');
+            setShowArrivedPopup(true);
+            startAutoDeliveryTimer();
         }
-    }, [order?.current_gps, order?.dropoff_gps, order?.status, uiArrivedState]);
+    }, [order?.status]);
 
-    // Start 10-minute auto-confirm timer
+    // Start 10-minute auto-confirm timer (auto-deliver after popup shown)
     const startAutoDeliveryTimer = () => {
         if (autoDeliveryTimerRef.current) {
             clearTimeout(autoDeliveryTimerRef.current);
         }
 
-        console.log('[useDeliveryTracking] Starting 10-min auto-confirm timer');
+        console.log('[useDeliveryTracking] Starting auto-delivery timer (10 min)');
 
-        // Countdown timer
-        if (countdownIntervalRef.current) {
-            clearInterval(countdownIntervalRef.current);
-        }
-
-        let seconds = 600; // 10 minutes
-        setAutoConfirmCountdown(seconds);
-
-        countdownIntervalRef.current = setInterval(() => {
-            seconds--;
-            setAutoConfirmCountdown(seconds);
-
-            if (seconds <= 0) {
-                clearInterval(countdownIntervalRef.current);
-            }
-        }, 1000);
-
-        // Auto-confirm timeout
+        // Auto-deliver timeout
         autoDeliveryTimerRef.current = setTimeout(async () => {
-            console.log('[useDeliveryTracking] Auto-confirming delivery after 10 min');
-            await handleAutoConfirm();
+            console.log('[useDeliveryTracking] Auto-delivering after 10 min');
+            await performAutoDelivery();
         }, 10 * 60 * 1000);
     };
 
@@ -132,73 +86,46 @@ export const useDeliveryTracking = (order, onRefetch) => {
                 {
                     text: 'Confirm',
                     onPress: async () => {
-                        await performConfirmDelivery();
+                        await performAutoDelivery();
                     },
                 },
             ]
         );
     };
 
-    // Perform the actual delivery confirmation
-    const performConfirmDelivery = async () => {
+    // Perform the actual delivery confirmation (auto-delivery)
+    const performAutoDelivery = async () => {
         try {
             // Clear timers
             if (autoDeliveryTimerRef.current) {
                 clearTimeout(autoDeliveryTimerRef.current);
                 autoDeliveryTimerRef.current = null;
             }
-            if (countdownIntervalRef.current) {
-                clearInterval(countdownIntervalRef.current);
-                countdownIntervalRef.current = null;
-            }
 
             // Update order to delivered
             await orderService.updateOrderStatus(order.id, 'delivered');
-            showToast('success', 'Delivery confirmed');
+            showToast('success', 'Delivery marked as received');
 
             // Reset UI state
-            setUiArrivedState(false);
-            setShowConfirmButton(false);
-            setAutoConfirmCountdown(null);
+            setShowArrivedPopup(false);
 
             // Refetch to sync with backend
             onRefetch?.();
         } catch (error) {
-            showToast('error', 'Failed to confirm delivery');
-            console.error('[useDeliveryTracking] Confirm error:', error);
+            showToast('error', 'Failed to mark delivery as received');
+            console.error('[useDeliveryTracking] Auto-deliver error:', error);
         }
     };
 
-    // Auto-confirm after 10 minutes
-    const handleAutoConfirm = async () => {
-        try {
-            // Clear timers
-            if (countdownIntervalRef.current) {
-                clearInterval(countdownIntervalRef.current);
-                countdownIntervalRef.current = null;
-            }
-
-            await orderService.updateOrderStatus(order.id, 'delivered');
-            showToast('info', 'Order automatically marked as delivered');
-
-            setUiArrivedState(false);
-            setShowConfirmButton(false);
-            setAutoConfirmCountdown(null);
-
-            onRefetch?.();
-        } catch (error) {
-            console.error('[useDeliveryTracking] Auto-confirm error:', error);
-        }
-    };
-
-    // Handle closing arrived popup
+    // Handle closing arrived popup - immediately move to delivered status
     const handleCloseArrivedPopup = () => {
         setShowArrivedPopup(false);
-        setShowConfirmButton(true); // Show confirm button after popup dismissed
+        // Immediately perform auto-delivery when popup is closed
+        performAutoDelivery();
     };
 
-    // Show map when delivering or delivered
-    const showMap = order?.status === 'delivering' || order?.status === 'delivered';
+    // Show map when delivering, arrived or delivered
+    const showMap = order?.status === 'delivering' || order?.status === 'arrived' || order?.status === 'delivered';
 
     // Cleanup on unmount
     useEffect(() => {
@@ -206,27 +133,17 @@ export const useDeliveryTracking = (order, onRefetch) => {
             if (autoDeliveryTimerRef.current) {
                 clearTimeout(autoDeliveryTimerRef.current);
             }
-            if (countdownIntervalRef.current) {
-                clearInterval(countdownIntervalRef.current);
-            }
         };
     }, []);
 
     // Reset UI state when order reaches delivered
     useEffect(() => {
         if (order?.status === 'delivered') {
-            setUiArrivedState(false);
             setShowArrivedPopup(false);
-            setShowConfirmButton(false);
-            setAutoConfirmCountdown(null);
 
             if (autoDeliveryTimerRef.current) {
                 clearTimeout(autoDeliveryTimerRef.current);
                 autoDeliveryTimerRef.current = null;
-            }
-            if (countdownIntervalRef.current) {
-                clearInterval(countdownIntervalRef.current);
-                countdownIntervalRef.current = null;
             }
         }
     }, [order?.status]);
@@ -242,14 +159,5 @@ export const useDeliveryTracking = (order, onRefetch) => {
         // Arrival popup
         showArrivedPopup,
         handleCloseArrivedPopup,
-
-        // Confirm button
-        showConfirmButton,
-        autoConfirmCountdown,
-        handleConfirmDelivery,
-        handleAutoConfirm: handleAutoConfirm,
-
-        // Drone arrival state (UI-only)
-        droneArrived: uiArrivedState,
     };
 };

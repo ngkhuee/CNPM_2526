@@ -13,11 +13,7 @@ const formatCountdown = (seconds) => {
 export const OrderActions = ({
     order,
     isDelivered,
-    onConfirmDelivery,
     onReview,
-    showConfirmButton,
-    autoConfirmCountdown,
-    onManualConfirm,
 }) => {
     if (isDelivered) {
         return (
@@ -30,49 +26,6 @@ export const OrderActions = ({
                 <TouchableOpacity style={styles.reviewButton} onPress={onReview}>
                     <MaterialIcons name="rate-review" size={18} color="#ff6b35" />
                     <Text style={styles.reviewButtonText}>Write Review</Text>
-                </TouchableOpacity>
-            </View>
-        );
-    }
-
-    // Show confirm button when drone arrives
-    if (showConfirmButton && order?.status === 'delivering') {
-        return (
-            <View style={styles.confirmSection}>
-                <View style={styles.alertBox}>
-                    <MaterialIcons name="info" size={20} color="#ff6b35" />
-                    <View style={styles.alertContent}>
-                        <Text style={styles.alertTitle}>Delivery Arrived!</Text>
-                        <Text style={styles.alertText}>
-                            Your order has arrived at the delivery location.
-                        </Text>
-                        {autoConfirmCountdown && (
-                            <Text style={styles.countdownText}>
-                                Auto-confirm in {formatCountdown(autoConfirmCountdown)}
-                            </Text>
-                        )}
-                    </View>
-                </View>
-                <TouchableOpacity
-                    style={styles.confirmButton}
-                    onPress={onManualConfirm || onConfirmDelivery}
-                >
-                    <MaterialIcons name="check-circle" size={20} color="#fff" />
-                    <Text style={styles.confirmButtonText}>Confirm Receipt</Text>
-                </TouchableOpacity>
-            </View>
-        );
-    }
-
-    if (order?.status === 'delivering') {
-        return (
-            <View style={styles.confirmSection}>
-                <Text style={styles.confirmText}>
-                    Driver is on the way to deliver your order. Please be ready.
-                </Text>
-                <TouchableOpacity style={styles.confirmButton} onPress={onConfirmDelivery}>
-                    <MaterialIcons name="check-circle" size={20} color="#fff" />
-                    <Text style={styles.confirmButtonText}>Confirm Receipt</Text>
                 </TouchableOpacity>
             </View>
         );

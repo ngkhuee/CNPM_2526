@@ -1,9 +1,18 @@
 // components/tracking/ArrivedPopup.jsx
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Modal, View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 
 export const ArrivedPopup = ({ visible, onClose }) => {
+    // Auto-close popup after 5 seconds
+    useEffect(() => {
+        if (visible) {
+            const timer = setTimeout(() => {
+                onClose();
+            }, 5000);
+            return () => clearTimeout(timer);
+        }
+    }, [visible, onClose]);
     return (
         <Modal
             visible={visible}
@@ -16,16 +25,16 @@ export const ArrivedPopup = ({ visible, onClose }) => {
                     <View style={styles.iconContainer}>
                         <MaterialIcons name="check-circle" size={60} color="#4caf50" />
                     </View>
-                    
+
                     <Text style={styles.title}>Order Arrived!</Text>
-                    
+
                     <Text style={styles.message}>
                         Your order has arrived at the destination.{'\n'}
                         Please confirm when you receive it.
                     </Text>
-                    
-                    <TouchableOpacity 
-                        style={styles.button} 
+
+                    <TouchableOpacity
+                        style={styles.button}
                         onPress={onClose}
                         activeOpacity={0.8}
                     >

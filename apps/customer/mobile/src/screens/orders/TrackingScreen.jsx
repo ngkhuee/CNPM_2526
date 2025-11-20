@@ -37,11 +37,7 @@ const TrackingScreen = ({ orderId }) => {
         isDelivered,
         showMap,
         showArrivedPopup,
-        droneArrived,
-        handleConfirmDelivery,
         handleCloseArrivedPopup,
-        showConfirmButton,
-        autoConfirmCountdown,
     } = useDeliveryTracking(order, () => handleRefresh());
 
     // Auto-navigate when delivered
@@ -180,30 +176,10 @@ const TrackingScreen = ({ orderId }) => {
                 {/* Order Details (with items merged) */}
                 <OrderDetails order={order} />
 
-                {/* Confirm Delivery Button - Show after drone arrived and popup dismissed */}
-                {showConfirmButton && !isDelivered && (
-                    <View style={styles.confirmSection}>
-                        <TouchableOpacity
-                            style={styles.confirmButton}
-                            onPress={handleConfirmDelivery}
-                            activeOpacity={0.8}
-                        >
-                            <MaterialIcons name="check-circle" size={24} color="#fff" />
-                            <Text style={styles.confirmButtonText}>Confirm Delivery Received</Text>
-                        </TouchableOpacity>
-                        {autoConfirmCountdown !== null && (
-                            <Text style={styles.confirmNote}>
-                                Auto-confirmed in {Math.floor(autoConfirmCountdown / 60)}:{String(autoConfirmCountdown % 60).padStart(2, '0')} min
-                            </Text>
-                        )}
-                    </View>
-                )}
-
                 {/* Action Buttons */}
                 <OrderActions
                     order={order}
                     isDelivered={isDelivered}
-                    onConfirmDelivery={handleConfirmDelivery}
                     onReview={handleReview}
                 />
             </ScrollView>

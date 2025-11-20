@@ -14,11 +14,11 @@ export const OrderStatusHeader = ({ order, isDelivered }) => {
                     <Text style={styles.statusHeaderText}>
                         {isDelivered ? 'Delivered' : 'In Progress'}
                     </Text>
-                    <Text style={styles.estimatedTime}>
+                    {/* <Text style={styles.estimatedTime}>
                         {order.estimated_delivery_time
                             ? `Arrives by ${new Date(order.estimated_delivery_time).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}`
                             : 'Calculating...'}
-                    </Text>
+                    </Text> */}
                 </View>
                 <View style={styles.statusIcon}>
                     {isDelivering ? (
@@ -36,7 +36,7 @@ export const OrderStatusHeader = ({ order, isDelivered }) => {
                 <View style={styles.droneInfo}>
                     <MaterialIcons name="info" size={14} color="#666" />
                     <Text style={styles.droneInfoText}>
-                        Vehicle: {order.drone_id}
+                        Drone: {order.drone_id}
                     </Text>
                 </View>
             )}

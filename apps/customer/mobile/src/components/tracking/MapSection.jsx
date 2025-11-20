@@ -121,12 +121,15 @@ export const MapSection = ({ order }) => {
             <head>
                 <meta charset="utf-8" />
                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <meta http-equiv="Content-Security-Policy" content="default-src *; script-src * 'unsafe-inline' 'unsafe-eval'; style-src * 'unsafe-inline'; img-src * data: blob:; font-src * data:; connect-src *;">
                 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
                 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"><\/script>
                 <style>
-                    body { margin: 0; padding: 0; }
-                    #map { position: absolute; top: 0; bottom: 0; width: 100%; }
+                    body { margin: 0; padding: 0; background: #f0f0f0; }
+                    #map { position: absolute; top: 0; bottom: 0; width: 100%; background: #f0f0f0; }
                     .custom-marker { font-size: 24px; }
+                    .leaflet-tile { background: #f0f0f0; }
+                    .leaflet-tile-pane { background: #f0f0f0; }
                     @keyframes pulse {
                         0%, 100% { transform: scale(1); opacity: 1; }
                         50% { transform: scale(1.2); opacity: 0.8; }
@@ -142,64 +145,81 @@ export const MapSection = ({ order }) => {
                     let map, droneMarker, dronePolyline, pickupGPS, dropoffGPS;
 
                     function initMap() {
-                        pickupGPS = { lat: ${pickupGPS.lat}, lng: ${pickupGPS.lng} };
-                        dropoffGPS = { lat: ${dropoffGPS.lat}, lng: ${dropoffGPS.lng} };
-                        ${droneGPS ? `const initialDroneGPS = { lat: ${droneGPS.lat}, lng: ${droneGPS.lng} };` : `const initialDroneGPS = null;`}
+                        try {
+                            pickupGPS = { lat: ${pickupGPS.lat}, lng: ${pickupGPS.lng} };
+                            dropoffGPS = { lat: ${dropoffGPS.lat}, lng: ${dropoffGPS.lng} };
+                            ${droneGPS ? `const initialDroneGPS = { lat: ${droneGPS.lat}, lng: ${droneGPS.lng} };` : `const initialDroneGPS = null;`}
 
-                        // Initialize map
-                        map = L.map('map').setView([pickupGPS.lat, pickupGPS.lng], 13);
-                        L.tileLayer('https:\/\/{s}.tile.openstreetmap.org\/{z}\/{x}\/{y}.png', {
-                            attribution: '© OpenStreetMap contributors',
-                            maxZoom: 19
-                        }).addTo(map);
+                            // Initialize map
+                            map = L.map('map').setView([pickupGPS.lat, pickupGPS.lng], 13);
+                            
+                            // Add tile layer - try OpenStreetMap first
+                            const osmTileLayer = L.tileLayer('https:\/\/{s}.tile.openstreetmap.org\/{z}\/{x}\/{y}.png', {
+                                attribution: '© OpenStreetMap contributors',
+                                maxZoom: 19,
+                                errorTileUrl: 'data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPHN2ZyB3aWR0aD0iMjU2IiBoZWlnaHQ9IjI1NiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8cmVjdCB3aWR0aD0iMjU2IiBoZWlnaHQ9IjI1NiIgZmlsbD0iI2VhZWFlYSIvPgo8L3N2Zz4=',
+                                crossOrigin: true
+                            });
+                            osmTileLayer.addTo(map);
 
-                        // Restaurant marker
-                        L.marker([pickupGPS.lat, pickupGPS.lng], {
-                            icon: L.divIcon({
-                                html: '${restaurantMarkerHtml}',
-                                iconSize: [40, 40],
-                                className: 'custom-marker'
-                            })
-                        }).bindPopup('${order.restaurant_name || 'Restaurant'}<br\/><small>Pickup Location<\/small>').addTo(map);
+                            // Add drag background
+                            map.on('tileerror', function(error) {
+                                console.warn('[MAP] Tile loading error, continuing anyway');
+                            });
 
-                        // Delivery marker
-                        L.marker([dropoffGPS.lat, dropoffGPS.lng], {
-                            icon: L.divIcon({
-                                html: '${homeMarkerHtml}',
-                                iconSize: [40, 40],
-                                className: 'custom-marker'
-                            })
-                        }).bindPopup('${order.customer?.address || 'Delivery Location'}<br\/><small>Your Location<\/small>').addTo(map);
-
-                        // Route line
-                        L.polyline(
-                            [[pickupGPS.lat, pickupGPS.lng], [dropoffGPS.lat, dropoffGPS.lng]],
-                            { color: '#FF6B35', weight: 3, dashArray: '5, 5', opacity: 0.8 }
-                        ).addTo(map);
-
-                        // Initial drone marker and route
-                        if (initialDroneGPS) {
-                            droneMarker = L.marker([initialDroneGPS.lat, initialDroneGPS.lng], {
+                            // Restaurant marker
+                            L.marker([pickupGPS.lat, pickupGPS.lng], {
                                 icon: L.divIcon({
-                                    html: '<div class="pulse-drone">${droneMarkerHtml}<\/div>',
+                                    html: '${restaurantMarkerHtml}',
                                     iconSize: [40, 40],
                                     className: 'custom-marker'
                                 })
-                            }).bindPopup('${order.drone_id || 'Drone'}<br\/><small>Current Position<\/small>').addTo(map);
+                            }).bindPopup('${order.restaurant_name || 'Restaurant'}<br\/><small>Pickup Location<\/small>').addTo(map);
 
-                            dronePolyline = L.polyline(
-                                [[initialDroneGPS.lat, initialDroneGPS.lng], [dropoffGPS.lat, dropoffGPS.lng]],
-                                { color: '#1976d2', weight: 2, opacity: 0.8 }
+                            // Delivery marker
+                            L.marker([dropoffGPS.lat, dropoffGPS.lng], {
+                                icon: L.divIcon({
+                                    html: '${homeMarkerHtml}',
+                                    iconSize: [40, 40],
+                                    className: 'custom-marker'
+                                })
+                            }).bindPopup('${order.customer?.address || 'Delivery Location'}<br\/><small>Your Location<\/small>').addTo(map);
+
+                            // Route line
+                            L.polyline(
+                                [[pickupGPS.lat, pickupGPS.lng], [dropoffGPS.lat, dropoffGPS.lng]],
+                                { color: '#FF6B35', weight: 3, dashArray: '5, 5', opacity: 0.8 }
                             ).addTo(map);
-                        }
 
-                        // Fit bounds
-                        const bounds = L.latLngBounds([
-                            [pickupGPS.lat, pickupGPS.lng],
-                            [dropoffGPS.lat, dropoffGPS.lng]
-                            ${droneGPS ? `, [initialDroneGPS.lat, initialDroneGPS.lng]` : ''}
-                        ]);
-                        map.fitBounds(bounds, { padding: [50, 50] });
+                            // Initial drone marker and route
+                            if (initialDroneGPS) {
+                                droneMarker = L.marker([initialDroneGPS.lat, initialDroneGPS.lng], {
+                                    icon: L.divIcon({
+                                        html: '<div class="pulse-drone">${droneMarkerHtml}<\/div>',
+                                        iconSize: [40, 40],
+                                        className: 'custom-marker'
+                                    })
+                                }).bindPopup('${order.drone_id || 'Drone'}<br\/><small>Current Position<\/small>').addTo(map);
+
+                                dronePolyline = L.polyline(
+                                    [[initialDroneGPS.lat, initialDroneGPS.lng], [dropoffGPS.lat, dropoffGPS.lng]],
+                                    { color: '#1976d2', weight: 2, opacity: 0.8 }
+                                ).addTo(map);
+                            }
+
+                            // Fit bounds
+                            const bounds = L.latLngBounds([
+                                [pickupGPS.lat, pickupGPS.lng],
+                                [dropoffGPS.lat, dropoffGPS.lng]
+                                ${droneGPS ? `, [initialDroneGPS.lat, initialDroneGPS.lng]` : ''}
+                            ]);
+                            map.fitBounds(bounds, { padding: [50, 50] });
+                            
+                            console.log('[MAP] Map initialized successfully');
+                        } catch (error) {
+                            console.error('[MAP] Error initializing map:', error);
+                            document.body.innerHTML = '<div style="padding:20px;color:red;">Map Error: ' + error.message + '</div>';
+                        }
                     }
 
                     // Exposed function to update drone position in real-time
@@ -289,7 +309,7 @@ export const MapSection = ({ order }) => {
                                 <MaterialIcons name="local-shipping" size={14} color="#fff" />
                             </View>
                             <View style={styles.legendText}>
-                                <Text style={styles.legendLabel}>Vehicle</Text>
+                                <Text style={styles.legendLabel}>Drone</Text>
                                 <Text style={styles.legendValue}>{order.drone_id}</Text>
                             </View>
                         </View>
@@ -306,8 +326,20 @@ export const MapSection = ({ order }) => {
                         style={styles.map}
                         scrollEnabled={false}
                         onLoadEnd={() => setMapLoading(false)}
+                        onError={(error) => {
+                            console.error('[MapSection] WebView Error:', error);
+                            setMapLoading(false);
+                        }}
+                        onMessage={(event) => {
+                            console.log('[MapSection] WebView Message:', event.nativeEvent.data);
+                        }}
                         javaScriptEnabled={true}
                         domStorageEnabled={true}
+                        useWebKit={true}
+                        startInLoadingState={true}
+                        mixedContentMode="always"
+                        allowUniversalAccessFromFileURLs={true}
+                        allowFileAccess={true}
                     />
                     {mapLoading && (
                         <View style={styles.loadingContainer}>
