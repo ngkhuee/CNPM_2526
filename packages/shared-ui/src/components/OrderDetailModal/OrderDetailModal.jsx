@@ -1,9 +1,43 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Modal } from "../Modal/Modal";
+import { DroneTrackingMap } from "./DroneTrackingMap";
 import "./OrderDetailModal.css";
 
-export const OrderDetailModal = ({ isOpen, onClose, order }) => {
+export const OrderDetailModal = ({ isOpen, onClose, order, enableAutoRefresh = false }) => {
+  const [autoRefresh, setAutoRefresh] = useState(enableAutoRefresh);
+  const [refreshedOrder, setRefreshedOrder] = useState(order);
+
+  // Auto-refresh order data every 3 seconds if order is in active delivery state
+  useEffect(() => {
+    if (!order || !isOpen || !autoRefresh || !enableAutoRefresh) return;
+
+    const activeStatuses = ["ready", "picking_up", "picked_up", "delivering"];
+    if (!activeStatuses.includes(order?.status)) return;
+
+    const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:4000";
+
+    const intervalId = setInterval(async () => {
+      try {
+        // Fetch fresh order data - using /orders/:id endpoint (routes.json will handle /api/ prefix)
+        const response = await fetch(
+          `${API_BASE_URL}/orders/${order.id}`
+        );
+        if (response.ok) {
+          const freshOrder = await response.json();
+          setRefreshedOrder(freshOrder);
+        }
+      } catch (error) {
+        console.error("Error refreshing order:", error);
+      }
+    }, 3000);
+
+    return () => clearInterval(intervalId);
+  }, [isOpen, autoRefresh, order?.id, order?.status, enableAutoRefresh]);
+
   if (!order) return null;
+
+  // Use refreshed order data if available, otherwise use original
+  const displayOrder = refreshedOrder || order;
 
   const formatCurrency = (v) => {
     return new Intl.NumberFormat("vi-VN", {
@@ -22,19 +56,128 @@ export const OrderDetailModal = ({ isOpen, onClose, order }) => {
     }
   };
 
-  const orderPlacedTime = getFormattedDate(order.created_at || order.createdAt);
-  const completedTime = order.status === "completed"
-    ? getFormattedDate(order.updated_at || order.updatedAt)
+  const orderPlacedTime = getFormattedDate(displayOrder.created_at || displayOrder.createdAt);
+  const completedTime = displayOrder.status === "completed"
+    ? getFormattedDate(displayOrder.updated_at || displayOrder.updatedAt)
     : null;
+
+  // Get restaurant and delivery locations for map
+  const restaurantLocation = {
+    lat: displayOrder.restaurant?.location?.lat || displayOrder.restaurant?.latitude || displayOrder.pickup_gps?.lat || 10.776,
+    lng: displayOrder.restaurant?.location?.lng || displayOrder.restaurant?.longitude || displayOrder.pickup_gps?.lng || 106.7,
+    name: displayOrder.restaurant?.name || displayOrder.restaurantName || "Restaurant",
+  };
+
+  const deliveryLocation = {
+    lat: displayOrder.dropoff_gps?.lat || displayOrder.customer?.latitude || 10.776,
+    lng: displayOrder.dropoff_gps?.lng || displayOrder.customer?.longitude || 106.7,
+    address: displayOrder.customer?.address || displayOrder.delivery_address || displayOrder.address || "Delivery Location",
+  };
+
+  const droneLocation = displayOrder.current_gps ? {
+    lat: displayOrder.current_gps.lat || displayOrder.current_gps.latitude,
+    lng: displayOrder.current_gps.lng || displayOrder.current_gps.longitude,
+  } : null;
+
+  const isDelivering = ["ready", "picking_up", "picked_up", "delivering"].includes(displayOrder.status);
+  const isActivelyDelivering = displayOrder.status === "delivering";
+
+  // Calculate distance remaining (simplified)
+  const calculateDistance = (lat1, lon1, lat2, lon2) => {
+    const R = 6371; // Earth radius in km
+    const dLat = ((lat2 - lat1) * Math.PI) / 180;
+    const dLon = ((lon2 - lon1) * Math.PI) / 180;
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  };
+
+  let remainingDistance = null;
+  if (isActivelyDelivering && droneLocation) {
+    remainingDistance = calculateDistance(
+      droneLocation.lat,
+      droneLocation.lng,
+      deliveryLocation.lat,
+      deliveryLocation.lng
+    );
+  }
 
   return (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
-      title={`Order #${order.id}`}
+      title={`Order #${displayOrder.id}`}
       width="900px"
     >
       <div className="odm-body">
+        {/* Drone Tracking Map - Show when order is delivering */}
+        {isActivelyDelivering && displayOrder.drone_id && (
+          <section className="odm-section odm-tracking-section">
+            <h4 style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              [DRONE] Real-time Delivery Tracking
+              <span style={{
+                fontSize: "12px",
+                fontWeight: "normal",
+                marginLeft: "auto",
+                color: "#ff6b35",
+              }}>
+                Live
+              </span>
+            </h4>
+            <DroneTrackingMap
+              restaurantLocation={restaurantLocation}
+              deliveryLocation={deliveryLocation}
+              droneLocation={droneLocation}
+              droneId={displayOrder.drone_id || displayOrder.droneId}
+              isDelivering={isActivelyDelivering}
+            />
+          </section>
+        )}
+
+        {/* Delivery Progress Section - Show when actively delivering */}
+        {isActivelyDelivering && displayOrder.drone_id && (
+          <section className="odm-section odm-progress-section">
+            <h4>[PIN] Delivery Progress</h4>
+            <div className="progress-grid">
+              <div className="progress-item">
+                <span className="progress-label">Drone ID:</span>
+                <span className="progress-value">
+                  {displayOrder.drone_id || displayOrder.droneId}
+                </span>
+              </div>
+              {droneLocation && (
+                <div className="progress-item">
+                  <span className="progress-label">Current Position:</span>
+                  <span className="progress-value">
+                    {droneLocation.lat.toFixed(4)}, {droneLocation.lng.toFixed(4)}
+                  </span>
+                </div>
+              )}
+              {remainingDistance !== null && (
+                <div className="progress-item">
+                  <span className="progress-label">Distance to Delivery:</span>
+                  <span className="progress-value progress-distance">
+                    {remainingDistance < 1
+                      ? Math.round(remainingDistance * 1000) + " m"
+                      : remainingDistance.toFixed(2) + " km"}
+                  </span>
+                </div>
+              )}
+              <div className="progress-item">
+                <span className="progress-label">Status:</span>
+                <span className="progress-value status-badge status-delivering">
+                  {displayOrder.status}
+                </span>
+              </div>
+            </div>
+          </section>
+        )}
+
         {/* Row 1: Customer & Restaurant */}
         <div className="odm-row">
           <section className="odm-section odm-half">
@@ -42,32 +185,32 @@ export const OrderDetailModal = ({ isOpen, onClose, order }) => {
             <p>
               <strong>Name:</strong>
               <span>
-                {order.customer?.name ||
-                  order.user?.full_name ||
-                  order.userName ||
-                  order.full_name ||
+                {displayOrder.customer?.name ||
+                  displayOrder.user?.full_name ||
+                  displayOrder.userName ||
+                  displayOrder.full_name ||
                   "-"}
               </span>
             </p>
             <p>
               <strong>ID:</strong>
-              <span>{order.user_id || order.userId || "-"}</span>
+              <span>{displayOrder.user_id || displayOrder.userId || "-"}</span>
             </p>
             <p>
               <strong>Phone:</strong>
               <span>
-                {order.customer?.phone ||
-                  order.user?.phone ||
-                  order.phone ||
+                {displayOrder.customer?.phone ||
+                  displayOrder.user?.phone ||
+                  displayOrder.phone ||
                   "N/A"}
               </span>
             </p>
             <p>
               <strong>Address:</strong>
               <span>
-                {order.customer?.address ||
-                  order.delivery_address ||
-                  order.address ||
+                {displayOrder.customer?.address ||
+                  displayOrder.delivery_address ||
+                  displayOrder.address ||
                   "-"}
               </span>
             </p>
@@ -78,25 +221,25 @@ export const OrderDetailModal = ({ isOpen, onClose, order }) => {
             <p>
               <strong>Name:</strong>
               <span>
-                {order.restaurant?.name || order.restaurantName || "N/A"}
+                {displayOrder.restaurant?.name || displayOrder.restaurantName || "N/A"}
               </span>
             </p>
             <p>
               <strong>Address:</strong>
               <span>
-                {order.restaurant?.address || order.restaurantAddress || "N/A"}
+                {displayOrder.restaurant?.address || displayOrder.restaurantAddress || "N/A"}
               </span>
             </p>
             <p>
               <strong>ID:</strong>
               <span className="value-highlight">
-                {order.restaurant_id || order.restaurantId || "-"}
+                {displayOrder.restaurant_id || displayOrder.restaurantId || "-"}
               </span>
             </p>
             <p>
               <strong>Phone:</strong>
               <span>
-                {order.restaurant?.phone || order.restaurantPhone || "N/A"}
+                {displayOrder.restaurant?.phone || displayOrder.restaurantPhone || "N/A"}
               </span>
             </p>
           </section>
@@ -108,19 +251,19 @@ export const OrderDetailModal = ({ isOpen, onClose, order }) => {
           <p>
             <strong>Status:</strong>
             <span className="odm-status-badge">
-              {order.status || "Unknown"}
+              {displayOrder.status || "Unknown"}
             </span>
           </p>
           <p>
             <strong>Payment Method:</strong>
             <span className="odm-payment-badge">
-              {order.payment_method || order.paymentMethod || "N/A"}
+              {displayOrder.payment_method || displayOrder.paymentMethod || "N/A"}
             </span>
           </p>
           <p>
             <strong>Payment Status:</strong>
             <span>
-              {order.payment_status || order.paymentStatus || "N/A"}
+              {displayOrder.payment_status || displayOrder.paymentStatus || "N/A"}
             </span>
           </p>
           <p>
@@ -142,8 +285,8 @@ export const OrderDetailModal = ({ isOpen, onClose, order }) => {
             <div style={{ paddingLeft: "15px" }} >
               <h5 style={{ marginBottom: "10px" }} >Items</h5>
               <ul>
-                {order.items && order.items.length > 0 ? (
-                  order.items.map((it, idx) => (
+                {displayOrder.items && displayOrder.items.length > 0 ? (
+                  displayOrder.items.map((it, idx) => (
                     <li key={idx}>
                       <span>
                         <strong>{it.name}</strong> × {it.quantity}
@@ -167,21 +310,21 @@ export const OrderDetailModal = ({ isOpen, onClose, order }) => {
                   <strong>Subtotal:</strong>
                   <span className="odm-amount" style={{ color: "#000" }} >
                     {formatCurrency(
-                      order.subtotal || order.sub_total || 0
+                      displayOrder.subtotal || displayOrder.sub_total || 0
                     )}
                   </span>
                 </p>
                 <p>
                   <strong>Delivery Fee:</strong>
                   <span className="odm-amount" style={{ color: "#000" }} >
-                    {formatCurrency(order.delivery_fee || order.deliveryFee || 0)}
+                    {formatCurrency(displayOrder.delivery_fee || displayOrder.deliveryFee || 0)}
                   </span>
                 </p>
                 <p>
                   <strong>Discount:</strong>
                   <span className="odm-amount odm-discount">
                     -{formatCurrency(
-                      order.discount_amount || order.discountAmount || 0
+                      displayOrder.discount_amount || displayOrder.discountAmount || 0
                     )}
                   </span>
                 </p>
@@ -189,7 +332,7 @@ export const OrderDetailModal = ({ isOpen, onClose, order }) => {
                   <strong>Total:</strong>
                   <span className="odm-amount odm-total">
                     {formatCurrency(
-                      order.total_amount || order.totalPrice || order.totalAmount || 0
+                      displayOrder.total_amount || displayOrder.totalPrice || displayOrder.totalAmount || 0
                     )}
                   </span>
                 </p>
@@ -204,31 +347,31 @@ export const OrderDetailModal = ({ isOpen, onClose, order }) => {
           <p>
             <strong>Drone:</strong>
             <span>
-              {order.drone_id || order.droneId
-                ? `${order.drone_id || order.droneId} - ${order.drone_name || order.droneName || ""}`.trim()
+              {displayOrder.drone_id || displayOrder.droneId
+                ? `${displayOrder.drone_id || displayOrder.droneId} - ${displayOrder.drone_name || displayOrder.droneName || ""}`.trim()
                 : "Not assigned"}
             </span>
           </p>
           <p>
             <strong>Restaurant Address:</strong>
             <span>
-              {order.restaurant?.address || order.restaurantAddress || "N/A"}
+              {displayOrder.restaurant?.address || displayOrder.restaurantAddress || "N/A"}
             </span>
           </p>
           <p>
             <strong>Customer Address:</strong>
             <span>
-              {order.customer?.address ||
-                order.delivery_address ||
-                order.address ||
+              {displayOrder.customer?.address ||
+                displayOrder.delivery_address ||
+                displayOrder.address ||
                 "N/A"}
             </span>
           </p>
-          {(order.special_instructions || order.specialInstructions) && (
+          {(displayOrder.special_instructions || displayOrder.specialInstructions) && (
             <p>
               <strong>Special Instructions:</strong>
               <span>
-                {order.special_instructions || order.specialInstructions}
+                {displayOrder.special_instructions || displayOrder.specialInstructions}
               </span>
             </p>
           )}

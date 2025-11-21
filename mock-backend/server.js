@@ -1151,17 +1151,20 @@ server.get("/orders", (req, res, next) => {
   const db = router.db;
   const userId = req.user?.id;
   const restaurantId = req.query.restaurant_id;
+  const user = db.get("users").find({ id: userId }).value();
+  const isAdmin = user?.roles?.includes("admin");
 
-  // Filter orders by user_id from token OR restaurant_id from query param
+  // Get all orders
   let orders = db.get("orders").value() || [];
 
   if (restaurantId) {
-    // Admin panel requesting orders for specific restaurant
+    // Requesting orders for specific restaurant
     orders = orders.filter(order => order.restaurant_id === restaurantId);
-  } else if (userId) {
-    // Customer requesting their own orders
+  } else if (!isAdmin && userId) {
+    // Non-admin customer requesting their own orders
     orders = orders.filter(order => order.user_id === userId);
   }
+  // If admin without restaurant_id: return ALL orders
 
   // Enrich each order with restaurant data
   const enrichedOrders = orders.map(order => {
@@ -1180,6 +1183,97 @@ server.get("/orders", (req, res, next) => {
   });
 
   res.json(enrichedOrders);
+});
+
+// ========== UPDATE ORDER ENDPOINT ==========
+// PATCH /orders/:id - Update order status, drone_id, and other fields
+// Authentication required: user must be the order owner or restaurant owner
+server.patch("/orders/:id", (req, res) => {
+  const db = router.db;
+  const orderId = req.params.id;
+  const userId = req.user?.id;
+  const updateData = req.body;
+
+  console.log(`[PATCH /orders/:id] Updating order ${orderId}`);
+  console.log(`[PATCH /orders/:id] User ID: ${userId}`);
+  console.log(`[PATCH /orders/:id] Update data:`, updateData);
+
+  // Find the order
+  const order = db.get("orders").find({ id: orderId }).value();
+  if (!order) {
+    console.log(`[PATCH /orders/:id] Order ${orderId} not found`);
+    return res.status(404).json({
+      success: false,
+      message: "Order not found",
+    });
+  }
+
+  // Authorization check: must be order owner (customer) or restaurant owner
+  const user = db.get("users").find({ id: userId }).value();
+  const isOrderOwner = order.user_id === userId;
+  const userRestaurantId = user?.restaurantId || user?.restaurant_id;
+  const isRestaurantOwner = userRestaurantId === order.restaurant_id;
+
+  if (!isOrderOwner && !isRestaurantOwner) {
+    console.log(`[PATCH /orders/:id] ❌ Unauthorized - User ${userId} cannot update order ${orderId}`);
+    return res.status(403).json({
+      success: false,
+      message: "You are not authorized to update this order",
+    });
+  }
+
+  // Build update object - only include provided fields
+  const updatedOrder = { ...order };
+
+  if (updateData.status !== undefined) {
+    updatedOrder.status = updateData.status;
+    console.log(`[PATCH /orders/:id] Status updated to: ${updateData.status}`);
+  }
+
+  if (updateData.drone_id !== undefined) {
+    updatedOrder.drone_id = updateData.drone_id;
+    console.log(`[PATCH /orders/:id] Drone ID updated to: ${updateData.drone_id}`);
+  }
+
+  if (updateData.special_instructions !== undefined) {
+    updatedOrder.special_instructions = updateData.special_instructions;
+  }
+
+  if (updateData.estimated_delivery_time !== undefined) {
+    updatedOrder.estimated_delivery_time = updateData.estimated_delivery_time;
+  }
+
+  if (updateData.actual_delivery_time !== undefined) {
+    updatedOrder.actual_delivery_time = updateData.actual_delivery_time;
+  }
+
+  if (updateData.rejection_reason !== undefined) {
+    updatedOrder.rejection_reason = updateData.rejection_reason;
+  }
+
+  if (updateData.rejected_at !== undefined) {
+    updatedOrder.rejected_at = updateData.rejected_at;
+  }
+
+  if (updateData.current_gps !== undefined) {
+    updatedOrder.current_gps = updateData.current_gps;
+  }
+
+  updatedOrder.updated_at = new Date().toISOString();
+
+  // Update in database
+  db.get("orders")
+    .find({ id: orderId })
+    .assign(updatedOrder)
+    .write();
+
+  console.log(`[PATCH /orders/:id] ✅ Order ${orderId} updated successfully`);
+
+  res.json({
+    success: true,
+    message: "Order updated successfully",
+    order: updatedOrder,
+  });
 });
 
 // ========== SIMULATE DRONE DELIVERY ENDPOINT ==========
@@ -1275,6 +1369,57 @@ server.post("/orders/:id/simulate-delivery", (req, res) => {
     steps,
     interval,
   });
+});
+
+// ========== DRONE ENDPOINTS ==========
+// GET /drones/available - Get all available drones
+server.get("/drones/available", (req, res) => {
+  const db = router.db;
+  const drones = db.get("drones").value() || [];
+  const availableDrones = drones.filter(d => d.status === "available");
+  console.log(`[GET /drones/available] Found ${availableDrones.length} available drones`);
+  res.json(availableDrones);
+});
+
+// GET /drones/:id - Get drone by ID
+server.get("/drones/:id", (req, res, next) => {
+  const db = router.db;
+  const droneId = req.params.id;
+  const drone = db.get("drones").find({ id: droneId }).value();
+
+  if (!drone) {
+    return next(); // Let json-server handle 404
+  }
+
+  res.json(drone);
+});
+
+// PATCH /drones/:id - Update drone
+server.patch("/drones/:id", (req, res, next) => {
+  const db = router.db;
+  const droneId = req.params.id;
+  const updateData = req.body;
+
+  console.log(`[PATCH /drones/:id] Updating drone ${droneId}`);
+  console.log(`[PATCH /drones/:id] Update data:`, updateData);
+
+  const drone = db.get("drones").find({ id: droneId }).value();
+  if (!drone) {
+    return next(); // Let json-server handle 404
+  }
+
+  // Update drone with new data
+  db.get("drones")
+    .find({ id: droneId })
+    .assign({
+      ...updateData,
+      updated_at: new Date().toISOString(),
+    })
+    .write();
+
+  const updatedDrone = db.get("drones").find({ id: droneId }).value();
+  console.log(`[PATCH /drones/:id] ✅ Drone ${droneId} updated`);
+  res.json(updatedDrone);
 });
 
 // ========== ADDRESSES ENDPOINT - Filter by User ==========

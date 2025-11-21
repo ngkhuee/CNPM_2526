@@ -499,6 +499,7 @@ const Orders = () => {
                     isOpen={showDetailModal}
                     onClose={closeOrderDetail}
                     order={selectedOrder}
+                    enableAutoRefresh={true}
                 />
 
                 <OrderRejectModal

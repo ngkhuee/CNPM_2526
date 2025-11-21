@@ -11,6 +11,7 @@ const generateToken = (user) => {
       id: user.id,
       email: user.email,
       role: user.role,
+      roles: user.roles,
     },
     SECRET_KEY,
     { expiresIn: "30d" }
@@ -44,9 +45,8 @@ const validateToken = (req, res, next) => {
     return next();
   }
 
-  // Note: GET /orders requires token - removed from public routes for security
-
-  // Note: GET /users requires token - removed from public routes for security
+  // Allow GET /orders, /users (requires token but let the route handler check)
+  // This allows the routes to check for admin/auth before filtering
 
   // Allow GET /auth/login and POST for register (public)
   if (req.method === "GET" && requestPath === "/auth/login") {

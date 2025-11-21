@@ -14,7 +14,7 @@ export const AdminAuthProvider = ({ children }) => {
       const token = localStorage.getItem("token");
       const user = await authService.getCurrentUser();
 
-      if (user && user.role === "admin") {
+      if (user && (user.role === "admin" || user.roles?.includes("admin"))) {
         setCurrentUser(user);
 
         // Validate admin status (non-blocking)
@@ -62,7 +62,7 @@ export const AdminAuthProvider = ({ children }) => {
       const response = await authService.login(email, password);
 
       if (response.success && response.user) {
-        if (response.user.role === "admin") {
+        if (response.user.role === "admin" || response.user.roles?.includes("admin")) {
           setCurrentUser(response.user);
           return { success: true, user: response.user };
         } else {

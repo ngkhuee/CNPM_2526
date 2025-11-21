@@ -6,6 +6,93 @@
   padding: 4px;
 }
 
+/* Tracking Section Styles */
+.odm-tracking-section {
+  border: 2px solid #ff6b35 !important;
+  background: linear-gradient(135deg, #fff9f5 0%, #f8f9fa 100%) !important;
+}
+
+.odm-tracking-section h4 {
+  color: #ff6b35;
+  border-bottom-color: #ff6b35;
+}
+
+.odm-progress-section {
+  background: linear-gradient(135deg, #e3f2fd 0%, #f8f9fa 100%) !important;
+  border: 2px solid #2196f3 !important;
+}
+
+.odm-progress-section h4 {
+  color: #2196f3;
+  border-bottom-color: #2196f3;
+}
+
+/* Progress Grid */
+.progress-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+  margin-top: 15px;
+}
+
+.progress-item {
+  display: flex;
+  flex-direction: column;
+  padding: 12px;
+  background: white;
+  border-radius: 6px;
+  border: 1px solid #e0e0e0;
+}
+
+.progress-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+
+.progress-value {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  word-break: break-all;
+}
+
+.progress-distance {
+  font-size: 16px;
+  color: #2196f3;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 6px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  width: fit-content;
+}
+
+.status-delivering {
+  background: #ffe0b2;
+  color: #e65100;
+  animation: pulse-status 1.5s infinite;
+}
+
+@keyframes pulse-status {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.7;
+  }
+}
+
 .odm-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -38,6 +125,15 @@
   padding-bottom: 10px;
   border-bottom: 2px solid #ff6b35;
   display: inline-block;
+}
+
+.odm-section h5 {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: #495057;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .odm-section p {
@@ -139,6 +235,10 @@
   color: #ff6b35;
 }
 
+.odm-discount {
+  color: #dc3545;
+}
+
 /* Scrollbar Styling */
 .odm-body::-webkit-scrollbar {
   width: 6px;
@@ -183,4 +283,10 @@
   .odm-section p strong {
     min-width: auto;
   }
+
+  .progress-grid {
+    grid-template-columns: 1fr;
+  }
 }
+
+```
