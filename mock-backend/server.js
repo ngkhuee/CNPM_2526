@@ -236,7 +236,7 @@ server.post("/orders", (req, res) => {
   const db = router.db;
   const orderData = req.body;
 
-  console.log("[POST /orders] 📦 Request body:", JSON.stringify(orderData, null, 2));
+  console.log("[POST /orders] Request body:", JSON.stringify(orderData, null, 2));
   console.log("[POST /orders] restaurant_id:", orderData.restaurant_id);
   console.log("[POST /orders] items type:", typeof orderData.items, "length:", orderData.items?.length);
   if (orderData.items && orderData.items.length > 0) {
@@ -252,19 +252,21 @@ server.post("/orders", (req, res) => {
     });
   }
 
-  if (!Array.isArray(orderData.items)) {
-    console.log("[POST /orders] ❌ items is not array, type:", typeof orderData.items);
-    return res.status(400).json({
-      success: false,
-      message: "items must be an array",
+  // Validate items - make sure it exists and is an array
+  if (!orderData.items || !Array.isArray(orderData.items) || orderData.items.length === 0) {
+    console.log("[POST /orders] ❌ Invalid items:", {
+      exists: !!orderData.items,
+      isArray: Array.isArray(orderData.items),
+      length: orderData.items?.length,
+      itemsValue: orderData.items
     });
-  }
-
-  if (orderData.items.length === 0) {
-    console.log("[POST /orders] ❌ items array is empty");
     return res.status(400).json({
       success: false,
-      message: "items cannot be empty",
+      message: "Order must contain at least one item. Please add items to your cart before placing an order.",
+      details: {
+        itemsReceived: orderData.items,
+        isArray: Array.isArray(orderData.items)
+      }
     });
   }
 

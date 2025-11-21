@@ -256,6 +256,11 @@ export const orderService = {
 
   async create(orderData) {
     try {
+      // Validate items exist before mapping
+      if (!orderData.items || !Array.isArray(orderData.items) || orderData.items.length === 0) {
+        throw new Error("Order must contain at least one item");
+      }
+
       // Map items to backend format (menu_id instead of foodId/food_id)
       const backendItems = orderData.items.map((item) => ({
         menu_id: item.foodId || item.food_id || item.id, // Support both camelCase and snake_case
