@@ -37,7 +37,7 @@ const ProductRevenueTable = ({ data = [], loading = false }) => {
                         <tr>
                             <th>Rank</th>
                             <th>Product Name</th>
-                            <th>Orders</th>
+                            <th>Quantity Sold</th>
                             <th>Revenue</th>
                         </tr>
                     </thead>

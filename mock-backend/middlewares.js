@@ -78,8 +78,12 @@ const validateToken = (req, res, next) => {
   // All other POST, PUT, PATCH, DELETE require token
   const token = req.headers.authorization?.split(" ")[1];
 
+  console.log("[validateToken] Path:", requestPath, "Method:", req.method);
+  console.log("[validateToken] Authorization header:", req.headers.authorization);
+  console.log("[validateToken] Token extracted:", token ? "YES" : "NO");
+
   if (!token) {
-    console.error("No token provided for path:", req.path, "Method:", req.method);
+    console.error("[validateToken] ❌ No token provided for path:", req.path, "Method:", req.method);
     return res.status(401).json({
       success: false,
       message: "No token provided. Please login.",

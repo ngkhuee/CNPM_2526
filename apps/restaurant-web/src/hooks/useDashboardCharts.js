@@ -97,14 +97,26 @@ export const useDashboardCharts = () => {
             const queryUrl = `${API_BASE_URL}/orders?restaurant_id=${currentRestaurant.id}`;
             console.log("Fetching from URL:", queryUrl);
 
-            const response = await fetch(queryUrl);
-            console.log("Response status:", response.status);
-
-            const orders = await response.json();
+            const token = localStorage.getItem("token");
+            const headers = token ? { Authorization: `Bearer ${token}` } : {};
+            const response = await fetch(queryUrl, { headers });
+            console.log("Response status:", response.status); const orders = await response.json();
             console.log("=== Orders fetched ===");
-            console.log("Total orders:", orders.length);
+            console.log("Orders response type:", typeof orders);
+            console.log("Is array:", Array.isArray(orders));
             console.log("Orders response:", orders);
 
+            // Ensure orders is an array
+            if (!Array.isArray(orders)) {
+                console.warn("Orders response is not an array, received:", orders);
+                setChartData((prev) => ({
+                    ...prev,
+                    revenueChart: [],
+                }));
+                return;
+            }
+
+            console.log("Total orders:", orders.length);
             if (orders.length > 0) {
                 console.log("First order:", JSON.stringify(orders[0], null, 2));
             } else {
@@ -183,10 +195,26 @@ export const useDashboardCharts = () => {
             const { startDate, endDate } = getDateRange(dateRange);
             console.log("fetchOrderChart - Date range:", startDate, "to", endDate);
 
+            const token = localStorage.getItem("token");
+            const headers = token ? { Authorization: `Bearer ${token}` } : {};
             const response = await fetch(
-                `${API_BASE_URL}/orders?restaurant_id=${currentRestaurant.id}`
+                `${API_BASE_URL}/orders?restaurant_id=${currentRestaurant.id}`,
+                { headers }
             );
             const orders = await response.json();
+            console.log("fetchOrderChart - Fetched orders type:", typeof orders);
+            console.log("fetchOrderChart - Is array:", Array.isArray(orders));
+
+            // Ensure orders is an array
+            if (!Array.isArray(orders)) {
+                console.warn("Orders response is not an array, received:", orders);
+                setChartData((prev) => ({
+                    ...prev,
+                    orderChart: [],
+                }));
+                return;
+            }
+
             console.log("fetchOrderChart - Fetched orders:", orders.length);
             if (orders.length > 0) {
                 console.log("fetchOrderChart - First order sample:", orders[0]);
@@ -202,7 +230,7 @@ export const useDashboardCharts = () => {
 
             // Filter orders by date range
             const filteredOrders = orders.filter((order) => {
-                const orderDate = new Date(order.created_at);
+                const orderDate = new Date(order.updated_at || order.created_at);
                 return orderDate >= startDate && orderDate <= endDate;
             });
 
@@ -263,10 +291,26 @@ export const useDashboardCharts = () => {
             const { startDate, endDate } = getDateRange(dateRange);
             console.log("fetchRevenueByProduct - Date range:", startDate, "to", endDate);
 
+            const token = localStorage.getItem("token");
+            const headers = token ? { Authorization: `Bearer ${token}` } : {};
             const response = await fetch(
-                `${API_BASE_URL}/orders?restaurant_id=${currentRestaurant.id}`
+                `${API_BASE_URL}/orders?restaurant_id=${currentRestaurant.id}`,
+                { headers }
             );
             const orders = await response.json();
+            console.log("fetchRevenueByProduct - Fetched orders type:", typeof orders);
+            console.log("fetchRevenueByProduct - Is array:", Array.isArray(orders));
+
+            // Ensure orders is an array
+            if (!Array.isArray(orders)) {
+                console.warn("Orders response is not an array, received:", orders);
+                setChartData((prev) => ({
+                    ...prev,
+                    revenueByProduct: [],
+                }));
+                return;
+            }
+
             console.log("fetchRevenueByProduct - Total orders fetched:", orders.length);
 
             // Helper to format date as YYYY-MM-DD using local time (not UTC)

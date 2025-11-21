@@ -184,9 +184,13 @@ export const restaurantService = {
       );
 
       console.log("PATCH response:", response);
+      console.log("PATCH response opening_hours:", response.opening_hours);
 
-      // Return mapped response
-      return this.getById(id);
+      // Return mapped response - fetch fresh data from API
+      const freshData = await this.getById(id);
+      console.log("Fresh data from getById:", freshData);
+      console.log("Fresh data opening_hours:", freshData.opening_hours);
+      return freshData;
     } catch (error) {
       console.error("=== Error in restaurantService.update ===");
       console.error("Error:", error);

@@ -192,6 +192,113 @@ server.post("/orders/check-pending-expiry", (req, res) => {
   });
 });
 
+// ========== CUSTOM ORDER CREATION ENDPOINT (Before auth middleware) ==========
+// POST /orders - Create new order with auto-populated user_id from token
+server.post("/orders", (req, res) => {
+  console.log("[POST /orders] ✅ Handler called!");
+  console.log("[POST /orders] req.headers.authorization:", req.headers.authorization);
+
+  // Manually validate token since this handler is before validateToken middleware
+  const token = req.headers.authorization?.split(" ")[1];
+
+  if (!token) {
+    console.log("[POST /orders] ❌ No token provided");
+    return res.status(401).json({
+      success: false,
+      message: "Unauthorized: Token required",
+    });
+  }
+
+  // Verify token
+  let decoded;
+  try {
+    const SECRET_KEY = process.env.JWT_SECRET || "tomato-food-delivery-secret-key";
+    const jwt = require("jsonwebtoken");
+    decoded = jwt.verify(token, SECRET_KEY);
+    console.log("[POST /orders] ✅ Token valid, userId:", decoded.id);
+  } catch (error) {
+    console.log("[POST /orders] ❌ Token invalid:", error.message);
+    return res.status(401).json({
+      success: false,
+      message: "Invalid or expired token",
+    });
+  }
+
+  const userId = decoded.id;
+  if (!userId) {
+    console.log("[POST /orders] ❌ No userId in token");
+    return res.status(401).json({
+      success: false,
+      message: "Unauthorized: Invalid token",
+    });
+  }
+
+  const db = router.db;
+  const orderData = req.body;
+
+  // Validate required fields
+  if (!orderData.restaurant_id || !Array.isArray(orderData.items) || orderData.items.length === 0) {
+    return res.status(400).json({
+      success: false,
+      message: "restaurant_id and items are required",
+    });
+  }
+
+  // Check if restaurant is open
+  const restaurant = db.get("restaurants").find({ id: orderData.restaurant_id }).value();
+  if (!restaurant) {
+    return res.status(404).json({
+      success: false,
+      message: "Restaurant not found",
+    });
+  }
+
+  if (!isRestaurantOpenHelper(restaurant.opening_hours)) {
+    return res.status(400).json({
+      success: false,
+      message: `Restaurant is currently closed. Opening hours: ${JSON.stringify(restaurant.opening_hours)}`,
+      code: "RESTAURANT_CLOSED",
+    });
+  }
+
+  // Auto-populate user_id from token
+  const newOrder = {
+    id: `ord_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+    user_id: userId, // Auto-populate from token
+    restaurant_id: orderData.restaurant_id,
+    items: orderData.items || [],
+    subtotal: orderData.subtotal || 0,
+    delivery_fee: orderData.delivery_fee || 0,
+    discount_amount: orderData.discount_amount || 0,
+    total_amount: orderData.total_amount || 0,
+    payment_method: orderData.payment_method || "momo",
+    payment_status: orderData.payment_status || "pending",
+    status: orderData.status || "pending",
+    special_instructions: orderData.special_instructions || "",
+    customer: orderData.customer || {},
+    delivery_address: orderData.delivery_address,
+    delivery_address_id: orderData.delivery_address_id,
+    dropoff_gps: orderData.dropoff_gps,
+    promotion_code: orderData.promotion_code,
+    promotion_id: orderData.promotion_id,
+    order_number: orderData.order_number || `ORD-${Date.now()}`,
+    created_at: orderData.created_at || new Date().toISOString(),
+    updated_at: orderData.updated_at || new Date().toISOString(),
+  };
+
+  // Add to database
+  db.get("orders").push(newOrder).write();
+
+  console.log("[POST /orders] Order created:", {
+    orderId: newOrder.id,
+    userId,
+    restaurantId: newOrder.restaurant_id,
+    items: newOrder.items.length,
+  });
+
+  res.status(201).json(newOrder);
+});
+
 // Apply auth middleware (after custom routes)
 server.use(validateToken);
 
@@ -940,81 +1047,43 @@ const isRestaurantOpenHelper = (openingHours) => {
   return currentTime >= dayHours.open && currentTime < dayHours.close;
 };
 
-// ========== CUSTOM ORDER CREATION ENDPOINT ==========
-// POST /orders - Create new order with auto-populated user_id from token
-server.post("/orders", (req, res) => {
-  const userId = req.user?.id;
-  if (!userId) {
-    return res.status(401).json({
-      success: false,
-      message: "Unauthorized: Token required",
-    });
-  }
-
+// ========== DEBUG ENDPOINT - Check server time and opening status ==========
+server.get("/debug/server-time", (req, res) => {
+  const restaurantId = req.query.restaurant_id;
   const db = router.db;
-  const orderData = req.body;
 
-  // Validate required fields
-  if (!orderData.restaurant_id || !Array.isArray(orderData.items) || orderData.items.length === 0) {
-    return res.status(400).json({
-      success: false,
-      message: "restaurant_id and items are required",
-    });
-  }
+  const now = new Date();
+  const DAYS_OF_WEEK = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
+  const dayOfWeek = DAYS_OF_WEEK[now.getDay()];
+  const currentTime = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
 
-  // Check if restaurant is open
-  const restaurant = db.get("restaurants").find({ id: orderData.restaurant_id }).value();
-  if (!restaurant) {
-    return res.status(404).json({
-      success: false,
-      message: "Restaurant not found",
-    });
-  }
-
-  if (!isRestaurantOpenHelper(restaurant.opening_hours)) {
-    return res.status(400).json({
-      success: false,
-      message: `Restaurant is currently closed. Opening hours: ${JSON.stringify(restaurant.opening_hours)}`,
-      code: "RESTAURANT_CLOSED",
-    });
-  }
-
-  // Auto-populate user_id from token
-  const newOrder = {
-    id: `ord_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-    user_id: userId, // Auto-populate from token
-    restaurant_id: orderData.restaurant_id,
-    items: orderData.items || [],
-    subtotal: orderData.subtotal || 0,
-    delivery_fee: orderData.delivery_fee || 0,
-    discount_amount: orderData.discount_amount || 0,
-    total_amount: orderData.total_amount || 0,
-    payment_method: orderData.payment_method || "momo",
-    payment_status: orderData.payment_status || "pending",
-    status: orderData.status || "pending",
-    special_instructions: orderData.special_instructions || "",
-    customer: orderData.customer || {},
-    delivery_address: orderData.delivery_address,
-    delivery_address_id: orderData.delivery_address_id,
-    dropoff_gps: orderData.dropoff_gps,
-    promotion_code: orderData.promotion_code,
-    promotion_id: orderData.promotion_id,
-    order_number: orderData.order_number || `ORD-${Date.now()}`,
-    created_at: orderData.created_at || new Date().toISOString(),
-    updated_at: orderData.updated_at || new Date().toISOString(),
+  let response = {
+    server_time: now.toISOString(),
+    server_day: dayOfWeek,
+    server_time_hhmm: currentTime,
   };
 
-  // Add to database
-  db.get("orders").push(newOrder).write();
+  if (restaurantId) {
+    const restaurant = db.get("restaurants").find({ id: restaurantId }).value();
+    if (restaurant) {
+      const isOpen = isRestaurantOpenHelper(restaurant.opening_hours);
+      response.restaurant = {
+        id: restaurant.id,
+        name: restaurant.name,
+        opening_hours: restaurant.opening_hours,
+        today_hours: restaurant.opening_hours[dayOfWeek],
+        is_open: isOpen,
+        check_details: {
+          current_time: currentTime,
+          today: dayOfWeek,
+          open_time: restaurant.opening_hours[dayOfWeek]?.open,
+          close_time: restaurant.opening_hours[dayOfWeek]?.close,
+        }
+      };
+    }
+  }
 
-  console.log("[POST /orders] Order created:", {
-    orderId: newOrder.id,
-    userId,
-    restaurantId: newOrder.restaurant_id,
-    items: newOrder.items.length,
-  });
-
-  res.status(201).json(newOrder);
+  res.json(response);
 });
 
 // ========== CUSTOM GET ORDERS ENDPOINT WITH RESTAURANT DATA ==========

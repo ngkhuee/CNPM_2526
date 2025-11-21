@@ -15,9 +15,17 @@ const FoodEditModal = ({ food, isOpen, onClose, onSubmit, categories, restaurant
 
     useEffect(() => {
         if (food) {
-            setEditFood(food);
+            // If food has a category name but no categoryId, find the matching categoryId
+            let foodData = { ...food };
+            if (food.category && !food.categoryId) {
+                const matchingCategory = categories.find((cat) => cat.name === food.category);
+                if (matchingCategory) {
+                    foodData.categoryId = matchingCategory.id;
+                }
+            }
+            setEditFood(foodData);
         }
-    }, [food]);
+    }, [food, categories]);
 
     const handleImageChange = async (file) => {
         if (!file) return;
@@ -45,7 +53,11 @@ const FoodEditModal = ({ food, isOpen, onClose, onSubmit, categories, restaurant
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        if (!editFood.categoryId && !editFood.category) {
+        // Check if either categoryId or category has a value
+        const hasCategoryId = editFood.categoryId && String(editFood.categoryId).trim();
+        const hasCategory = editFood.category && String(editFood.category).trim();
+
+        if (!hasCategoryId && !hasCategory) {
             alert("Please select a category!");
             return;
         }
