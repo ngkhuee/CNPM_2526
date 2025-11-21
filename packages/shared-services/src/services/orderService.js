@@ -256,13 +256,13 @@ export const orderService = {
 
   async create(orderData) {
     try {
-      // Map items to backend format (menu_id instead of foodId)
+      // Map items to backend format (menu_id instead of foodId/food_id)
       const backendItems = orderData.items.map((item) => ({
-        menu_id: item.foodId,
+        menu_id: item.foodId || item.food_id || item.id, // Support both camelCase and snake_case
         name: item.name,
         quantity: item.quantity,
-        unit_price: item.price,
-        subtotal: item.price * item.quantity,
+        unit_price: item.price || item.unit_price,
+        subtotal: (item.price || item.unit_price) * item.quantity,
       }));
 
       // Map frontend camelCase to backend snake_case

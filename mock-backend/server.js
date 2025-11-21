@@ -236,11 +236,35 @@ server.post("/orders", (req, res) => {
   const db = router.db;
   const orderData = req.body;
 
+  console.log("[POST /orders] 📦 Request body:", JSON.stringify(orderData, null, 2));
+  console.log("[POST /orders] restaurant_id:", orderData.restaurant_id);
+  console.log("[POST /orders] items type:", typeof orderData.items, "length:", orderData.items?.length);
+  if (orderData.items && orderData.items.length > 0) {
+    console.log("[POST /orders] First item:", JSON.stringify(orderData.items[0], null, 2));
+  }
+
   // Validate required fields
-  if (!orderData.restaurant_id || !Array.isArray(orderData.items) || orderData.items.length === 0) {
+  if (!orderData.restaurant_id) {
+    console.log("[POST /orders] ❌ Missing restaurant_id");
     return res.status(400).json({
       success: false,
-      message: "restaurant_id and items are required",
+      message: "restaurant_id is required",
+    });
+  }
+
+  if (!Array.isArray(orderData.items)) {
+    console.log("[POST /orders] ❌ items is not array, type:", typeof orderData.items);
+    return res.status(400).json({
+      success: false,
+      message: "items must be an array",
+    });
+  }
+
+  if (orderData.items.length === 0) {
+    console.log("[POST /orders] ❌ items array is empty");
+    return res.status(400).json({
+      success: false,
+      message: "items cannot be empty",
     });
   }
 
@@ -266,7 +290,14 @@ server.post("/orders", (req, res) => {
     id: `ord_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
     user_id: userId, // Auto-populate from token
     restaurant_id: orderData.restaurant_id,
-    items: orderData.items || [],
+    items: (orderData.items || []).map(item => ({
+      // Support both camelCase and snake_case field names
+      menu_id: item.menu_id || item.foodId || item.food_id || item.id,
+      name: item.name || "",
+      quantity: item.quantity || 1,
+      unit_price: item.unit_price || item.price || 0,
+      subtotal: (item.quantity || 1) * (item.unit_price || item.price || 0),
+    })),
     subtotal: orderData.subtotal || 0,
     delivery_fee: orderData.delivery_fee || 0,
     discount_amount: orderData.discount_amount || 0,
