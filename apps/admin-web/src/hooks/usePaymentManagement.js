@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import { restaurantService } from "shared-services";
 
 /**
  * Hook for admin payment management
@@ -20,15 +21,23 @@ export const usePaymentManagement = () => {
   const fetchWithdrawals = useCallback(async () => {
     setLoading(true);
     try {
-      const withdrawalsResponse = await fetch(`${API_BASE_URL}/withdrawals`);
+      // Get token from localStorage
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setError("Authentication required. Please login again.");
+        setLoading(false);
+        return;
+      }
+
+      const withdrawalsResponse = await fetch(`${API_BASE_URL}/withdrawals`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
       const withdrawalsData = (await withdrawalsResponse.ok)
         ? await withdrawalsResponse.json()
         : [];
 
-      const restaurantsResponse = await fetch(`${API_BASE_URL}/restaurants`);
-      const restaurantsData = (await restaurantsResponse.ok)
-        ? await restaurantsResponse.json()
-        : [];
+      // Use restaurantService to get restaurants (includes auth)
+      const restaurantsData = await restaurantService.getAll();
 
       // Join withdrawals with restaurant info
       const enriched = withdrawalsData.map((w) => {

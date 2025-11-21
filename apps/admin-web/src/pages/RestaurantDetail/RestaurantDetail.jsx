@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { formatCurrency, formatRating } from "@utils/formatters";
 import { useRestaurantRating } from "shared-hooks";
+import { orderService, restaurantService } from "shared-services";
 import {
     MdArrowBack,
     MdStar,
@@ -33,9 +34,8 @@ const RestaurantDetail = () => {
     const loadRestaurantDetail = async () => {
         setLoading(true);
         try {
-            // Get restaurant info
-            const restaurantRes = await fetch(`${API_BASE_URL}/restaurants/${restaurantId}`);
-            const restaurantData = await restaurantRes.ok ? await restaurantRes.json() : null;
+            // Get restaurant info using service (includes auth token)
+            const restaurantData = await restaurantService.getById(restaurantId);
             setRestaurant(restaurantData);
 
             if (!restaurantData) {
@@ -43,20 +43,17 @@ const RestaurantDetail = () => {
                 return;
             }
 
-            // Get orders for this restaurant - json-server returns array for query params
-            const ordersRes = await fetch(
-                `${API_BASE_URL}/orders?restaurant_id=${restaurantId}`
-            );
-            let ordersData = await ordersRes.ok ? await ordersRes.json() : [];
-            // Handle both array and object responses
-            if (!Array.isArray(ordersData)) {
-                ordersData = ordersData.value || [];
-            }
-            setOrders(ordersData);
+            // Get orders for this restaurant using orderService (includes auth token)
+            const ordersData = await orderService.getByRestaurant(restaurantId);
+            setOrders(ordersData || []);
 
-            // Get balance info
+            // Get balance info with auth token
+            const token = localStorage.getItem("token");
             const balanceRes = await fetch(
-                `${API_BASE_URL}/restaurant_balances?restaurant_id=${restaurantId}`
+                `${API_BASE_URL}/restaurant_balances?restaurant_id=${restaurantId}`,
+                {
+                    headers: token ? { Authorization: `Bearer ${token}` } : {},
+                }
             );
             let balanceData = await balanceRes.ok ? await balanceRes.json() : [];
             // Handle both array and object responses
@@ -72,26 +69,27 @@ const RestaurantDetail = () => {
             today.setHours(0, 0, 0, 0);
 
             const todayOrders = ordersData.filter((o) => {
-                const orderDate = new Date(o.created_at);
+                const orderDate = new Date(o.created_at || o.createdAt);
                 orderDate.setHours(0, 0, 0, 0);
                 return orderDate.getTime() === today.getTime();
             });
 
             const thisWeekOrders = ordersData.filter((o) => {
-                const orderDate = new Date(o.created_at);
+                const orderDate = new Date(o.created_at || o.createdAt);
                 const weekStart = new Date(today);
                 weekStart.setDate(today.getDate() - today.getDay());
                 return orderDate >= weekStart;
             });
 
             const completedOrders = ordersData.filter((o) => o.status === "delivered");
-            const totalRevenue = completedOrders.reduce((sum, o) => sum + o.total_amount, 0);
+
+            const totalRevenue = completedOrders.reduce((sum, o) => sum + (o.total_amount || o.totalAmount || 0), 0);
             const todayRevenue = todayOrders
                 .filter((o) => o.status === "delivered")
-                .reduce((sum, o) => sum + o.total_amount, 0);
+                .reduce((sum, o) => sum + (o.total_amount || o.totalAmount || 0), 0);
             const weekRevenue = thisWeekOrders
                 .filter((o) => o.status === "delivered")
-                .reduce((sum, o) => sum + o.total_amount, 0);
+                .reduce((sum, o) => sum + (o.total_amount || o.totalAmount || 0), 0);
 
             setStats({
                 totalOrders: ordersData.length,
@@ -302,9 +300,9 @@ const RestaurantDetail = () => {
                                             <td>
                                                 <code>{order.id}</code>
                                             </td>
-                                            <td>{order.customer?.name || order.user_id}</td>
+                                            <td>{order.customer?.name || order.customerName || order.userName || order.user_id || "N/A"}</td>
                                             <td className="amount">
-                                                {formatCurrency(order.total_amount)}
+                                                {formatCurrency(order.total_amount || order.totalAmount || 0)}
                                             </td>
                                             <td>
                                                 <span className={`status-badge status-${order.status}`}>
@@ -312,7 +310,9 @@ const RestaurantDetail = () => {
                                                 </span>
                                             </td>
                                             <td className="date">
-                                                {new Date(order.created_at).toLocaleDateString("vi-VN")}
+                                                {order.created_at || order.createdAt
+                                                    ? new Date(order.created_at || order.createdAt).toLocaleDateString("vi-VN")
+                                                    : "Invalid Date"}
                                             </td>
                                         </tr>
                                     ))}

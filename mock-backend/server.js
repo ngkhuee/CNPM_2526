@@ -273,13 +273,24 @@ server.post("/orders", (req, res) => {
   // Check if restaurant is open
   const restaurant = db.get("restaurants").find({ id: orderData.restaurant_id }).value();
   if (!restaurant) {
+    console.log("[POST /orders] ❌ Restaurant not found:", orderData.restaurant_id);
     return res.status(404).json({
       success: false,
       message: "Restaurant not found",
     });
   }
 
-  if (!isRestaurantOpenHelper(restaurant.opening_hours)) {
+  // Check opening hours
+  const isOpen = isRestaurantOpenHelper(restaurant.opening_hours);
+  console.log("[POST /orders] Restaurant open check:", {
+    restaurantId: restaurant.id,
+    restaurantName: restaurant.name,
+    isOpen: isOpen,
+    openingHours: restaurant.opening_hours
+  });
+
+  if (!isOpen) {
+    console.log("[POST /orders] ❌ Restaurant is closed");
     return res.status(400).json({
       success: false,
       message: `Restaurant is currently closed. Opening hours: ${JSON.stringify(restaurant.opening_hours)}`,
@@ -287,14 +298,14 @@ server.post("/orders", (req, res) => {
     });
   }
 
-  // Auto-populate user_id from token
+  // Auto-populate user_id and pickup_gps from restaurant location
   const newOrder = {
     id: `ord_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
     user_id: userId, // Auto-populate from token
     restaurant_id: orderData.restaurant_id,
     items: (orderData.items || []).map(item => ({
-      // Support both camelCase and snake_case field names
-      menu_id: item.menu_id || item.foodId || item.food_id || item.id,
+      // Support all field name variations - check in priority order
+      menu_id: item.menu_id || item.food_id || item.foodId || item.id,
       name: item.name || "",
       quantity: item.quantity || 1,
       unit_price: item.unit_price || item.price || 0,
@@ -311,6 +322,8 @@ server.post("/orders", (req, res) => {
     customer: orderData.customer || {},
     delivery_address: orderData.delivery_address,
     delivery_address_id: orderData.delivery_address_id,
+    // Auto-populate pickup_gps from restaurant location
+    pickup_gps: orderData.pickup_gps || restaurant.location || null,
     dropoff_gps: orderData.dropoff_gps,
     promotion_code: orderData.promotion_code,
     promotion_id: orderData.promotion_id,
@@ -327,6 +340,8 @@ server.post("/orders", (req, res) => {
     userId,
     restaurantId: newOrder.restaurant_id,
     items: newOrder.items.length,
+    pickup_gps: newOrder.pickup_gps,
+    dropoff_gps: newOrder.dropoff_gps,
   });
 
   res.status(201).json(newOrder);
@@ -1065,11 +1080,16 @@ const isRestaurantOpenHelper = (openingHours) => {
     "saturday",
   ];
 
+  // Use Vietnam timezone (UTC+7)
   const now = new Date();
-  const dayOfWeek = DAYS_OF_WEEK[now.getDay()];
-  const currentTime = `${String(now.getHours()).padStart(2, "0")}:${String(
-    now.getMinutes()
+  const vietnamTime = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Ho_Chi_Minh' }));
+
+  const dayOfWeek = DAYS_OF_WEEK[vietnamTime.getDay()];
+  const currentTime = `${String(vietnamTime.getHours()).padStart(2, "0")}:${String(
+    vietnamTime.getMinutes()
   ).padStart(2, "0")}`;
+
+  console.log(`[isRestaurantOpenHelper] Day: ${dayOfWeek}, Time: ${currentTime}`);
 
   const dayHours = openingHours[dayOfWeek];
 
@@ -1086,12 +1106,15 @@ server.get("/debug/server-time", (req, res) => {
   const db = router.db;
 
   const now = new Date();
+  const vietnamTime = new Date(now.toLocaleString('en-US', { timeZone: 'Asia/Ho_Chi_Minh' }));
+
   const DAYS_OF_WEEK = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
-  const dayOfWeek = DAYS_OF_WEEK[now.getDay()];
-  const currentTime = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+  const dayOfWeek = DAYS_OF_WEEK[vietnamTime.getDay()];
+  const currentTime = `${String(vietnamTime.getHours()).padStart(2, "0")}:${String(vietnamTime.getMinutes()).padStart(2, "0")}`;
 
   let response = {
-    server_time: now.toISOString(),
+    server_time_utc: now.toISOString(),
+    server_time_vietnam: vietnamTime.toISOString(),
     server_day: dayOfWeek,
     server_time_hhmm: currentTime,
   };
