@@ -16,9 +16,9 @@ const FoodCard = ({ food, assets, onEdit, onDelete, onViewDetail, onFormatVND, c
     const getCategoryName = () => {
         if (food.categoryId) {
             const category = categories.find((c) => c.id === food.categoryId);
-            return category ? category.name : "Uncategorized";
+            return category ? category.name : "Chưa phân loại";
         }
-        return food.category || "Uncategorized";
+        return food.category || "Chưa phân loại";
     };
 
     return (
@@ -27,7 +27,7 @@ const FoodCard = ({ food, assets, onEdit, onDelete, onViewDetail, onFormatVND, c
                 {getImageSrc(food) ? (
                     <img src={getImageSrc(food)} alt={food.name} />
                 ) : (
-                    <p>No image</p>
+                    <p>Không có ảnh</p>
                 )}
             </div>
             <div className="food-info">
@@ -82,10 +82,10 @@ const FoodCard = ({ food, assets, onEdit, onDelete, onViewDetail, onFormatVND, c
             </div>
             <div className="card-actions">
                 <button className="edit-btn" onClick={() => onEdit(food)}>
-                    <MdEdit /> Edit
+                    <MdEdit /> Sửa
                 </button>
                 <button className="remove-btn" onClick={() => onDelete(food.id)}>
-                    <MdDelete /> Remove
+                    <MdDelete /> Xóa
                 </button>
             </div>
         </div>

@@ -28,7 +28,7 @@ export default function BottomNavigation({ activeRoute, onNavigate }) {
                     size={24}
                     color={iconColor('home')}
                 />
-                <Text style={[styles.label, { color: textColor('home') }]}>Home</Text>
+                <Text style={[styles.label, { color: textColor('home') }]}>Trang chủ</Text>
             </TouchableOpacity>
 
             {/* Cart với Badge */}
@@ -51,7 +51,7 @@ export default function BottomNavigation({ activeRoute, onNavigate }) {
                         </View>
                     )}
                 </View>
-                <Text style={[styles.label, { color: textColor('cart') }]}>Cart</Text>
+                <Text style={[styles.label, { color: textColor('cart') }]}>Giỏ hàng</Text>
             </TouchableOpacity>
 
             {/* Orders */}
@@ -64,7 +64,7 @@ export default function BottomNavigation({ activeRoute, onNavigate }) {
                     size={24}
                     color={iconColor('orders')}
                 />
-                <Text style={[styles.label, { color: textColor('orders') }]}>Orders</Text>
+                <Text style={[styles.label, { color: textColor('orders') }]}>Đơn hàng</Text>
             </TouchableOpacity>
 
             {/* Me */}
@@ -77,7 +77,7 @@ export default function BottomNavigation({ activeRoute, onNavigate }) {
                     size={24}
                     color={iconColor('profile')}
                 />
-                <Text style={[styles.label, { color: textColor('profile') }]}>Me</Text>
+                <Text style={[styles.label, { color: textColor('profile') }]}>Tôi</Text>
             </TouchableOpacity>
         </View>
     );

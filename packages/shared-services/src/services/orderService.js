@@ -1,59 +1,6 @@
 import apiClient from "../config/apiClient";
 import { ENDPOINTS } from "../config/endpoints";
-
-// Helper function to map backend order to frontend format
-const mapOrderToFrontend = (
-  order,
-  user = null,
-  restaurant = null,
-  address = null
-) => ({
-  id: order.id,
-  _id: order.id,
-  userId: order.user_id,
-  restaurantId: order.restaurant_id,
-  addressId: order.address_id,
-  droneId: order.drone_id,
-  items: (order.items || []).map((item) => ({
-    ...item,
-    foodId: item.foodId || item.menu_id || item.id,
-  })),
-  subtotal: order.subtotal,
-  deliveryFee: order.delivery_fee,
-  discountAmount: order.discount_amount,
-  totalAmount: order.total_amount,
-  paymentMethod: order.payment_method,
-  paymentStatus: order.payment_status,
-  payment_status: order.payment_status,
-  status: order.status,
-  specialInstructions: order.special_instructions,
-  estimatedDeliveryTime: order.estimated_delivery_time,
-  actualDeliveryTime: order.actual_delivery_time,
-  createdAt: order.created_at,
-  updatedAt: order.updated_at,
-  user: user,
-  userName: user?.full_name || order.user_id,
-  restaurant: restaurant,
-  restaurantName: restaurant?.name || null,
-  restaurant_id: order.restaurant_id,
-  // Customer info (from user and address)
-  customerName: user?.full_name || "N/A",
-  customerPhone: user?.phone || address?.phone || "N/A",
-  customerAddress: address?.full_address || address?.address || "N/A",
-  delivery_address: address?.full_address || address?.address || order.delivery_address || "N/A",
-  // GPS coordinates
-  pickup_gps: order.pickup_gps || restaurant?.location || null,
-  dropoff_gps:
-    order.dropoff_gps ||
-    (address?.latitude && address?.longitude
-      ? {
-        lat: address.latitude,
-        lng: address.longitude,
-      }
-      : null),
-  current_gps: order.current_gps || null,
-  drone_id: order.drone_id,
-});
+import { transformOrderFromAPI, transformOrderToAPI } from "../utils/orderTransformer";
 
 export const orderService = {
   async getAll() {
@@ -70,7 +17,6 @@ export const orderService = {
         "OrderService.getAll() - Raw orders from API:",
         orders.length
       );
-      console.log("Sample raw order:", orders[0]);
 
       // Map user and restaurant data to orders and convert to frontend format
       const mappedOrders = orders.map((order) => {
@@ -80,30 +26,22 @@ export const orderService = {
         const address =
           addresses.find((a) => a.id === order.address_id) || null;
 
-        // Create enriched order
-        const enrichedOrder = mapOrderToFrontend(order, user, restaurant);
+        // Create enriched order with relations
+        const enrichedOrder = {
+          ...order,
+          user,
+          restaurant,
+          address,
+        };
 
-        // Add address information
-        if (address) {
-          enrichedOrder.address = address;
-          enrichedOrder.addressInfo = {
-            fullAddress: address.full_address,
-            street: address.street,
-            ward: address.ward,
-            district: address.district,
-            city: address.city,
-            phone: address.phone,
-          };
-        }
-
-        return enrichedOrder;
+        // ✅ Use unified transformer
+        return transformOrderFromAPI(enrichedOrder);
       });
 
       console.log(
-        "OrderService.getAll() - Mapped orders:",
+        "OrderService.getAll() - Transformed orders:",
         mappedOrders.length
       );
-      console.log("Sample mapped order:", mappedOrders[0]);
 
       return mappedOrders;
     } catch (error) {
@@ -113,10 +51,10 @@ export const orderService = {
 
   async getById(id) {
     try {
-      // Fetch order, user, restaurant, and address data
+      // Fetch order
       const order = await apiClient.get(ENDPOINTS.ORDERS.BY_ID(id));
 
-      // Fetch user, restaurant, and address info if available
+      // Fetch relations if available
       let user = null;
       let restaurant = null;
       let address = null;
@@ -147,29 +85,16 @@ export const orderService = {
         console.warn("Could not fetch address:", err);
       }
 
-      // Create enriched order
-      const enrichedOrder = mapOrderToFrontend(order, user, restaurant, address);
+      // Enrich with relations
+      const enrichedOrder = {
+        ...order,
+        user,
+        restaurant,
+        address,
+      };
 
-      // Override with embedded customer data if available
-      if (order.customer) {
-        enrichedOrder.customerName = order.customer.name || enrichedOrder.customerName;
-        enrichedOrder.customerPhone = order.customer.phone || enrichedOrder.customerPhone;
-        enrichedOrder.customerAddress = order.customer.address || enrichedOrder.customerAddress;
-      }
-
-      // Add full address info
-      if (address) {
-        enrichedOrder.addressInfo = {
-          fullAddress: address.full_address || address.address_line,
-          street: address.street,
-          ward: address.ward,
-          district: address.district,
-          city: address.city,
-          phone: address.phone,
-        };
-      }
-
-      return enrichedOrder;
+      // ✅ Use unified transformer
+      return transformOrderFromAPI(enrichedOrder);
     } catch (error) {
       throw error;
     }
@@ -187,29 +112,30 @@ export const orderService = {
         const restaurant =
           restaurants.find((r) => r.id === order.restaurant_id) || null;
 
-        // Enrich items with foodId by matching with menus
-        const enrichedOrder = mapOrderToFrontend(order, null, restaurant);
-
-        enrichedOrder.items = enrichedOrder.items.map((item) => {
-          // Try to find menu by name and restaurant_id
-          if (!item.foodId && item.name) {
+        // Enrich items with foodId from menus
+        const enrichedItems = (order.items || []).map((item) => {
+          if (!item.menu_id && item.name) {
             const menu = menus.find(
               (m) => m.name === item.name && m.restaurant_id === order.restaurant_id
             );
             if (menu) {
-              item.foodId = menu.id;
+              item.menu_id = menu.id;
             }
           }
           return item;
         });
 
-        return enrichedOrder;
+        const enrichedOrder = {
+          ...order,
+          items: enrichedItems,
+          restaurant,
+        };
+
+        // ✅ Use unified transformer
+        return transformOrderFromAPI(enrichedOrder);
       });
 
-      console.log("orderService.getByUser() returned:", result);
-      if (result.length > 0) {
-        console.log("Sample order items:", result[0].items);
-      }
+      console.log("orderService.getByUser() returned:", result.length, "orders");
 
       return result;
     } catch (error) {
@@ -231,23 +157,16 @@ export const orderService = {
         const address =
           addresses.find((a) => a.id === order.address_id) || null;
 
-        // Create enriched order with user and address info
-        const enrichedOrder = mapOrderToFrontend(order, user, restaurant);
+        // Enrich with relations
+        const enrichedOrder = {
+          ...order,
+          user,
+          restaurant,
+          address,
+        };
 
-        // Add address information
-        if (address) {
-          enrichedOrder.address = address;
-          enrichedOrder.addressInfo = {
-            fullAddress: address.full_address,
-            street: address.street,
-            ward: address.ward,
-            district: address.district,
-            city: address.city,
-            phone: address.phone,
-          };
-        }
-
-        return enrichedOrder;
+        // ✅ Use unified transformer
+        return transformOrderFromAPI(enrichedOrder);
       });
     } catch (error) {
       throw error;
@@ -256,52 +175,22 @@ export const orderService = {
 
   async create(orderData) {
     try {
-      // Validate items exist before mapping
+      // Validate items
       if (!orderData.items || !Array.isArray(orderData.items) || orderData.items.length === 0) {
         throw new Error("Order must contain at least one item");
       }
 
-      // Map items to backend format (menu_id instead of foodId/food_id)
-      const backendItems = orderData.items.map((item) => ({
-        menu_id: item.foodId || item.food_id || item.id, // Support both camelCase and snake_case
-        name: item.name,
-        quantity: item.quantity,
-        unit_price: item.price || item.unit_price,
-        subtotal: (item.price || item.unit_price) * item.quantity,
-      }));
+      // ✅ Use unified transformer to convert to API format
+      const payload = transformOrderToAPI(orderData);
 
-      // Map frontend camelCase to backend snake_case
-      const newOrder = {
-        user_id: orderData.customerId,
-        restaurant_id: orderData.restaurantId,
-        address_id: orderData.addressId,
-        items: backendItems,
-        subtotal: orderData.subtotal,
-        delivery_fee: orderData.deliveryFee || 0,
-        discount_amount: orderData.discountAmount || 0,
-        total_amount: orderData.total_amount,
-        payment_method: orderData.payment_method || "momo",
-        status: orderData.status || "pending",
-        payment_status: orderData.paymentStatus || "pending",
-        special_instructions: orderData.specialInstructions || "",
-        customer: orderData.customer,
-        dropoff_gps: orderData.dropoff_gps,
-        order_number: `ORD-${Date.now()}`,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      };
+      console.log("📤 Creating order with payload:", payload);
+      const response = await apiClient.post(ENDPOINTS.ORDERS.BASE, payload);
+      console.log("✅ Order created:", response);
 
-      // Remove undefined values
-      Object.keys(newOrder).forEach(
-        (key) => newOrder[key] === undefined && delete newOrder[key]
-      );
-
-      console.log("📤 Sending order to backend:", newOrder);
-      const response = await apiClient.post(ENDPOINTS.ORDERS.BASE, newOrder);
-      console.log("Backend response:", response);
-      return mapOrderToFrontend(response);
+      // ✅ Transform response back to frontend format
+      return transformOrderFromAPI(response);
     } catch (error) {
-      console.error("Order creation failed:", error);
+      console.error("❌ Order creation failed:", error);
       throw error;
     }
   },
@@ -311,7 +200,8 @@ export const orderService = {
         status,
         updated_at: new Date().toISOString(),
       });
-      return mapOrderToFrontend(response);
+      // ✅ Use unified transformer
+      return transformOrderFromAPI(response);
     } catch (error) {
       throw error;
     }
@@ -319,20 +209,17 @@ export const orderService = {
 
   async update(id, orderData) {
     try {
-      // Map frontend to backend - only include fields that are explicitly provided
+      // Build payload with only provided fields
       const payload = {
         updated_at: new Date().toISOString(),
       };
 
-      // Only add fields if they exist in orderData
+      // Map fields
       if (orderData.status !== undefined) {
         payload.status = orderData.status;
       }
-      if (orderData.droneId !== undefined) {
-        payload.drone_id = orderData.droneId;
-      }
-      if (orderData.drone_id !== undefined) {
-        payload.drone_id = orderData.drone_id;
+      if (orderData.droneId || orderData.drone_id) {
+        payload.drone_id = orderData.droneId || orderData.drone_id;
       }
       if (orderData.specialInstructions !== undefined) {
         payload.special_instructions = orderData.specialInstructions;
@@ -356,7 +243,8 @@ export const orderService = {
         ENDPOINTS.ORDERS.BY_ID(id),
         payload
       );
-      return mapOrderToFrontend(response);
+      // ✅ Use unified transformer
+      return transformOrderFromAPI(response);
     } catch (error) {
       throw error;
     }
@@ -366,6 +254,40 @@ export const orderService = {
     try {
       return await this.updateStatus(id, "cancelled");
     } catch (error) {
+      throw error;
+    }
+  },
+
+  /**
+   * Get drone status for an order
+   * @param {string} orderId - Order ID
+   * @returns {Promise<Object>} Drone journey info
+   */
+  async getDroneStatus(orderId) {
+    try {
+      const response = await apiClient.get(`/orders/${orderId}/drone-status`);
+      return response;
+    } catch (error) {
+      console.error(`Error fetching drone status for order ${orderId}:`, error);
+      throw error;
+    }
+  },
+
+  /**
+   * Update drone journey stage for an order
+   * @param {string} orderId - Order ID
+   * @param {string} stage - Journey stage
+   * @returns {Promise<Object>}
+   */
+  async updateDroneJourneyStage(orderId, stage) {
+    try {
+      const response = await apiClient.patch(ENDPOINTS.ORDERS.BY_ID(orderId), {
+        drone_journey_stage: stage,
+        updated_at: new Date().toISOString(),
+      });
+      return mapOrderToFrontend(response);
+    } catch (error) {
+      console.error(`Error updating drone journey stage for order ${orderId}:`, error);
       throw error;
     }
   },

@@ -129,7 +129,7 @@ export default function CategoryFilter({
                     <View style={styles.bottomSheet}>
                         {/* Modal Header */}
                         <View style={styles.modalHeader}>
-                            <Text style={styles.modalTitle}>Categories</Text>
+                            <Text style={styles.modalTitle}>Danh mục</Text>
                             <TouchableOpacity
                                 onPress={() => setShowModal(false)}
                                 hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}

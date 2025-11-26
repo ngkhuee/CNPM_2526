@@ -71,7 +71,7 @@ const FoodItem = ({
 
         {!isRestaurantOpen ? (
           <div className="closed-overlay">
-            <span>Restaurant Closed</span>
+            <span>Nhà hàng đóng cửa</span>
           </div>
         ) : null}
       </div>
@@ -115,7 +115,7 @@ const FoodItem = ({
               }}
             >
               <MdLocalFireDepartment size={16} style={{ color: "#ff6b35" }} />
-              {sold > 0 ? `${sold} sold` : "0 sold"}
+              {sold > 0 ? `${sold} đã bán` : "0 đã bán"}
             </span>
           )}
         </div>

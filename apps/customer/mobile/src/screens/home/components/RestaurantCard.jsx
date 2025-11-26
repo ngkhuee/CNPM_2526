@@ -26,7 +26,7 @@ export default function RestaurantCard({ item, onPress }) {
 
             <View style={styles.content}>
                 <Text style={styles.name} numberOfLines={2}>
-                    {item.name || 'Unknown Restaurant'}
+                    {item.name || 'Nhà hàng'}
                 </Text>
 
                 <View style={styles.infoRow}>

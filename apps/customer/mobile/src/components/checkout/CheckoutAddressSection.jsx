@@ -42,7 +42,7 @@ export const CheckoutAddressSection = ({
                 // Keep showManualInput true so user can edit the GPS address
                 setShowManualInput(true);
             } catch (error) {
-                Alert.alert('GPS Error', error.message || 'Failed to get GPS location');
+                Alert.alert('Lỗi GPS', error.message || 'Không thể lấy vị trí GPS');
             }
         }
     };
@@ -51,7 +51,7 @@ export const CheckoutAddressSection = ({
         <View style={styles.section}>
             <View style={styles.sectionHeader}>
                 <MaterialIcons name="location-on" size={20} color="#ff6b35" />
-                <Text style={styles.sectionTitle}>Delivery Address</Text>
+                <Text style={styles.sectionTitle}>Địa chỉ giao hàng</Text>
             </View>
 
             {/* Selected Address Display */}
@@ -61,7 +61,7 @@ export const CheckoutAddressSection = ({
                         <MaterialIcons name="check-circle" size={20} color="#4caf50" />
                         <View style={{ flex: 1, marginLeft: 8 }}>
                             <Text style={styles.addressLabel}>
-                                {selectedAddress.label || 'Delivery Address'}
+                                {selectedAddress.label || 'Địa chỉ giao hàng'}
                             </Text>
                             <Text style={styles.addressText} numberOfLines={2}>
                                 {selectedAddress.address_line || selectedAddress.address}
@@ -94,26 +94,26 @@ export const CheckoutAddressSection = ({
                         {gpsLoading ? (
                             <>
                                 <ActivityIndicator size="small" color="#fff" />
-                                <Text style={styles.gpsButtonText}>Getting Location...</Text>
+                                <Text style={styles.gpsButtonText}>Đang lấy vị trí...</Text>
                             </>
                         ) : (
                             <>
                                 <MaterialIcons name="my-location" size={18} color="#fff" />
-                                <Text style={styles.gpsButtonText}>Use GPS Location</Text>
+                                <Text style={styles.gpsButtonText}>Sử dụng vị trí GPS</Text>
                             </>
                         )}
                     </TouchableOpacity>
 
                     {/* Manual Address Input */}
-                    <Text style={styles.orText}>OR</Text>
+                    <Text style={styles.orText}>HOẶC</Text>
                     <View style={styles.fieldContainer}>
-                        <Text style={styles.label}>Delivery Address *</Text>
+                        <Text style={styles.label}>Địa chỉ giao hàng *</Text>
                         <TextInput
                             style={[
                                 styles.addressInput,
                                 addressError && styles.inputError,
                             ]}
-                            placeholder="Enter full delivery address"
+                            placeholder="Nhập địa chỉ giao hàng đầy đủ"
                             placeholderTextColor="#aaa"
                             value={manualAddress || ''}
                             onChangeText={onManualAddressChange}
@@ -141,7 +141,7 @@ export const CheckoutAddressSection = ({
                             color="#ff6b35"
                         />
                         <Text style={styles.showAddressesText}>
-                            Saved Addresses ({savedAddresses.length})
+                            Địa chỉ đã lưu ({savedAddresses.length})
                         </Text>
                     </TouchableOpacity>
 
@@ -155,7 +155,7 @@ export const CheckoutAddressSection = ({
                                 >
                                     <View style={styles.addressItemContent}>
                                         <Text style={styles.addressItemLabel}>
-                                            {address.label} {address.is_default && '(Default)'}
+                                            {address.label} {address.is_default && '(Mặc định)'}
                                         </Text>
                                         <Text style={styles.addressItemText} numberOfLines={1}>
                                             {address.address_line}

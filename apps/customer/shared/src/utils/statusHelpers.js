@@ -85,7 +85,8 @@ export const formatOrderStatus = (status) => {
  * (use canCancelOrder from orderHelpers for order object)
  */
 export const canCancelOrderByStatus = (status) => {
-    const cancellableStatuses = ["paid", "confirmed", "preparing"];
+    // Can cancel if payment completed but not yet preparing
+    const cancellableStatuses = ["pending", "confirmed"];
     return cancellableStatuses.includes(status);
 };
 
@@ -93,8 +94,9 @@ export const canCancelOrderByStatus = (status) => {
  * Check if order can be tracked
  */
 export const canTrackOrder = (status) => {
-    const untrackableStatuses = ["paid", "pending"];
-    return !untrackableStatuses.includes(status);
+    // Can't track if payment not completed or order not confirmed
+    const untrackableStatuses = ["pending"];
+    return untrackableStatuses.includes(status);
 };
 
 /**

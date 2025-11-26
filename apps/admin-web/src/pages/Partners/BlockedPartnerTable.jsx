@@ -12,11 +12,11 @@ const BlockedPartnerTable = ({ restaurants, onUnblock, onDelete }) => {
         <table className="partners-table">
             <thead>
                 <tr>
-                    <th>Restaurant</th>
+                    <th>Nhà hàng</th>
                     <th>Email</th>
-                    <th>Phone</th>
-                    <th>Blocked Date</th>
-                    <th>Actions</th>
+                    <th>Điện thoại</th>
+                    <th>Ngày khóa</th>
+                    <th>Thao tác</th>
                 </tr>
             </thead>
             <tbody>
@@ -40,21 +40,21 @@ const BlockedPartnerTable = ({ restaurants, onUnblock, onDelete }) => {
                                 <Link
                                     to={`/admin/partners/${r.id}`}
                                     className="btn-view"
-                                    title="View Details"
+                                    title="Xem chi tiết"
                                 >
                                     <MdVisibility />
                                 </Link>
                                 <button
                                     className="btn-unblock"
                                     onClick={() => onUnblock(r.id)}
-                                    title="Unblock Restaurant"
+                                    title="Mở khóa nhà hàng"
                                 >
-                                    <MdCheckCircle /> Unblock
+                                    <MdCheckCircle /> Mở khóa
                                 </button>
                                 <button
                                     className="btn-delete"
                                     onClick={() => onDelete(r.id)}
-                                    title="Delete Restaurant"
+                                    title="Xóa nhà hàng"
                                 >
                                     <MdDelete />
                                 </button>

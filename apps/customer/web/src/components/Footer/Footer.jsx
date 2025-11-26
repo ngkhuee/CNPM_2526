@@ -9,10 +9,10 @@ const Footer = () => {
         <div className="footer-content-left">
           <img src={assets.footer} alt="" />
           <p>
-            Lorem Ipsum is simply dummy text of the printing and typesetting
-            industry. Lorem Ipsum has been the industry's standard dummy text
-            ever since the 1500s, when an unknown printer took a galley of type
-            and scrambled it to make a type specimen book.
+            Chúng tôi mang đến cho bạn những trải nghiệm ẩm thực tuyệt vời
+            với thực đơn đa dạng từ các nhà hàng đối tác. Đặt món dễ dàng,
+            giao hàng nhanh chóng bằng drone, thưởng thức bữa ăn ngon
+            ngay tại nhà.
           </p>
           <div className="footer-social-icons">
             <img src={assets.facebook_icon} alt="" />
@@ -21,25 +21,25 @@ const Footer = () => {
           </div>
         </div>
         <div className="footer-content-center">
-          <h2>COMPANY</h2>
+          <h2>CÔNG TY</h2>
           <ul>
-            <li>Home</li>
-            <li>About us</li>
-            <li>Delivery</li>
-            <li>Privacy policy</li>
+            <li>Trang chủ</li>
+            <li>Về chúng tôi</li>
+            <li>Giao hàng</li>
+            <li>Chính sách bảo mật</li>
           </ul>
         </div>
         <div className="footer-content-right">
-          <h2>GET IN TOUCH</h2>
+          <h2>LIÊN HỆ</h2>
           <ul>
-            <li>+1-212-456-7890</li>
-            <li>contact@yummy.com</li>
+            <li>+84-909-123-456</li>
+            <li>lienhe@yummy.com</li>
           </ul>
         </div>
       </div>
       <hr />
       <p className="footer-copyright">
-        Copyright 2024 © yummy.com - All Right Reserved.
+        Bản quyền 2024 © yummy.com - Tất cả quyền được bảo lưu.
       </p>
     </div>
   );

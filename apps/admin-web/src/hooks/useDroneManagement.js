@@ -88,22 +88,30 @@ export const useDroneManagement = (onSuccess) => {
         });
         console.log("[saveDrone] Drone updated:", editingDrone.id);
       } else {
-        // Create new drone
-        const latitude = droneForm.latitude ? parseFloat(droneForm.latitude) : 10.77;
-        const longitude = droneForm.longitude ? parseFloat(droneForm.longitude) : 106.68;
+        // Create new drone - Auto-set base location (273 An Dương Vương)
+        const BASE_LOCATION = {
+          lat: 10.7626,
+          lng: 106.682,
+          address: "273 An Dương Vương, Phường Chợ Quán, TP. HCM"
+        };
 
         const newDrone = await droneService.createDrone({
           identifier: droneForm.identifier.trim(),
           status: "available",
-          latitude: latitude,
-          longitude: longitude,
-          current_location: droneForm.address || "Warehouse HCM",
+          latitude: BASE_LOCATION.lat,
+          longitude: BASE_LOCATION.lng,
+          current_location: {
+            lat: BASE_LOCATION.lat,
+            lng: BASE_LOCATION.lng,
+            address: BASE_LOCATION.address
+          },
+          battery_level: 100, // Start with full battery
           max_weight_kg: 5,
           assigned_order_id: null,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         });
-        console.log("[saveDrone] New drone created:", newDrone);
+        console.log("[saveDrone] New drone created at base location:", newDrone);
       }
 
       setShowDroneModal(false);
@@ -151,12 +159,15 @@ export const useDroneManagement = (onSuccess) => {
   // Toggle drone status (available/locked) - only when idle
   const handleToggleDrone = useCallback(
     async (drone) => {
-      // Only allow locking/unlocking when drone is idle (available and no assigned order)
-      const isIdle = drone.status === "available" && !drone.assignedOrderId;
+      // Allow locking when available (and no order), allow unlocking when locked
+      const hasOrder = drone.assignedOrderId || drone.assigned_order_id;
+      const canToggle =
+        (drone.status === "available" && !hasOrder) ||
+        (drone.status === "locked");
 
-      if (!isIdle) {
+      if (!canToggle) {
         alert(
-          "Chỉ có thể khóa/mở khóa drone khi đang trong trạng thái rảnh rỗi"
+          "Chỉ có thể khóa/mở khóa drone khi đang trong trạng thái rảnh rỗi (không có đơn)"
         );
         return;
       }
@@ -177,13 +188,42 @@ export const useDroneManagement = (onSuccess) => {
   );
 
   // Open location modal
-  const openLocationModal = useCallback((drone) => {
+  const openLocationModal = useCallback((drone, orders = []) => {
+    // Extract address from current_location (can be string or object)
+    let address = "Unknown location";
+    if (drone.current_location) {
+      if (typeof drone.current_location === "string") {
+        address = drone.current_location;
+      } else if (drone.current_location.address) {
+        address = drone.current_location.address;
+      }
+    }
+
+    // Find assigned order if drone has one
+    let orderInfo = null;
+    if (drone.assigned_order_id || drone.assignedOrderId) {
+      const orderId = drone.assigned_order_id || drone.assignedOrderId;
+      const order = orders.find(o => o.id === orderId);
+      if (order) {
+        orderInfo = {
+          orderId: order.id,
+          status: order.status,
+          droneJourneyStage: order.drone_journey_stage || order.droneJourneyStage,
+          restaurantAddress: order.pickup_address || order.pickupAddress,
+          customerAddress: order.dropoff_address || order.dropoffAddress,
+        };
+      }
+    }
+
     setLocationCoords(
       drone.latitude && drone.longitude
         ? {
           lat: drone.latitude,
           lng: drone.longitude,
-          updated_at: new Date().toISOString(), // Always show current time
+          address: address,
+          updated_at: new Date().toISOString(), // Always use current time when opening modal
+          orderInfo: orderInfo,
+          droneStatus: drone.status,
         }
         : null
     );

@@ -23,7 +23,7 @@ const Add = () => {
   const onSubmitHandler = async (event) => {
     event.preventDefault();
     const result = await handleSubmit(() => {
-      toast.success("Product added successfully!");
+      toast.success("Đã thêm sản phẩm thành công!");
     });
     if (!result.success) {
       toast.error(result.message);
@@ -32,16 +32,16 @@ const Add = () => {
 
   return (
     <div className="add">
-      <h2 className="add-title">Add New Product</h2>
+      <h2 className="add-title">Thêm sản phẩm mới</h2>
       <form className="add-form" onSubmit={onSubmitHandler}>
         <div className="add-left">
-          <p className="label">Product Image</p>
+          <p className="label">Ảnh sản phẩm</p>
           <label htmlFor="image" className="upload-box">
             <img
               src={image ? URL.createObjectURL(image) : assets.upload_area}
               alt="upload"
             />
-            <span>Click to upload</span>
+            <span>Nhấp để tải lên</span>
           </label>
           <input
             type="file"
@@ -56,31 +56,31 @@ const Add = () => {
         <div className="add-right">
           {currentRestaurant && (
             <div className="restaurant-info">
-              <p className="label">Restaurant</p>
+              <p className="label">Nhà hàng</p>
               <p className="restaurant-name">
                 <MdLocationOn /> {currentRestaurant.name}
               </p>
             </div>
           )}
 
-          <p className="label">Product Name</p>
+          <p className="label">Tên sản phẩm</p>
           <input
             type="text"
             name="name"
             value={formData.name}
             onChange={handleInputChange}
-            placeholder="Enter product name"
+            placeholder="Nhập tên sản phẩm"
             required
             disabled={loading}
           />
 
-          <p className="label">Description</p>
+          <p className="label">Mô tả</p>
           <textarea
             name="description"
             value={formData.description}
             onChange={handleInputChange}
             rows={4}
-            placeholder="Write product description"
+            placeholder="Viết mô tả sản phẩm"
             required
             disabled={loading}
           />
@@ -88,7 +88,7 @@ const Add = () => {
           <div className="add-bottom">
             <div className="category-box">
               <p className="label">
-                Category <span style={{ color: "red" }}>*</span>
+                Danh mục <span style={{ color: "red" }}>*</span>
               </p>
               <select
                 name="categoryId"
@@ -97,7 +97,7 @@ const Add = () => {
                 disabled={loading}
                 required
               >
-                <option value="">-- Select a category (Required) --</option>
+                <option value="">-- Chọn danh mục (Bắt buộc) --</option>
                 {categories.map((cat) => (
                   <option key={cat.id} value={cat.id}>
                     {cat.name}
@@ -107,7 +107,7 @@ const Add = () => {
             </div>
 
             <div className="price-box">
-              <p className="label">Price</p>
+              <p className="label">Giá</p>
               <input
                 type="number"
                 name="price"
@@ -125,10 +125,10 @@ const Add = () => {
           <button type="submit" className="add-btn" disabled={loading}>
             {loading ? (
               <>
-                <MdHourglassEmpty /> Adding...
+                <MdHourglassEmpty /> Đang thêm...
               </>
             ) : (
-              "Add Product"
+              "Thêm sản phẩm"
             )}
           </button>
         </div>

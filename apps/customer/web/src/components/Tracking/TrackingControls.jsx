@@ -6,9 +6,6 @@ const TrackingControls = ({
     autoRefreshEnabled,
     onRefresh,
     onToggleAutoRefresh,
-    orderStatus,
-    onSimulateDelivery,
-    simulatingDelivery,
 }) => {
     return (
         <div
@@ -49,8 +46,8 @@ const TrackingControls = ({
                 }}
                 title={
                     autoRefreshEnabled
-                        ? "Disable auto-refresh"
-                        : "Enable auto-refresh"
+                        ? "Tắt tự động làm mới"
+                        : "Bật tự động làm mới"
                 }
             >
                 {autoRefreshEnabled ? (
@@ -59,14 +56,14 @@ const TrackingControls = ({
                     <MdToggleOff size={20} color="#444" />
                 )}
                 <span>
-                    Auto-refresh{" "}
+                    Tự động làm mới{" "}
                     <span
                         style={{
                             fontWeight: "700",
                             color: autoRefreshEnabled ? "#2e7d32" : "#444",
                         }}
                     >
-                        {autoRefreshEnabled ? "ON" : "OFF"}
+                        {autoRefreshEnabled ? "BẬT" : "TẮT"}
                     </span>
                 </span>
             </button>
@@ -113,49 +110,8 @@ const TrackingControls = ({
                         transformOrigin: "center",
                     }}
                 />
-                {refreshing ? "Loading..." : "Refresh"}
+                {refreshing ? "Đang tải..." : "Làm mới"}
             </button>
-
-            {/* Simulate Delivery Button - only for test_delivering_map order or pending status */}
-            {(orderStatus === "pending" || orderStatus === "confirmed" || orderStatus === "ready") && onSimulateDelivery && (
-                <button
-                    onClick={onSimulateDelivery}
-                    disabled={simulatingDelivery}
-                    style={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        gap: "8px",
-                        padding: "8px 16px",
-                        background: simulatingDelivery ? "#9e9e9e" : "#ff6b35",
-                        color: "white",
-                        border: "none",
-                        borderRadius: "6px",
-                        cursor: simulatingDelivery ? "not-allowed" : "pointer",
-                        fontSize: "14px",
-                        fontWeight: "600",
-                        boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-                        transition: "all 0.2s ease",
-                    }}
-                    onMouseEnter={(e) => {
-                        if (!simulatingDelivery) {
-                            e.target.style.background = "#ff5722";
-                            e.target.style.transform = "translateY(-1px)";
-                            e.target.style.boxShadow = "0 4px 6px rgba(0,0,0,0.15)";
-                        }
-                    }}
-                    onMouseLeave={(e) => {
-                        if (!simulatingDelivery) {
-                            e.target.style.background = "#ff6b35";
-                            e.target.style.transform = "translateY(0)";
-                            e.target.style.boxShadow = "0 2px 4px rgba(0,0,0,0.1)";
-                        }
-                    }}
-                    title="Simulate drone delivery movement (test only)"
-                >
-                    🚁 {simulatingDelivery ? "Starting..." : "Start Delivery"}
-                </button>
-            )}
 
             {/* Inline CSS animation */}
             <style>

@@ -90,7 +90,7 @@ export default function RestaurantFoodCard({ item, onPress, isHighlighted = fals
 
                         {/* Sold Count */}
                         {soldCount > 0 && (
-                            <Text style={styles.soldText}>{soldCount.toLocaleString()} sold</Text>
+                            <Text style={styles.soldText}>Đã bán {soldCount.toLocaleString()}</Text>
                         )}
 
                         {/* Price Row */}

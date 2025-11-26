@@ -64,7 +64,7 @@ export const AuthProvider = ({ children }) => {
                         console.warn('[AuthContext] Attempt to login with restaurant_owner account');
                         return {
                             success: false,
-                            message: 'This account is for restaurant partners. Please use the partner app.',
+                            message: 'Tài khoản này dành cho đối tác nhà hàng. Vui lòng sử dụng ứng dụng đối tác.',
                             accountType: 'restaurant_owner'
                         };
                     }
@@ -72,7 +72,7 @@ export const AuthProvider = ({ children }) => {
                         console.warn('[AuthContext] Attempt to login with admin account');
                         return {
                             success: false,
-                            message: 'This account is for administrators. Please use the admin panel.',
+                            message: 'Tài khoản này dành cho quản trị viên. Vui lòng sử dụng trang quản trị.',
                             accountType: 'admin'
                         };
                     }
@@ -80,7 +80,7 @@ export const AuthProvider = ({ children }) => {
                         console.warn('[AuthContext] User does not have customer role:', userData.roles);
                         return {
                             success: false,
-                            message: 'Invalid account type for this application'
+                            message: 'Loại tài khoản không hợp lệ cho ứng dụng này'
                         };
                     }
                 }
@@ -92,20 +92,20 @@ export const AuthProvider = ({ children }) => {
                     if (userData.status === 'blocked') {
                         return {
                             success: false,
-                            message: 'Your account has been blocked by administrator. Please contact support.',
+                            message: 'Tài khoản của bạn đã bị khóa bởi quản trị viên. Vui lòng liên hệ hỗ trợ.',
                             accountType: 'blocked'
                         };
                     }
                     if (userData.status === 'pending') {
                         return {
                             success: false,
-                            message: 'Your account is pending approval. Please wait for administrator confirmation.',
+                            message: 'Tài khoản của bạn đang chờ duyệt. Vui lòng chờ xác nhận từ quản trị viên.',
                             accountType: 'pending'
                         };
                     }
                     return {
                         success: false,
-                        message: `Your account status is: ${userData.status}. Please contact support.`
+                        message: `Trạng thái tài khoản: ${userData.status}. Vui lòng liên hệ hỗ trợ.`
                     };
                 }
 
@@ -134,25 +134,25 @@ export const AuthProvider = ({ children }) => {
                 console.log('[AuthContext] Login successful:', userData.email);
                 return { success: true, user: userData };
             } else {
-                return { success: false, message: response.message || 'Login failed' };
+                return { success: false, message: response.message || 'Đăng nhập thất bại' };
             }
         } catch (error) {
             console.error('[AuthContext] Login error:', error.message);
 
             // Handle specific error cases
-            let errorMessage = error.message || 'Login failed';
+            let errorMessage = error.message || 'Đăng nhập thất bại';
 
             // 401 Unauthorized = Invalid email/password
             if (error.response?.status === 401) {
-                errorMessage = 'Invalid email or password. Please try again.';
+                errorMessage = 'Email hoặc mật khẩu không đúng. Vui lòng thử lại.';
             }
             // Network errors
             else if (error.code === 'ECONNABORTED' || !error.response) {
-                errorMessage = 'Network error. Please check your connection and try again.';
+                errorMessage = 'Lỗi kết nối. Vui lòng kiểm tra kết nối mạng và thử lại.';
             }
             // Other HTTP errors
             else if (error.response?.status) {
-                errorMessage = error.response.data?.message || `Error: ${error.response.status}`;
+                errorMessage = error.response.data?.message || `Lỗi: ${error.response.status}`;
             }
 
             return { success: false, message: errorMessage };
@@ -187,29 +187,29 @@ export const AuthProvider = ({ children }) => {
                 console.log('[AuthContext] Register successful:', newUser.email);
                 return { success: true, user: newUser };
             } else {
-                return { success: false, message: response.message || 'Registration failed' };
+                return { success: false, message: response.message || 'Đăng ký thất bại' };
             }
         } catch (error) {
             console.error('[AuthContext] Register error:', error.message);
 
             // Handle specific error cases
-            let errorMessage = error.message || 'Registration failed';
+            let errorMessage = error.message || 'Đăng ký thất bại';
 
             // Handle field validation errors
             if (error.response?.data?.fieldError) {
-                errorMessage = error.response.data.message || 'Validation error';
+                errorMessage = error.response.data.message || 'Lỗi xác thực';
             }
             // Email already exists
             else if (error.response?.status === 400 && error.response.data?.message?.includes('Email')) {
-                errorMessage = 'This email is already registered. Please use another email or login.';
+                errorMessage = 'Email này đã được đăng ký. Vui lòng dùng email khác hoặc đăng nhập.';
             }
             // Other HTTP errors
             else if (error.response?.status) {
-                errorMessage = error.response.data?.message || `Error: ${error.response.status}`;
+                errorMessage = error.response.data?.message || `Lỗi: ${error.response.status}`;
             }
             // Network errors
             else if (error.code === 'ECONNABORTED' || !error.response) {
-                errorMessage = 'Network error. Please check your connection and try again.';
+                errorMessage = 'Lỗi kết nối. Vui lòng kiểm tra kết nối mạng và thử lại.';
             }
 
             return { success: false, message: errorMessage };

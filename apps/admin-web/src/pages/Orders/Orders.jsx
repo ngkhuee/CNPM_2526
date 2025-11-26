@@ -28,7 +28,7 @@ const Orders = () => {
   };
 
   if (loading) {
-    return <div className="orders-page">Loading...</div>;
+    return <div className="orders-page">Đang tải...</div>;
   }
 
   const filteredOrders = getFilteredOrders().filter((order) => {
@@ -55,13 +55,14 @@ const Orders = () => {
       />
 
       {filteredOrders.length === 0 && (
-        <div className="no-data">No orders found</div>
+        <div className="no-data">Không tìm thấy đơn hàng</div>
       )}
 
       <OrderDetailModal
         isOpen={detailOpen}
         onClose={() => setDetailOpen(false)}
         order={selectedOrder}
+        enableAutoRefresh={true}
       />
     </div>
   );

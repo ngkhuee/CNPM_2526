@@ -27,14 +27,12 @@ const DeliveryStats = ({ drones, deliveryOrdersCount, totalOrders }) => {
             stroke="currentColor"
             strokeWidth="2"
           >
-            <rect x="1" y="3" width="15" height="13" />
-            <polygon points="16 8 20 8 23 11 23 16 16 16 16 8" />
-            <circle cx="5.5" cy="18.5" r="2.5" />
-            <circle cx="18.5" cy="18.5" r="2.5" />
+            <path d="M12 2L2 7l10 5 10-5-10-5z" />
+            <path d="M2 17l10 5 10-5M2 12l10 5 10-5" />
           </svg>
         </div>
         <div className="stat-info">
-          <p className="stat-label">Total drones</p>
+          <p className="stat-label">Tổng drone</p>
           <p className="stat-value">{drones.length}</p>
         </div>
       </div>
@@ -53,7 +51,7 @@ const DeliveryStats = ({ drones, deliveryOrdersCount, totalOrders }) => {
           </svg>
         </div>
         <div className="stat-info">
-          <p className="stat-label">Active</p>
+          <p className="stat-label">Hoạt động</p>
           <p className="stat-value">{activeDronesCount}</p>
         </div>
       </div>
@@ -73,7 +71,7 @@ const DeliveryStats = ({ drones, deliveryOrdersCount, totalOrders }) => {
           </svg>
         </div>
         <div className="stat-info">
-          <p className="stat-label">Delivering</p>
+          <p className="stat-label">Đang giao</p>
           <p className="stat-value">{deliveringDronesCount}</p>
         </div>
       </div>
@@ -92,7 +90,7 @@ const DeliveryStats = ({ drones, deliveryOrdersCount, totalOrders }) => {
           </svg>
         </div>
         <div className="stat-info">
-          <p className="stat-label">Locked</p>
+          <p className="stat-label">Đã khóa</p>
           <p className="stat-value">{lockedDronesCount}</p>
         </div>
       </div>

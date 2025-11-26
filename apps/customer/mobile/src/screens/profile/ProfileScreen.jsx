@@ -73,9 +73,9 @@ export default function ProfileScreen({ onNavigate }) {
                             color="#ff6b35"
                             style={styles.lockIcon}
                         />
-                        <Text style={styles.modalTitle}>Login Required</Text>
+                        <Text style={styles.modalTitle}>Yêu cầu đăng nhập</Text>
                         <Text style={styles.modalSubtitle}>
-                            Sign in to view your profile and manage addresses
+                            Đăng nhập để xem hồ sơ và quản lý địa chỉ
                         </Text>
 
                         <TouchableOpacity
@@ -84,7 +84,7 @@ export default function ProfileScreen({ onNavigate }) {
                                 handleNavigate('login');
                             }}
                         >
-                            <Text style={styles.modalLoginButtonText}>Login</Text>
+                            <Text style={styles.modalLoginButtonText}>Đăng nhập</Text>
                         </TouchableOpacity>
                     </View>
                 </SafeAreaView>
@@ -109,7 +109,7 @@ export default function ProfileScreen({ onNavigate }) {
         return (
             <SafeAreaView style={styles.container}>
                 <View style={styles.centerContent}>
-                    <Text style={styles.notLoggedInText}>Please login first</Text>
+                    <Text style={styles.notLoggedInText}>Vui lòng đăng nhập</Text>
                 </View>
             </SafeAreaView>
         );

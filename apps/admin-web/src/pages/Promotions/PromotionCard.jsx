@@ -23,27 +23,27 @@ const PromotionCard = ({ promotion, onEdit, onToggleStatus, onDelete }) => {
 
             <div className="promo-details">
                 <div className="promo-value">
-                    <span className="label">Discount:</span>
+                    <span className="label">Giảm giá:</span>
                     <span className="value">{getDiscountDisplay()}</span>
                 </div>
                 <div className="promo-detail">
-                    <span className="label">Min Order:</span>
+                    <span className="label">Đơn tối thiểu:</span>
                     <span>{formatCurrency(promotion.minOrderValue)}</span>
                 </div>
                 {promotion.maxDiscount > 0 && (
                     <div className="promo-detail">
-                        <span className="label">Max Discount:</span>
+                        <span className="label">Giảm tối đa:</span>
                         <span>{formatCurrency(promotion.maxDiscount)}</span>
                     </div>
                 )}
                 <div className="promo-detail">
-                    <span className="label">Usage:</span>
+                    <span className="label">Đã dùng:</span>
                     <span>
                         {promotion.usedCount || 0} / {promotion.usageLimit || "∞"}
                     </span>
                 </div>
                 <div className="promo-detail">
-                    <span className="label">Valid Until:</span>
+                    <span className="label">Hết hạn:</span>
                     <span>
                         {promotion.endDate
                             ? new Date(promotion.endDate).toLocaleDateString()
@@ -54,19 +54,19 @@ const PromotionCard = ({ promotion, onEdit, onToggleStatus, onDelete }) => {
 
             <div className="promo-actions">
                 <button className="btn-edit" onClick={() => onEdit(promotion)}>
-                    Edit
+                    Sửa
                 </button>
                 <button
                     className="btn-toggle"
                     onClick={() => onToggleStatus(promotion)}
                 >
-                    {promotion.status === "active" ? "Deactivate" : "Activate"}
+                    {promotion.status === "active" ? "Tắt" : "Bật"}
                 </button>
                 <button
                     className="btn-delete"
                     onClick={() => onDelete(promotion.id)}
                 >
-                    Delete
+                    Xóa
                 </button>
             </div>
         </div>

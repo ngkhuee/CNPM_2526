@@ -9,11 +9,11 @@ const TrackingOrderDetails = ({ order }) => {
         <div className="tracking-section order-details">
             {/* Order ID & Status */}
             <div className="detail-row">
-                <strong>Order ID:</strong>
+                <strong>Mã đơn hàng:</strong>
                 <span>#{order.id || order._id}</span>
             </div>
             <div className="detail-row">
-                <strong>Status:</strong>
+                <strong>Trạng thái:</strong>
                 <span className={`status-badge status-${order.status}`}>
                     {order.status?.replace(/_/g, ' ')}
                 </span>
@@ -22,10 +22,10 @@ const TrackingOrderDetails = ({ order }) => {
             {/* Restaurant info */}
             {order.restaurant && (
                 <div className="detail-row">
-                    <strong>Restaurant:</strong>
+                    <strong>Nhà hàng:</strong>
                     <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                         <MdRestaurant size={16} />
-                        <span>{order.restaurant.name || "Unknown"}</span>
+                        <span>{order.restaurant.name || "Không xác định"}</span>
                     </div>
                 </div>
             )}
@@ -33,7 +33,7 @@ const TrackingOrderDetails = ({ order }) => {
             {/* Pickup & Delivery locations */}
             {order.restaurant?.address && (
                 <div className="detail-row">
-                    <strong>Pickup:</strong>
+                    <strong>Điểm lấy hàng:</strong>
                     <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                         <MdLocationOn size={16} />
                         <small>{order.restaurant.address}</small>
@@ -43,7 +43,7 @@ const TrackingOrderDetails = ({ order }) => {
 
             {order.delivery_address && (
                 <div className="detail-row">
-                    <strong>Delivery:</strong>
+                    <strong>Điểm giao hàng:</strong>
                     <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                         <MdHome size={16} />
                         <small>{order.delivery_address}</small>
@@ -53,7 +53,7 @@ const TrackingOrderDetails = ({ order }) => {
 
             {/* Items */}
             <div className="detail-row">
-                <strong>Items:</strong>
+                <strong>Sản phẩm:</strong>
                 <div>
                     {order.items?.map((item, idx) => (
                         <div key={idx} style={{ fontSize: "14px", marginTop: "4px" }}>
@@ -66,7 +66,7 @@ const TrackingOrderDetails = ({ order }) => {
 
             {/* Total */}
             <div className="detail-row" style={{ fontWeight: "bold", fontSize: "16px" }}>
-                <strong>Total:</strong>
+                <strong>Tổng cộng:</strong>
                 <span style={{ color: "#ff6b35" }}>
                     {formatCurrency(order.total_amount || order.totalAmount || 0)}
                 </span>

@@ -21,26 +21,26 @@ const Users = () => {
     const result = await handleStatusToggle(userId, currentStatus);
     if (result.success) {
       alert(
-        `User ${result.newStatus === "active" ? "activated" : "blocked"} successfully!`
+        `${result.newStatus === "active" ? "Kích hoạt" : "Khóa"} người dùng thành công!`
       );
     } else {
-      alert("Failed to update user status");
+      alert("Không thể cập nhật trạng thái người dùng");
     }
   };
 
   const handleDeleteUser = async (userId) => {
-    if (window.confirm("Are you sure you want to delete this user?")) {
+    if (window.confirm("Bạn có chắc chắn muốn xóa người dùng này?")) {
       const result = await handleDelete(userId);
       if (result.success) {
-        alert("User deleted successfully!");
+        alert("Đã xóa người dùng thành công!");
       } else {
-        alert("Failed to delete user");
+        alert("Không thể xóa người dùng");
       }
     }
   };
 
   if (loading) {
-    return <div className="users-page">Loading...</div>;
+    return <div className="users-page">Đang tải...</div>;
   }
 
   const filteredUsers = getFilteredUsers();
@@ -48,7 +48,7 @@ const Users = () => {
   return (
     <div className="users-page">
       <div className="users-header">
-        <h2>Customer Management</h2>
+        <h2>Quản lý Khách hàng</h2>
         <UserFilter
           filter={filter}
           onFilterChange={setFilter}
@@ -64,7 +64,7 @@ const Users = () => {
       />
 
       {filteredUsers.length === 0 && (
-        <div className="no-data">No users found</div>
+        <div className="no-data">Không tìm thấy người dùng</div>
       )}
     </div>
   );

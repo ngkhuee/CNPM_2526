@@ -73,14 +73,16 @@ export const MapSection = ({ order }) => {
 
         const droneGPS = normalizeGPS(order.current_gps);
 
-        // Check if position actually changed
-        if (lastDroneGPSRef.current &&
-            lastDroneGPSRef.current.lat === droneGPS.lat &&
-            lastDroneGPSRef.current.lng === droneGPS.lng) {
+        // Check if position actually changed - use tolerance for floating point comparison
+        const hasPositionChanged = !lastDroneGPSRef.current ||
+            Math.abs(lastDroneGPSRef.current.lat - droneGPS.lat) > 0.00001 ||
+            Math.abs(lastDroneGPSRef.current.lng - droneGPS.lng) > 0.00001;
+
+        if (!hasPositionChanged) {
             return;
         }
 
-        lastDroneGPSRef.current = droneGPS;
+        lastDroneGPSRef.current = { ...droneGPS };
 
         // Send update command to WebView
         const jsCode = `
@@ -92,7 +94,7 @@ export const MapSection = ({ order }) => {
 
         webViewRef.current.injectJavaScript(jsCode);
         console.log('[MapSection] Updated drone position:', droneGPS);
-    }, [order.current_gps, isDelivering]);
+    }, [order.current_gps, isDelivering, order.current_gps?.lat, order.current_gps?.lng, order.current_gps?.latitude, order.current_gps?.longitude]);
 
     // Reset arrival flag when order status changes
     useEffect(() => {
@@ -223,17 +225,41 @@ export const MapSection = ({ order }) => {
                     }
 
                     // Exposed function to update drone position in real-time
+                    // Creates drone marker if it doesn't exist yet
                     window.updateDronePosition = function(lat, lng) {
-                        if (!droneMarker || !map) return;
+                        if (!map) {
+                            console.warn('[MAP] Map not ready yet');
+                            return;
+                        }
                         
                         const newLatLng = L.latLng(lat, lng);
-                        droneMarker.setLatLng(newLatLng);
                         
-                        if (dronePolyline) {
-                            dronePolyline.setLatLngs([[lat, lng], [dropoffGPS.lat, dropoffGPS.lng]]);
+                        // Create drone marker if it doesn't exist
+                        if (!droneMarker) {
+                            console.log('[MAP] Creating new drone marker at:', lat, lng);
+                            droneMarker = L.marker([lat, lng], {
+                                icon: L.divIcon({
+                                    html: '<div class="pulse-drone">${droneMarkerHtml}<\\/div>',
+                                    iconSize: [40, 40],
+                                    className: 'custom-marker'
+                                })
+                            }).bindPopup('${order.drone_id || 'Drone'}<br\\/><small>Current Position<\\/small>').addTo(map);
+                            
+                            // Create drone route polyline
+                            dronePolyline = L.polyline(
+                                [[lat, lng], [dropoffGPS.lat, dropoffGPS.lng]],
+                                { color: '#1976d2', weight: 2, opacity: 0.8 }
+                            ).addTo(map);
+                        } else {
+                            // Update existing marker position
+                            droneMarker.setLatLng(newLatLng);
+                            
+                            if (dronePolyline) {
+                                dronePolyline.setLatLngs([[lat, lng], [dropoffGPS.lat, dropoffGPS.lng]]);
+                            }
                         }
 
-                        console.log('Drone position updated to:', lat, lng);
+                        console.log('[MAP] Drone position updated to:', lat, lng);
                     };
 
                     initMap();
@@ -279,14 +305,14 @@ export const MapSection = ({ order }) => {
         <>
             {/* Map Legend */}
             <View style={styles.section}>
-                <Text style={styles.sectionTitle}>Delivery Route</Text>
+                <Text style={styles.sectionTitle}>Lộ trình giao hàng</Text>
                 <View style={styles.legendContainer}>
                     <View style={styles.legendItem}>
                         <View style={[styles.legendIcon, { backgroundColor: '#FF6B35' }]}>
                             <MaterialIcons name="restaurant" size={14} color="#fff" />
                         </View>
                         <View style={styles.legendText}>
-                            <Text style={styles.legendLabel}>Restaurant</Text>
+                            <Text style={styles.legendLabel}>Nhà hàng</Text>
                             <Text style={styles.legendValue} numberOfLines={1}>
                                 {order.restaurant_name || 'Restaurant'}
                             </Text>
@@ -297,9 +323,9 @@ export const MapSection = ({ order }) => {
                             <MaterialIcons name="home" size={14} color="#fff" />
                         </View>
                         <View style={styles.legendText}>
-                            <Text style={styles.legendLabel}>Delivery</Text>
+                            <Text style={styles.legendLabel}>Giao hàng</Text>
                             <Text style={styles.legendValue} numberOfLines={1}>
-                                {order.customer?.address || 'Your Location'}
+                                {order.customer?.address || 'Vị trí của bạn'}
                             </Text>
                         </View>
                     </View>
@@ -344,7 +370,7 @@ export const MapSection = ({ order }) => {
                     {mapLoading && (
                         <View style={styles.loadingContainer}>
                             <ActivityIndicator size="large" color="#FF6B35" />
-                            <Text style={styles.loadingText}>Loading map...</Text>
+                            <Text style={styles.loadingText}>Đang tải bản đồ...</Text>
                         </View>
                     )}
                     {/* View on Map Button */}
@@ -357,34 +383,34 @@ export const MapSection = ({ order }) => {
                             }}
                         >
                             <MaterialIcons name="open-in-new" size={16} color="#fff" />
-                            <Text style={styles.viewMapButtonText}>View on Map</Text>
+                            <Text style={styles.viewMapButtonText}>Xem bản đồ</Text>
                         </TouchableOpacity>
                     )}
                 </View>
                 <Text style={styles.mapNote}>
                     {isDelivering
-                        ? 'Real-time tracking during delivery'
+                        ? 'Theo dõi thời gian thực trong quá trình giao hàng'
                         : order?.status === 'arrived'
-                            ? 'Delivery drone has arrived at destination'
+                            ? 'Drone giao hàng đã đến điểm đích'
                             : order?.status === 'delivered'
-                                ? 'Order has been delivered'
-                                : 'Map view available when delivery starts'}
+                                ? 'Đơn hàng đã được giao'
+                                : 'Bản đồ sẽ hiển thị khi bắt đầu giao hàng'}
                 </Text>
             </View>
 
             {/* Distance Information */}
             {isDelivering && order.current_gps && (
                 <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Delivery Progress</Text>
+                    <Text style={styles.sectionTitle}>Tiến độ giao hàng</Text>
                     <View style={styles.progressCard}>
                         <View style={styles.progressRow}>
-                            <Text style={styles.progressLabel}>Total Distance</Text>
+                            <Text style={styles.progressLabel}>Tổng quãng đường</Text>
                             <Text style={styles.progressValue}>
                                 {deliveryDistance.toFixed(2)} km
                             </Text>
                         </View>
                         <View style={styles.progressRow}>
-                            <Text style={styles.progressLabel}>Remaining Distance</Text>
+                            <Text style={styles.progressLabel}>Quãng đường còn lại</Text>
                             <Text style={styles.progressValue}>
                                 {currentDistance.toFixed(2)} km
                             </Text>

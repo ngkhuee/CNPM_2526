@@ -11,8 +11,8 @@ const CartItems = ({
     return (
         <div className="cart-items">
             <div className="cart-items-title">
-                <p>Items</p> <p>Title</p> <p>Price</p> <p>Quantity</p>{" "}
-                <p>Total</p> <p>Remove</p>
+                <p>STT</p> <p>Tên món</p> <p>Giá</p> <p>Số lượng</p>{" "}
+                <p>Tổng</p> <p>Xóa</p>
             </div>
             <br />
             <hr />
@@ -24,8 +24,8 @@ const CartItems = ({
                         color: "#999",
                     }}
                 >
-                    <h2>Your Cart is Empty</h2>
-                    <p>Add your favorite dishes to cart!</p>
+                    <h2>Giỏ hàng trống</h2>
+                    <p>Thêm món ăn yêu thích vào giỏ hàng!</p>
                     <button
                         onClick={onViewMenu}
                         style={{
@@ -39,7 +39,7 @@ const CartItems = ({
                             fontSize: "16px",
                         }}
                     >
-                        View Menu
+                        Xem thực đơn
                     </button>
                 </div>
             ) : (

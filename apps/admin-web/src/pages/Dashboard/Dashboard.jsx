@@ -12,8 +12,8 @@ const Dashboard = () => {
   if (loading) {
     return (
       <div className="dashboard-page">
-        <h2>Admin Dashboard</h2>
-        <p>Loading statistics...</p>
+        <h2>Bảng điều khiển Quản trị</h2>
+        <p>Đang tải thống kê...</p>
       </div>
     );
   }
@@ -21,9 +21,9 @@ const Dashboard = () => {
   if (error) {
     return (
       <div className="dashboard-page">
-        <h2>Admin Dashboard</h2>
-        <p className="error">Error loading stats: {error}</p>
-        <button onClick={fetchStats}>Retry</button>
+        <h2>Bảng điều khiển Quản trị</h2>
+        <p className="error">Lỗi khi tải thống kê: {error}</p>
+        <button onClick={fetchStats}>Thử lại</button>
       </div>
     );
   }
@@ -38,7 +38,7 @@ const Dashboard = () => {
           marginBottom: "20px",
         }}
       >
-        <h2>Admin Dashboard - System Overview</h2>
+        <h2>Bảng điều khiển Quản trị - Tổng quan Hệ thống</h2>
         <button
           onClick={fetchStats}
           style={{
@@ -50,7 +50,7 @@ const Dashboard = () => {
             cursor: "pointer",
           }}
         >
-          Refresh Stats
+          Làm mới thống kê
         </button>
       </div>
 
@@ -63,7 +63,7 @@ const Dashboard = () => {
 
       <div className="restaurant-revenue-section" style={{ marginTop: "60px" }}>
         <h3 style={{ marginBottom: "30px" }}>
-          Revenue by Restaurant (Top Performers)
+          Doanh thu theo Nhà hàng (Top nổi bật)
         </h3>
         <RevenueTable
           restaurants={stats.revenueByRestaurant}

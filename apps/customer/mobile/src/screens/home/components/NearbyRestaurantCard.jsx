@@ -23,7 +23,7 @@ export default function NearbyRestaurantCard({ item, onPress }) {
             </View>
             <View style={styles.content}>
                 <Text style={styles.name} numberOfLines={2}>
-                    {item.name || 'Restaurant'}
+                    {item.name || 'Nhà hàng'}
                 </Text>
                 <View style={styles.distanceRow}>
                     <MaterialIcons name="location-on" size={14} color="#ff6b35" />

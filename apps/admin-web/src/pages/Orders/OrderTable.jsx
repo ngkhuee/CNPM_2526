@@ -37,12 +37,12 @@ const OrderTable = ({ orders, onOrderSelect, getStatusBadgeClass }) => {
             <table className="orders-table">
                 <thead>
                     <tr>
-                        <th>Order ID</th>
-                        <th>Customer</th>
-                        <th>Items</th>
-                        <th>Total</th>
-                        <th>Payment</th>
-                        <th>Status</th>
+                        <th>Mã ĐH</th>
+                        <th>Khách hàng</th>
+                        <th>Sản phẩm</th>
+                        <th>Tổng tiền</th>
+                        <th>Thanh toán</th>
+                        <th>Trạng thái</th>
                         <th>Drone</th>
                         <th>
                             <div
@@ -58,7 +58,7 @@ const OrderTable = ({ orders, onOrderSelect, getStatusBadgeClass }) => {
                                 }
                                 title="Click to change sort order"
                             >
-                                Time
+                                Thời gian
                                 <HiOutlineChevronUpDown
                                     style={{
                                         transform:
@@ -72,7 +72,7 @@ const OrderTable = ({ orders, onOrderSelect, getStatusBadgeClass }) => {
                                 />
                             </div>
                         </th>
-                        <th>Actions</th>
+                        <th>Thao tác</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -95,7 +95,7 @@ const OrderTable = ({ orders, onOrderSelect, getStatusBadgeClass }) => {
                                     ))}
                                     {order.items?.length > 2 && (
                                         <span className="more-items">
-                                            +{order.items.length - 2} more
+                                            +{order.items.length - 2} món khác
                                         </span>
                                     )}
                                 </div>
@@ -143,7 +143,7 @@ const OrderTable = ({ orders, onOrderSelect, getStatusBadgeClass }) => {
                             <td>
                                 <button
                                     className="btn-view"
-                                    title="View details"
+                                    title="Xem chi tiết"
                                     onClick={() => onOrderSelect(order)}
                                 >
                                     <svg

@@ -178,6 +178,23 @@
       "status": "pending",
       "created_at": "2025-11-20T03:37:09.636Z",
       "updated_at": "2025-11-20T03:37:09.636Z"
+    },
+    {
+      "id": "u1764063242203",
+      "email": "customer2@gmail.com",
+      "password": "123",
+      "name": "cust2",
+      "phone": "0902222222",
+      "roles": [
+        "customer"
+      ],
+      "status": "active",
+      "created_at": "2025-11-25T09:34:02.203Z",
+      "updated_at": "2025-11-26T05:53:45.664Z",
+      "gender": "",
+      "dob": "",
+      "avatar": "",
+      "full_name": "cust2"
     }
   ],
   "addresses": [
@@ -246,6 +263,19 @@
       "is_default": true,
       "created_at": "2025-11-19T04:39:18.438Z",
       "id": "d2UrnEb"
+    },
+    {
+      "user_id": "u1764063242203",
+      "address_line": "Công Ty TNHH Magnon Việt Nam, Lầu 7, Hẻm 18A Nguyễn Thị Minh Khai, Khu phố 10, Phường Sài Gòn, Thành phố Thủ Đức, Thành phố Hồ Chí Minh, 71006, Việt Nam",
+      "district": "District 1",
+      "city": "Ho Chi Minh",
+      "phone": "",
+      "lat": 10.787145583001823,
+      "lng": 106.70002361812115,
+      "is_default": true,
+      "created_at": "2025-11-26T05:54:41.250Z",
+      "updated_at": "2025-11-26T05:54:48.849Z",
+      "id": "c7ZIvc6"
     }
   ],
   "restaurants": [
@@ -683,12 +713,12 @@
     {
       "id": "c5",
       "restaurant_id": "r3",
-      "name": "Drinks",
+      "name": "Đồ uống",
       "description": "Beverages and drinks",
       "display_order": 5,
       "status": "active",
       "created_at": "2021-11-15T00:00:00.000Z",
-      "updated_at": "2021-11-15T00:00:00.000Z"
+      "updated_at": "2025-11-26T15:09:15.927Z"
     },
     {
       "id": "NxqTswu",
@@ -762,6 +792,15 @@
       "created_at": "2025-11-07T02:40:24.717Z",
       "updated_at": "2025-11-07T02:40:24.717Z",
       "id": "AgyQjzX"
+    },
+    {
+      "name": "Mì",
+      "description": "",
+      "status": "active",
+      "restaurant_id": "r2",
+      "created_at": "2025-11-25T09:42:47.844Z",
+      "updated_at": "2025-11-25T09:42:47.844Z",
+      "id": "VE_iV61"
     }
   ],
   "menus": [
@@ -873,7 +912,7 @@
     {
       "id": 8,
       "restaurant_id": "r2",
-      "category_id": "F2EtzMG",
+      "category_id": "VE_iV61",
       "name": "Spicy Chicken Set",
       "description": "Spicy fried chicken with sides",
       "price": 149000,
@@ -881,7 +920,7 @@
       "is_available": true,
       "preparation_time_minutes": 15,
       "created_at": "2024-01-01T00:00:00.000Z",
-      "updated_at": "2025-11-05T13:57:54.154Z",
+      "updated_at": "2025-11-25T09:42:59.497Z",
       "rating": 4.3,
       "sold": 0
     },
@@ -919,14 +958,14 @@
       "id": 11,
       "restaurant_id": "r3",
       "category_id": "LL5QYAF",
-      "name": "Full Hamburger",
+      "name": "Hamburger đầy đủ",
       "description": "Classic pizza with tomato, mozzarella and basil",
       "price": 52000,
       "image": "/images/foods/food_11.png",
       "is_available": true,
       "preparation_time_minutes": 18,
       "created_at": "2024-01-01T00:00:00.000Z",
-      "updated_at": "2025-11-05T14:32:06.581Z",
+      "updated_at": "2025-11-26T15:09:39.579Z",
       "rating": 4.6,
       "sold": 0
     },
@@ -1126,7 +1165,8 @@
       "created_at": "2025-11-06T04:29:19.896Z",
       "updated_at": "2025-11-06T06:35:31.539Z",
       "id": "Lc_LFY4",
-      "actual_delivery_time": "2025-11-06T06:35:31.539Z"
+      "actual_delivery_time": "2025-11-06T06:35:31.539Z",
+      "drone_journey_stage": null
     },
     {
       "user_id": "u1762416794526",
@@ -1171,45 +1211,8 @@
       "order_number": "ORD-1762416916052",
       "created_at": "2025-11-06T08:15:16.052Z",
       "updated_at": "2025-11-06T08:25:57.158Z",
-      "id": "rty8-9M"
-    },
-    {
-      "user_id": "u2",
-      "restaurant_id": "r4",
-      "address_id": "fCGWrRz",
-      "items": [
-        {
-          "menu_id": 13,
-          "name": "Texas Fried Chicken",
-          "quantity": 1,
-          "unit_price": 95000,
-          "subtotal": 95000
-        }
-      ],
-      "subtotal": 95000,
-      "delivery_fee": 0,
-      "discount_amount": 0,
-      "promotion_id": null,
-      "promotion_code": null,
-      "promotion_type": null,
-      "total_amount": 95000,
-      "payment_method": "momo",
-      "status": "ready",
-      "payment_status": "pending",
-      "special_instructions": "",
-      "customer": {
-        "name": "abc",
-        "phone": "0902222222",
-        "address": "Hẻm 8 Nguyễn Trãi, Phường Chợ Quán, Thành phố Thủ Đức, Thành phố Hồ Chí Minh, 72760, Việt Nam"
-      },
-      "dropoff_gps": {
-        "lat": 10.758976,
-        "lng": 106.6819026
-      },
-      "order_number": "ORD-1762480556380",
-      "created_at": "2025-11-07T01:55:56.380Z",
-      "updated_at": "2025-11-07T01:57:43.473Z",
-      "id": "cdNemGJ"
+      "id": "rty8-9M",
+      "drone_journey_stage": null
     },
     {
       "user_id": "u2",
@@ -1249,7 +1252,8 @@
       "updated_at": "2025-11-07T02:35:12.521Z",
       "id": "Pp7QYVs",
       "drone_id": "drone2",
-      "actual_delivery_time": "2025-11-07T02:35:12.521Z"
+      "actual_delivery_time": "2025-11-07T02:35:12.521Z",
+      "drone_journey_stage": null
     },
     {
       "user_id": "u2",
@@ -1288,7 +1292,8 @@
       "updated_at": "2025-11-12T08:42:49.189Z",
       "id": "h_D_mkM",
       "drone_id": "drone2",
-      "actual_delivery_time": "2025-11-12T08:42:49.189Z"
+      "actual_delivery_time": "2025-11-12T08:42:49.189Z",
+      "drone_journey_stage": null
     },
     {
       "user_id": "u1762957623609",
@@ -1326,7 +1331,8 @@
       "created_at": "2025-11-13T06:36:29.170Z",
       "updated_at": "2025-11-13T07:00:56.957Z",
       "id": "qXiuRrb",
-      "cancellation_reason": ""
+      "cancellation_reason": "",
+      "drone_journey_stage": null
     },
     {
       "user_id": "u1762957623609",
@@ -1365,7 +1371,8 @@
       "updated_at": "2025-11-13T15:59:17.991Z",
       "id": "6ZTPwiu",
       "drone_id": "drone2",
-      "actual_delivery_time": "2025-11-13T15:59:17.991Z"
+      "actual_delivery_time": "2025-11-13T15:59:17.991Z",
+      "drone_journey_stage": null
     },
     {
       "user_id": "u1762957623609",
@@ -1400,7 +1407,8 @@
       "created_at": "2025-11-15T05:02:08.120Z",
       "updated_at": "2025-11-17T03:49:31.889Z",
       "id": "GK7tIoo",
-      "cancellation_reason": "Auto-cancelled: Payment not completed within 30 minutes"
+      "cancellation_reason": "Auto-cancelled: Payment not completed within 30 minutes",
+      "drone_journey_stage": null
     },
     {
       "user_id": "u1762957623609",
@@ -1441,7 +1449,8 @@
       "created_at": "2025-11-17T03:11:54.671Z",
       "updated_at": "2025-11-17T03:49:31.889Z",
       "id": "ORbdVRp",
-      "cancellation_reason": "Auto-cancelled: Payment not completed within 30 minutes"
+      "cancellation_reason": "Auto-cancelled: Payment not completed within 30 minutes",
+      "drone_journey_stage": null
     },
     {
       "user_id": "u1762957623609",
@@ -1474,7 +1483,8 @@
       "updated_at": "2025-11-17T04:03:26.116Z",
       "id": "gVbRtju",
       "drone_id": "drone5",
-      "actual_delivery_time": "2025-11-17T04:03:26.114Z"
+      "actual_delivery_time": "2025-11-17T04:03:26.114Z",
+      "drone_journey_stage": null
     },
     {
       "user_id": "u1762957623609",
@@ -1512,7 +1522,8 @@
       "created_at": "2025-11-17T07:36:04.252Z",
       "updated_at": "2025-11-17T09:20:35.142Z",
       "id": "eo0DvHL",
-      "cancellation_reason": "Auto-cancelled: Payment not completed within 30 minutes"
+      "cancellation_reason": "Auto-cancelled: Payment not completed within 30 minutes",
+      "drone_journey_stage": null
     },
     {
       "items": [
@@ -1547,7 +1558,8 @@
       "created_at": "2025-11-19T04:33:45.314Z",
       "updated_at": "2025-11-19T05:42:22.576Z",
       "id": "hb17BCY",
-      "cancellation_reason": "Auto-cancelled: Payment not completed within 30 minutes"
+      "cancellation_reason": "Auto-cancelled: Payment not completed within 30 minutes",
+      "drone_journey_stage": null
     },
     {
       "id": "ord_1763551413623_wglcddcqr",
@@ -1608,7 +1620,8 @@
       "created_at": "2025-11-19T11:23:32.653Z",
       "updated_at": "2025-11-20T01:50:13.426Z",
       "drone_id": "drone2",
-      "actual_delivery_time": "2025-11-20T01:50:13.426Z"
+      "actual_delivery_time": "2025-11-20T01:50:13.426Z",
+      "drone_journey_stage": null
     },
     {
       "id": "ord_1763617223543_qtt9s71ox",
@@ -1655,7 +1668,8 @@
       "created_at": "2025-11-20T05:40:24.885Z",
       "updated_at": "2025-11-20T05:41:43.577Z",
       "drone_id": "drone4",
-      "actual_delivery_time": "2025-11-20T05:41:43.577Z"
+      "actual_delivery_time": "2025-11-20T05:41:43.577Z",
+      "drone_journey_stage": null
     },
     {
       "id": "ord_1763617563450_dxvdkuosw",
@@ -1695,7 +1709,8 @@
       "created_at": "2025-11-20T05:46:04.728Z",
       "updated_at": "2025-11-20T05:48:03.936Z",
       "drone_id": "drone5",
-      "actual_delivery_time": "2025-11-20T05:48:03.936Z"
+      "actual_delivery_time": "2025-11-20T05:48:03.936Z",
+      "drone_journey_stage": null
     },
     {
       "id": "ord_1763618297545_ttj5upigj",
@@ -1735,7 +1750,240 @@
       "created_at": "2025-11-20T05:58:18.808Z",
       "updated_at": "2025-11-20T05:59:58.818Z",
       "drone_id": "drone5",
-      "actual_delivery_time": "2025-11-20T05:59:58.818Z"
+      "actual_delivery_time": "2025-11-20T05:59:58.818Z",
+      "drone_journey_stage": null
+    },
+    {
+      "id": "ord_1764063370619_3595kkzsf",
+      "user_id": "u1764063242203",
+      "restaurant_id": "r2",
+      "items": [
+        {
+          "menu_id": 7,
+          "name": "Chicken Combo",
+          "quantity": 1,
+          "unit_price": 129000,
+          "subtotal": 129000
+        },
+        {
+          "menu_id": 6,
+          "name": "Chicken Burger",
+          "quantity": 1,
+          "unit_price": 69000,
+          "subtotal": 69000
+        }
+      ],
+      "subtotal": 198000,
+      "delivery_fee": 0,
+      "discount_amount": 0,
+      "total_amount": 198000,
+      "payment_method": "online",
+      "payment_status": "pending",
+      "status": "cancelled",
+      "special_instructions": "",
+      "customer": {
+        "name": "cust2",
+        "phone": "0902222222",
+        "address": "213abc"
+      },
+      "delivery_address": "213abc",
+      "pickup_gps": {
+        "lat": 10.8,
+        "lng": 106.71
+      },
+      "dropoff_gps": null,
+      "promotion_code": null,
+      "promotion_id": null,
+      "order_number": "ORD-1764063370525",
+      "created_at": "2025-11-25T09:36:10.525Z",
+      "updated_at": "2025-11-25T10:55:00.651Z",
+      "cancellation_reason": "Auto-cancelled: Payment not completed within 30 minutes"
+    },
+    {
+      "id": "ord_1764069794436_lqyemydr9",
+      "user_id": "u1764063242203",
+      "restaurant_id": "r2",
+      "items": [
+        {
+          "menu_id": 8,
+          "name": "Spicy Chicken Set",
+          "quantity": 2,
+          "unit_price": 149000,
+          "subtotal": 298000
+        },
+        {
+          "menu_id": 6,
+          "name": "Chicken Burger",
+          "quantity": 1,
+          "unit_price": 69000,
+          "subtotal": 69000
+        }
+      ],
+      "subtotal": 367000,
+      "delivery_fee": 0,
+      "discount_amount": 0,
+      "total_amount": 367000,
+      "payment_method": "online",
+      "payment_status": "paid",
+      "status": "delivered",
+      "special_instructions": "",
+      "customer": {
+        "name": "cust2",
+        "phone": "0902222222",
+        "address": "Hẻm 8 Nguyễn Trãi, Phường Chợ Quán, Thành phố Thủ Đức, TP. HCM"
+      },
+      "delivery_address": "Hẻm 8 Nguyễn Trãi, Phường Chợ Quán, Thành phố Thủ Đức, TP. HCM",
+      "pickup_address": "252 Võ Văn Ngân, Linh Chiểu, Thành phố Thủ Đức, TP. HCM",
+      "pickup_gps": {
+        "lat": 10.8,
+        "lng": 106.71
+      },
+      "dropoff_address": "Hẻm 8 Nguyễn Trãi, Phường Chợ Quán, Thành phố Thủ Đức, TP. HCM",
+      "dropoff_gps": {
+        "lat": 10.758976,
+        "lng": 106.6819026
+      },
+      "promotion_code": null,
+      "promotion_id": null,
+      "order_number": "ORD-1764069794371",
+      "created_at": "2025-11-25T11:23:14.371Z",
+      "updated_at": "2025-11-26T05:46:01.353Z",
+      "drone_id": "drone1",
+      "drone_journey_stage": "at_customer"
+    },
+    {
+      "id": "ord_1764136527380_ev39vn1iy",
+      "user_id": "u1764063242203",
+      "restaurant_id": "r2",
+      "items": [
+        {
+          "menu_id": 6,
+          "name": "Chicken Burger",
+          "quantity": 1,
+          "unit_price": 69000,
+          "subtotal": 69000
+        }
+      ],
+      "subtotal": 69000,
+      "delivery_fee": 0,
+      "discount_amount": 0,
+      "total_amount": 69000,
+      "payment_method": "online",
+      "payment_status": "pending",
+      "status": "delivered",
+      "special_instructions": "",
+      "customer": {
+        "name": "cust2",
+        "phone": "0902222222",
+        "address": "Công Ty TNHH Magnon Việt Nam, Lầu 7, Hẻm 18A Nguyễn Thị Minh Khai, Khu phố 10, Phường Sài Gòn, Thành phố Thủ Đức, Thành phố Hồ Chí Minh, 71006, Việt Nam"
+      },
+      "delivery_address": "Công Ty TNHH Magnon Việt Nam, Lầu 7, Hẻm 18A Nguyễn Thị Minh Khai, Khu phố 10, Phường Sài Gòn, Thành phố Thủ Đức, Thành phố Hồ Chí Minh, 71006, Việt Nam",
+      "pickup_gps": {
+        "lat": 10.8,
+        "lng": 106.71
+      },
+      "dropoff_gps": {
+        "lat": 10.787127624482016,
+        "lng": 106.70004812914388
+      },
+      "promotion_code": null,
+      "promotion_id": null,
+      "order_number": "ORD-1764136527269",
+      "created_at": "2025-11-26T05:55:27.269Z",
+      "updated_at": "2025-11-26T06:10:53.225Z",
+      "drone_id": "drone1",
+      "drone_journey_stage": "at_customer"
+    },
+    {
+      "id": "ord_1764137484188_ir3fhngjb",
+      "user_id": "u1764063242203",
+      "restaurant_id": "r2",
+      "items": [
+        {
+          "menu_id": 5,
+          "name": "Fried Chicken Wings",
+          "quantity": 1,
+          "unit_price": 89000,
+          "subtotal": 89000
+        }
+      ],
+      "subtotal": 89000,
+      "delivery_fee": 0,
+      "discount_amount": 0,
+      "total_amount": 89000,
+      "payment_method": "online",
+      "payment_status": "pending",
+      "status": "delivered",
+      "special_instructions": "",
+      "customer": {
+        "name": "cust2",
+        "phone": "0902222222",
+        "address": "Công Ty TNHH Magnon Việt Nam, Lầu 7, Hẻm 18A Nguyễn Thị Minh Khai, Khu phố 10, Phường Sài Gòn, Thành phố Thủ Đức, Thành phố Hồ Chí Minh, 71006, Việt Nam"
+      },
+      "delivery_address": "Công Ty TNHH Magnon Việt Nam, Lầu 7, Hẻm 18A Nguyễn Thị Minh Khai, Khu phố 10, Phường Sài Gòn, Thành phố Thủ Đức, Thành phố Hồ Chí Minh, 71006, Việt Nam",
+      "pickup_gps": {
+        "lat": 10.8,
+        "lng": 106.71
+      },
+      "dropoff_gps": {
+        "lat": 10.787033390281362,
+        "lng": 106.70007144697458
+      },
+      "promotion_code": null,
+      "promotion_id": null,
+      "order_number": "ORD-1764137484085",
+      "created_at": "2025-11-26T06:11:24.085Z",
+      "updated_at": "2025-11-26T06:36:21.263Z",
+      "drone_id": "drone1",
+      "drone_journey_stage": "at_customer",
+      "current_gps": {
+        "latitude": 10.799351669514069,
+        "longitude": 106.70950357234872
+      }
+    },
+    {
+      "id": "ord_1764161247141_y51h4edc5",
+      "user_id": "u1764063242203",
+      "restaurant_id": "r3",
+      "items": [
+        {
+          "menu_id": 9,
+          "name": "Pizza Spicy Garlic Shrimp",
+          "quantity": 1,
+          "unit_price": 254000,
+          "subtotal": 254000
+        }
+      ],
+      "subtotal": 254000,
+      "delivery_fee": 0,
+      "discount_amount": 0,
+      "total_amount": 254000,
+      "payment_method": "online",
+      "payment_status": "pending",
+      "status": "delivered",
+      "special_instructions": "",
+      "customer": {
+        "name": "cust2",
+        "phone": "0902222222",
+        "address": "Công Ty TNHH Magnon Việt Nam, Lầu 7, Hẻm 18A Nguyễn Thị Minh Khai, Khu phố 10, Phường Sài Gòn, Thành phố Thủ Đức, Thành phố Hồ Chí Minh, 71006, Việt Nam, District 1, Ho Chi Minh"
+      },
+      "delivery_address": "Công Ty TNHH Magnon Việt Nam, Lầu 7, Hẻm 18A Nguyễn Thị Minh Khai, Khu phố 10, Phường Sài Gòn, Thành phố Thủ Đức, Thành phố Hồ Chí Minh, 71006, Việt Nam, District 1, Ho Chi Minh",
+      "pickup_gps": {
+        "lat": 10.77,
+        "lng": 106.68
+      },
+      "dropoff_gps": null,
+      "promotion_code": null,
+      "promotion_id": null,
+      "order_number": "ORD-1764161247017",
+      "created_at": "2025-11-26T12:47:27.017Z",
+      "updated_at": "2025-11-26T12:48:30.923Z",
+      "drone_id": "drone1",
+      "drone_journey_stage": "at_customer",
+      "current_gps": {
+        "latitude": 10.770838285,
+        "longitude": 106.681006955
+      }
     }
   ],
   "order_tracking": [
@@ -1952,19 +2200,6 @@
       "updated_at": "2025-11-06T08:25:00.000Z"
     },
     {
-      "id": "rev6",
-      "user_id": "u2",
-      "food_id": 13,
-      "restaurant_id": "r4",
-      "order_id": "cdNemGJ",
-      "rating": 4,
-      "comment": "Better this time! Fresh and tasty.",
-      "images": [],
-      "restaurant_reply": "We appreciate your visit!",
-      "created_at": "2025-11-07T02:00:00.000Z",
-      "updated_at": "2025-11-07T02:05:00.000Z"
-    },
-    {
       "id": "rev7",
       "user_id": "u2",
       "food_id": 19,
@@ -2015,93 +2250,145 @@
       "images": [],
       "restaurant_reply": null,
       "id": "7A1ID_A"
+    },
+    {
+      "food_id": 6,
+      "user_id": "u1764063242203",
+      "restaurant_id": "r2",
+      "order_id": "ord_1764069794436_lqyemydr9",
+      "rating": 5,
+      "comment": "ok1",
+      "created_at": "2025-11-26T05:46:32.609Z",
+      "updated_at": "2025-11-26T05:46:32.609Z",
+      "images": [],
+      "restaurant_reply": null,
+      "id": "ddR1yaN"
     }
   ],
   "drones": [
     {
       "id": "drone1",
       "identifier": "Drone 1",
-      "status": "busy",
-      "battery_level": 85,
-      "latitude": 10.77,
-      "longitude": 106.68,
+      "status": "available",
+      "battery_level": 100,
+      "latitude": 10.7626,
+      "longitude": 106.682,
       "current_location": {
-        "lat": 10.77,
-        "lng": 106.68
+        "lat": 10.7626,
+        "lng": 106.682,
+        "address": "273 An Dương Vương, Phường Chợ Quán, TP. HCM"
       },
       "max_weight_kg": 5,
-      "assigned_order_id": "cdNemGJ",
+      "assigned_order_id": null,
       "last_maintenance": "2025-11-01T00:00:00.000Z",
       "created_at": "2025-01-01T00:00:00.000Z",
-      "updated_at": "2025-11-07T01:57:02.452Z"
+      "updated_at": "2025-11-26T12:48:30.917Z"
     },
     {
       "id": "drone2",
       "identifier": "Drone 2",
-      "status": "busy",
-      "battery_level": 65,
-      "latitude": null,
-      "longitude": null,
+      "status": "locked",
+      "battery_level": 100,
+      "latitude": 10.7626,
+      "longitude": 106.682,
       "current_location": {
-        "lat": 10.77,
-        "lng": 106.68
+        "lat": 10.7626,
+        "lng": 106.682,
+        "address": "273 An Dương Vương, Phường Chợ Quán, TP. HCM"
       },
       "max_weight_kg": 5,
-      "assigned_order_id": "ord_1763617223543_qtt9s71ox",
+      "assigned_order_id": null,
       "last_maintenance": "2025-10-28T00:00:00.000Z",
       "created_at": "2025-01-01T00:00:00.000Z",
-      "updated_at": "2025-11-20T05:40:54.937Z"
+      "updated_at": "2025-11-25T12:19:25.549Z"
     },
     {
       "id": "drone3",
       "identifier": "Drone 3",
-      "status": "locked",
+      "status": "available",
       "battery_level": 25,
-      "latitude": 10.77,
-      "longitude": 106.68,
+      "latitude": 10.7626,
+      "longitude": 106.682,
       "current_location": {
-        "lat": 10.77,
-        "lng": 106.68
+        "lat": 10.7626,
+        "lng": 106.682,
+        "address": "273 An Dương Vương, Phường Chợ Quán, TP. HCM"
       },
       "max_weight_kg": 5,
       "assigned_order_id": null,
       "last_maintenance": "2025-10-25T00:00:00.000Z",
       "created_at": "2025-01-01T00:00:00.000Z",
-      "updated_at": "2025-11-05T14:00:00.000Z"
+      "updated_at": "2025-11-26T09:50:13.067Z"
     },
     {
       "id": "drone4",
       "identifier": "Drone 4",
-      "status": "busy",
-      "battery_level": 90,
-      "latitude": null,
-      "longitude": null,
+      "status": "available",
+      "battery_level": 100,
+      "latitude": 10.7626,
+      "longitude": 106.682,
       "current_location": {
-        "lat": 10.776,
-        "lng": 106.7
+        "lat": 10.7626,
+        "lng": 106.682,
+        "address": "273 An Dương Vương, Phường Chợ Quán, TP. HCM"
       },
       "max_weight_kg": 5,
-      "assigned_order_id": "ord_1763617563450_dxvdkuosw",
+      "assigned_order_id": null,
       "last_maintenance": "2025-11-02T00:00:00.000Z",
       "created_at": "2025-01-15T00:00:00.000Z",
-      "updated_at": "2025-11-20T05:47:29.175Z"
+      "updated_at": "2025-11-25T12:00:00.000Z"
     },
     {
       "id": "drone5",
       "identifier": "Drone 5",
       "status": "available",
-      "battery_level": 78,
-      "latitude": null,
-      "longitude": null,
+      "battery_level": 100,
+      "latitude": 10.7626,
+      "longitude": 106.682,
       "current_location": {
-        "lat": 10.774,
-        "lng": 106.705
+        "lat": 10.7626,
+        "lng": 106.682,
+        "address": "273 An Dương Vương, Phường Chợ Quán, TP. HCM"
       },
       "max_weight_kg": 5,
       "assigned_order_id": null,
       "last_maintenance": "2025-10-30T00:00:00.000Z",
       "created_at": "2025-02-01T00:00:00.000Z",
-      "updated_at": "2025-11-20T05:59:58.893Z"
+      "updated_at": "2025-11-26T09:50:16.749Z"
+    },
+    {
+      "identifier": "Drone 6",
+      "status": "available",
+      "battery_level": 100,
+      "latitude": 10.7626,
+      "longitude": 106.682,
+      "current_location": {
+        "lat": 10.7626,
+        "lng": 106.682,
+        "address": "273 An Dương Vương, Phường Chợ Quán, TP. HCM"
+      },
+      "max_weight_kg": 5,
+      "assigned_order_id": null,
+      "created_at": "2025-11-25T11:24:38.965Z",
+      "updated_at": "2025-11-25T12:19:18.894Z",
+      "id": "PmAPZl3"
+    },
+    {
+      "identifier": "Drone 7",
+      "status": "locked",
+      "battery_level": 100,
+      "latitude": 10.7626,
+      "longitude": 106.682,
+      "current_location": {
+        "lat": 10.7626,
+        "lng": 106.682,
+        "address": "273 An Dương Vương, Phường Chợ Quán, TP. HCM"
+      },
+      "max_weight_kg": 5,
+      "assigned_order_id": null,
+      "created_at": "2025-11-25T11:24:42.297Z",
+      "updated_at": "2025-11-26T05:47:11.115Z",
+      "id": "9_oQS8X"
     }
   ],
   "settings": [
@@ -2151,6 +2438,26 @@
       "updated_at": "2025-11-20T05:58:17.711Z",
       "total": 0,
       "restaurant_name": null
+    },
+    {
+      "id": 2,
+      "user_id": "u1764063242203",
+      "restaurant_id": "r3",
+      "items": [
+        {
+          "item_id": "item_1764162492162_sd74d24wv",
+          "food_id": 10,
+          "name": "Pizza Burrata Parma Ham",
+          "price": 298000,
+          "image": "/images/foods/food_6.png",
+          "quantity": 1,
+          "note": "",
+          "subtotal": 298000
+        }
+      ],
+      "updated_at": "2025-11-26T13:08:12.162Z",
+      "total": 298000,
+      "restaurant_name": "Pizza 4P's"
     }
   ],
   "withdrawals": [

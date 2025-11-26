@@ -39,7 +39,7 @@ export const RestaurantHeaderCompact = ({ restaurant }) => {
                     <View style={styles.quickInfoItem}>
                         <MaterialIcons name="schedule" size={16} color="#ff6b35" />
                         <Text style={styles.quickInfoText}>
-                            {restaurant.deliveryTimeMinutes} mins
+                            {restaurant.deliveryTimeMinutes} phút
                         </Text>
                     </View>
                     <View style={styles.quickInfoItem}>
@@ -59,7 +59,7 @@ export const RestaurantHeaderCompact = ({ restaurant }) => {
                             color="#fff"
                         />
                         <Text style={styles.statusText}>
-                            {isOpen ? 'Open Now' : 'Closed'}
+                            {isOpen ? 'Đang mở cửa' : 'Đã đóng cửa'}
                         </Text>
                     </View>
                     {todayHours && (
@@ -79,10 +79,10 @@ export const RestaurantHeaderCompact = ({ restaurant }) => {
                     <View style={styles.closedBanner}>
                         <MaterialIcons name="info" size={20} color="#ff9800" />
                         <View style={styles.closedBannerText}>
-                            <Text style={styles.closedBannerTitle}>Currently Closed</Text>
+                            <Text style={styles.closedBannerTitle}>Hiện đang đóng cửa</Text>
                             {todayHours && (
                                 <Text style={styles.closedBannerSubtitle}>
-                                    Opens at {todayHours.open}
+                                    Mở cửa lúc {todayHours.open}
                                 </Text>
                             )}
                         </View>
@@ -93,7 +93,7 @@ export const RestaurantHeaderCompact = ({ restaurant }) => {
                 {restaurant.status === 'blocked' && (
                     <View style={styles.blockedBanner}>
                         <MaterialIcons name="lock" size={20} color="#d32f2f" />
-                        <Text style={styles.blockedText}>Restaurant is closed</Text>
+                        <Text style={styles.blockedText}>Nhà hàng đã ngừng hoạt động</Text>
                     </View>
                 )}
             </View>
@@ -102,9 +102,9 @@ export const RestaurantHeaderCompact = ({ restaurant }) => {
 };
 
 const styles = StyleSheet.create({
-    banner: { 
-        width: '100%', 
-        height: 200, 
+    banner: {
+        width: '100%',
+        height: 200,
         backgroundColor: '#eee',
     },
     restaurantInfo: {
@@ -114,134 +114,134 @@ const styles = StyleSheet.create({
         borderBottomWidth: 1,
         borderBottomColor: '#eee',
     },
-    infoHeader: { 
-        flexDirection: 'row', 
-        alignItems: 'flex-start', 
+    infoHeader: {
+        flexDirection: 'row',
+        alignItems: 'flex-start',
         marginBottom: 12,
     },
-    restaurantImage: { 
-        width: 60, 
-        height: 60, 
-        borderRadius: 8, 
-        marginRight: 12, 
+    restaurantImage: {
+        width: 60,
+        height: 60,
+        borderRadius: 8,
+        marginRight: 12,
         backgroundColor: '#eee',
     },
-    infoContent: { 
+    infoContent: {
         flex: 1,
     },
-    restaurantName: { 
-        fontSize: 16, 
-        fontWeight: '700', 
-        color: '#333', 
+    restaurantName: {
+        fontSize: 16,
+        fontWeight: '700',
+        color: '#333',
         marginBottom: 4,
     },
-    ratingRow: { 
-        flexDirection: 'row', 
-        alignItems: 'center', 
+    ratingRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
         marginBottom: 4,
     },
-    ratingText: { 
-        fontSize: 12, 
-        fontWeight: '600', 
-        color: '#333', 
+    ratingText: {
+        fontSize: 12,
+        fontWeight: '600',
+        color: '#333',
         marginLeft: 4,
     },
-    reviewCount: { 
-        fontSize: 12, 
-        color: '#999', 
+    reviewCount: {
+        fontSize: 12,
+        color: '#999',
         marginLeft: 4,
     },
-    category: { 
-        fontSize: 12, 
+    category: {
+        fontSize: 12,
         color: '#999',
     },
-    quickInfo: { 
+    quickInfo: {
         gap: 8,
     },
-    quickInfoItem: { 
-        flexDirection: 'row', 
+    quickInfoItem: {
+        flexDirection: 'row',
         alignItems: 'center',
     },
-    quickInfoText: { 
-        fontSize: 12, 
-        color: '#666', 
-        marginLeft: 8, 
+    quickInfoText: {
+        fontSize: 12,
+        color: '#666',
+        marginLeft: 8,
         flex: 1,
     },
-    statusSection: { 
-        flexDirection: 'row', 
-        alignItems: 'center', 
+    statusSection: {
+        flexDirection: 'row',
+        alignItems: 'center',
         gap: 12,
         marginHorizontal: 12,
         marginTop: 12,
     },
-    statusBadge: { 
-        flexDirection: 'row', 
-        alignItems: 'center', 
-        paddingHorizontal: 12, 
-        paddingVertical: 6, 
-        borderRadius: 20, 
+    statusBadge: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+        borderRadius: 20,
         gap: 6,
     },
     statusOpen: { backgroundColor: '#4CAF50' },
     statusClosed: { backgroundColor: '#f44336' },
-    statusText: { 
-        fontSize: 12, 
-        color: '#fff', 
+    statusText: {
+        fontSize: 12,
+        color: '#fff',
         fontWeight: '600',
     },
-    hoursText: { 
-        fontSize: 12, 
-        color: '#666', 
+    hoursText: {
+        fontSize: 12,
+        color: '#666',
         fontWeight: '500',
     },
-    description: { 
-        fontSize: 13, 
-        color: '#666', 
+    description: {
+        fontSize: 13,
+        color: '#666',
         lineHeight: 18,
         marginHorizontal: 12,
         marginTop: 12,
     },
     closedBanner: {
-        flexDirection: 'row', 
-        alignItems: 'center', 
+        flexDirection: 'row',
+        alignItems: 'center',
         backgroundColor: '#fff3e0',
-        borderWidth: 1, 
-        borderColor: '#ffb74d', 
+        borderWidth: 1,
+        borderColor: '#ffb74d',
         borderRadius: 6,
-        paddingHorizontal: 12, 
+        paddingHorizontal: 12,
         paddingVertical: 10,
         marginHorizontal: 12,
         marginTop: 12,
         gap: 10,
     },
     closedBannerText: { flex: 1 },
-    closedBannerTitle: { 
-        fontSize: 13, 
-        fontWeight: '600', 
+    closedBannerTitle: {
+        fontSize: 13,
+        fontWeight: '600',
         color: '#e65100',
     },
-    closedBannerSubtitle: { 
-        fontSize: 12, 
-        color: '#ef6c00', 
+    closedBannerSubtitle: {
+        fontSize: 12,
+        color: '#ef6c00',
         marginTop: 2,
     },
     blockedBanner: {
-        flexDirection: 'row', 
-        alignItems: 'center', 
+        flexDirection: 'row',
+        alignItems: 'center',
         backgroundColor: '#ffebee',
-        borderWidth: 1, 
-        borderColor: '#ef5350', 
+        borderWidth: 1,
+        borderColor: '#ef5350',
         borderRadius: 6,
-        paddingHorizontal: 12, 
+        paddingHorizontal: 12,
         paddingVertical: 10,
         marginHorizontal: 12,
         marginTop: 12,
         gap: 8,
     },
-    blockedText: { 
-        fontSize: 13, 
-        color: '#d32f2f', 
+    blockedText: {
+        fontSize: 13,
+        color: '#d32f2f',
         fontWeight: '600',
     },
 });

@@ -48,26 +48,26 @@ export default function MenuDrawer({ isVisible, onClose, onNavigate }) {
     const menuItems = [
         {
             id: 'become-partner',
-            label: 'Become a Restaurant Partner',
+            label: 'Trở thành đối tác nhà hàng',
             icon: 'store',
             screen: 'register-restaurant',
         },
         {
             id: 'profile',
-            label: 'My Profile',
+            label: 'Trang cá nhân',
             icon: 'account-circle',
             screen: 'profile',
         },
         {
             id: 'settings',
-            label: 'Settings',
+            label: 'Cài đặt',
             icon: 'settings',
             screen: 'settings',
             disabled: true,
         },
         {
             id: 'about',
-            label: 'About Us',
+            label: 'Về chúng tôi',
             icon: 'info',
             screen: 'about',
             disabled: true,
@@ -102,7 +102,7 @@ export default function MenuDrawer({ isVisible, onClose, onNavigate }) {
                         <View style={styles.drawerHeaderIcon}>
                             <MaterialIcons name="menu" size={24} color="#ff6b35" />
                         </View>
-                        <Text style={styles.drawerTitle}>Menu</Text>
+                        <Text style={styles.drawerTitle}>Danh mục</Text>
                     </View>
                     <TouchableOpacity style={styles.closeBtn} onPress={onClose}>
                         <MaterialIcons name="close" size={24} color="#333" />

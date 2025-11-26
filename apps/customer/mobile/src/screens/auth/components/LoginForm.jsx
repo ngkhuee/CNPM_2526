@@ -7,13 +7,13 @@ import { View, Text, TextInput, TouchableOpacity, ActivityIndicator, StyleSheet 
 export const LoginForm = ({ formData, updateField, onSubmit, loading }) => {
     return (
         <View style={styles.formContainer}>
-            <Text style={styles.formTitle}>Login to Your Account</Text>
+            <Text style={styles.formTitle}>Đăng nhập tài khoản</Text>
 
             <View style={styles.inputGroup}>
                 <Text style={styles.label}>Email</Text>
                 <TextInput
                     style={styles.input}
-                    placeholder="Enter your email"
+                    placeholder="Nhập email của bạn"
                     placeholderTextColor="#999"
                     keyboardType="email-address"
                     autoCapitalize="none"
@@ -24,10 +24,10 @@ export const LoginForm = ({ formData, updateField, onSubmit, loading }) => {
             </View>
 
             <View style={styles.inputGroup}>
-                <Text style={styles.label}>Password</Text>
+                <Text style={styles.label}>Mật khẩu</Text>
                 <TextInput
                     style={styles.input}
-                    placeholder="Enter your password"
+                    placeholder="Nhập mật khẩu của bạn"
                     placeholderTextColor="#999"
                     secureTextEntry={true}
                     editable={!loading}
@@ -44,7 +44,7 @@ export const LoginForm = ({ formData, updateField, onSubmit, loading }) => {
                 {loading ? (
                     <ActivityIndicator color="#fff" size="small" />
                 ) : (
-                    <Text style={styles.submitButtonText}>Login</Text>
+                    <Text style={styles.submitButtonText}>Đăng nhập</Text>
                 )}
             </TouchableOpacity>
         </View>

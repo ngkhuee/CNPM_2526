@@ -12,10 +12,10 @@ const PlaceOrder = () => {
   useEffect(() => {
     // Redirect to cart if not logged in or cart is empty
     if (!user) {
-      toast.error("Please sign in to place an order");
+      toast.error("Vui lòng đăng nhập để đặt hàng");
       navigate("/cart");
     } else if (!cart?.items || cart.items.length === 0) {
-      toast.error("Your cart is empty");
+      toast.error("Giỏ hàng của bạn đang trống");
       navigate("/cart");
     } else {
       // Navigate to checkout-info page
@@ -25,7 +25,7 @@ const PlaceOrder = () => {
 
   return (
     <div className="place-order">
-      <p>Redirecting to checkout...</p>
+      <p>Đang chuyển đến trang thanh toán...</p>
     </div>
   );
 };

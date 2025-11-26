@@ -29,19 +29,19 @@ const SwitchRestaurantModal = ({
                     {/* Header */}
                     <View style={styles.header}>
                         <MaterialIcons name="info" size={28} color="#ff6b35" />
-                        <Text style={styles.title}>Change Restaurant?</Text>
+                        <Text style={styles.title}>Đổi nhà hàng?</Text>
                     </View>
 
                     {/* Content */}
                     <View style={styles.content}>
                         <Text style={styles.message}>
-                            Your cart contains items from <Text style={styles.bold}>{currentRestaurant}</Text>
+                            Giỏ hàng của bạn đang có món từ <Text style={styles.bold}>{currentRestaurant}</Text>
                         </Text>
                         <Text style={styles.message}>
-                            You want to add items from <Text style={styles.bold}>{newRestaurant}</Text>
+                            Bạn muốn thêm món từ <Text style={styles.bold}>{newRestaurant}</Text>
                         </Text>
                         <Text style={styles.question}>
-                            What would you like to do?
+                            Bạn muốn làm gì?
                         </Text>
                     </View>
 
@@ -54,7 +54,7 @@ const SwitchRestaurantModal = ({
                         >
                             <MaterialIcons name="shopping-cart" size={20} color="#fff" />
                             <Text style={[styles.buttonText, styles.checkoutText]}>
-                                Checkout Now
+                                Thanh toán ngay
                             </Text>
                         </TouchableOpacity>
 
@@ -65,7 +65,7 @@ const SwitchRestaurantModal = ({
                         >
                             <MaterialIcons name="delete" size={20} color="#ff6b35" />
                             <Text style={[styles.buttonText, styles.clearText]}>
-                                Clear Cart & Add New
+                                Xóa giỏ & thêm mới
                             </Text>
                         </TouchableOpacity>
 
@@ -76,7 +76,7 @@ const SwitchRestaurantModal = ({
                         >
                             <MaterialIcons name="close" size={20} color="#666" />
                             <Text style={[styles.buttonText, styles.cancelText]}>
-                                Cancel
+                                Hủy
                             </Text>
                         </TouchableOpacity>
                     </View>

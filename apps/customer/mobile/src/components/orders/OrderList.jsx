@@ -24,7 +24,7 @@ export default function OrderList({
         return (
             <View style={styles.centerContainer}>
                 <ActivityIndicator size="large" color="#FF6B35" />
-                <Text style={styles.loadingText}>Loading orders...</Text>
+                <Text style={styles.loadingText}>Đang tải đơn hàng...</Text>
             </View>
         );
     }
@@ -33,9 +33,9 @@ export default function OrderList({
         return (
             <View style={styles.emptyContainer}>
                 <MaterialIcons name="inbox" size={48} color="#ddd" />
-                <Text style={styles.emptyTitle}>No Orders Yet</Text>
+                <Text style={styles.emptyTitle}>Chưa có đơn hàng</Text>
                 <Text style={styles.emptyText}>
-                    Start ordering from your favorite restaurants!
+                    Bắt đầu đặt món từ nhà hàng yêu thích của bạn!
                 </Text>
             </View>
         );

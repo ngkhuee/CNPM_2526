@@ -25,7 +25,7 @@ export const OrderItemsList = ({ order }) => {
 
     return (
         <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Order Items</Text>
+            <Text style={styles.sectionTitle}>Sản phẩm đặt hàng</Text>
             <FlatList
                 data={order.items}
                 renderItem={renderItem}
@@ -35,13 +35,13 @@ export const OrderItemsList = ({ order }) => {
             />
             <View style={styles.summarySection}>
                 <View style={styles.summaryRow}>
-                    <Text style={styles.summaryLabel}>Subtotal</Text>
+                    <Text style={styles.summaryLabel}>Tạm tính</Text>
                     <Text style={styles.summaryValue}>
                         ₫{(order.subtotal || 0).toLocaleString('vi-VN')}
                     </Text>
                 </View>
                 <View style={styles.summaryRow}>
-                    <Text style={styles.summaryLabel}>Delivery Fee</Text>
+                    <Text style={styles.summaryLabel}>Phí giao hàng</Text>
                     <Text style={styles.summaryValue}>
                         ₫{(order.deliveryFee || order.delivery_fee || 0).toLocaleString('vi-VN')}
                     </Text>
@@ -49,7 +49,7 @@ export const OrderItemsList = ({ order }) => {
                 {(order.discountAmount || order.discount_amount) > 0 && (
                     <View style={[styles.summaryRow, styles.discountRow]}>
                         <Text style={styles.discountLabel}>
-                            Discount {order.promo_code && `(${order.promo_code})`}
+                            Giảm giá {order.promo_code && `(${order.promo_code})`}
                         </Text>
                         <Text style={styles.discountValue}>
                             -₫{(order.discountAmount || order.discount_amount || 0).toLocaleString('vi-VN')}
@@ -57,7 +57,7 @@ export const OrderItemsList = ({ order }) => {
                     </View>
                 )}
                 <View style={[styles.summaryRow, styles.totalRow]}>
-                    <Text style={styles.totalLabel}>Total</Text>
+                    <Text style={styles.totalLabel}>Tổng cộng</Text>
                     <Text style={styles.totalValue}>
                         ₫{(order.totalPrice || order.total_amount || 0).toLocaleString('vi-VN')}
                     </Text>

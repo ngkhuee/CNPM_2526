@@ -15,10 +15,10 @@ const RestaurantDisplay = ({ showAllRestaurants = false }) => {
         className="restaurant-display-title"
         style={{ display: "flex", alignItems: "center", gap: "10px" }}
       >
-        All Restaurants
+        Tất cả nhà hàng
       </h2>
       <p style={{ color: "#666", marginBottom: "20px", fontSize: "14px" }}>
-        Browse all available restaurants on our platform
+        Duyệt tất cả nhà hàng trên nền tảng của chúng tôi
       </p>
 
       <div className="food-display-list">

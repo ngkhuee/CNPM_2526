@@ -11,9 +11,9 @@ export default function HomeHero({ onExplorePress }) {
         >
             <View style={styles.overlay}>
                 <View style={styles.content}>
-                    <Text style={styles.title}>Order your favourite food here</Text>
+                    <Text style={styles.title}>Đặt món ăn yêu thích của bạn</Text>
                     <Text style={styles.subtitle}>
-                        Choose from a diverse menu featuring delectable dishes crafted with the finest ingredients
+                        Lựa chọn từ thực đơn đa dạng với những món ăn thơm ngon được chế biến từ nguyên liệu tươi ngon nhất
                     </Text>
 
                     {/* <TouchableOpacity style={styles.btn} onPress={onExplorePress}>

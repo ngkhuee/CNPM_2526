@@ -28,11 +28,11 @@ export default function RegisterRestaurantScreen({ onNavigate }) {
 
         if (result.success) {
             Alert.alert(
-                'Registration Successful',
-                'Your restaurant has been submitted for review. You will be notified once approved.',
+                'Đăng ký thành công',
+                'Nhà hàng của bạn đã được gửi để xét duyệt. Bạn sẽ được thông báo khi được chấp thuận.',
                 [
                     {
-                        text: 'OK',
+                        text: 'Đồng ý',
                         onPress: () => {
                             resetForm();
                             onNavigate('home');
@@ -49,7 +49,7 @@ export default function RegisterRestaurantScreen({ onNavigate }) {
                 <TouchableOpacity onPress={() => onNavigate('home')}>
                     <MaterialIcons name="arrow-back" size={24} color="#333" />
                 </TouchableOpacity>
-                <Text style={styles.headerTitle}>Become a Partner</Text>
+                <Text style={styles.headerTitle}>Trở thành đối tác</Text>
                 <View style={{ width: 24 }} />
             </View>
 
@@ -69,20 +69,20 @@ export default function RegisterRestaurantScreen({ onNavigate }) {
                 {/* Hero Section */}
                 <View style={styles.heroSection}>
                     <MaterialIcons name="store" size={48} color="#ff6b35" />
-                    <Text style={styles.heroTitle}>Join Our Platform</Text>
+                    <Text style={styles.heroTitle}>Tham gia nền tảng</Text>
                     <Text style={styles.heroSubtitle}>
-                        Reach thousands of customers and grow your business
+                        Tiếp cận hàng ngàn khách hàng và phát triển kinh doanh
                     </Text>
                 </View>
 
                 {/* Restaurant Information Section */}
                 <View style={styles.formSection}>
-                    <Text style={styles.sectionTitle}>Restaurant Information</Text>
+                    <Text style={styles.sectionTitle}>Thông tin nhà hàng</Text>
 
                     {/* Restaurant Name */}
                     <View style={styles.formGroup}>
                         <Text style={styles.label}>
-                            Restaurant Name <Text style={styles.required}>*</Text>
+                            Tên nhà hàng <Text style={styles.required}>*</Text>
                         </Text>
                         <View style={styles.inputContainer}>
                             <MaterialIcons
@@ -93,7 +93,7 @@ export default function RegisterRestaurantScreen({ onNavigate }) {
                             />
                             <TextInput
                                 style={styles.input}
-                                placeholder="e.g., Joe's Pizza"
+                                placeholder="VD: Pizza Hut"
                                 placeholderTextColor="#ccc"
                                 value={formData.restaurantName}
                                 onChangeText={(value) => handleChange('restaurantName', value)}
@@ -104,7 +104,7 @@ export default function RegisterRestaurantScreen({ onNavigate }) {
                     {/* Address */}
                     <View style={styles.formGroup}>
                         <Text style={styles.label}>
-                            Address <Text style={styles.required}>*</Text>
+                            Địa chỉ <Text style={styles.required}>*</Text>
                         </Text>
                         <View style={styles.inputContainer}>
                             <MaterialIcons
@@ -115,7 +115,7 @@ export default function RegisterRestaurantScreen({ onNavigate }) {
                             />
                             <TextInput
                                 style={styles.input}
-                                placeholder="Full restaurant address"
+                                placeholder="Địa chỉ đầy đủ của nhà hàng"
                                 placeholderTextColor="#ccc"
                                 value={formData.address}
                                 onChangeText={(value) => handleChange('address', value)}
@@ -125,10 +125,10 @@ export default function RegisterRestaurantScreen({ onNavigate }) {
 
                     {/* Description */}
                     <View style={styles.formGroup}>
-                        <Text style={styles.label}>Description (Optional)</Text>
+                        <Text style={styles.label}>Mô tả (Tùy chọn)</Text>
                         <TextInput
                             style={[styles.input, styles.textArea]}
-                            placeholder="Tell us about your restaurant..."
+                            placeholder="Giới thiệu về nhà hàng của bạn..."
                             placeholderTextColor="#ccc"
                             multiline
                             numberOfLines={3}
@@ -140,12 +140,12 @@ export default function RegisterRestaurantScreen({ onNavigate }) {
 
                 {/* Owner Information Section */}
                 <View style={styles.formSection}>
-                    <Text style={styles.sectionTitle}>Owner Information</Text>
+                    <Text style={styles.sectionTitle}>Thông tin chủ sở hữu</Text>
 
                     {/* Full Name */}
                     <View style={styles.formGroup}>
                         <Text style={styles.label}>
-                            Full Name <Text style={styles.required}>*</Text>
+                            Họ tên <Text style={styles.required}>*</Text>
                         </Text>
                         <View style={styles.inputContainer}>
                             <MaterialIcons
@@ -156,7 +156,7 @@ export default function RegisterRestaurantScreen({ onNavigate }) {
                             />
                             <TextInput
                                 style={styles.input}
-                                placeholder="Your full name"
+                                placeholder="Họ tên của bạn"
                                 placeholderTextColor="#ccc"
                                 value={formData.ownerName}
                                 onChangeText={(value) => handleChange('ownerName', value)}
@@ -190,7 +190,7 @@ export default function RegisterRestaurantScreen({ onNavigate }) {
                     {/* Phone */}
                     <View style={styles.formGroup}>
                         <Text style={styles.label}>
-                            Phone <Text style={styles.required}>*</Text>
+                            Số điện thoại <Text style={styles.required}>*</Text>
                         </Text>
                         <View style={styles.inputContainer}>
                             <MaterialIcons
@@ -213,7 +213,7 @@ export default function RegisterRestaurantScreen({ onNavigate }) {
                     {/* Password */}
                     <View style={styles.formGroup}>
                         <Text style={styles.label}>
-                            Password <Text style={styles.required}>*</Text>
+                            Mật khẩu <Text style={styles.required}>*</Text>
                         </Text>
                         <View style={styles.inputContainer}>
                             <MaterialIcons
@@ -224,7 +224,7 @@ export default function RegisterRestaurantScreen({ onNavigate }) {
                             />
                             <TextInput
                                 style={styles.input}
-                                placeholder="At least 6 characters"
+                                placeholder="Ít nhất 6 ký tự"
                                 placeholderTextColor="#ccc"
                                 secureTextEntry={!showPassword}
                                 value={formData.password}
@@ -243,7 +243,7 @@ export default function RegisterRestaurantScreen({ onNavigate }) {
                     {/* Confirm Password */}
                     <View style={styles.formGroup}>
                         <Text style={styles.label}>
-                            Confirm Password <Text style={styles.required}>*</Text>
+                            Xác nhận mật khẩu <Text style={styles.required}>*</Text>
                         </Text>
                         <View style={styles.inputContainer}>
                             <MaterialIcons
@@ -254,7 +254,7 @@ export default function RegisterRestaurantScreen({ onNavigate }) {
                             />
                             <TextInput
                                 style={styles.input}
-                                placeholder="Confirm your password"
+                                placeholder="Nhập lại mật khẩu"
                                 placeholderTextColor="#ccc"
                                 secureTextEntry={!showConfirmPassword}
                                 value={formData.confirmPassword}
@@ -278,7 +278,7 @@ export default function RegisterRestaurantScreen({ onNavigate }) {
                         onPress={() => onNavigate('home')}
                         disabled={loading}
                     >
-                        <Text style={styles.cancelBtnText}>Cancel</Text>
+                        <Text style={styles.cancelBtnText}>Hủy</Text>
                     </TouchableOpacity>
 
                     <TouchableOpacity
@@ -289,7 +289,7 @@ export default function RegisterRestaurantScreen({ onNavigate }) {
                         {loading ? (
                             <ActivityIndicator size="small" color="#fff" />
                         ) : (
-                            <Text style={styles.submitBtnText}>Submit Application</Text>
+                            <Text style={styles.submitBtnText}>Gửi đơn đăng ký</Text>
                         )}
                     </TouchableOpacity>
                 </View>
@@ -298,8 +298,8 @@ export default function RegisterRestaurantScreen({ onNavigate }) {
                 <View style={styles.infoNote}>
                     <MaterialIcons name="info" size={16} color="#666" />
                     <Text style={styles.infoText}>
-                        After submission, your application will be reviewed by our admin team. You will be
-                        notified once your restaurant is approved.
+                        Sau khi gửi, đơn đăng ký của bạn sẽ được xét duyệt bởi đội ngũ quản trị.
+                        Bạn sẽ được thông báo khi nhà hàng được chấp thuận.
                     </Text>
                 </View>
             </ScrollView>

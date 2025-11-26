@@ -8,7 +8,7 @@ const OrderRejectModal = ({ isOpen, order, onClose, onSubmit, loading }) => {
         const finalReason = rejectReason === "other" ? customReason : rejectReason;
 
         if (!finalReason || !finalReason.trim()) {
-            alert("Please provide a reason for rejection");
+            alert("Vui lòng chọn lý do từ chối");
             return;
         }
 
@@ -40,7 +40,7 @@ const OrderRejectModal = ({ isOpen, order, onClose, onSubmit, loading }) => {
                 }}
             >
                 <h3 style={{ marginBottom: "20px", color: "#333" }}>
-                    Reject Order #{order?.id}
+                    Từ chối Đơn hàng #{order?.id}
                 </h3>
 
                 <div style={{ marginBottom: "20px" }}>
@@ -51,7 +51,7 @@ const OrderRejectModal = ({ isOpen, order, onClose, onSubmit, loading }) => {
                             fontWeight: "600",
                         }}
                     >
-                        Reason for rejection:
+                        Lý do từ chối:
                     </label>
                     <select
                         value={rejectReason}
@@ -64,7 +64,7 @@ const OrderRejectModal = ({ isOpen, order, onClose, onSubmit, loading }) => {
                             fontSize: "14px",
                         }}
                     >
-                        <option value="">-- Select a reason --</option>
+                        <option value="">-- Chọn lý do --</option>
                         <option value="out_of_ingredients">Hết nguyên liệu</option>
                         <option value="too_busy">Quá tải đơn hàng</option>
                         <option value="closed">Ngoài giờ hoạt động</option>
@@ -76,7 +76,7 @@ const OrderRejectModal = ({ isOpen, order, onClose, onSubmit, loading }) => {
                     <div style={{ marginBottom: "20px" }}>
                         <textarea
                             value={customReason}
-                            placeholder="Please specify the reason..."
+                            placeholder="Vui lòng nhập lý do..."
                             onChange={(e) => setCustomReason(e.target.value)}
                             style={{
                                 width: "100%",
@@ -110,7 +110,7 @@ const OrderRejectModal = ({ isOpen, order, onClose, onSubmit, loading }) => {
                             fontSize: "14px",
                         }}
                     >
-                        Cancel
+                        Hủy
                     </button>
                     <button
                         onClick={handleSubmit}
@@ -125,7 +125,7 @@ const OrderRejectModal = ({ isOpen, order, onClose, onSubmit, loading }) => {
                             fontSize: "14px",
                         }}
                     >
-                        {loading ? "Processing..." : "Reject Order"}
+                        {loading ? "Đang xử lý..." : "Từ chối Đơn hàng"}
                     </button>
                 </div>
             </div>

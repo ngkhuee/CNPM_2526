@@ -26,15 +26,15 @@ export const CheckoutCustomerForm = ({
         <View style={styles.section}>
             <View style={styles.sectionHeader}>
                 <MaterialIcons name="person" size={20} color="#ff6b35" />
-                <Text style={styles.sectionTitle}>Customer Information</Text>
+                <Text style={styles.sectionTitle}>Thông tin khách hàng</Text>
             </View>
 
             {/* Name Field */}
             <View style={styles.fieldContainer}>
-                <Text style={styles.label}>Full Name *</Text>
+                <Text style={styles.label}>Họ và tên *</Text>
                 <TextInput
                     style={[styles.input, errors.customerName && styles.inputError]}
-                    placeholder="Enter full name"
+                    placeholder="Nhập họ tên"
                     placeholderTextColor="#aaa"
                     value={data.customerName || ''}
                     onChangeText={(val) => handleFieldChange('customerName', val)}
@@ -47,10 +47,10 @@ export const CheckoutCustomerForm = ({
 
             {/* Phone Field */}
             <View style={styles.fieldContainer}>
-                <Text style={styles.label}>Phone Number *</Text>
+                <Text style={styles.label}>Số điện thoại *</Text>
                 <TextInput
                     style={[styles.input, errors.phone && styles.inputError]}
-                    placeholder="Enter phone number"
+                    placeholder="Nhập số điện thoại"
                     placeholderTextColor="#aaa"
                     value={data.phone || ''}
                     onChangeText={(val) => handleFieldChange('phone', val)}
@@ -64,10 +64,10 @@ export const CheckoutCustomerForm = ({
 
             {/* Email Field */}
             <View style={styles.fieldContainer}>
-                <Text style={styles.label}>Email Address *</Text>
+                <Text style={styles.label}>Địa chỉ email *</Text>
                 <TextInput
                     style={[styles.input, errors.email && styles.inputError]}
-                    placeholder="Enter email address"
+                    placeholder="Nhập địa chỉ email"
                     placeholderTextColor="#aaa"
                     value={data.email || ''}
                     onChangeText={(val) => handleFieldChange('email', val)}

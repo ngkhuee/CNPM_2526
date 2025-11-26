@@ -50,31 +50,31 @@ const RegisterRestaurant = () => {
       !formData.phone ||
       !formData.address
     ) {
-      setError("Please fill in all required fields");
+      setError("Vui lòng điền đầy đủ thông tin bắt buộc");
       return;
     }
 
     if (formData.password !== formData.confirmPassword) {
-      setError("Passwords do not match");
+      setError("Mật khẩu không khớp");
       return;
     }
 
     if (formData.password.length < 6) {
-      setError("Password must be at least 6 characters");
+      setError("Mật khẩu phải có ít nhất 6 ký tự");
       return;
     }
 
     // Phone validation
     const phoneRegex = /^[0-9]{10,11}$/;
     if (!phoneRegex.test(formData.phone)) {
-      setError("Please enter a valid phone number (10-11 digits)");
+      setError("Vui lòng nhập số điện thoại hợp lệ (10-11 chữ số)");
       return;
     }
 
     // Email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(formData.email)) {
-      setError("Please enter a valid email address");
+      setError("Vui lòng nhập email hợp lệ");
       return;
     }
 
@@ -94,7 +94,7 @@ const RegisterRestaurant = () => {
       const existingUser = users.find((u) => u.email === formData.email);
       if (existingUser) {
         setError(
-          "This email is already registered as a customer account. Please use a different email."
+          "Email này đã được đăng ký là tài khoản khách hàng. Vui lòng sử dụng email khác."
         );
         setLoading(false);
         return;
@@ -106,7 +106,7 @@ const RegisterRestaurant = () => {
       );
       if (existingRestaurant) {
         setError(
-          "This email is already registered. Please use a different email."
+          "Email này đã được đăng ký. Vui lòng sử dụng email khác."
         );
         setLoading(false);
         return;
@@ -121,7 +121,7 @@ const RegisterRestaurant = () => {
         id: restaurantId,
         name: formData.restaurantName,
         owner_id: userId,
-        description: formData.description || "No description provided",
+        description: formData.description || "Chưa có mô tả",
         address: formData.address,
         latitude: 10.762622, // Default coords - should be updated later
         longitude: 106.660172,
@@ -193,14 +193,14 @@ const RegisterRestaurant = () => {
 
       // Show success message
       alert(
-        "Registration successful!\n\nYour restaurant has been submitted for review. You will receive a notification once the admin approves your registration.\n\nThank you for partnering with us!"
+        "Đăng ký thành công!\n\nNhà hàng của bạn đã được gửi để xét duyệt. Bạn sẽ nhận được thông báo khi quản trị viên phê duyệt đăng ký của bạn.\n\nCảm ơn bạn đã hợp tác với chúng tôi!"
       );
 
       // Redirect to home
       navigate("/");
     } catch (error) {
       console.error("Registration error:", error);
-      setError("Registration failed. Please try again.");
+      setError("Đăng ký thất bại. Vui lòng thử lại.");
     } finally {
       setLoading(false);
     }
@@ -211,8 +211,8 @@ const RegisterRestaurant = () => {
       <div className="register-restaurant-container">
         <div className="register-restaurant-header">
           <MdStore size={48} />
-          <h1>Become a Restaurant Partner</h1>
-          <p>Join our platform and reach thousands of customers</p>
+          <h1>Trở thành đối tác nhà hàng</h1>
+          <p>Tham gia nền tảng và tiếp cận hàng nghìn khách hàng</p>
         </div>
 
         <form onSubmit={handleSubmit} className="register-restaurant-form">
@@ -223,61 +223,61 @@ const RegisterRestaurant = () => {
           )}
 
           <div className="form-section">
-            <h3>Restaurant Information</h3>
+            <h3>Thông tin nhà hàng</h3>
 
             <div className="form-group">
               <label>
-                <MdStore /> Restaurant Name <span className="required">*</span>
+                <MdStore /> Tên nhà hàng <span className="required">*</span>
               </label>
               <input
                 type="text"
                 name="restaurantName"
                 value={formData.restaurantName}
                 onChange={handleChange}
-                placeholder="e.g., Joe's Pizza"
+                placeholder="Ví dụ: Pizza Ngon"
                 required
               />
             </div>
 
             <div className="form-group">
               <label>
-                <MdLocationOn /> Address <span className="required">*</span>
+                <MdLocationOn /> Địa chỉ <span className="required">*</span>
               </label>
               <input
                 type="text"
                 name="address"
                 value={formData.address}
                 onChange={handleChange}
-                placeholder="Full restaurant address"
+                placeholder="Địa chỉ đầy đủ của nhà hàng"
                 required
               />
             </div>
 
             <div className="form-group">
-              <label>Description (Optional)</label>
+              <label>Mô tả (Tùy chọn)</label>
               <textarea
                 name="description"
                 value={formData.description}
                 onChange={handleChange}
-                placeholder="Tell us about your restaurant..."
+                placeholder="Giới thiệu về nhà hàng của bạn..."
                 rows={3}
               />
             </div>
           </div>
 
           <div className="form-section">
-            <h3>Owner Information</h3>
+            <h3>Thông tin chủ sở hữu</h3>
 
             <div className="form-group">
               <label>
-                Owner Full Name <span className="required">*</span>
+                Họ và tên chủ sở hữu <span className="required">*</span>
               </label>
               <input
                 type="text"
                 name="ownerName"
                 value={formData.ownerName}
                 onChange={handleChange}
-                placeholder="Your full name"
+                placeholder="Họ tên đầy đủ của bạn"
                 required
               />
             </div>
@@ -299,7 +299,7 @@ const RegisterRestaurant = () => {
 
               <div className="form-group">
                 <label>
-                  <MdPhone /> Phone <span className="required">*</span>
+                  <MdPhone /> Số điện thoại <span className="required">*</span>
                 </label>
                 <input
                   type="tel"
@@ -315,21 +315,21 @@ const RegisterRestaurant = () => {
             <div className="form-row">
               <div className="form-group">
                 <label>
-                  <MdLock /> Password <span className="required">*</span>
+                  <MdLock /> Mật khẩu <span className="required">*</span>
                 </label>
                 <input
                   type="password"
                   name="password"
                   value={formData.password}
                   onChange={handleChange}
-                  placeholder="At least 6 characters"
+                  placeholder="Ít nhất 6 ký tự"
                   required
                 />
               </div>
 
               <div className="form-group">
                 <label>
-                  <MdLock /> Confirm Password{" "}
+                  <MdLock /> Xác nhận mật khẩu{" "}
                   <span className="required">*</span>
                 </label>
                 <input
@@ -337,7 +337,7 @@ const RegisterRestaurant = () => {
                   name="confirmPassword"
                   value={formData.confirmPassword}
                   onChange={handleChange}
-                  placeholder="Confirm your password"
+                  placeholder="Xác nhận mật khẩu của bạn"
                   required
                 />
               </div>
@@ -351,10 +351,10 @@ const RegisterRestaurant = () => {
               className="btn-cancel"
               disabled={loading}
             >
-              Cancel
+              Hủy
             </button>
             <button type="submit" className="btn-submit" disabled={loading}>
-              {loading ? "Submitting..." : "Submit Application"}
+              {loading ? "Đang gửi..." : "Gửi đăng ký"}
             </button>
           </div>
 

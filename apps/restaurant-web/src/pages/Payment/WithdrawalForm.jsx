@@ -11,15 +11,15 @@ const WithdrawalForm = ({ availableBalance, onSubmit, loading }) => {
     const amountNum = parseFloat(amount);
 
     if (!amount || amount.trim() === "" || isNaN(amountNum)) {
-      newErrors.amount = "Please enter a valid amount";
+      newErrors.amount = "Vui lòng nhập số tiền hợp lệ";
     } else if (amountNum <= 0) {
-      newErrors.amount = "Amount must be greater than 0";
+      newErrors.amount = "Số tiền phải lớn hơn 0";
     } else if (amountNum < 1000) {
-      newErrors.amount = "Minimum withdrawal amount is 1,000₫";
+      newErrors.amount = "Số tiền rút tối thiểu là 1.000₫";
     } else if (amountNum % 1000 !== 0) {
-      newErrors.amount = "Amount must be a multiple of 1,000₫";
+      newErrors.amount = "Số tiền phải là bội số của 1.000₫";
     } else if (amountNum > availableBalance) {
-      newErrors.amount = `Amount cannot exceed available balance (${formatCurrency(availableBalance)})`;
+      newErrors.amount = `Số tiền không thể vượt quá số dư khả dụng (${formatCurrency(availableBalance)})`;
     }
 
     setErrors(newErrors);
@@ -41,14 +41,14 @@ const WithdrawalForm = ({ availableBalance, onSubmit, loading }) => {
   return (
     <div className="withdrawal-form-container">
       <div className="withdrawal-form-card">
-        <h3>Request Withdrawal</h3>
+        <h3>Yêu cầu rút tiền</h3>
         <p className="info-text">
-          Available balance: <strong>{formatCurrency(availableBalance)}</strong>
+          Số dư khả dụng: <strong>{formatCurrency(availableBalance)}</strong>
         </p>
 
         <form onSubmit={handleSubmit} noValidate>
           <div className="form-group">
-            <label htmlFor="amount">Withdrawal Amount *</label>
+            <label htmlFor="amount">Số tiền rút *</label>
             <div className="input-wrapper">
               <span className="currency-symbol">₫</span>
               <input
@@ -85,20 +85,20 @@ const WithdrawalForm = ({ availableBalance, onSubmit, loading }) => {
 
           <div className="form-info">
             <p>
-              <strong>Note:</strong> Your withdrawal request will be processed
-              and your account will be updated once approved by the admin.
+              <strong>Lưu ý:</strong> Yêu cầu rút tiền của bạn sẽ được xử lý
+              và tài khoản sẽ được cập nhật khi được quản trị viên phê duyệt.
             </p>
           </div>
 
           <button type="submit" className="btn-submit" disabled={loading}>
-            <MdSend /> {loading ? "Submitting..." : "Submit Withdrawal Request"}
+            <MdSend /> {loading ? "Đang gửi..." : "Gửi yêu cầu rút tiền"}
           </button>
         </form>
       </div>
 
       {/* Quick Amount Buttons */}
       <div className="quick-amounts">
-        <p className="quick-label">Quick amounts:</p>
+        <p className="quick-label">Số tiền nhanh:</p>
         <div className="quick-buttons">
           {[1000000, 2000000, 5000000, 10000000].map((quickAmount) => (
             <button

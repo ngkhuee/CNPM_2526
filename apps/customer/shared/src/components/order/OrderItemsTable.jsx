@@ -20,11 +20,11 @@ const OrderItemsTable = ({
         <table>
             <thead>
                 <tr>
-                    <th>Item</th>
-                    <th>Quantity</th>
-                    <th>Price</th>
-                    <th>Total</th>
-                    {canReviewThisOrder && <th>Review</th>}
+                    <th>Sản phẩm</th>
+                    <th>Số lượng</th>
+                    <th>Đơn giá</th>
+                    <th>Tổng</th>
+                    {canReviewThisOrder && <th>Đánh giá</th>}
                 </tr>
             </thead>
             <tbody>
@@ -63,7 +63,7 @@ const OrderItemsTable = ({
                                             }}
                                             disabled
                                         >
-                                            <MdCheckCircle size={14} /> Reviewed
+                                            <MdCheckCircle size={14} /> Đã đánh giá
                                         </button>
                                     ) : (
                                         <button
@@ -90,7 +90,7 @@ const OrderItemsTable = ({
                                                 e.target.style.transform = "translateY(0)";
                                             }}
                                         >
-                                            <MdStar size={14} /> Rate
+                                            <MdStar size={14} /> Đánh giá
                                         </button>
                                     )}
                                 </td>

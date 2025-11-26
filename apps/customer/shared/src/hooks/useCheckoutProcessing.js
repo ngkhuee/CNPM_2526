@@ -71,6 +71,15 @@ export const useCheckoutProcessing = (user) => {
         ) => {
             const pickupGPS = await getRestaurantLocation(restaurantId);
 
+            // Get restaurant full info for address
+            let restaurantAddress = null;
+            try {
+                const restaurant = await restaurantService.getById(restaurantId);
+                restaurantAddress = restaurant?.address || null;
+            } catch (error) {
+                console.warn("Could not fetch restaurant address:", error);
+            }
+
             const subtotal = items.reduce(
                 (sum, item) => sum + item.price * item.quantity,
                 0
@@ -102,13 +111,17 @@ export const useCheckoutProcessing = (user) => {
                     address: customer.address,
                 },
                 pickup_gps: pickupGPS,
+                pickup_address: restaurantAddress,
                 dropoff_gps: gpsLocation || null,
+                dropoff_address: customer.address,
+                delivery_address: customer.address,
                 promotion_id: promotion?.id || null,
                 total_amount: total,
                 subtotal: subtotal,
                 deliveryFee: 0,
                 discountAmount: discountAmount,
-                status: "paid",
+                status: "pending",
+                payment_status: "pending",
                 payment_method: "online",
             };
         },

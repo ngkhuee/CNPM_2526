@@ -5,14 +5,19 @@ import { Alert } from 'react-native';
 import * as orderService from '../services/orderService';
 import { showToast } from '../utils/toastHelper';
 
+// Simplified timeline: Paid → Confirmed → Preparing → Delivering → Completed
 export const ORDER_TIMELINE = [
-    { status: 'pending', label: 'Order Placed', icon: 'shopping-cart' },
+    { status: 'paid', label: 'Paid', icon: 'check-circle' },
     { status: 'confirmed', label: 'Confirmed', icon: 'check-circle' },
     { status: 'preparing', label: 'Preparing', icon: 'local-dining' },
-    { status: 'ready', label: 'Ready for Pickup', icon: 'done' },
     { status: 'delivering', label: 'Delivering', icon: 'local-shipping' },
-    { status: 'arrived', label: 'Arrived', icon: 'location-on' },
-    { status: 'delivered', label: 'Delivered', icon: 'flag' },
+    { status: 'delivered', label: 'Completed', icon: 'flag' },
+];
+
+// Cancelled/Rejected timeline
+export const CANCELLED_TIMELINE = [
+    { status: 'paid', label: 'Paid', icon: 'check-circle' },
+    { status: 'cancelled', label: 'Cancelled', icon: 'cancel' },
 ];
 
 export const useDeliveryTracking = (order, onRefetch) => {
@@ -39,14 +44,20 @@ export const useDeliveryTracking = (order, onRefetch) => {
 
     // Get current status index for timeline
     const getStatusIndex = () => {
+        // Map actual status to timeline stages
         const statusMap = {
-            pending: 0,
-            confirmed: 1,
-            preparing: 2,
-            ready: 3,
-            delivering: 4,
-            arrived: 5,
-            delivered: 6,
+            'pending': 0, // Maps to 'paid' stage
+            'paid': 0,
+            'confirmed': 1,
+            'preparing': 2,
+            'ready': 2, // Part of preparing stage
+            'picking_up': 3, // All delivery statuses map to delivering
+            'picked_up': 3,
+            'delivering': 3,
+            'arrived': 3,
+            'delivered': 4,
+            'cancelled': 1, // For cancelled timeline
+            'rejected': 1, // For rejected timeline
         };
 
         return statusMap[order?.status] || 0;

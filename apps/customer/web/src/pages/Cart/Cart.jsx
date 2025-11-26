@@ -36,25 +36,25 @@ const Cart = () => {
 
   const handleCheckout = async () => {
     if (!user) {
-      alert("Please login before placing an order.");
+      alert("Vui lòng đăng nhập trước khi đặt hàng.");
       return;
     }
 
     if (subtotal === 0) {
-      alert("Your cart is empty.");
+      alert("Giỏ hàng của bạn đang trống.");
       return;
     }
 
     try {
       const restaurant = await restaurantService.getById(cart.restaurant_id);
       if (!restaurant) {
-        alert("The restaurant in your cart is no longer available.");
+        alert("Nhà hàng trong giỏ hàng không còn hoạt động.");
         return;
       }
 
       navigate("/checkout-info");
     } catch (err) {
-      alert("Error validating restaurant. Please try again.");
+      alert("Lỗi kiểm tra nhà hàng. Vui lòng thử lại.");
       console.error(err);
     }
   };

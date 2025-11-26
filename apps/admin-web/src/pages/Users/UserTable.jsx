@@ -10,13 +10,13 @@ const UserTable = ({ users, onStatusToggle, onDelete, getRoleBadgeClass }) => {
             <thead>
                 <tr>
                     <th>ID</th>
-                    <th>Name</th>
+                    <th>Tên</th>
                     <th>Email</th>
-                    <th>Phone</th>
-                    <th>Role</th>
-                    <th>Status</th>
-                    <th>Created At</th>
-                    <th>Actions</th>
+                    <th>Điện thoại</th>
+                    <th>Vai trò</th>
+                    <th>Trạng thái</th>
+                    <th>Ngày tạo</th>
+                    <th>Thao tác</th>
                 </tr>
             </thead>
             <tbody>
@@ -53,14 +53,14 @@ const UserTable = ({ users, onStatusToggle, onDelete, getRoleBadgeClass }) => {
                                         onStatusToggle(user.id, user.status || "active")
                                     }
                                 >
-                                    {user.status === "active" ? "Block" : "Activate"}
+                                    {user.status === "active" ? "Khóa" : "Kích hoạt"}
                                 </button>
                                 {user.role !== "admin" && (
                                     <button
                                         className="btn-delete"
                                         onClick={() => onDelete(user.id)}
                                     >
-                                        Delete
+                                        Xóa
                                     </button>
                                 )}
                             </div>

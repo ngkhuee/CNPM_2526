@@ -2,10 +2,10 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 
 const CATEGORIES = [
-    { id: 0, name: 'All', keyword: '' },
-    { id: 1, name: 'Burger', keyword: 'Burger' },
+    { id: 0, name: 'Tất cả', keyword: '' },
+    { id: 1, name: 'Bánh mì kẹp', keyword: 'Burger' },
     { id: 2, name: 'Pizza', keyword: 'Pizza' },
-    { id: 3, name: 'Cake', keyword: 'Cake' },
+    { id: 3, name: 'Bánh ngọt', keyword: 'Cake' },
 ];
 
 export default function CategoryTabs({ selectedCategory, onCategoryChange }) {
@@ -24,7 +24,7 @@ export default function CategoryTabs({ selectedCategory, onCategoryChange }) {
                         selectedCategory === '' && styles.tabTextActive,
                     ]}
                 >
-                    All
+                    Tất cả
                 </Text>
             </TouchableOpacity>
 

@@ -24,7 +24,7 @@ const Login = () => {
       if (response.success && response.user) {
         // Kiểm tra role phải là restaurant
         if (response.user.role !== "restaurant") {
-          setError("This account is not a restaurant account!");
+          setError("Tài khoản này không phải là tài khoản nhà hàng!");
           authService.logout();
           setLoading(false);
           return;
@@ -32,7 +32,7 @@ const Login = () => {
 
         // Kiểm tra có restaurantId không
         if (!response.user.restaurantId) {
-          setError("Restaurant ID not found!");
+          setError("Không tìm thấy ID nhà hàng!");
           authService.logout();
           setLoading(false);
           return;
@@ -52,7 +52,7 @@ const Login = () => {
             // Check user account status
             if (userData.status === "blocked") {
               setError(
-                "Your account has been blocked by admin.\n\nPlease contact support for more information."
+                "Tài khoản của bạn đã bị khóa bởi quản trị viên.\n\nVui lòng liên hệ hỗ trợ để biết thêm thông tin."
               );
               authService.logout();
               setLoading(false);
@@ -61,7 +61,7 @@ const Login = () => {
 
             if (userData.status === "pending") {
               setError(
-                "Your restaurant registration is pending approval.\n\nPlease wait for admin to review and approve your account.\nYou will be notified once approved."
+                "Đăng ký nhà hàng của bạn đang chờ duyệt.\n\nVui lòng chờ quản trị viên xem xét và phê duyệt tài khoản của bạn.\nBạn sẽ được thông báo khi được phê duyệt."
               );
               authService.logout();
               setLoading(false);
@@ -69,7 +69,7 @@ const Login = () => {
             }
 
             if (userData.status !== "active") {
-              setError("Your account is not active. Please contact support.");
+              setError("Tài khoản của bạn không hoạt động. Vui lòng liên hệ hỗ trợ.");
               authService.logout();
               setLoading(false);
               return;
@@ -86,7 +86,7 @@ const Login = () => {
 
             if (restaurantData.status === "blocked") {
               setError(
-                "Your restaurant has been blocked by admin.\n\nPlease contact support for more information."
+                "Nhà hàng của bạn đã bị khóa bởi quản trị viên.\n\nVui lòng liên hệ hỗ trợ để biết thêm thông tin."
               );
               authService.logout();
               setLoading(false);
@@ -95,7 +95,7 @@ const Login = () => {
 
             if (restaurantData.status === "pending") {
               setError(
-                "Your restaurant registration is pending approval.\n\nPlease wait for admin to review and approve your restaurant.\nYou will be notified once approved."
+                "Đăng ký nhà hàng của bạn đang chờ duyệt.\n\nVui lòng chờ quản trị viên xem xét và phê duyệt nhà hàng của bạn.\nBạn sẽ được thông báo khi được phê duyệt."
               );
               authService.logout();
               setLoading(false);
@@ -104,7 +104,7 @@ const Login = () => {
 
             if (restaurantData.status !== "active") {
               setError(
-                "Your restaurant is not active. Please contact support."
+                "Nhà hàng của bạn không hoạt động. Vui lòng liên hệ hỗ trợ."
               );
               authService.logout();
               setLoading(false);
@@ -114,7 +114,7 @@ const Login = () => {
         } catch (validationError) {
           console.error("Status validation error:", validationError);
           setError(
-            "Unable to validate account status. Please try again later."
+            "Không thể xác thực trạng thái tài khoản. Vui lòng thử lại sau."
           );
           authService.logout();
           setLoading(false);
@@ -127,11 +127,11 @@ const Login = () => {
         // Navigate to dashboard
         navigate("/dashboard");
       } else {
-        setError(response.message || "Login failed!");
+        setError(response.message || "Đăng nhập thất bại!");
       }
     } catch (err) {
       console.error("Login error:", err);
-      setError(err.message || "An error occurred. Please try again.");
+      setError(err.message || "Có lỗi xảy ra. Vui lòng thử lại.");
     } finally {
       setLoading(false);
     }
@@ -161,7 +161,7 @@ const Login = () => {
     // </div>
     <div className="login-page" style={{ backgroundImage: `url(${login_bg})` }}>
       <form className="login-form" onSubmit={handleSubmit}>
-        <h2>Restaurant Login</h2>
+        <h2>Đăng nhập Nhà hàng</h2>
         {error && <p className="error">{error}</p>}
         <input
           type="email"
@@ -173,14 +173,14 @@ const Login = () => {
         />
         <input
           type="password"
-          placeholder="Password"
+          placeholder="Mật khẩu"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
           disabled={loading}
         />
         <button type="submit" disabled={loading}>
-          {loading ? "Logging in..." : "Log in"}
+          {loading ? "Đang đăng nhập..." : "Đăng nhập"}
         </button>
       </form>
     </div>

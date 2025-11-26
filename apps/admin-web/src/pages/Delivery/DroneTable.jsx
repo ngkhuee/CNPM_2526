@@ -14,16 +14,21 @@ const DroneTable = ({
 
   // Check if drone is delivering (busy/delivering or has assigned order)
   const isDelivering = (drone) => {
+    const hasOrder = drone.assignedOrderId || drone.assigned_order_id;
     return (
       drone.status === "busy" ||
       drone.status === "delivering" ||
-      drone.assignedOrderId !== null
+      hasOrder !== null && hasOrder !== undefined
     );
   };
 
-  // Check if drone is idle (available and no assigned order)
-  const isIdle = (drone) => {
-    return drone.status === "available" && !drone.assignedOrderId;
+  // Check if drone can be toggled (available without order, or locked)
+  const canToggle = (drone) => {
+    const hasOrder = drone.assignedOrderId || drone.assigned_order_id;
+    return (
+      (drone.status === "available" && !hasOrder) ||
+      drone.status === "locked"
+    );
   };
 
   return (
@@ -32,17 +37,17 @@ const DroneTable = ({
         <thead>
           <tr>
             <th>ID</th>
-            <th>Name</th>
-            <th>Status</th>
-            <th>Assigned Order</th>
-            <th>Actions</th>
+            <th>Tên</th>
+            <th>Trạng thái</th>
+            <th>Đơn hàng</th>
+            <th>Thao tác</th>
           </tr>
         </thead>
         <tbody>
           {filteredDrones.length === 0 ? (
             <tr>
               <td colSpan="5" className="no-data">
-                No drones found
+                Không tìm thấy drone
               </td>
             </tr>
           ) : (
@@ -60,8 +65,8 @@ const DroneTable = ({
                   </span>
                 </td>
                 <td>
-                  {drone.assignedOrderId ? (
-                    <span className="order-link">#{drone.assignedOrderId}</span>
+                  {(drone.assignedOrderId || drone.assigned_order_id) ? (
+                    <span className="order-link">#{drone.assignedOrderId || drone.assigned_order_id}</span>
                   ) : (
                     <span className="no-order">-</span>
                   )}
@@ -71,7 +76,7 @@ const DroneTable = ({
                     <button
                       className="btn-action btn-view"
                       onClick={() => onViewLocation(drone)}
-                      title="View location"
+                      title="Xem vị trí"
                     >
                       <svg
                         width="16"
@@ -88,7 +93,7 @@ const DroneTable = ({
                     <button
                       className="btn-action btn-edit"
                       onClick={() => onEdit(drone)}
-                      title="Edit name"
+                      title="Sửa tên"
                     >
                       <svg
                         width="16"
@@ -105,20 +110,20 @@ const DroneTable = ({
                     <button
                       className="btn-action btn-toggle"
                       onClick={() => onToggle(drone)}
-                      disabled={!isIdle(drone)}
+                      disabled={!canToggle(drone)}
                       title={
-                        !isIdle(drone)
-                          ? "Can only lock/unlock when drone is idle"
+                        !canToggle(drone)
+                          ? "Chỉ có thể khóa/mở khóa khi drone không có đơn"
                           : drone.status === "locked"
-                            ? "Unlock drone"
-                            : "Lock drone"
+                            ? "Mở khóa drone"
+                            : "Khóa drone"
                       }
                       style={{
-                        opacity: !isIdle(drone) ? 0.5 : 1,
-                        cursor: !isIdle(drone) ? "not-allowed" : "pointer",
+                        opacity: !canToggle(drone) ? 0.5 : 1,
+                        cursor: !canToggle(drone) ? "not-allowed" : "pointer",
                       }}
                     >
-                      {drone.status === "locked" ? "Unlock" : "Lock"}
+                      {drone.status === "locked" ? "Mở khóa" : "Khóa"}
                     </button>
                     <button
                       className="btn-action btn-delete"
@@ -126,8 +131,8 @@ const DroneTable = ({
                       disabled={isDelivering(drone)}
                       title={
                         isDelivering(drone)
-                          ? "Can only delete when drone is not delivering"
-                          : "Delete drone"
+                          ? "Chỉ có thể xóa khi drone không đang giao hàng"
+                          : "Xóa drone"
                       }
                       style={{
                         opacity: isDelivering(drone) ? 0.5 : 1,

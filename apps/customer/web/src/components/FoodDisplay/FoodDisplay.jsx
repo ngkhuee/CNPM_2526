@@ -65,7 +65,7 @@ const FoodDisplay = ({
         return (
           <span style={{ display: "flex", alignItems: "center", gap: "10px" }}>
             <MdStar size={28} style={{ color: "#ff6b35" }} />
-            Top Rated Dishes
+            Món Được Đánh Giá Cao
           </span>
         );
       }
@@ -73,7 +73,7 @@ const FoodDisplay = ({
         return (
           <span style={{ display: "flex", alignItems: "center", gap: "10px" }}>
             <MdLocalFireDepartment size={28} style={{ color: "#ff6b35" }} />
-            Best Selling Dishes
+            Món Bán Chạy
           </span>
         );
       }
@@ -81,12 +81,12 @@ const FoodDisplay = ({
         return (
           <span style={{ display: "flex", alignItems: "center", gap: "10px" }}>
             <MdRestaurant size={28} style={{ color: "#ff6b35" }} />
-            Available Dishes
+            Món Hiện Có
           </span>
         );
       }
     }
-    return "Choose your favorite food";
+    return "Chọn món yêu thích của bạn";
   };
 
   return (
@@ -110,7 +110,7 @@ const FoodDisplay = ({
 
           <input
             type="text"
-            placeholder="Search food..."
+            placeholder="Tìm món ăn..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="food-search-input"

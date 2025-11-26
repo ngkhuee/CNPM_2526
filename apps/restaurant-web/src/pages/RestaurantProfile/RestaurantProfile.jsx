@@ -104,12 +104,12 @@ const RestaurantProfile = () => {
         const timeRegex = /^\d{2}:\d{2}$/;
         if (!timeRegex.test(times.open) || !timeRegex.test(times.close)) {
           alert(
-            `Invalid time format for ${day}. Use HH:mm format (e.g., 09:00)`
+            `Định dạng giờ không hợp lệ cho ${day}. Sử dụng định dạng HH:mm (ví dụ: 09:00)`
           );
           return;
         }
         if (times.open >= times.close) {
-          alert(`Opening time must be earlier than closing time for ${day}`);
+          alert(`Giờ mở cửa phải sớm hơn giờ đóng cửa cho ${day}`);
           return;
         }
       }
@@ -119,7 +119,7 @@ const RestaurantProfile = () => {
 
     try {
       if (!currentUser || !currentUser.restaurantId) {
-        alert("Restaurant ID not found!");
+        alert("Không tìm thấy ID nhà hàng!");
         return;
       }
 
@@ -133,7 +133,7 @@ const RestaurantProfile = () => {
 
       if (result.success) {
         setEditing(false);
-        alert("Restaurant information updated successfully!");
+        alert("Đã cập nhật thông tin nhà hàng thành công!");
         // Refresh restaurant data
         await fetchRestaurantInfo(currentUser.restaurantId);
       } else {
@@ -144,17 +144,17 @@ const RestaurantProfile = () => {
           result.message.includes("Invalid or expired token") ||
           result.message.includes("Unauthorized")
         ) {
-          alert("Your session has expired. Please login again.");
+          alert("Phiên làm việc đã hết hạn. Vui lòng đăng nhập lại.");
           localStorage.removeItem("token");
           localStorage.removeItem("user");
           window.location.href = "/login";
         } else {
-          alert(`Failed to update: ${result.message}`);
+          alert(`Cập nhật thất bại: ${result.message}`);
         }
       }
     } catch (error) {
       console.error("Error saving restaurant:", error);
-      alert(`An error occurred while saving: ${error.message}`);
+      alert(`Có lỗi xảy ra khi lưu: ${error.message}`);
     } finally {
       setLoading(false);
     }
@@ -175,11 +175,11 @@ const RestaurantProfile = () => {
           // Set form data with uploaded path (not base64)
           setFormData((prev) => ({ ...prev, [type]: uploadResult.path }));
         } else {
-          alert("Image upload failed");
+          alert("Tải ảnh lên thất bại");
         }
       } catch (error) {
         console.error("Error uploading image:", error);
-        alert("Error uploading image");
+        alert("Lỗi khi tải ảnh lên");
       } finally {
         setLoading(false);
       }
@@ -242,7 +242,7 @@ const RestaurantProfile = () => {
     <div className="main-content">
       <div className="restaurant-profile">
         <h2>
-          <MdRestaurant /> Restaurant Profile
+          <MdRestaurant /> Hồ sơ Nhà hàng
         </h2>
 
         {/* BANNER */}
@@ -258,7 +258,7 @@ const RestaurantProfile = () => {
           {editing && (
             <div className="upload-banner-btn">
               <label htmlFor="banner-upload">
-                <MdCamera /> Change Banner
+                <MdCamera /> Thay đổi Ảnh bìa
               </label>
               <input
                 id="banner-upload"
@@ -285,7 +285,7 @@ const RestaurantProfile = () => {
             {editing && (
               <div className="upload-logo-btn">
                 <label htmlFor="logo-upload">
-                  <MdCamera /> Change Logo
+                  <MdCamera /> Thay đổi Logo
                 </label>
                 <input
                   id="logo-upload"
@@ -309,7 +309,7 @@ const RestaurantProfile = () => {
               }}
             >
               <div className="form-group">
-                <label htmlFor="restaurant-name">Restaurant Name:</label>
+                <label htmlFor="restaurant-name">Tên nhà hàng:</label>
                 <input
                   id="restaurant-name"
                   type="text"
@@ -321,7 +321,7 @@ const RestaurantProfile = () => {
               </div>
 
               <div className="form-group">
-                <label htmlFor="restaurant-address">Address:</label>
+                <label htmlFor="restaurant-address">Địa chỉ:</label>
                 <input
                   id="restaurant-address"
                   type="text"
@@ -335,7 +335,7 @@ const RestaurantProfile = () => {
               </div>
 
               <div className="form-group">
-                <label htmlFor="restaurant-phone">Phone:</label>
+                <label htmlFor="restaurant-phone">Số điện thoại:</label>
                 <input
                   id="restaurant-phone"
                   type="tel"
@@ -362,7 +362,7 @@ const RestaurantProfile = () => {
                 <div className="opening-hours-section">
                   <div className="section-header">
                     <MdAccessTime style={{ fontSize: "18px" }} />
-                    <label>Opening Hours</label>
+                    <label>Giờ mở cửa</label>
                   </div>
                   <div className="hours-grid">
                     {DAYS_OF_WEEK.map((day) => (
@@ -384,7 +384,7 @@ const RestaurantProfile = () => {
                             className="hours-input"
                             title="Opening time (HH:mm)"
                           />
-                          <span className="time-separator">to</span>
+                          <span className="time-separator">đến</span>
                           <input
                             id={`close-${day}`}
                             type="time"
@@ -411,7 +411,7 @@ const RestaurantProfile = () => {
                       display: "block",
                     }}
                   >
-                    Set opening and closing times separately for each day.
+                    Đặt giờ mở cửa và đóng cửa riêng biệt cho từng ngày.
                   </small>
                 </div>
               )}
@@ -419,17 +419,17 @@ const RestaurantProfile = () => {
               {currentRestaurant && (
                 <div className="readonly-info">
                   <p>
-                    <strong>Rating:</strong> <MdStar />{" "}
+                    <strong>Đánh giá:</strong> <MdStar />{" "}
                     {formatRating(rating !== null ? rating : currentRestaurant.rating)}
                   </p>
                   <p>
-                    <strong>Reviews:</strong> {totalReviews}
+                    <strong>Lượt đánh giá:</strong> {totalReviews}
                   </p>
                   <p>
-                    <strong>Status:</strong> {currentRestaurant.status}
+                    <strong>Trạng thái:</strong> {currentRestaurant.status}
                   </p>
                   <p>
-                    <strong>Opened:</strong>{" "}
+                    <strong>Ngày mở:</strong>{" "}
                     {new Date(currentRestaurant.openedAt).toLocaleDateString()}
                   </p>
                 </div>
@@ -443,7 +443,7 @@ const RestaurantProfile = () => {
                       className="save-btn"
                       disabled={loading}
                     >
-                      <MdSave /> {loading ? "Saving..." : "Save"}
+                      <MdSave /> {loading ? "Đang lưu..." : "Lưu"}
                     </button>
                     <button
                       type="button"
@@ -467,7 +467,7 @@ const RestaurantProfile = () => {
                       }}
                       disabled={loading}
                     >
-                      <MdClose /> Cancel
+                      <MdClose /> Hủy
                     </button>
                   </>
                 ) : (
@@ -480,7 +480,7 @@ const RestaurantProfile = () => {
                       setEditing(true);
                     }}
                   >
-                    <MdEdit /> Edit Info
+                    <MdEdit /> Chỉnh sửa
                   </button>
                 )}
               </div>

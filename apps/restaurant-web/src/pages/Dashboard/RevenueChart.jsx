@@ -11,7 +11,7 @@ const RevenueChart = ({ data = [], loading = false, onDateRangeChange }) => {
     if (loading) {
         return (
             <div className="chart-container">
-                <div className="chart-skeleton">Loading chart...</div>
+                <div className="chart-skeleton">Đang tải biểu đồ...</div>
             </div>
         );
     }
@@ -19,7 +19,7 @@ const RevenueChart = ({ data = [], loading = false, onDateRangeChange }) => {
     if (!data || data.length === 0) {
         return (
             <div className="chart-container">
-                <div className="chart-empty">No revenue data available</div>
+                <div className="chart-empty">Chưa có dữ liệu doanh thu</div>
             </div>
         );
     }
@@ -28,26 +28,26 @@ const RevenueChart = ({ data = [], loading = false, onDateRangeChange }) => {
         <div className="chart-container">
             <div className="chart-header">
                 <div className="chart-title">
-                    <MdTrendingUp /> Revenue Trend
+                    <MdTrendingUp /> Xu hướng Doanh thu
                 </div>
                 <div className="chart-filters">
                     <button
                         className="filter-btn"
                         onClick={() => onDateRangeChange("7days")}
                     >
-                        7 Days
+                        7 Ngày
                     </button>
                     <button
                         className="filter-btn"
                         onClick={() => onDateRangeChange("week")}
                     >
-                        Week
+                        Tuần
                     </button>
                     <button
                         className="filter-btn"
                         onClick={() => onDateRangeChange("month")}
                     >
-                        Month
+                        Tháng
                     </button>
                 </div>
             </div>
@@ -73,7 +73,7 @@ const RevenueChart = ({ data = [], loading = false, onDateRangeChange }) => {
                         strokeWidth={2}
                         dot={{ fill: "#667eea", r: 5 }}
                         activeDot={{ r: 7 }}
-                        name="Revenue"
+                        name="Doanh thu"
                     />
                 </LineChart>
             </ResponsiveContainer>

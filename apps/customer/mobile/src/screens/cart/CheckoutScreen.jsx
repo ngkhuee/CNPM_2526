@@ -75,7 +75,7 @@ const CheckoutScreen = () => {
     const { promotions, getApplicablePromotions, validatePromotion, calculateDiscount } = usePromotions();
     const { deliveryFee } = useSettings();
     const { processCheckoutOrder, loading: processingOrder } = useCheckoutProcessing();
-    const { startAutoCancel } = useOrderAutoCancel();
+    // Auto-cancel is now handled by backend, not client-side
 
     // Form State
     const [checkoutData, setCheckoutData] = useState({
@@ -150,28 +150,28 @@ const CheckoutScreen = () => {
         const newErrors = {};
 
         if (!checkoutData.customerName?.trim()) {
-            newErrors.customerName = 'Full name is required';
+            newErrors.customerName = 'Vui lòng nhập họ tên';
         }
 
         if (!checkoutData.phone?.trim()) {
-            newErrors.phone = 'Phone number is required';
+            newErrors.phone = 'Vui lòng nhập số điện thoại';
         } else if (!/^[0-9]{10,}$/.test(checkoutData.phone.replace(/\D/g, ''))) {
-            newErrors.phone = 'Invalid phone number';
+            newErrors.phone = 'Số điện thoại không hợp lệ';
         }
 
         if (!checkoutData.email?.trim()) {
-            newErrors.email = 'Email is required';
+            newErrors.email = 'Vui lòng nhập email';
         } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(checkoutData.email)) {
-            newErrors.email = 'Invalid email address';
+            newErrors.email = 'Email không hợp lệ';
         }
 
         const finalAddress = selectedAddress?.address_line || manualAddress || checkoutData.address;
         if (!finalAddress?.trim()) {
-            newErrors.address = 'Delivery address is required';
+            newErrors.address = 'Vui lòng nhập địa chỉ giao hàng';
         }
 
         if (!checkoutData.paymentMethod || !['card', 'momo'].includes(checkoutData.paymentMethod)) {
-            newErrors.paymentMethod = 'Please select a payment method';
+            newErrors.paymentMethod = 'Vui lòng chọn phương thức thanh toán';
         }
 
         setErrors(newErrors);
@@ -218,7 +218,7 @@ const CheckoutScreen = () => {
         try {
             await requestLocation();
         } catch (error) {
-            Alert.alert('Location Error', error.message || 'Failed to get location');
+            Alert.alert('Lỗi vị trí', error.message || 'Không thể lấy vị trí');
         }
     };
 
@@ -227,14 +227,14 @@ const CheckoutScreen = () => {
      */
     const handleApplyPromo = () => {
         if (!promoCode.trim()) {
-            showToast('error', 'Enter a promo code');
+            showToast('error', 'Vui lòng nhập mã khuyến mãi');
             return;
         }
 
         const validation = validatePromotion(promoCode, subtotal, cart.restaurant_id);
         if (validation.valid) {
             setAppliedPromo(validation.promotion);
-            showToast('success', `Promo applied: ${validation.promotion.code}`);
+            showToast('success', `Đã áp dụng mã: ${validation.promotion.code}`);
             setPromoCode('');
         } else {
             showToast('error', validation.message);
@@ -247,7 +247,7 @@ const CheckoutScreen = () => {
     const handleRemovePromo = () => {
         setAppliedPromo(null);
         setPromoCode('');
-        showToast('success', 'Promo removed');
+        showToast('success', 'Đã xóa mã khuyến mãi');
     };
 
     /**
@@ -258,7 +258,7 @@ const CheckoutScreen = () => {
         setAppliedPromo(promo);
         setPromoCode(promo.code);
         setShowPromosModal(false);
-        showToast('success', `Promo applied: ${promo.code}`);
+        showToast('success', `Đã áp dụng mã: ${promo.code}`);
     };
 
     /**
@@ -267,12 +267,12 @@ const CheckoutScreen = () => {
     const handlePlaceOrder = async () => {
         // Validate form
         if (!validateForm()) {
-            showToast('error', 'Please fill in all required fields correctly');
+            showToast('error', 'Vui lòng điền đầy đủ thông tin');
             return;
         }
 
         if (!cart?.items || cart.items.length === 0) {
-            showToast('error', 'Cart is empty');
+            showToast('error', 'Giỏ hàng trống');
             return;
         }
 
@@ -281,12 +281,12 @@ const CheckoutScreen = () => {
             try {
                 const restaurant = await restaurantService.getById(cart.restaurant_id);
                 if (!isRestaurantOpen(restaurant.opening_hours)) {
-                    showToast('error', 'Sorry, this restaurant is currently closed. Please check the opening hours.');
+                    showToast('error', 'Xin lỗi, nhà hàng hiện đã đóng cửa. Vui lòng kiểm tra giờ mở cửa.');
                     return;
                 }
             } catch (error) {
                 console.error('[CheckoutScreen] Error checking restaurant status:', error);
-                showToast('error', 'Error verifying restaurant status. Please try again.');
+                showToast('error', 'Lỗi kiểm tra trạng thái nhà hàng. Vui lòng thử lại.');
                 return;
             }
             // Prepare final checkout data
@@ -312,9 +312,8 @@ const CheckoutScreen = () => {
 
             console.log('[CheckoutScreen] Order created:', order);
 
-            // Start 30-minute auto-cancel timer for pending orders
-            console.log('[CheckoutScreen] Starting 30-minute auto-cancel timer for order:', order.id);
-            startAutoCancel(order.id, 30 * 60 * 1000); // 30 minutes
+            // Note: Auto-cancel timer is handled by backend after 30 minutes
+            // No need for client-side timer
 
             // Clear current restaurant cart (CHỈ xóa giỏ hiện tại)
             // Nếu có giỏ từ restaurant khác, auto-switch sang
@@ -328,7 +327,7 @@ const CheckoutScreen = () => {
                 console.log('[CheckoutScreen] No other carts, cart is now empty');
             }
 
-            showToast('success', 'Order placed successfully!');
+            showToast('success', 'Đặt hàng thành công!');
 
             // Add a small delay to ensure cart state is updated before navigating
             await new Promise(resolve => setTimeout(resolve, 500));
@@ -339,7 +338,7 @@ const CheckoutScreen = () => {
             console.log('[CheckoutScreen] Navigation call completed');
         } catch (error) {
             console.error('[CheckoutScreen] Order placement error:', error);
-            showToast('error', error.message || 'Failed to place order');
+            showToast('error', error.message || 'Không thể đặt hàng');
         }
     };
 
@@ -349,12 +348,12 @@ const CheckoutScreen = () => {
             <SafeAreaView style={styles.container}>
                 <View style={styles.emptyContainer}>
                     <MaterialIcons name="shopping-cart" size={48} color="#ccc" />
-                    <Text style={styles.emptyText}>Cart is empty</Text>
+                    <Text style={styles.emptyText}>Giỏ hàng trống</Text>
                     <TouchableOpacity
                         style={styles.backButton}
                         onPress={() => navigate('home')}
                     >
-                        <Text style={styles.backButtonText}>Continue Shopping</Text>
+                        <Text style={styles.backButtonText}>Tiếp tục mua sắm</Text>
                     </TouchableOpacity>
                 </View>
             </SafeAreaView>
@@ -368,7 +367,7 @@ const CheckoutScreen = () => {
                 <TouchableOpacity onPress={() => navigate('cart')}>
                     <MaterialIcons name="arrow-back" size={24} color="#1a1a1a" />
                 </TouchableOpacity>
-                <Text style={styles.headerTitle}>Checkout</Text>
+                <Text style={styles.headerTitle}>Thanh toán</Text>
                 <View style={{ width: 24 }} />
             </View>
 
@@ -401,7 +400,7 @@ const CheckoutScreen = () => {
                 <View style={styles.section}>
                     <View style={styles.sectionHeader}>
                         <MaterialIcons name="local-offer" size={20} color="#ff6b35" />
-                        <Text style={styles.sectionTitle}>Promotion Code</Text>
+                        <Text style={styles.sectionTitle}>Mã khuyến mãi</Text>
                     </View>
 
                     {appliedPromo ? (
@@ -437,7 +436,7 @@ const CheckoutScreen = () => {
                                 >
                                     <MaterialIcons name="local-offer" size={18} color="#ff6b35" />
                                     <Text style={styles.showPromosText}>
-                                        View Available Promotions ({applicablePromos.length})
+                                        Xem khuyến mãi ({applicablePromos.length})
                                     </Text>
                                     <MaterialIcons name="arrow-drop-down" size={20} color="#ff6b35" />
                                 </TouchableOpacity>
@@ -448,7 +447,7 @@ const CheckoutScreen = () => {
                                 <MaterialIcons name="card-giftcard" size={18} color="#ff6b35" />
                                 <TextInput
                                     style={styles.promoInput}
-                                    placeholder="Or enter promo code"
+                                    placeholder="Hoặc nhập mã khuyến mãi"
                                     placeholderTextColor="#aaa"
                                     value={promoCode}
                                     onChangeText={setPromoCode}
@@ -459,7 +458,7 @@ const CheckoutScreen = () => {
                                 style={styles.promoApplyButton}
                                 onPress={handleApplyPromo}
                             >
-                                <Text style={styles.promoApplyText}>Apply</Text>
+                                <Text style={styles.promoApplyText}>Áp dụng</Text>
                             </TouchableOpacity>
                         </View>
                     )}
@@ -469,7 +468,7 @@ const CheckoutScreen = () => {
                 <View style={styles.section}>
                     <View style={styles.sectionHeader}>
                         <MaterialIcons name="payment" size={20} color="#ff6b35" />
-                        <Text style={styles.sectionTitle}>Payment Method</Text>
+                        <Text style={styles.sectionTitle}>Phương thức thanh toán</Text>
                     </View>
 
                     {['card', 'momo'].map(method => (
@@ -487,8 +486,8 @@ const CheckoutScreen = () => {
                                 color={checkoutData.paymentMethod === method ? '#ff6b35' : '#ccc'}
                             />
                             <Text style={styles.paymentOptionText}>
-                                {method === 'card' && 'Card Payment'}
-                                {method === 'momo' && 'MoMo Wallet'}
+                                {method === 'card' && 'Thanh toán thẻ'}
+                                {method === 'momo' && 'Ví MoMo'}
                             </Text>
                         </TouchableOpacity>
                     ))}
@@ -522,7 +521,7 @@ const CheckoutScreen = () => {
                         <>
                             <MaterialIcons name="check-circle" size={20} color="#fff" />
                             <Text style={styles.placeOrderText}>
-                                Place Order • ₫{total.toLocaleString('vi-VN')}
+                                Đặt hàng • ₫{total.toLocaleString('vi-VN')}
                             </Text>
                         </>
                     )}
@@ -540,7 +539,7 @@ const CheckoutScreen = () => {
                     <View style={styles.modalContent}>
                         {/* Modal Header */}
                         <View style={styles.modalHeader}>
-                            <Text style={styles.modalTitle}>Available Promotions ({applicablePromos.length})</Text>
+                            <Text style={styles.modalTitle}>Khuyến mãi ({applicablePromos.length})</Text>
                             <TouchableOpacity onPress={() => setShowPromosModal(false)}>
                                 <MaterialIcons name="close" size={24} color="#666" />
                             </TouchableOpacity>
@@ -579,7 +578,7 @@ const CheckoutScreen = () => {
                             ListEmptyComponent={
                                 <View style={styles.emptyPromos}>
                                     <MaterialIcons name="local-offer" size={48} color="#ddd" />
-                                    <Text style={styles.emptyPromosText}>No promotions available</Text>
+                                    <Text style={styles.emptyPromosText}>Không có khuyến mãi</Text>
                                 </View>
                             }
                         />

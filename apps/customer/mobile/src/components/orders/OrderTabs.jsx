@@ -21,7 +21,7 @@ export default function OrderTabs({ activeTab, onTabChange, currentCount, histor
                         activeTab === 'current' && styles.tabTextActive,
                     ]}
                 >
-                    Current ({currentCount})
+                    Đang xử lý ({currentCount})
                 </Text>
             </TouchableOpacity>
 
@@ -40,7 +40,7 @@ export default function OrderTabs({ activeTab, onTabChange, currentCount, histor
                         activeTab === 'history' && styles.tabTextActive,
                     ]}
                 >
-                    History ({historyCount})
+                    Lịch sử ({historyCount})
                 </Text>
             </TouchableOpacity>
         </View>

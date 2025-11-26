@@ -27,8 +27,8 @@ export default function DatePickerModal({
     }, [selectedDate, visible]);
 
     const months = [
-        'January', 'February', 'March', 'April', 'May', 'June',
-        'July', 'August', 'September', 'October', 'November', 'December'
+        'Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6',
+        'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'
     ];
 
     const getDaysInMonth = (m, y) => {
@@ -69,9 +69,9 @@ export default function DatePickerModal({
                     {/* Header */}
                     <View style={styles.header}>
                         <TouchableOpacity onPress={onCancel}>
-                            <Text style={styles.cancelBtn}>Cancel</Text>
+                            <Text style={styles.cancelBtn}>Hủy</Text>
                         </TouchableOpacity>
-                        <Text style={styles.headerTitle}>Select Date of Birth</Text>
+                        <Text style={styles.headerTitle}>Chọn ngày sinh</Text>
                         <TouchableOpacity
                             onPress={handleConfirm}
                             disabled={isFutureDate()}
@@ -80,7 +80,7 @@ export default function DatePickerModal({
                                 styles.confirmBtn,
                                 isFutureDate() && styles.confirmBtnDisabled
                             ]}>
-                                Confirm
+                                Xác nhận
                             </Text>
                         </TouchableOpacity>
                     </View>
@@ -96,7 +96,7 @@ export default function DatePickerModal({
                     <View style={styles.pickerContainer}>
                         {/* Month */}
                         <View style={styles.pickerColumn}>
-                            <Text style={styles.columnLabel}>Month</Text>
+                            <Text style={styles.columnLabel}>Tháng</Text>
                             <ScrollView
                                 style={styles.picker}
                                 showsVerticalScrollIndicator={true}
@@ -123,7 +123,7 @@ export default function DatePickerModal({
 
                         {/* Day */}
                         <View style={styles.pickerColumn}>
-                            <Text style={styles.columnLabel}>Day</Text>
+                            <Text style={styles.columnLabel}>Ngày</Text>
                             <ScrollView
                                 style={styles.picker}
                                 showsVerticalScrollIndicator={true}
@@ -150,7 +150,7 @@ export default function DatePickerModal({
 
                         {/* Year */}
                         <View style={styles.pickerColumn}>
-                            <Text style={styles.columnLabel}>Year</Text>
+                            <Text style={styles.columnLabel}>Năm</Text>
                             <ScrollView
                                 style={styles.picker}
                                 showsVerticalScrollIndicator={true}
@@ -181,7 +181,7 @@ export default function DatePickerModal({
                         <View style={styles.warningContainer}>
                             <MaterialIcons name="warning" size={16} color="#f44336" />
                             <Text style={styles.warningText}>
-                                Date of birth cannot be in the future
+                                Ngày sinh không thể ở tương lai
                             </Text>
                         </View>
                     )}

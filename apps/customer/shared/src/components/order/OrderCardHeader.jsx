@@ -20,19 +20,19 @@ const OrderCardHeader = ({ order, onTrackClick, onCancelClick, onContinuePayment
                             marginBottom: "8px",
                         }}
                     >
-                        <b>Restaurant:</b>{" "}
+                        <b>Nhà hàng:</b>{" "}
                         {order.restaurantName || order.restaurant?.name || `Belga Pizza`}
                     </p>
                 )}
 
             <p>
-                <b>Status:</b>{" "}
+                <b>Trạng thái:</b>{" "}
                 <span style={orderValidationService.getStatusBadgeStyle(order.status)}>
                     {order.status}
                 </span>
             </p>
             <p>
-                <b>Order Date:</b>{" "}
+                <b>Ngày đặt:</b>{" "}
                 {new Date(order.createdAt || order.created_at).toLocaleString(
                     "vi-VN",
                     {
@@ -56,7 +56,7 @@ const OrderCardHeader = ({ order, onTrackClick, onCancelClick, onContinuePayment
                 >
                     <p style={{ margin: 0, color: "#721c24", fontSize: "14px" }}>
                         <b>
-                            <MdCancel /> Rejection Reason:
+                            <MdCancel /> Lý do từ chối:
                         </b>{" "}
                         {order.rejection_reason}
                     </p>
@@ -68,7 +68,7 @@ const OrderCardHeader = ({ order, onTrackClick, onCancelClick, onContinuePayment
                             fontStyle: "italic",
                         }}
                     >
-                        Your payment will be refunded within 3-5 business days.
+                        Thanh toán của bạn sẽ được hoàn lại trong 3-5 ngày làm việc.
                     </p>
                 </div>
             )}
@@ -77,13 +77,13 @@ const OrderCardHeader = ({ order, onTrackClick, onCancelClick, onContinuePayment
             {order.customer && (
                 <>
                     <p>
-                        <b>Customer:</b> {order.customer.name}
+                        <b>Khách hàng:</b> {order.customer.name}
                     </p>
                     <p>
-                        <b>Phone:</b> {order.customer.phone}
+                        <b>Điện thoại:</b> {order.customer.phone}
                     </p>
                     <p>
-                        <b>Address:</b> {order.customer.address}
+                        <b>Địa chỉ:</b> {order.customer.address}
                     </p>
                 </>
             )}
@@ -109,25 +109,27 @@ const OrderCardHeader = ({ order, onTrackClick, onCancelClick, onContinuePayment
                             fontWeight: "600",
                         }}
                     >
-                        <MdPayment /> Continue Payment
+                        <MdPayment /> Tiếp tục thanh toán
                     </button>
                 )}
 
                 {/* Only show Track button if order can be tracked */}
-                {order.status !== "paid" && order.status !== "pending" && (
-                    <button
-                        className="track-btn"
-                        onClick={() => onTrackClick(order)}
-                        style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "8px",
-                            justifyContent: "center",
-                        }}
-                    >
-                        <MdLocationOn /> Track Order
-                    </button>
-                )}
+                {order.status !== "pending" &&
+                    order.status !== "cancelled" &&
+                    order.status !== "rejected" && (
+                        <button
+                            className="track-btn"
+                            onClick={() => onTrackClick(order)}
+                            style={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "8px",
+                                justifyContent: "center",
+                            }}
+                        >
+                            <MdLocationOn /> Theo dõi đơn hàng
+                        </button>
+                    )}
 
                 {/* Cancel button for orders that can be cancelled */}
                 {orderValidationService.canCancelOrder(order) && (
@@ -149,12 +151,12 @@ const OrderCardHeader = ({ order, onTrackClick, onCancelClick, onContinuePayment
                             fontWeight: "600",
                         }}
                     >
-                        <MdError /> Cancel Order
+                        <MdError /> Hủy đơn hàng
                     </button>
                 )}
 
-                {/* Show waiting message for paid orders */}
-                {order.status === "paid" && (
+                {/* Show waiting message for pending orders with payment completed */}
+                {order.status === "pending" && order.payment_status === "paid" && (
                     <p
                         style={{
                             color: "#666",
@@ -163,7 +165,7 @@ const OrderCardHeader = ({ order, onTrackClick, onCancelClick, onContinuePayment
                             margin: "10px 0",
                         }}
                     >
-                        Waiting for restaurant confirmation...
+                        Đang chờ nhà hàng xác nhận...
                     </p>
                 )}
             </div>

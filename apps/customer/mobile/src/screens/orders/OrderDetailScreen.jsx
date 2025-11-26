@@ -20,21 +20,21 @@ import * as orderService from '../../services/orderService';
 import { showToast } from '../../utils/toastHelper';
 
 const ORDER_STATUS_LABELS = {
-    pending: { label: 'Pending', color: '#ff9800' },
-    paid: { label: 'Paid', color: '#2196f3' },
-    confirmed: { label: 'Confirmed', color: '#2196f3' },
-    preparing: { label: 'Preparing', color: '#ff9800' },
-    ready: { label: 'Ready for Pickup', color: '#ff9800' },
-    delivering: { label: 'Delivering', color: '#1976d2' },
-    delivered: { label: 'Delivered', color: '#4caf50' },
-    cancelled: { label: 'Cancelled', color: '#e53935' },
+    pending: { label: 'Chờ xác nhận', color: '#ff9800' },
+    paid: { label: 'Đã thanh toán', color: '#2196f3' },
+    confirmed: { label: 'Đã xác nhận', color: '#2196f3' },
+    preparing: { label: 'Đang chuẩn bị', color: '#ff9800' },
+    ready: { label: 'Sẵn sàng lấy', color: '#ff9800' },
+    delivering: { label: 'Đang giao', color: '#1976d2' },
+    delivered: { label: 'Đã giao', color: '#4caf50' },
+    cancelled: { label: 'Đã hủy', color: '#e53935' },
 };
 
 const PaymentStatusLabels = {
-    pending: { label: 'Pending', color: '#ff9800' },
-    processing: { label: 'Processing', color: '#ff9800' },
-    completed: { label: 'Completed', color: '#4caf50' },
-    failed: { label: 'Failed', color: '#e53935' },
+    pending: { label: 'Chờ thanh toán', color: '#ff9800' },
+    processing: { label: 'Đang xử lý', color: '#ff9800' },
+    completed: { label: 'Hoàn tất', color: '#4caf50' },
+    failed: { label: 'Thất bại', color: '#e53935' },
 };
 
 const OrderDetailScreen = ({ orderId }) => {
@@ -55,7 +55,7 @@ const OrderDetailScreen = ({ orderId }) => {
             setError(null);
         } catch (err) {
             console.error('[OrderDetailScreen] Error:', err);
-            setError('Failed to load order details');
+            setError('Không thể tải chi tiết đơn hàng');
         } finally {
             setLoading(false);
         }
@@ -63,20 +63,20 @@ const OrderDetailScreen = ({ orderId }) => {
 
     const handleCancelOrder = () => {
         Alert.alert(
-            'Cancel Order',
-            'Are you sure you want to cancel this order?',
+            'Hủy đơn hàng',
+            'Bạn có chắc chắn muốn hủy đơn hàng này không?',
             [
-                { text: 'No', style: 'cancel' },
+                { text: 'Không', style: 'cancel' },
                 {
-                    text: 'Yes, Cancel',
+                    text: 'Có, hủy đi',
                     style: 'destructive',
                     onPress: async () => {
                         try {
                             await orderService.cancelOrder(order.id);
-                            showToast('success', 'Order cancelled');
+                            showToast('success', 'Đã hủy đơn hàng');
                             fetchOrderDetail();
                         } catch (err) {
-                            showToast('error', 'Failed to cancel order');
+                            showToast('error', 'Không thể hủy đơn hàng');
                         }
                     },
                 },
@@ -105,12 +105,12 @@ const OrderDetailScreen = ({ orderId }) => {
             <SafeAreaView style={styles.container}>
                 <View style={styles.errorContainer}>
                     <MaterialIcons name="error-outline" size={48} color="#e53935" />
-                    <Text style={styles.errorText}>{error || 'Order not found'}</Text>
+                    <Text style={styles.errorText}>{error || 'Không tìm thấy đơn hàng'}</Text>
                     <TouchableOpacity
                         style={styles.backButton}
                         onPress={() => navigate('orders')}
                     >
-                        <Text style={styles.backButtonText}>Go Back</Text>
+                        <Text style={styles.backButtonText}>Quay lại</Text>
                     </TouchableOpacity>
                 </View>
             </SafeAreaView>
@@ -130,7 +130,7 @@ const OrderDetailScreen = ({ orderId }) => {
                 <TouchableOpacity onPress={() => navigate('orders')}>
                     <MaterialIcons name="arrow-back" size={24} color="#1a1a1a" />
                 </TouchableOpacity>
-                <Text style={styles.headerTitle}>Order Details</Text>
+                <Text style={styles.headerTitle}>Chi tiết đơn hàng</Text>
                 <View style={{ width: 24 }} />
             </View>
 
@@ -139,7 +139,7 @@ const OrderDetailScreen = ({ orderId }) => {
                 <View style={styles.section}>
                     <View style={styles.orderHeaderRow}>
                         <View>
-                            <Text style={styles.orderId}>Order #{order.id?.substring(0, 8)}</Text>
+                            <Text style={styles.orderId}>Đơn #{order.id?.substring(0, 8)}</Text>
                             <Text style={styles.orderDate}>
                                 {new Date(order.created_at).toLocaleString('vi-VN')}
                             </Text>
@@ -153,7 +153,7 @@ const OrderDetailScreen = ({ orderId }) => {
                 {/* Payment Status */}
                 <View style={styles.section}>
                     <View style={styles.statusRow}>
-                        <Text style={styles.statusLabel}>Payment Status:</Text>
+                        <Text style={styles.statusLabel}>Thanh toán:</Text>
                         <View style={[styles.paymentStatusBadge, { borderColor: paymentStatusInfo.color }]}>
                             <Text style={[styles.paymentStatusText, { color: paymentStatusInfo.color }]}>
                                 {paymentStatusInfo.label}
@@ -164,18 +164,18 @@ const OrderDetailScreen = ({ orderId }) => {
 
                 {/* Customer Info */}
                 <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Customer Information</Text>
+                    <Text style={styles.sectionTitle}>Thông tin khách hàng</Text>
                     <View style={styles.infoItem}>
                         <MaterialIcons name="person" size={20} color="#666" />
                         <View style={styles.infoContent}>
-                            <Text style={styles.infoLabel}>Name</Text>
+                            <Text style={styles.infoLabel}>Họ tên</Text>
                             <Text style={styles.infoText}>{order.customer?.name}</Text>
                         </View>
                     </View>
                     <View style={styles.infoItem}>
                         <MaterialIcons name="phone" size={20} color="#666" />
                         <View style={styles.infoContent}>
-                            <Text style={styles.infoLabel}>Phone</Text>
+                            <Text style={styles.infoLabel}>SĐT</Text>
                             <Text style={styles.infoText}>{order.customer?.phone}</Text>
                         </View>
                     </View>
@@ -189,7 +189,7 @@ const OrderDetailScreen = ({ orderId }) => {
                     <View style={styles.infoItem}>
                         <MaterialIcons name="location-on" size={20} color="#666" />
                         <View style={styles.infoContent}>
-                            <Text style={styles.infoLabel}>Delivery Address</Text>
+                            <Text style={styles.infoLabel}>Địa chỉ giao hàng</Text>
                             <Text style={styles.infoText}>{order.customer?.address}</Text>
                         </View>
                     </View>
@@ -197,7 +197,7 @@ const OrderDetailScreen = ({ orderId }) => {
 
                 {/* Items */}
                 <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Items ({order.items?.length})</Text>
+                    <Text style={styles.sectionTitle}>Sản phẩm ({order.items?.length})</Text>
                     {order.items?.map((item, idx) => (
                         <View key={idx} style={styles.itemRow}>
                             <View style={styles.itemInfo}>
@@ -218,15 +218,15 @@ const OrderDetailScreen = ({ orderId }) => {
 
                 {/* Price Breakdown */}
                 <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Price Breakdown</Text>
+                    <Text style={styles.sectionTitle}>Chi tiết giá</Text>
                     <View style={styles.summaryRow}>
-                        <Text style={styles.summaryLabel}>Subtotal</Text>
+                        <Text style={styles.summaryLabel}>Tạm tính</Text>
                         <Text style={styles.summaryValue}>
                             ₫{order.subtotal?.toLocaleString('vi-VN')}
                         </Text>
                     </View>
                     <View style={styles.summaryRow}>
-                        <Text style={styles.summaryLabel}>Delivery Fee</Text>
+                        <Text style={styles.summaryLabel}>Phí giao hàng</Text>
                         <Text style={styles.summaryValue}>
                             ₫{order.deliveryFee?.toLocaleString('vi-VN')}
                         </Text>
@@ -234,7 +234,7 @@ const OrderDetailScreen = ({ orderId }) => {
                     {order.discountAmount > 0 && (
                         <View style={[styles.summaryRow, styles.discountRow]}>
                             <Text style={styles.discountLabel}>
-                                Discount {order.promo_code && `(${order.promo_code})`}
+                                Giảm giá {order.promo_code && `(${order.promo_code})`}
                             </Text>
                             <Text style={styles.discountValue}>
                                 -₫{order.discountAmount?.toLocaleString('vi-VN')}
@@ -242,7 +242,7 @@ const OrderDetailScreen = ({ orderId }) => {
                         </View>
                     )}
                     <View style={[styles.summaryRow, styles.totalRow]}>
-                        <Text style={styles.totalLabel}>Total</Text>
+                        <Text style={styles.totalLabel}>Tổng cộng</Text>
                         <Text style={styles.totalValue}>
                             ₫{order.totalPrice?.toLocaleString('vi-VN')}
                         </Text>
@@ -257,7 +257,7 @@ const OrderDetailScreen = ({ orderId }) => {
                             onPress={handleTrackOrder}
                         >
                             <MaterialIcons name="map" size={20} color="#1976d2" />
-                            <Text style={styles.trackButtonText}>Track Order</Text>
+                            <Text style={styles.trackButtonText}>Theo dõi đơn</Text>
                         </TouchableOpacity>
                     )}
 
@@ -267,7 +267,7 @@ const OrderDetailScreen = ({ orderId }) => {
                             onPress={handleCancelOrder}
                         >
                             <MaterialIcons name="close" size={20} color="#e53935" />
-                            <Text style={styles.cancelButtonText}>Cancel Order</Text>
+                            <Text style={styles.cancelButtonText}>Hủy đơn hàng</Text>
                         </TouchableOpacity>
                     )}
 
@@ -277,7 +277,7 @@ const OrderDetailScreen = ({ orderId }) => {
                             onPress={handleReview}
                         >
                             <MaterialIcons name="rate-review" size={20} color="#ff6b35" />
-                            <Text style={styles.reviewButtonText}>Write Review</Text>
+                            <Text style={styles.reviewButtonText}>Viết đánh giá</Text>
                         </TouchableOpacity>
                     )}
                 </View>

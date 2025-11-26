@@ -81,7 +81,7 @@ export default function RestaurantReviewsSection({ restaurantId }) {
             {/* Review Header */}
             <View style={styles.reviewHeader}>
                 <View style={styles.reviewUserInfo}>
-                    <Text style={styles.reviewUserName}>{item.user?.name || 'Anonymous'}</Text>
+                    <Text style={styles.reviewUserName}>{item.user?.name || 'Ẩn danh'}</Text>
                     {renderStars(item.rating || 0)}
                 </View>
                 <Text style={styles.reviewDate}>
@@ -102,7 +102,7 @@ export default function RestaurantReviewsSection({ restaurantId }) {
                 <View style={styles.restaurantReply}>
                     <View style={styles.replyHeader}>
                         <MaterialIcons name="reply" size={14} color="#ff6b35" />
-                        <Text style={styles.replyLabel}>Restaurant's Reply</Text>
+                        <Text style={styles.replyLabel}>Phản hồi từ nhà hàng</Text>
                     </View>
                     <Text style={styles.replyText}>{item.restaurant_reply}</Text>
                 </View>
@@ -121,11 +121,11 @@ export default function RestaurantReviewsSection({ restaurantId }) {
     if (reviews.length === 0) {
         return (
             <View style={styles.container}>
-                <Text style={styles.header}>Customer Reviews</Text>
+                <Text style={styles.header}>Đánh giá khách hàng</Text>
                 <View style={styles.emptyContainer}>
                     <MaterialIcons name="rate-review" size={32} color="#ccc" />
-                    <Text style={styles.emptyText}>No reviews yet</Text>
-                    <Text style={styles.emptySubtext}>Be the first to review this restaurant</Text>
+                    <Text style={styles.emptyText}>Chưa có đánh giá</Text>
+                    <Text style={styles.emptySubtext}>Hãy là người đầu tiên đánh giá nhà hàng này</Text>
                 </View>
             </View>
         );
@@ -135,7 +135,7 @@ export default function RestaurantReviewsSection({ restaurantId }) {
         <View style={styles.container}>
             {/* Header with Rating Summary */}
             <View style={styles.headerRow}>
-                <Text style={styles.header}>Customer Reviews</Text>
+                <Text style={styles.header}>Đánh giá khách hàng</Text>
                 <View style={styles.ratingBadge}>
                     <MaterialIcons name="star" size={16} color="#ffc107" />
                     <Text style={styles.ratingValue}>{avgRating}</Text>
@@ -153,7 +153,7 @@ export default function RestaurantReviewsSection({ restaurantId }) {
 
             {/* View All Link */}
             {reviews.length >= 5 && (
-                <Text style={styles.viewAllLink}>Showing 5 most recent reviews</Text>
+                <Text style={styles.viewAllLink}>Hiển thị 5 đánh giá gần nhất</Text>
             )}
         </View>
     );

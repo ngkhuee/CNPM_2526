@@ -73,7 +73,7 @@ export default function CartModal({
             <SafeAreaView style={styles.container}>
                 {/* Header */}
                 <View style={styles.header}>
-                    <Text style={styles.headerTitle}>Your Cart</Text>
+                    <Text style={styles.headerTitle}>Giỏ hàng của bạn</Text>
                     <TouchableOpacity onPress={onClose}>
                         <MaterialIcons name="close" size={24} color="#1a1a1a" />
                     </TouchableOpacity>
@@ -90,7 +90,7 @@ export default function CartModal({
                 ) : (
                     <View style={styles.emptyContainer}>
                         <MaterialIcons name="shopping-cart" size={48} color="#ddd" />
-                        <Text style={styles.emptyText}>Your cart is empty</Text>
+                        <Text style={styles.emptyText}>Giỏ hàng trống</Text>
                     </View>
                 )}
 
@@ -98,7 +98,7 @@ export default function CartModal({
                 {localCart.items.length > 0 && (
                     <View style={styles.footer}>
                         <View style={styles.totalSection}>
-                            <Text style={styles.totalLabel}>Subtotal</Text>
+                            <Text style={styles.totalLabel}>Tạm tính</Text>
                             <Text style={styles.totalValue}>
                                 {formatCurrency(localCart.total)}
                             </Text>
@@ -109,14 +109,14 @@ export default function CartModal({
                                 style={styles.continueBtn}
                                 onPress={onClose}
                             >
-                                <Text style={styles.continueBtnText}>Continue Shopping</Text>
+                                <Text style={styles.continueBtnText}>Tiếp tục mua sắm</Text>
                             </TouchableOpacity>
 
                             <TouchableOpacity
                                 style={styles.checkoutBtn}
                                 onPress={onCheckout}
                             >
-                                <Text style={styles.checkoutBtnText}>Checkout</Text>
+                                <Text style={styles.checkoutBtnText}>Thanh toán</Text>
                             </TouchableOpacity>
                         </View>
                     </View>

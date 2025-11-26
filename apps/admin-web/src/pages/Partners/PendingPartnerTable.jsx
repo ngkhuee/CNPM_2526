@@ -5,19 +5,19 @@ import { MdVisibility, MdCheckCircle } from "react-icons/md";
 
 const PendingPartnerTable = ({ restaurants, onApprove }) => {
     if (restaurants.length === 0) {
-        return <div className="empty-state">No pending restaurants</div>;
+        return <div className="empty-state">Không có nhà hàng chờ duyệt</div>;
     }
 
     return (
         <table className="partners-table">
             <thead>
                 <tr>
-                    <th>Restaurant</th>
+                    <th>Nhà hàng</th>
                     <th>Email</th>
-                    <th>Phone</th>
-                    <th>Address</th>
-                    <th>Registered</th>
-                    <th>Actions</th>
+                    <th>Điện thoại</th>
+                    <th>Địa chỉ</th>
+                    <th>Ngày đăng ký</th>
+                    <th>Thao tác</th>
                 </tr>
             </thead>
             <tbody>
@@ -42,16 +42,16 @@ const PendingPartnerTable = ({ restaurants, onApprove }) => {
                                 <Link
                                     to={`/admin/partners/${r.id}`}
                                     className="btn-view"
-                                    title="View Details"
+                                    title="Xem chi tiết"
                                 >
-                                    <MdVisibility /> View
+                                    <MdVisibility /> Xem
                                 </Link>
                                 <button
                                     className="btn-approve"
                                     onClick={() => onApprove(r.id)}
-                                    title="Approve Restaurant"
+                                    title="Phê duyệt nhà hàng"
                                 >
-                                    <MdCheckCircle /> Approve
+                                    <MdCheckCircle /> Duyệt
                                 </button>
                             </div>
                         </td>

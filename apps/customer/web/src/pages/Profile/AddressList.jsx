@@ -12,8 +12,8 @@ const AddressList = ({
         return (
             <div className="addresses-empty">
                 <MdLocationOn size={48} />
-                <p>No addresses yet</p>
-                <span>Add your first delivery address to get started</span>
+                <p>Chưa có địa chỉ nào</p>
+                <span>Thêm địa chỉ giao hàng đầu tiên để bắt đầu</span>
             </div>
         );
     }
@@ -24,8 +24,8 @@ const AddressList = ({
                 <thead>
                     <tr>
                         <th className="col-number">#</th>
-                        <th className="col-address">Address</th>
-                        <th className="col-actions">Actions</th>
+                        <th className="col-address">Địa chỉ</th>
+                        <th className="col-actions">Thao tác</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -45,7 +45,7 @@ const AddressList = ({
                                     </div>
                                     {addr.note && (
                                         <div className="address-note">
-                                            <strong>Note:</strong> {addr.note}
+                                            <strong>Ghi chú:</strong> {addr.note}
                                         </div>
                                     )}
                                     {addr.lat && addr.lng && (
@@ -56,7 +56,7 @@ const AddressList = ({
                                     )}
                                     {addr.is_default && (
                                         <span className="default-badge">
-                                            <MdCheckCircle size={12} /> Default
+                                            <MdCheckCircle size={12} /> Mặc định
                                         </span>
                                     )}
                                 </div>
@@ -69,16 +69,16 @@ const AddressList = ({
                                             disabled={loading}
                                             className="btn-action btn-action-default"
                                         >
-                                            Set as Default
+                                            Đặt làm mặc định
                                         </button>
                                     )}
                                     <button
                                         onClick={() => onDeleteAddress(addr.id)}
                                         disabled={loading}
                                         className="btn-action btn-action-delete"
-                                        title="Delete"
+                                        title="Xóa"
                                     >
-                                        <MdDelete size={16} /> Delete
+                                        <MdDelete size={16} /> Xóa
                                     </button>
                                 </div>
                             </td>

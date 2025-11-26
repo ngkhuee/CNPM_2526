@@ -13,7 +13,7 @@ export default function AddressList({
     return (
         <View style={styles.section}>
             <View style={styles.addressHeader}>
-                <Text style={styles.sectionTitle}>Delivery Addresses</Text>
+                <Text style={styles.sectionTitle}>Địa chỉ giao hàng</Text>
                 <TouchableOpacity
                     style={styles.addButton}
                     onPress={onToggleAddForm}
@@ -42,7 +42,7 @@ export default function AddressList({
                                         </Text>
                                         {address.note && (
                                             <Text style={styles.addressNote}>
-                                                Note: {address.note}
+                                                Ghi chú: {address.note}
                                             </Text>
                                         )}
                                     </View>
@@ -50,7 +50,7 @@ export default function AddressList({
                             </View>
                             {address.isDefault && (
                                 <View style={styles.defaultBadge}>
-                                    <Text style={styles.defaultBadgeText}>Default</Text>
+                                    <Text style={styles.defaultBadgeText}>Mặc định</Text>
                                 </View>
                             )}
                         </View>
@@ -60,7 +60,7 @@ export default function AddressList({
                                     style={styles.actionButton}
                                     onPress={() => onSetDefault(address.id)}
                                 >
-                                    <Text style={styles.actionButtonText}>Set as Default</Text>
+                                    <Text style={styles.actionButtonText}>Đặt làm mặc định</Text>
                                 </TouchableOpacity>
                             )}
                             <TouchableOpacity
@@ -68,7 +68,7 @@ export default function AddressList({
                                 onPress={() => onDelete(address.id)}
                             >
                                 <MaterialIcons name="delete" size={18} color="#f44336" />
-                                <Text style={styles.deleteButtonText}>Delete</Text>
+                                <Text style={styles.deleteButtonText}>Xóa</Text>
                             </TouchableOpacity>
                         </View>
                     </View>
@@ -76,9 +76,9 @@ export default function AddressList({
             ) : (
                 <View style={styles.emptyState}>
                     <MaterialIcons name="location-off" size={48} color="#ccc" />
-                    <Text style={styles.emptyStateText}>No addresses yet</Text>
+                    <Text style={styles.emptyStateText}>Chưa có địa chỉ nào</Text>
                     <Text style={styles.emptyStateSubtext}>
-                        Add your first delivery address
+                        Thêm địa chỉ giao hàng đầu tiên của bạn
                     </Text>
                 </View>
             )}

@@ -8,7 +8,7 @@ const FoodsModal = ({ isOpen, foods, onClose }) => {
     return (
         <div className="modal-overlay" onClick={onClose}>
             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-                <h3>Foods in this Category</h3>
+                <h3>Món ăn trong danh mục này</h3>
                 {foods.length > 0 ? (
                     <ul className="foods-list">
                         {foods.map((food) => (
@@ -22,10 +22,10 @@ const FoodsModal = ({ isOpen, foods, onClose }) => {
                         ))}
                     </ul>
                 ) : (
-                    <p>No foods found in this category.</p>
+                    <p>Không tìm thấy món ăn nào trong danh mục này.</p>
                 )}
                 <button className="cancel-btn" onClick={onClose}>
-                    Close
+                    Đóng
                 </button>
             </div>
         </div>

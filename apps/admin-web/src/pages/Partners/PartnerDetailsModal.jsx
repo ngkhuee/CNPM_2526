@@ -8,7 +8,7 @@ const PartnerDetailsModal = ({ isOpen, onClose, restaurant }) => {
         <div className="modal-backdrop" onClick={onClose}>
             <div className="modal" onClick={(e) => e.stopPropagation()}>
                 <div className="modal-header">
-                    <h3>Restaurant Details</h3>
+                    <h3>Chi tiết Nhà hàng</h3>
                     <button className="close-btn" onClick={onClose}>
                         ×
                     </button>
@@ -22,7 +22,7 @@ const PartnerDetailsModal = ({ isOpen, onClose, restaurant }) => {
                         />
                     </div>
                     <div className="detail-row">
-                        <strong>Restaurant Name:</strong>
+                        <strong>Tên nhà hàng:</strong>
                         <span>{restaurant.name}</span>
                     </div>
                     <div className="detail-row">
@@ -30,36 +30,36 @@ const PartnerDetailsModal = ({ isOpen, onClose, restaurant }) => {
                         <span>{restaurant.email}</span>
                     </div>
                     <div className="detail-row">
-                        <strong>Phone:</strong>
+                        <strong>Điện thoại:</strong>
                         <span>{restaurant.phone}</span>
                     </div>
                     <div className="detail-row">
-                        <strong>Address:</strong>
+                        <strong>Địa chỉ:</strong>
                         <span>{restaurant.address}</span>
                     </div>
                     <div className="detail-row">
-                        <strong>Description:</strong>
+                        <strong>Mô tả:</strong>
                         <span>{restaurant.description || "N/A"}</span>
                     </div>
                     <div className="detail-row">
-                        <strong>Category:</strong>
+                        <strong>Danh mục:</strong>
                         <span>{restaurant.primary_category || "N/A"}</span>
                     </div>
                     <div className="detail-row">
-                        <strong>Status:</strong>
+                        <strong>Trạng thái:</strong>
                         <span className={`status-badge status-${restaurant.status}`}>
                             {restaurant.status}
                         </span>
                     </div>
                     <div className="detail-row">
-                        <strong>Rating:</strong>
+                        <strong>Đánh giá:</strong>
                         <span>
-                            Rating: {formatRating(restaurant.rating || 0)} (
-                            {restaurant.total_reviews || 0} reviews)
+                            Đánh giá: {formatRating(restaurant.rating || 0)} (
+                            {restaurant.total_reviews || 0} lượt)
                         </span>
                     </div>
                     <div className="detail-row">
-                        <strong>Registered:</strong>
+                        <strong>Ngày đăng ký:</strong>
                         <span>
                             {new Date(restaurant.created_at).toLocaleString("vi-VN")}
                         </span>
@@ -67,7 +67,7 @@ const PartnerDetailsModal = ({ isOpen, onClose, restaurant }) => {
                 </div>
                 <div className="modal-footer">
                     <button onClick={onClose} className="btn-close">
-                        Close
+                        Đóng
                     </button>
                 </div>
             </div>

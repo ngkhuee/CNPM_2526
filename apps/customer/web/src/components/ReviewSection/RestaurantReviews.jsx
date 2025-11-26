@@ -18,7 +18,7 @@ const RestaurantReviews = ({ restaurantId, maxReviews = 5 }) => {
 
     useEffect(() => {
         if (!restaurantId) {
-            setError("Restaurant ID is required");
+            setError("ID nhà hàng là bắt buộc");
             setLoading(false);
             return;
         }
@@ -53,14 +53,14 @@ const RestaurantReviews = ({ restaurantId, maxReviews = 5 }) => {
             setReviews(sorted);
         } catch (err) {
             console.error("Error fetching reviews:", err);
-            setError("Failed to load reviews");
+            setError("Không thể tải đánh giá");
         } finally {
             setLoading(false);
         }
     };
 
     if (loading) {
-        return <div className="review-list-loading">Loading reviews...</div>;
+        return <div className="review-list-loading">Đang tải đánh giá...</div>;
     }
 
     if (error) {
@@ -70,7 +70,7 @@ const RestaurantReviews = ({ restaurantId, maxReviews = 5 }) => {
     if (reviews.length === 0) {
         return (
             <div className="review-list-empty">
-                <p>No reviews yet. Be the first to review this restaurant!</p>
+                <p>Chưa có đánh giá nào. Hãy là người đầu tiên đánh giá nhà hàng này!</p>
             </div>
         );
     }
@@ -78,12 +78,12 @@ const RestaurantReviews = ({ restaurantId, maxReviews = 5 }) => {
     return (
         <div className="review-list-container">
             <div className="review-list-header">
-                <h3>Customer Reviews</h3>
+                <h3>Đánh giá của khách hàng</h3>
                 <div className="review-stats">
                     <span className="avg-rating">
                         ⭐ {avgRating}/5
                     </span>
-                    <span className="total-reviews">({reviews.length} reviews)</span>
+                    <span className="total-reviews">({reviews.length} đánh giá)</span>
                 </div>
             </div>
 
@@ -92,7 +92,7 @@ const RestaurantReviews = ({ restaurantId, maxReviews = 5 }) => {
                     <ReviewCard
                         key={review.id}
                         review={review}
-                        foodName={review.food_name || "Product"}
+                        foodName={review.food_name || "Sản phẩm"}
                         showReplyButton={false}
                     />
                 ))}
@@ -100,7 +100,7 @@ const RestaurantReviews = ({ restaurantId, maxReviews = 5 }) => {
 
             {maxReviews > 0 && reviews.length >= maxReviews && (
                 <div className="review-list-footer">
-                    <p>Showing {reviews.length} most recent reviews</p>
+                    <p>Đang hiển thị {reviews.length} đánh giá mới nhất</p>
                 </div>
             )}
         </div>

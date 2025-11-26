@@ -12,17 +12,12 @@ const FoodDetail = ({
   currentUserId = null,
   currentRestaurantId = null, // Restaurant ID for checking ownership
   onAddToCart = null, // Callback for adding to cart (customer only)
-  canReview = false, // Whether user can review (from order history)
 }) => {
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [replyText, setReplyText] = useState({});
   const [submittingReply, setSubmittingReply] = useState({});
   const [quantity, setQuantity] = useState(1);
-  const [showReviewForm, setShowReviewForm] = useState(false);
-  const [reviewForm, setReviewForm] = useState({ rating: 5, comment: "" });
-  const [submittingReview, setSubmittingReview] = useState(false);
-  const [userHasReviewed, setUserHasReviewed] = useState(false);
 
   useEffect(() => {
     const foodId = food?.id || food?._id;
@@ -43,12 +38,6 @@ const FoodDetail = ({
         (a, b) => new Date(b.created_at) - new Date(a.created_at)
       );
       setReviews(sorted);
-
-      // Check if current user has already reviewed
-      if (currentUserId && userRole === "customer") {
-        const userReview = sorted.find((r) => r.user_id === currentUserId);
-        setUserHasReviewed(!!userReview);
-      }
     } catch (error) {
       console.error("Error fetching reviews:", error);
     } finally {
@@ -58,7 +47,7 @@ const FoodDetail = ({
 
   const handleSubmitReply = async (reviewId) => {
     if (!replyText[reviewId]?.trim()) {
-      alert("Please enter a reply");
+      alert("Vui lòng nhập phản hồi");
       return;
     }
 
@@ -69,49 +58,14 @@ const FoodDetail = ({
         restaurant_reply: replyText[reviewId].trim(),
       });
 
-      alert("Reply submitted successfully!");
+      alert("Gửi phản hồi thành công!");
       setReplyText({ ...replyText, [reviewId]: "" });
       await fetchReviews(); // Refresh reviews
     } catch (error) {
       console.error("Error submitting reply:", error);
-      alert("Error submitting reply");
+      alert("Lỗi gửi phản hồi");
     } finally {
       setSubmittingReply({ ...submittingReply, [reviewId]: false });
-    }
-  };
-
-  const handleSubmitReview = async () => {
-    if (!currentUserId) {
-      alert("Please login to submit a review");
-      return;
-    }
-
-    if (reviewForm.comment.trim().length < 10) {
-      alert("Review comment must be at least 10 characters");
-      return;
-    }
-
-    try {
-      setSubmittingReview(true);
-      const foodId = food.id || food._id;
-
-      await reviewService.create({
-        food_id: foodId,
-        user_id: currentUserId,
-        restaurant_id: food.restaurantId || food.restaurant_id,
-        rating: reviewForm.rating,
-        comment: reviewForm.comment.trim(),
-      });
-
-      alert("Thank you for your review!");
-      setReviewForm({ rating: 5, comment: "" });
-      setShowReviewForm(false);
-      await fetchReviews();
-    } catch (error) {
-      console.error("Error submitting review:", error);
-      alert("Error submitting review. Please try again.");
-    } finally {
-      setSubmittingReview(false);
     }
   };
 
@@ -153,7 +107,7 @@ const FoodDetail = ({
             <div className="food-rating-summary">
               {renderStars(Math.round(avgRating))}
               <span className="rating-text">
-                {formatRating(avgRating)} ({totalReviews} reviews)
+                {formatRating(avgRating)} ({totalReviews} đánh giá)
               </span>
             </div>
 
@@ -177,7 +131,7 @@ const FoodDetail = ({
                     onClose();
                   }}
                 >
-                  Add to Cart
+                  Thêm vào giỏ hàng
                 </button>
               </div>
             )}
@@ -187,72 +141,14 @@ const FoodDetail = ({
         {/* Reviews Section */}
         <div className="food-detail-reviews">
           <div className="reviews-header">
-            <h3>Customer Reviews</h3>
-            {userRole === "customer" && currentUserId && !userHasReviewed && canReview && (
-              <button
-                className="submit-review-toggle-btn"
-                onClick={() => setShowReviewForm(!showReviewForm)}
-              >
-                {showReviewForm ? "Cancel" : "Write a Review"}
-              </button>
-            )}
-            {userRole === "customer" && currentUserId && !canReview && !userHasReviewed}
-            {userHasReviewed && (
-              <span className="already-reviewed-badge">You reviewed this</span>
-            )}
+            <h3>Đánh giá của khách hàng</h3>
           </div>
 
-          {/* Review Submission Form */}
-          {showReviewForm && userRole === "customer" && canReview && (
-            <div className="review-form">
-              <div className="form-group">
-                <label>Rating</label>
-                <div className="star-input">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <button
-                      key={star}
-                      className={`star-btn ${star <= reviewForm.rating ? "active" : ""}`}
-                      onClick={() => setReviewForm({ ...reviewForm, rating: star })}
-                      type="button"
-                    >
-                      <MdStar size={28} />
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="review-comment">Your Review</label>
-                <textarea
-                  id="review-comment"
-                  placeholder="Share your experience with this dish... (minimum 10 characters)"
-                  value={reviewForm.comment}
-                  onChange={(e) =>
-                    setReviewForm({ ...reviewForm, comment: e.target.value })
-                  }
-                  rows={4}
-                />
-                <small className="char-count">
-                  {reviewForm.comment.length} characters
-                </small>
-              </div>
-
-              <button
-                className="submit-review-btn"
-                onClick={handleSubmitReview}
-                disabled={submittingReview || reviewForm.comment.length < 10}
-              >
-                <MdSend size={16} />
-                {submittingReview ? "Submitting..." : "Submit Review"}
-              </button>
-            </div>
-          )}
-
           {loading ? (
-            <p className="loading-text">Loading reviews...</p>
+            <p className="loading-text">Đang tải đánh giá...</p>
           ) : reviews.length === 0 ? (
             <p className="no-reviews-text">
-              No reviews yet. Be the first to review!
+              Chưa có đánh giá. Hãy là người đầu tiên đánh giá!
             </p>
           ) : (
             <div className="reviews-list">
@@ -275,7 +171,7 @@ const FoodDetail = ({
                     <div className="restaurant-reply">
                       <MdReply size={16} />
                       <div>
-                        <strong>Restaurant:</strong>
+                        <strong>Nhà hàng:</strong>
                         <p>{review.restaurant_reply}</p>
                       </div>
                     </div>
@@ -289,7 +185,7 @@ const FoodDetail = ({
                       food.restaurant_id === currentRestaurantId) && (
                       <div className="reply-input-section">
                         <textarea
-                          placeholder="Reply to this review..."
+                          placeholder="Phản hồi đánh giá này..."
                           value={replyText[review.id] || ""}
                           onChange={(e) =>
                             setReplyText({
@@ -305,8 +201,8 @@ const FoodDetail = ({
                           disabled={submittingReply[review.id]}
                         >
                           {submittingReply[review.id]
-                            ? "Submitting..."
-                            : "Reply"}
+                            ? "Đang gửi..."
+                            : "Gửi"}
                         </button>
                       </div>
                     )}

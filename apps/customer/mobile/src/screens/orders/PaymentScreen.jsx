@@ -59,7 +59,7 @@ const PaymentScreen = ({ orderId }) => {
             }
         } catch (error) {
             console.error('[PaymentScreen] Error fetching order:', error);
-            Alert.alert('Error', 'Failed to load order');
+            Alert.alert('Lỗi', 'Không thể tải đơn hàng');
             navigate('orders');
         } finally {
             setLoading(false);
@@ -69,7 +69,7 @@ const PaymentScreen = ({ orderId }) => {
     return (
         <SafeAreaView style={styles.container}>
             <ActivityIndicator size="large" color="#ff6b35" style={{ marginTop: 50 }} />
-            <Text style={styles.loadingText}>Loading payment...</Text>
+            <Text style={styles.loadingText}>Đang tải thanh toán...</Text>
         </SafeAreaView>
     );
 };

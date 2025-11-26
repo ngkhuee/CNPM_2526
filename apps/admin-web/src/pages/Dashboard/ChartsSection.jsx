@@ -5,19 +5,19 @@ const ChartsSection = ({ revenueOverTime, ordersOverTime }) => {
     return (
         <div className="charts-container">
             <div className="chart-item">
-                <h3>Revenue Over Time (Last 7 Days)</h3>
+                <h3>Doanh thu theo thời gian (7 ngày qua)</h3>
                 {revenueOverTime.length > 0 ? (
                     <LineChart data={revenueOverTime} dataKey="revenue" />
                 ) : (
-                    <p>No data available</p>
+                    <p>Chưa có dữ liệu</p>
                 )}
             </div>
             <div className="chart-item">
-                <h3>Orders Over Time (Last 7 Days)</h3>
+                <h3>Đơn hàng theo thời gian (7 ngày qua)</h3>
                 {ordersOverTime.length > 0 ? (
                     <BarChart data={ordersOverTime} dataKey="orders" />
                 ) : (
-                    <p>No data available</p>
+                    <p>Chưa có dữ liệu</p>
                 )}
             </div>
         </div>

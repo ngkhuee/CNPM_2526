@@ -3,8 +3,8 @@ import React from "react";
 const List = () => {
   return (
     <div className="list add flex-col">
-      <p>Food List Management - Not implemented for Admin</p>
-      <p>This page is for Restaurant management only.</p>
+      <p>Quản lý Danh sách Món ăn - Không dành cho Quản trị viên</p>
+      <p>Trang này chỉ dành cho quản lý Nhà hàng.</p>
     </div>
   );
 };

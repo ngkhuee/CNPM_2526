@@ -19,13 +19,13 @@ export const OrderActions = ({
         return (
             <View style={styles.deliveredSection}>
                 <MaterialIcons name="check-circle" size={48} color="#4caf50" />
-                <Text style={styles.deliveredText}>Order Delivered!</Text>
+                <Text style={styles.deliveredText}>Đã giao hàng!</Text>
                 <Text style={styles.deliveredSubtext}>
-                    Thank you for your order. Enjoy your meal!
+                    Cảm ơn bạn đã đặt hàng. Chúc bạn ngon miệng!
                 </Text>
                 <TouchableOpacity style={styles.reviewButton} onPress={onReview}>
                     <MaterialIcons name="rate-review" size={18} color="#ff6b35" />
-                    <Text style={styles.reviewButtonText}>Write Review</Text>
+                    <Text style={styles.reviewButtonText}>Viết đánh giá</Text>
                 </TouchableOpacity>
             </View>
         );

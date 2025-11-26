@@ -18,18 +18,601 @@ const saveDb = () => {
     JSON.stringify(db, null, 2),
     "utf-8"
   );
-  console.log("[DB] Auto-saved changes to db.json");
+  console.log("[DB] Saved changes to db.json");
 };
 
-// Save database every 5 seconds if there are changes
-let saveInterval = setInterval(() => {
-  saveDb();
+// No auto-save interval - save only on actual write operations
+
+// ========== DRONE SIMULATION FUNCTIONS ==========
+/**
+ * Simulate drone flying from base to restaurant
+ * Duration: 20 seconds
+ * Flow: searching -> going_to_restaurant -> at_restaurant
+ * Base location: 273 An Dương Vương (10.7626, 106.682)
+ */
+const simulateDroneToRestaurant = (orderId, droneId) => {
+  const db = router.db;
+  const BASE_LOCATION = { lat: 10.7626, lng: 106.682 };
+
+  console.log(`[DRONE SIM] Starting base -> restaurant for order ${orderId}, drone ${droneId}`);
+
+  // Get order and restaurant location
+  const order = db.get("orders").find({ id: orderId }).value();
+  if (!order) {
+    console.log(`[DRONE SIM] Order ${orderId} not found`);
+    return;
+  }
+
+  const restaurant = db.get("restaurants").find({ id: order.restaurant_id }).value();
+  const restaurantLat = restaurant?.latitude || restaurant?.lat || 10.776;
+  const restaurantLng = restaurant?.longitude || restaurant?.lng || 106.7;
+
+  // Validate order state
+  if (!order) {
+    console.log(`[DRONE SIM] Order ${orderId} not found`);
+    return;
+  }
+
+  // Check if order is in valid state for starting simulation
+  if (order.drone_journey_stage !== "searching") {
+    console.log(`[DRONE SIM] Order ${orderId} not in searching stage (current: ${order.drone_journey_stage}), skipping`);
+    return;
+  }
+
+  // Validate drone is assigned
+  if (!droneId || order.drone_id !== droneId) {
+    console.log(`[DRONE SIM] Drone mismatch for order ${orderId}: expected ${droneId}, got ${order.drone_id}`);
+    return;
+  }
+
+  console.log(`[DRONE SIM] ✅ Starting simulation for order ${orderId} with drone ${droneId}`);
+
+  // Step 1: Wait 1 second before starting to move (let frontend show "searching" state)
+  setTimeout(() => {
+    // Re-check order state before proceeding
+    const currentOrder = db.get("orders").find({ id: orderId }).value();
+    if (!currentOrder || currentOrder.drone_journey_stage !== "searching") {
+      console.log(`[DRONE SIM] Order ${orderId} state changed, aborting simulation`);
+      return;
+    }
+    // Set to "going_to_restaurant" and start moving
+    db.get("orders")
+      .find({ id: orderId })
+      .assign({
+        drone_journey_stage: "going_to_restaurant",
+        current_gps: {
+          lat: BASE_LOCATION.lat,
+          lng: BASE_LOCATION.lng,
+          latitude: BASE_LOCATION.lat,
+          longitude: BASE_LOCATION.lng,
+        },
+        updated_at: new Date().toISOString(),
+      })
+      .write();
+
+    // Set drone at base location
+    db.get("drones")
+      .find({ id: droneId })
+      .assign({
+        latitude: BASE_LOCATION.lat,
+        longitude: BASE_LOCATION.lng,
+        current_location: {
+          lat: BASE_LOCATION.lat,
+          lng: BASE_LOCATION.lng,
+        },
+        updated_at: new Date().toISOString(),
+      })
+      .write();
+
+    console.log(`[DRONE SIM] Order ${orderId}: drone leaving base NOW, going to restaurant`);
+
+    // Step 2: Simulate GPS movement from base to restaurant using RECURSIVE setTimeout
+    const steps = 20; // 20 steps
+    const interval = 100; // 100ms per step = 2 seconds total
+    let currentStep = 0;
+
+    const moveStep = () => {
+      currentStep++;
+      if (currentStep > steps) {
+        // Finished moving - arrived at restaurant
+        const currentOrder = db.get("orders").find({ id: orderId }).value();
+        if (currentOrder && currentOrder.drone_journey_stage === "going_to_restaurant") {
+          db.get("orders")
+            .find({ id: orderId })
+            .assign({
+              status: "preparing", // Update status to preparing when drone arrives
+              drone_journey_stage: "at_restaurant",
+              current_gps: {
+                lat: restaurantLat,
+                lng: restaurantLng,
+                latitude: restaurantLat,
+                longitude: restaurantLng,
+              },
+              updated_at: new Date().toISOString(),
+            })
+            .write();
+
+          // Set drone to exact restaurant location
+          db.get("drones")
+            .find({ id: droneId })
+            .assign({
+              latitude: restaurantLat,
+              longitude: restaurantLng,
+              current_location: {
+                lat: restaurantLat,
+                lng: restaurantLng,
+              },
+              updated_at: new Date().toISOString(),
+            })
+            .write();
+
+          console.log(`[DRONE SIM] ✅ Order ${orderId}: drone ARRIVED at restaurant - Status changed to PREPARING`);
+        }
+        return;
+      }
+
+      // Calculate current position
+      const progress = currentStep / steps;
+      const currentLat = BASE_LOCATION.lat + (restaurantLat - BASE_LOCATION.lat) * progress;
+      const currentLng = BASE_LOCATION.lng + (restaurantLng - BASE_LOCATION.lng) * progress;
+
+      // Update drone location
+      db.get("drones")
+        .find({ id: droneId })
+        .assign({
+          latitude: currentLat,
+          longitude: currentLng,
+          current_location: {
+            lat: currentLat,
+            lng: currentLng,
+          },
+          updated_at: new Date().toISOString(),
+        })
+        .write();
+
+      // Update order current_gps so frontend can track drone in real-time
+      db.get("orders")
+        .find({ id: orderId })
+        .assign({
+          current_gps: {
+            lat: currentLat,
+            lng: currentLng,
+            latitude: currentLat,
+            longitude: currentLng,
+          },
+          updated_at: new Date().toISOString(),
+        })
+        .write();
+
+      console.log(`[DRONE SIM] 🚁 Drone ${droneId} step ${currentStep}/${steps}: (${currentLat.toFixed(5)}, ${currentLng.toFixed(5)}) - ${Math.round(progress * 100)}%`);
+
+      // Schedule next step
+      setTimeout(moveStep, interval);
+    };
+
+    // Start first step
+    moveStep();
+  }, 1000); // 1 second delay before starting
+};
+
+/**
+ * Simulate drone flying from restaurant to customer, then return to base
+ * Duration: 15 seconds (delivery) + 10 seconds (return to base)
+ * Flow: going_to_customer -> at_customer -> arrived -> returning_to_base -> (drone available)
+ * Base location: 273 An Dương Vương (10.7626, 106.682)
+ */
+const simulateDroneToCustomer = (orderId) => {
+  try {
+    console.log(`[DRONE SIM] ========== FUNCTION CALLED ==========`);
+    console.log(`[DRONE SIM] Received orderId: ${orderId}`);
+    const db = router.db;
+    const BASE_LOCATION = { lat: 10.7626, lng: 106.682 };
+
+    const order = db.get("orders").find({ id: orderId }).value();
+    console.log(`[DRONE SIM] Order found:`, order ? `YES (drone: ${order.drone_id})` : `NO`);
+
+    if (!order || !order.drone_id) {
+      console.log(`[DRONE SIM] ❌ CANNOT START: order=${!!order}, drone_id=${order?.drone_id}`);
+      return;
+    }
+
+    console.log(`[DRONE SIM] ========== STARTING DELIVERY SIMULATION ==========`);
+    console.log(`[DRONE SIM] Order ID: ${orderId}`);
+    console.log(`[DRONE SIM] Drone ID: ${order.drone_id}`);
+    console.log(`[DRONE SIM] Current status: ${order.status}, stage: ${order.drone_journey_stage}`);
+
+    // Validate order state
+    if (order.drone_journey_stage !== "at_restaurant") {
+      console.log(`[DRONE SIM] ❌ Order ${orderId} drone not at restaurant (stage: ${order.drone_journey_stage}), cannot start delivery`);
+      return;
+    }
+
+    console.log(`[DRONE SIM] ✅ Validation passed, starting restaurant -> customer for order ${orderId}`);
+
+    // Wait 2 seconds before starting (let frontend show "ready" state)
+    setTimeout(() => {
+      // Re-check order state before proceeding
+      const currentOrder = db.get("orders").find({ id: orderId }).value();
+      if (!currentOrder) {
+        console.log(`[DRONE SIM] ❌ Order ${orderId} not found, aborting delivery`);
+        return;
+      }
+
+      // Allow "at_restaurant" or "ready" status
+      if (currentOrder.drone_journey_stage !== "at_restaurant" && currentOrder.status !== "ready") {
+        console.log(`[DRONE SIM] ❌ Order ${orderId} state changed (status: ${currentOrder.status}, stage: ${currentOrder.drone_journey_stage}), aborting delivery`);
+        return;
+      }
+
+      // NOW set status to delivering and start moving
+      db.get("orders")
+        .find({ id: orderId })
+        .assign({
+          drone_journey_stage: "going_to_customer",
+          status: "delivering",
+          updated_at: new Date().toISOString(),
+        })
+        .write();
+
+      console.log(`[DRONE SIM] ✅ Order ${orderId}: Status changed to DELIVERING, drone starting journey`);
+
+      // Simulate GPS movement from restaurant to customer
+      const pickup = order.pickup_gps || { latitude: 10.776, longitude: 106.7 };
+      const dropoff = order.dropoff_gps || { latitude: 10.7867657, longitude: 106.7001391 };
+
+      const pickupLat = pickup.latitude || pickup.lat || 10.776;
+      const pickupLng = pickup.longitude || pickup.lng || 106.7;
+      const dropoffLat = dropoff.latitude || dropoff.lat || 10.7867657;
+      const dropoffLng = dropoff.longitude || dropoff.lng || 106.7001391;
+
+      const steps = 40; // 40 steps - nhiều steps hơn để thấy di chuyển mượt
+      const interval = 200; // 200ms per step = 8 seconds total
+      let currentStep = 0;
+
+      const moveToCustomer = () => {
+        currentStep++;
+        if (currentStep > steps) {
+          // Arrived at customer
+          console.log(`[DRONE SIM] ✅ Order ${orderId}: drone ARRIVED at customer`);
+
+          db.get("orders")
+            .find({ id: orderId })
+            .assign({
+              status: "arrived",
+              drone_journey_stage: "at_customer",
+              current_gps: {
+                lat: dropoffLat,
+                lng: dropoffLng,
+                latitude: dropoffLat,
+                longitude: dropoffLng,
+              },
+              updated_at: new Date().toISOString(),
+            })
+            .write();
+
+          db.get("drones")
+            .find({ id: order.drone_id })
+            .assign({
+              latitude: dropoffLat,
+              longitude: dropoffLng,
+              current_location: {
+                lat: dropoffLat,
+                lng: dropoffLng,
+              },
+              updated_at: new Date().toISOString(),
+            })
+            .write();
+
+          // After 2 seconds at customer, start returning to base
+          setTimeout(() => {
+            console.log(`[DRONE SIM] 🔙 Order ${orderId}: drone returning to base`);
+            returnToBase(order.drone_id, dropoffLat, dropoffLng);
+          }, 2000);
+
+          // Auto-complete order after 10 minutes if customer doesn't confirm
+          setTimeout(() => {
+            const currentOrder = db.get("orders").find({ id: orderId }).value();
+            if (currentOrder && currentOrder.status === "arrived") {
+              console.log(`[AUTO-COMPLETE] ⏰ Order ${orderId}: Auto-completing after 10 minutes`);
+              db.get("orders")
+                .find({ id: orderId })
+                .assign({
+                  status: "delivered",
+                  actual_delivery_time: new Date().toISOString(),
+                  updated_at: new Date().toISOString(),
+                })
+                .write();
+            }
+          }, 10 * 60 * 1000); // 10 minutes
+          return;
+        }
+
+        // Calculate current position
+        const progress = currentStep / steps;
+        const currentLat = pickupLat + (dropoffLat - pickupLat) * progress;
+        const currentLng = pickupLng + (dropoffLng - pickupLng) * progress;
+
+        console.log(`[DRONE SIM] 🚁 Drone step ${currentStep}/${steps}: (${currentLat.toFixed(6)}, ${currentLng.toFixed(6)}) - ${Math.round(progress * 100)}%`);
+
+        db.get("orders")
+          .find({ id: orderId })
+          .assign({
+            current_gps: {
+              lat: currentLat,
+              lng: currentLng,
+              latitude: currentLat,
+              longitude: currentLng,
+            },
+            updated_at: new Date().toISOString(),
+          })
+          .write();
+
+        db.get("drones")
+          .find({ id: order.drone_id })
+          .assign({
+            latitude: currentLat,
+            longitude: currentLng,
+            current_location: {
+              lat: currentLat,
+              lng: currentLng,
+            },
+            updated_at: new Date().toISOString(),
+          })
+          .write();
+
+        // Schedule next step
+        setTimeout(moveToCustomer, interval);
+      };
+
+      // Start movement
+      moveToCustomer();
+
+      // Helper function to return drone to base
+      function returnToBase(droneId, startLat, startLng) {
+        const returnSteps = 10; // 10 steps
+        const returnInterval = 1000; // 1 second per step = 10 seconds total
+        let returnStep = 0;
+
+        const moveToBase = () => {
+          returnStep++;
+          if (returnStep > returnSteps) {
+            // Arrived at base
+            console.log(`[DRONE SIM] ✅ Drone ${droneId}: ARRIVED at base, now available`);
+
+            db.get("drones")
+              .find({ id: droneId })
+              .assign({
+                status: "available",
+                assigned_order_id: null,
+                latitude: BASE_LOCATION.lat,
+                longitude: BASE_LOCATION.lng,
+                current_location: {
+                  lat: BASE_LOCATION.lat,
+                  lng: BASE_LOCATION.lng,
+                  address: "273 An Dương Vương, Phường Chợ Quán, TP. HCM"
+                },
+                battery_level: 100,
+                updated_at: new Date().toISOString(),
+              })
+              .write();
+            return;
+          }
+
+          const returnProgress = returnStep / returnSteps;
+          const currentReturnLat = startLat + (BASE_LOCATION.lat - startLat) * returnProgress;
+          const currentReturnLng = startLng + (BASE_LOCATION.lng - startLng) * returnProgress;
+
+          console.log(`[DRONE SIM] 🔙 Drone ${droneId} returning step ${returnStep}/${returnSteps}: (${currentReturnLat.toFixed(6)}, ${currentReturnLng.toFixed(6)})`);
+
+          db.get("drones")
+            .find({ id: droneId })
+            .assign({
+              latitude: currentReturnLat,
+              longitude: currentReturnLng,
+              current_location: {
+                lat: currentReturnLat,
+                lng: currentReturnLng,
+              },
+              updated_at: new Date().toISOString(),
+            })
+            .write();
+
+          // Schedule next step
+          setTimeout(moveToBase, returnInterval);
+        };
+
+        // Start return journey
+        moveToBase();
+      }
+    }, 2000); // 2 seconds delay before starting delivery
+  } catch (error) {
+    console.error(`[DRONE SIM] ❌❌❌ ERROR IN simulateDroneToCustomer:`, error);
+  }
+};
+
+// ========== BACKGROUND DRONE ASSIGNMENT SERVICE ==========
+// ========== RESUME STUCK SIMULATIONS ON SERVER START ==========
+// Resume any orders stuck in "going_to_restaurant" or "going_to_customer" stages
+const resumeStuckSimulations = () => {
+  const db = router.db;
+  const orders = db.get("orders").value() || [];
+  const BASE_LOCATION = { lat: 10.7626, lng: 106.682 };
+
+  orders.forEach((order) => {
+    // Release drones from completed orders
+    if (["arrived", "delivered", "completed", "cancelled"].includes(order.status) && order.drone_id) {
+      const drone = db.get("drones").find({ id: order.drone_id }).value();
+      if (drone && drone.status === "busy" && drone.assigned_order_id === order.id) {
+        console.log(`[RESUME] Releasing drone ${order.drone_id} from completed order ${order.id}`);
+        db.get("drones")
+          .find({ id: order.drone_id })
+          .assign({
+            status: "available",
+            assigned_order_id: null,
+            latitude: BASE_LOCATION.lat,
+            longitude: BASE_LOCATION.lng,
+            current_location: {
+              lat: BASE_LOCATION.lat,
+              lng: BASE_LOCATION.lng,
+              address: "273 An Dương Vương, Phường Chợ Quán, TP. HCM"
+            },
+            battery_level: 100,
+            updated_at: new Date().toISOString(),
+          })
+          .write();
+      }
+      return; // Skip further processing
+    }
+
+    if (order.drone_id && order.drone_journey_stage) {
+      // Handle orders stuck in "searching" state with drone already assigned
+      if (order.drone_journey_stage === "searching") {
+        console.log(`[RESUME] Order ${order.id} stuck in searching with drone ${order.drone_id}, restarting simulation...`);
+        // Restart the simulation to restaurant
+        simulateDroneToRestaurant(order.id, order.drone_id);
+        return;
+      }
+
+      if (order.drone_journey_stage === "going_to_restaurant") {
+        console.log(`[RESUME] Order ${order.id} stuck in going_to_restaurant, completing journey...`);
+        // Complete the journey to restaurant immediately
+        const restaurant = db.get("restaurants").find({ id: order.restaurant_id }).value();
+        const restaurantLat = restaurant?.latitude || restaurant?.lat || 10.776;
+        const restaurantLng = restaurant?.longitude || restaurant?.lng || 106.7;
+
+        db.get("orders")
+          .find({ id: order.id })
+          .assign({
+            drone_journey_stage: "at_restaurant",
+            updated_at: new Date().toISOString(),
+          })
+          .write();
+
+        db.get("drones")
+          .find({ id: order.drone_id })
+          .assign({
+            latitude: restaurantLat,
+            longitude: restaurantLng,
+            current_location: {
+              lat: restaurantLat,
+              lng: restaurantLng,
+            },
+            updated_at: new Date().toISOString(),
+          })
+          .write();
+
+        console.log(`[RESUME] Order ${order.id} drone now at restaurant`);
+      } else if (order.drone_journey_stage === "at_restaurant" && order.status === "ready") {
+        // Handle orders stuck in "ready" state (restaurant marked ready but simulation didn't start)
+        console.log(`[RESUME] Order ${order.id} stuck in ready state, restarting delivery simulation...`);
+        simulateDroneToCustomer(order.id);
+        return;
+      } else if (order.drone_journey_stage === "going_to_customer") {
+        console.log(`[RESUME] Order ${order.id} stuck in going_to_customer, completing delivery...`);
+        // Complete the delivery to customer immediately
+        const dropoff = order.dropoff_gps || { lat: 10.7867657, lng: 106.7001391 };
+        const dropoffLat = dropoff.latitude || dropoff.lat || 10.7867657;
+        const dropoffLng = dropoff.longitude || dropoff.lng || 106.7001391;
+
+        db.get("orders")
+          .find({ id: order.id })
+          .assign({
+            drone_journey_stage: "at_customer",
+            status: "arrived",
+            updated_at: new Date().toISOString(),
+          })
+          .write();
+
+        db.get("drones")
+          .find({ id: order.drone_id })
+          .assign({
+            latitude: dropoffLat,
+            longitude: dropoffLng,
+            current_location: {
+              lat: dropoffLat,
+              lng: dropoffLng,
+            },
+            updated_at: new Date().toISOString(),
+          })
+          .write();
+
+        console.log(`[RESUME] Order ${order.id} drone now at customer`);
+      }
+    }
+  });
+};
+
+// Run resume on server start
+console.log("[INIT] Checking for stuck simulations...");
+resumeStuckSimulations();
+
+// Automatically assign drones to confirmed orders every 5 seconds
+let droneAssignmentInterval = setInterval(() => {
+  const db = router.db;
+  const orders = db.get("orders").value() || [];
+  const drones = db.get("drones").value() || [];
+
+  // Find orders that need drone assignment (status='confirmed' means payment completed and restaurant confirmed)
+  const ordersNeedingDrone = orders.filter(
+    (order) =>
+      order.status === "confirmed" &&
+      !order.drone_id &&
+      !order.drone_journey_stage
+  );
+
+  if (ordersNeedingDrone.length === 0) {
+    return; // No orders to process
+  }
+
+  // Find available drones
+  const availableDrones = drones.filter(
+    (drone) => drone.status === "available"
+  );
+
+  if (availableDrones.length === 0) {
+    console.log(
+      `[DRONE ASSIGNMENT] ${ordersNeedingDrone.length} orders waiting, but no drones available`
+    );
+    return;
+  }
+
+  // Assign drones to orders (one drone per order)
+  ordersNeedingDrone.slice(0, availableDrones.length).forEach((order, index) => {
+    const drone = availableDrones[index];
+
+    // Update order
+    db.get("orders")
+      .find({ id: order.id })
+      .assign({
+        drone_id: drone.id,
+        drone_journey_stage: "searching",
+        updated_at: new Date().toISOString(),
+      })
+      .write();
+
+    // Update drone
+    db.get("drones")
+      .find({ id: drone.id })
+      .assign({
+        status: "busy",
+        assigned_order_id: order.id,
+        updated_at: new Date().toISOString(),
+      })
+      .write();
+
+    console.log(
+      `[DRONE ASSIGNMENT] Assigned drone ${drone.identifier} to order ${order.id}`
+    );
+
+    // Start drone simulation to restaurant
+    simulateDroneToRestaurant(order.id, drone.id);
+  });
 }, 5000);
 
 // Save on server shutdown
 process.on("SIGINT", () => {
   console.log("\nSaving database before shutdown...");
-  clearInterval(saveInterval);
+  clearInterval(droneAssignmentInterval);
   saveDb();
   console.log("Database saved. Shutting down...");
   process.exit(0);
@@ -166,7 +749,8 @@ server.post("/orders/check-pending-expiry", (req, res) => {
   let cancelledCount = 0;
 
   orders.forEach((order) => {
-    if (order.status === "pending") {
+    // Only auto-cancel if payment not completed
+    if (order.status === "pending" && order.payment_status === "pending") {
       const createdAt = new Date(order.created_at).getTime();
       const timeDiff = now - createdAt;
 
@@ -345,6 +929,25 @@ server.post("/orders", (req, res) => {
   });
 
   res.status(201).json(newOrder);
+});
+
+// Middleware to validate order status transitions
+server.patch("/orders/:id", (req, res, next) => {
+  if (req.body.status === 'confirmed') {
+    const db = router.db;
+    const orderId = req.params.id;
+    const order = db.get('orders').find({ id: orderId }).value();
+
+    // Validate: can only confirm if payment is completed (check both payment_status and status)
+    if (order && order.payment_status !== 'paid' && order.status !== 'paid') {
+      return res.status(400).json({
+        success: false,
+        message: 'Cannot confirm order: Payment not completed',
+        code: 'PAYMENT_NOT_COMPLETED'
+      });
+    }
+  }
+  next();
 });
 
 // Apply auth middleware (after custom routes)
@@ -1253,6 +1856,28 @@ server.patch("/orders/:id", (req, res) => {
   if (updateData.status !== undefined) {
     updatedOrder.status = updateData.status;
     console.log(`[PATCH /orders/:id] Status updated to: ${updateData.status}`);
+
+    // Auto-release drone when order is completed/delivered/cancelled
+    if (["delivered", "completed", "cancelled"].includes(updateData.status) && order.drone_id) {
+      const BASE_LOCATION = { lat: 10.7626, lng: 106.682 };
+      console.log(`[PATCH /orders/:id] Auto-releasing drone ${order.drone_id} from order ${orderId}`);
+      db.get("drones")
+        .find({ id: order.drone_id })
+        .assign({
+          status: "available",
+          assigned_order_id: null,
+          latitude: BASE_LOCATION.lat,
+          longitude: BASE_LOCATION.lng,
+          current_location: {
+            lat: BASE_LOCATION.lat,
+            lng: BASE_LOCATION.lng,
+            address: "273 An Dương Vương, Phường Chợ Quán, TP. HCM"
+          },
+          battery_level: 100,
+          updated_at: new Date().toISOString(),
+        })
+        .write();
+    }
   }
 
   if (updateData.drone_id !== undefined) {
@@ -1301,6 +1926,43 @@ server.patch("/orders/:id", (req, res) => {
   });
 });
 
+// ========== GET DRONE STATUS ENDPOINT ==========
+// GET /orders/:id/drone-status - Get drone journey status for an order
+server.get("/orders/:id/drone-status", (req, res) => {
+  const db = router.db;
+  const orderId = req.params.id;
+
+  const order = db.get("orders").find({ id: orderId }).value();
+  if (!order) {
+    return res.status(404).json({
+      success: false,
+      message: "Order not found",
+    });
+  }
+
+  let droneInfo = null;
+  if (order.drone_id) {
+    const drone = db.get("drones").find({ id: order.drone_id }).value();
+    if (drone) {
+      droneInfo = {
+        id: drone.id,
+        identifier: drone.identifier,
+        status: drone.status,
+        battery_level: drone.battery_level,
+        current_location: drone.current_location,
+      };
+    }
+  }
+
+  res.json({
+    success: true,
+    order_id: order.id,
+    drone_id: order.drone_id,
+    drone_journey_stage: order.drone_journey_stage,
+    drone: droneInfo,
+  });
+});
+
 // ========== SIMULATE DRONE DELIVERY ENDPOINT ==========
 // POST /orders/:id/simulate-delivery - Trigger drone movement simulation
 // Drone moves from pickup_gps to dropoff_gps, then order status becomes "arrived"
@@ -1317,82 +1979,40 @@ server.post("/orders/:id/simulate-delivery", (req, res) => {
     return res.status(400).json({ error: "Order has no drone assigned" });
   }
 
-  // Set order to delivering status with mock GPS movement
-  // Ensure consistent format: use both latitude/longitude AND lat/lng for compatibility
-  const pickup = order.pickup_gps || { latitude: 10.776, longitude: 106.7 };
-  const dropoff = order.dropoff_gps || { latitude: 10.7867657, longitude: 106.7001391 };
+  // VALIDATION: Drone must be at restaurant before restaurant can mark ready
+  if (order.drone_journey_stage !== "at_restaurant") {
+    return res.status(400).json({
+      error: "Cannot start delivery: Drone has not arrived at restaurant yet",
+      code: "DRONE_NOT_AT_RESTAURANT",
+      current_stage: order.drone_journey_stage,
+    });
+  }
 
-  // Normalize to ensure we have latitude/longitude format
-  const pickupLat = pickup.latitude || pickup.lat || 10.776;
-  const pickupLng = pickup.longitude || pickup.lng || 106.7;
-  const dropoffLat = dropoff.latitude || dropoff.lat || 10.7867657;
-  const dropoffLng = dropoff.longitude || dropoff.lng || 106.7001391;
+  // Use the new simulation function
+  console.log(`[API] POST /orders/${orderId}/simulate-delivery - Starting drone simulation`);
+  console.log(`[API] Order status: ${order.status}, drone_journey_stage: ${order.drone_journey_stage}`);
 
-  // Update order to delivering
+  // Mark order as "ready" (food is ready for pickup)
+  // Status will be updated to "delivering" by simulateDroneToCustomer after delay
   db.get("orders")
     .find({ id: orderId })
     .assign({
-      status: "delivering",
-      current_gps: {
-        latitude: pickupLat,
-        longitude: pickupLng,
-      },
+      status: "ready",
       updated_at: new Date().toISOString(),
     })
     .write();
 
-  console.log(`[SIMULATE DELIVERY] Starting simulation for order ${orderId}`);
-  console.log(`[SIMULATE DELIVERY] From: (${pickupLat}, ${pickupLng}) To: (${dropoffLat}, ${dropoffLng})`);
+  console.log(`[API] Order marked as ready, starting drone simulation`);
 
-  // Simulate progressive movement from pickup to dropoff in steps
-  const steps = 10;
-  const interval = 1500; // 1.5 seconds per step
-
-  for (let i = 1; i <= steps; i++) {
-    setTimeout(() => {
-      const progress = i / steps;
-      const currentLat = pickupLat + (dropoffLat - pickupLat) * progress;
-      const currentLng = pickupLng + (dropoffLng - pickupLng) * progress;
-
-      db.get("orders")
-        .find({ id: orderId })
-        .assign({
-          current_gps: {
-            latitude: currentLat,
-            longitude: currentLng,
-          },
-          updated_at: new Date().toISOString(),
-        })
-        .write();
-
-      console.log(`[SIMULATE DELIVERY] Step ${i}/${steps}: (${currentLat.toFixed(6)}, ${currentLng.toFixed(6)})`);
-
-      // Last step - mark as arrived (not delivered yet)
-      if (i === steps) {
-        setTimeout(() => {
-          db.get("orders")
-            .find({ id: orderId })
-            .assign({
-              status: "arrived",
-              current_gps: {
-                latitude: dropoffLat,
-                longitude: dropoffLng,
-              },
-              updated_at: new Date().toISOString(),
-            })
-            .write();
-          console.log(`[SIMULATE DELIVERY] Drone arrived at destination for order ${orderId}`);
-        }, 500);
-      }
-    }, i * interval);
-  }
+  // Start simulation - it will update status to "delivering" after the initial delay
+  simulateDroneToCustomer(orderId);
 
   res.json({
     success: true,
-    message: "Drone delivery simulation started",
+    message: "Order marked as ready, drone will start delivery simulation",
     orderId,
-    steps,
-    interval,
+    drone_id: order.drone_id,
+    status: "ready",
   });
 });
 

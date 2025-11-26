@@ -44,7 +44,7 @@ export default function HomeScreen({ onNavigate }) {
   const [error, setError] = useState(null);
   const [selectedCategory, setSelectedCategory] = useState('');
   const [nearbyRestaurants, setNearbyRestaurants] = useState([]);
-  const [address, setAddress] = useState('Select location');
+  const [address, setAddress] = useState('Chọn vị trí');
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearchOverlay, setShowSearchOverlay] = useState(false);
   const [showSearchResults, setShowSearchResults] = useState(false);
@@ -141,7 +141,7 @@ export default function HomeScreen({ onNavigate }) {
       await requestLocation();
     } catch (err) {
       console.error('[HomeScreen] Error requesting location:', err);
-      Alert.alert('Error', 'Failed to get location. Please check your GPS settings.');
+      Alert.alert('Lỗi', 'Không thể lấy vị trí. Vui lòng kiểm tra cài đặt GPS.');
     } finally {
       setGpsLoading(false);
     }
@@ -255,7 +255,7 @@ export default function HomeScreen({ onNavigate }) {
         />
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#ff6b35" />
-          <Text style={styles.loadingText}>Loading...</Text>
+          <Text style={styles.loadingText}>Đang tải...</Text>
         </View>
       </SafeAreaView>
     );
@@ -276,7 +276,7 @@ export default function HomeScreen({ onNavigate }) {
         <View style={styles.errorContainer}>
           <Text style={styles.errorText}>Error: {error}</Text>
           <TouchableOpacity style={styles.retryBtn} onPress={fetchData}>
-            <Text style={styles.retryBtnText}>Retry</Text>
+            <Text style={styles.retryBtnText}>Thử lại</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -313,7 +313,7 @@ export default function HomeScreen({ onNavigate }) {
         {/* Nearby Restaurants (when location available) */}
         {nearbyRestaurants.length > 0 && (
           <View style={styles.section}>
-            <SectionTitle title="Nearby Restaurants" />
+            <SectionTitle title="Nhà hàng gần đây" />
             <FlatList
               horizontal
               scrollEnabled
@@ -337,7 +337,7 @@ export default function HomeScreen({ onNavigate }) {
         {topRatedFoods.length > 0 && (
           <View style={styles.section}>
             <SectionTitleWithIcon
-              title="Top Rated"
+              title="Đánh giá cao"
               icon="star"
               iconColor="#FFB800"
             />
@@ -362,7 +362,7 @@ export default function HomeScreen({ onNavigate }) {
         {bestSellerFoods.length > 0 && (
           <View style={styles.section}>
             <SectionTitleWithIcon
-              title="Best Sellers"
+              title="Bán chạy"
               icon="local-fire-department"
               iconColor="#FF6B35"
             />
@@ -391,7 +391,7 @@ export default function HomeScreen({ onNavigate }) {
 
         {/* Foods Grid */}
         <View style={styles.section}>
-          <SectionTitle title="Popular Items" />
+          <SectionTitle title="Món phổ biến" />
           <View style={styles.gridContainer}>
             <View style={styles.gridWrapper}>
               {filteredFoods.map((item) => (
@@ -411,7 +411,7 @@ export default function HomeScreen({ onNavigate }) {
         {/* Top Rated Restaurants */}
         <View style={styles.section}>
           <SectionTitle
-            title="Top Rated Restaurants"
+            title="Nhà hàng đánh giá cao"
           />
           <FlatList
             scrollEnabled={false}

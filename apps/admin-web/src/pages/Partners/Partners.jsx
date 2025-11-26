@@ -20,17 +20,17 @@ const Partners = () => {
   const handleApproveClick = async (id) => {
     if (
       window.confirm(
-        "Approve this restaurant? It will be able to start operating."
+        "Phê duyệt nhà hàng này? Họ sẽ có thể bắt đầu hoạt động."
       )
     ) {
       const restaurant = restaurants.find((r) => r.id === id);
       const result = await handleApprove(id, restaurant);
       if (result.success) {
         alert(
-          "Restaurant approved successfully! They can now login and start accepting orders."
+          "Phê duyệt nhà hàng thành công! Họ có thể đăng nhập và bắt đầu nhận đơn hàng."
         );
       } else {
-        alert("Error: " + result.message);
+        alert("Lỗi: " + result.message);
       }
     }
   };
@@ -38,15 +38,15 @@ const Partners = () => {
   const handleBlockClick = async (id) => {
     if (
       window.confirm(
-        "Block this restaurant? They won't be able to login or receive orders."
+        "Khóa nhà hàng này? Họ sẽ không thể đăng nhập hoặc nhận đơn hàng."
       )
     ) {
       const restaurant = restaurants.find((r) => r.id === id);
       const result = await handleBlock(id, restaurant);
       if (result.success) {
-        alert("Restaurant blocked successfully!");
+        alert("Đã khóa nhà hàng thành công!");
       } else {
-        alert("Error: " + result.message);
+        alert("Lỗi: " + result.message);
       }
     }
   };
@@ -54,15 +54,15 @@ const Partners = () => {
   const handleUnblockClick = async (id) => {
     if (
       window.confirm(
-        "Unblock this restaurant? They will be able to login and receive orders again."
+        "Mở khóa nhà hàng này? Họ sẽ có thể đăng nhập và nhận đơn hàng lại."
       )
     ) {
       const restaurant = restaurants.find((r) => r.id === id);
       const result = await handleUnblock(id, restaurant);
       if (result.success) {
-        alert("Restaurant unblocked successfully!");
+        alert("Đã mở khóa nhà hàng thành công!");
       } else {
-        alert("Error: " + result.message);
+        alert("Lỗi: " + result.message);
       }
     }
   };
@@ -70,18 +70,18 @@ const Partners = () => {
   const handleDeleteClick = async (id) => {
     if (
       window.confirm(
-        "DELETE this restaurant permanently?\n\nThis will:\n- Delete the restaurant account\n- Remove all their menu items\n- Cancel any pending orders\n\nThis action CANNOT be undone!"
+        "XÓA VĨNH VIỄN nhà hàng này?\n\nHành động này sẽ:\n- Xóa tài khoản nhà hàng\n- Xóa tất cả món ăn\n- Hủy các đơn hàng đang chờ\n\nHành động này KHÔNG THỂ hoàn tác!"
       )
     ) {
       const secondConfirm = window.prompt(
-        'Type "DELETE" to confirm permanent deletion:'
+        'Nhập "DELETE" để xác nhận xóa vĩnh viễn:'
       );
       if (secondConfirm === "DELETE") {
         const result = await handleDelete(id);
         if (result.success) {
-          alert("Restaurant deleted permanently!");
+          alert("Đã xóa vĩnh viễn nhà hàng!");
         } else {
-          alert("Error: " + result.message);
+          alert("Lỗi: " + result.message);
         }
       }
     }
@@ -90,16 +90,16 @@ const Partners = () => {
   return (
     <div className="partners-page">
       <div className="partners-header">
-        <h2>Restaurant Management</h2>
+        <h2>Quản lý Nhà hàng</h2>
         <button onClick={refresh} disabled={loading} className="btn-refresh">
-          <MdRefresh /> {loading ? "Loading..." : "Refresh"}
+          <MdRefresh /> {loading ? "Đang tải..." : "Làm mới"}
         </button>
       </div>
 
       {/* PENDING RESTAURANTS */}
       <div className="section pending-section">
         <h3 className="section-title">
-          <MdNotifications /> Pending Approvals ({pendingRestaurants.length})
+          <MdNotifications /> Chờ duyệt ({pendingRestaurants.length})
         </h3>
         <PendingPartnerTable
           restaurants={pendingRestaurants}
@@ -110,7 +110,7 @@ const Partners = () => {
       {/* ACTIVE RESTAURANTS */}
       <div className="section active-section">
         <h3 className="section-title">
-          <MdCheckCircle /> Active Restaurants ({activeRestaurants.length})
+          <MdCheckCircle /> Nhà hàng hoạt động ({activeRestaurants.length})
         </h3>
         <ActivePartnerTable
           restaurants={activeRestaurants}
@@ -123,7 +123,7 @@ const Partners = () => {
       {blockedRestaurants.length > 0 && (
         <div className="section blocked-section">
           <h3 className="section-title">
-            <MdBlock /> Blocked Restaurants ({blockedRestaurants.length})
+            <MdBlock /> Nhà hàng bị khóa ({blockedRestaurants.length})
           </h3>
           <BlockedPartnerTable
             restaurants={blockedRestaurants}

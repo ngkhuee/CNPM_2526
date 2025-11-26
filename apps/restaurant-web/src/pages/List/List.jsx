@@ -57,20 +57,20 @@ const List = () => {
 
     const result = await updateFood(editedFood.id, updateData);
     if (result.success) {
-      toast.success("Food updated successfully!");
+      toast.success("Đã cập nhật món ăn thành công!");
       handleCloseEditModal();
     } else {
-      toast.error("Failed to update: " + result.message);
+      toast.error("Cập nhật thất bại: " + result.message);
     }
   };
 
   const handleRemoveFood = async (id) => {
-    if (window.confirm("Are you sure you want to delete this food?")) {
+    if (window.confirm("Bạn có chắc chắn muốn xóa món ăn này không?")) {
       const result = await deleteFood(id);
       if (result.success) {
-        toast.success("Food deleted successfully!");
+        toast.success("Đã xóa món ăn thành công!");
       } else {
-        toast.error("Failed to delete: " + result.message);
+        toast.error("Xóa thất bại: " + result.message);
       }
     }
   };
@@ -89,9 +89,9 @@ const List = () => {
   return (
     <div className="main-content">
       <div className="list-header">
-        <h2>All Foods List</h2>
+        <h2>Danh sách món ăn</h2>
         <button className="add-btn" onClick={() => navigate("/add")}>
-          <MdAdd /> Add New Food
+          <MdAdd /> Thêm món ăn mới
         </button>
       </div>
 
@@ -119,7 +119,7 @@ const List = () => {
             />
           ))
         ) : (
-          <p className="no-foods">No foods available</p>
+          <p className="no-foods">Không có món ăn nào</p>
         )}
       </div>
 

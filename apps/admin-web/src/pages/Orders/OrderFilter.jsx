@@ -5,20 +5,20 @@ const OrderFilter = ({ filter, onFilterChange, getStatusCount, onRefresh, refres
     return (
         <div>
             <div className="orders-header">
-                <h2>Order Management</h2>
+                <h2>Quản lý Đơn hàng</h2>
                 <button
                     onClick={onRefresh}
                     disabled={refreshing}
                     className="refresh-btn"
                 >
-                    <MdRefresh /> {refreshing ? "Refreshing..." : "Refresh"}
+                    <MdRefresh /> {refreshing ? "Đang làm mới..." : "Làm mới"}
                 </button>
             </div>
 
             <div className="orders-filter">
                 <input
                     type="text"
-                    placeholder="Search by Order ID..."
+                    placeholder="Tìm theo Mã đơn hàng..."
                     value={searchId}
                     onChange={(e) => onSearchChange(e.target.value)}
                     style={{
@@ -34,25 +34,25 @@ const OrderFilter = ({ filter, onFilterChange, getStatusCount, onRefresh, refres
                     className={filter === "all" ? "active" : ""}
                     onClick={() => onFilterChange("all")}
                 >
-                    All ({getStatusCount("all")})
+                    Tất cả ({getStatusCount("all")})
                 </button>
                 <button
                     className={filter === "delivering" ? "active" : ""}
                     onClick={() => onFilterChange("delivering")}
                 >
-                    Delivering ({getStatusCount("delivering")})
+                    Đang giao ({getStatusCount("delivering")})
                 </button>
                 <button
                     className={filter === "delivered" ? "active" : ""}
                     onClick={() => onFilterChange("delivered")}
                 >
-                    Delivered ({getStatusCount("delivered")})
+                    Đã giao ({getStatusCount("delivered")})
                 </button>
                 <button
                     className={filter === "cancelled" ? "active" : ""}
                     onClick={() => onFilterChange("cancelled")}
                 >
-                    Cancelled/Rejected ({getStatusCount("cancelled")})
+                    Đã hủy ({getStatusCount("cancelled")})
                 </button>
             </div>
         </div>

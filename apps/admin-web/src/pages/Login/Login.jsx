@@ -24,7 +24,7 @@ const Login = () => {
       if (response.success && response.user) {
         // Check role must be admin
         if (response.user.role !== "admin") {
-          setError("This account is not an admin account!");
+          setError("Tài khoản này không phải là tài khoản quản trị viên!");
           logoutAdmin();
           return;
         }
@@ -32,11 +32,11 @@ const Login = () => {
         // Navigate to admin dashboard
         navigate("/admin");
       } else {
-        setError(response.message || "Login failed!");
+        setError(response.message || "Đăng nhập thất bại!");
       }
     } catch (err) {
       console.error("Login error:", err);
-      setError(err.message || "An error occurred. Please try again.");
+      setError(err.message || "Có lỗi xảy ra. Vui lòng thử lại.");
     } finally {
       setLoading(false);
     }
@@ -46,8 +46,8 @@ const Login = () => {
     <div className="admin-login-page">
       <div className="admin-login-container">
         <form className="admin-login-form" onSubmit={handleSubmit}>
-          <h2>Admin Login</h2>
-          <p className="subtitle">System Management Portal</p>
+          <h2>Đăng nhập Quản trị viên</h2>
+          <p className="subtitle">Cổng quản lý hệ thống</p>
 
           {error && <div className="error-message">{error}</div>}
 
@@ -67,7 +67,7 @@ const Login = () => {
             <label>Password</label>
             <input
               type="password"
-              placeholder="Enter your password"
+              placeholder="Nhập mật khẩu của bạn"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
@@ -76,7 +76,7 @@ const Login = () => {
           </div>
 
           <button type="submit" className="login-button" disabled={loading}>
-            {loading ? "Logging in..." : "Login"}
+            {loading ? "Đang đăng nhập..." : "Đăng nhập"}
           </button>
         </form>
       </div>

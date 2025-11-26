@@ -40,8 +40,8 @@ const Dashboard = () => {
       <div className="dashboard-page">
         <h2>
           {currentRestaurant
-            ? `${currentRestaurant.name} Dashboard`
-            : "Restaurant Dashboard"}
+            ? `Bảng điều khiển ${currentRestaurant.name}`
+            : "Bảng điều khiển Nhà hàng"}
         </h2>
 
         {currentRestaurant && (
@@ -50,8 +50,8 @@ const Dashboard = () => {
               <MdLocationOn /> {currentRestaurant.location?.address}
             </p>
             <p>
-              <MdStar /> Rating: {currentRestaurant.rating} (
-              {currentRestaurant.reviewCount} reviews)
+              <MdStar /> Đánh giá: {currentRestaurant.rating} (
+              {currentRestaurant.reviewCount} đánh giá)
             </p>
             <p>
               <MdPhone /> {currentRestaurant.ownerPhone}
@@ -62,22 +62,22 @@ const Dashboard = () => {
         {/* Card thống kê */}
         <div className="cards-container">
           <CardStats
-            title="Total Orders"
+            title="Tổng đơn hàng"
             value={stats.totalOrders}
             color="primary"
           />
           <CardStats
-            title="Completed"
+            title="Hoàn thành"
             value={stats.completedOrders}
             color="success"
           />
           <CardStats
-            title="Pending"
+            title="Đang chờ"
             value={stats.pendingOrders}
             color="warning"
           />
           <CardStats
-            title="Revenue"
+            title="Doanh thu"
             value={formatCurrency(stats.revenue)}
             color="success"
           />
@@ -87,24 +87,24 @@ const Dashboard = () => {
         {reviewStats && (
           <div className="cards-container">
             <CardStats
-              title="Average Rating"
+              title="Đánh giá trung bình"
               value={`${formatRating(reviewStats.avgRating)}/5`}
               color="info"
             />
             <CardStats
-              title="Total Reviews"
+              title="Tổng đánh giá"
               value={reviewStats.total}
               color="primary"
             />
             <CardStats
-              title="Pending Replies"
+              title="Chờ phản hồi"
               value={reviewStats.pending}
               color="warning"
               onClick={() => navigate("/reviews?filter=pending")}
               className="clickable"
             />
             <CardStats
-              title="Replied"
+              title="Đã phản hồi"
               value={reviewStats.replied}
               color="success"
               onClick={() => navigate("/reviews?filter=replied")}

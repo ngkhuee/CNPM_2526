@@ -5,11 +5,11 @@ const Reports = () => {
     return (
         <div className="reports-page">
             <div className="reports-header">
-                <h2>Reports</h2>
+                <h2>Báo cáo</h2>
             </div>
 
             <div className="reports-content">
-                <p>Reports feature coming soon...</p>
+                <p>Tính năng báo cáo sắp ra mắt...</p>
             </div>
         </div>
     );

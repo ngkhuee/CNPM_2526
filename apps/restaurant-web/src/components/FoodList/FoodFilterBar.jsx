@@ -12,7 +12,7 @@ const FoodFilterBar = ({
         <div className="list-filters">
             <input
                 type="text"
-                placeholder="Search by name..."
+                placeholder="Tìm theo tên..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
             />
@@ -20,7 +20,7 @@ const FoodFilterBar = ({
                 value={categoryFilter}
                 onChange={(e) => setCategoryFilter(e.target.value)}
             >
-                <option value="All">All Categories</option>
+                <option value="All">Tất cả danh mục</option>
                 {categories.map((cat) => (
                     <option key={cat.id} value={cat.id}>
                         {cat.name}
@@ -37,7 +37,7 @@ const FoodFilterBar = ({
                     return null;
                 })}
                 {restaurantFoods.some((f) => !f.category && !f.categoryId) && (
-                    <option value="Uncategorized">Uncategorized</option>
+                    <option value="Uncategorized">Chưa phân loại</option>
                 )}
             </select>
         </div>

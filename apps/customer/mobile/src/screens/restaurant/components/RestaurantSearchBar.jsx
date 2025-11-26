@@ -15,7 +15,7 @@ export default function RestaurantSearchBar({ restaurantName, searchQuery, onSea
                 <MaterialIcons name="search" size={20} color="#999" style={styles.searchIcon} />
                 <TextInput
                     style={styles.input}
-                    placeholder={`Searching in ${restaurantName}`}
+                    placeholder={`Tìm kiếm tại ${restaurantName}`}
                     placeholderTextColor="#ccc"
                     value={searchQuery}
                     onChangeText={onSearchChange}

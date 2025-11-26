@@ -50,7 +50,7 @@ const RestaurantDetail = () => {
       <div className="restaurant-detail">
         <div className="loading-container">
           <div className="loading-spinner"></div>
-          <p>Loading restaurant...</p>
+          <p>Đang tải nhà hàng...</p>
         </div>
       </div>
     );
@@ -61,10 +61,10 @@ const RestaurantDetail = () => {
       <div className="restaurant-detail">
         <button className="back-button" onClick={() => navigate(-1)}>
           <MdArrowBack size={20} />
-          Back
+          Quay lại
         </button>
         <div className="error-container">
-          <p className="error-message">{error || "Restaurant not found"}</p>
+          <p className="error-message">{error || "Không tìm thấy nhà hàng"}</p>
         </div>
       </div>
     );
@@ -95,7 +95,7 @@ const RestaurantDetail = () => {
   const handleAddToCart = async (foodId, quantity = 1) => {
     // Check if restaurant is open
     if (!isOpen) {
-      alert("Sorry, this restaurant is currently closed. Please check the opening hours.");
+      alert("Xin lỗi, nhà hàng hiện đang đóng cửa. Vui lòng kiểm tra giờ mở cửa.");
       return;
     }
 
@@ -105,7 +105,7 @@ const RestaurantDetail = () => {
       if (can) {
         // Same restaurant or empty cart, add directly
         await addItem(restaurant.id, foodId, quantity, "");
-        alert("Added to cart!");
+        alert("Đã thêm vào giỏ hàng!");
         setShowFoodPopup(false);
       } else {
         // Different restaurant, show warning dialog
@@ -120,7 +120,7 @@ const RestaurantDetail = () => {
         setPendingFoodData({ foodId, quantity });
         setShowSwitchDialog(true);
       } else {
-        alert("Error adding to cart: " + error.message);
+        alert("Lỗi thêm vào giỏ hàng: " + error.message);
       }
     }
   };
@@ -143,13 +143,13 @@ const RestaurantDetail = () => {
         );
       }
 
-      alert("Cart updated!");
+      alert("Giỏ hàng đã cập nhật!");
       setShowSwitchDialog(false);
       setPendingFoodData(null);
       setShowFoodPopup(false);
     } catch (error) {
       console.error("Error switching restaurant:", error);
-      alert("Error updating cart: " + error.message);
+      alert("Lỗi cập nhật giỏ hàng: " + error.message);
     }
   };
 
@@ -175,7 +175,7 @@ const RestaurantDetail = () => {
       {/* Back Button */}
       <button className="back-button" onClick={() => navigate(-1)}>
         <MdArrowBack size={20} />
-        Back
+        Quay lại
       </button>
 
       {/* Restaurant Header */}
@@ -195,7 +195,7 @@ const RestaurantDetail = () => {
                 <MdStar size={18} />
                 <span>
                   {formatRating(rating !== null ? rating : restaurant.rating)} ({totalReviews || restaurant.reviewCount || 0}{" "}
-                  reviews)
+                  đánh giá)
                 </span>
               </div>
             )}
@@ -211,7 +211,7 @@ const RestaurantDetail = () => {
               className={`restaurant-status ${isOpen ? "open" : "closed"
                 }`}
             >
-              {isOpen ? "Open Now" : "Closed"}
+              {isOpen ? "Đang mở cửa" : "Đã đóng cửa"}
               {todayHours && (
                 <span className="hours-info">
                   {todayHours.open} - {todayHours.close}
@@ -232,15 +232,15 @@ const RestaurantDetail = () => {
           <div className="closed-notice">
             <MdWarning size={20} />
             <div className="notice-content">
-              <strong>This restaurant is currently closed</strong>
-              {todayHours && <p>Hours: {todayHours.open} - {todayHours.close}</p>}
-              <p>You can browse the menu, but cannot place an order now.</p>
+              <strong>Nhà hàng hiện đang đóng cửa</strong>
+              {todayHours && <p>Giờ mở cửa: {todayHours.open} - {todayHours.close}</p>}
+              <p>Bạn có thể xem thực đơn nhưng không thể đặt hàng lúc này.</p>
             </div>
           </div>
         )}
 
         <div className="menu-header">
-          <h2 className="menu-title">Menu</h2>
+          <h2 className="menu-title">Thực đơn</h2>
 
           {/* Category Filter */}
           {categories.length > 1 && (
@@ -263,7 +263,7 @@ const RestaurantDetail = () => {
         {menuLoading ? (
           <div className="loading-container">
             <div className="loading-spinner"></div>
-            <p>Loading menu...</p>
+            <p>Đang tải thực đơn...</p>
           </div>
         ) : filteredMenuItems.length > 0 ? (
           <div className="menu-items-grid">
@@ -288,8 +288,8 @@ const RestaurantDetail = () => {
           <div className="empty-container">
             <p className="empty-message">
               {selectedCategory === "All"
-                ? "No menu items available"
-                : `No items in ${selectedCategory} category`}
+                ? "Không có món ăn nào"
+                : `Không có món ăn trong danh mục ${selectedCategory}`}
             </p>
           </div>
         )}

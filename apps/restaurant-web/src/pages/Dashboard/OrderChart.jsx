@@ -10,7 +10,7 @@ const OrderChart = ({ data = [], loading = false }) => {
     if (loading) {
         return (
             <div className="chart-container">
-                <div className="chart-skeleton">Loading chart...</div>
+                <div className="chart-skeleton">Đang tải biểu đồ...</div>
             </div>
         );
     }
@@ -18,7 +18,7 @@ const OrderChart = ({ data = [], loading = false }) => {
     if (!data || data.length === 0) {
         return (
             <div className="chart-container">
-                <div className="chart-empty">No order data available</div>
+                <div className="chart-empty">Chưa có dữ liệu đơn hàng</div>
             </div>
         );
     }
@@ -27,7 +27,7 @@ const OrderChart = ({ data = [], loading = false }) => {
         <div className="chart-container">
             <div className="chart-header">
                 <div className="chart-title">
-                    <MdBarChart /> Orders Trend
+                    <MdBarChart /> Xu hướng Đơn hàng
                 </div>
             </div>
 
@@ -44,7 +44,7 @@ const OrderChart = ({ data = [], loading = false }) => {
                         }}
                     />
                     <Legend />
-                    <Bar dataKey="value" fill="#764ba2" name="Orders" radius={[8, 8, 0, 0]} />
+                    <Bar dataKey="value" fill="#764ba2" name="Đơn hàng" radius={[8, 8, 0, 0]} />
                 </BarChart>
             </ResponsiveContainer>
         </div>

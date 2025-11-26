@@ -7,22 +7,22 @@ const StatsCardsSection = ({ stats }) => {
         <>
             <div className="cards-container">
                 <CardStats
-                    title="Total Users"
+                    title="Tổng người dùng"
                     value={stats.totalUsers}
                     color="primary"
                 />
                 <CardStats
-                    title="Total Restaurants"
+                    title="Tổng nhà hàng"
                     value={`${stats.activeRestaurants} / ${stats.totalRestaurants}`}
                     color="success"
                 />
                 <CardStats
-                    title="Total Orders"
+                    title="Tổng đơn hàng"
                     value={stats.totalOrders}
                     color="warning"
                 />
                 <CardStats
-                    title="Total Revenue"
+                    title="Tổng doanh thu"
                     value={formatCurrency(stats.totalRevenue)}
                     color="success"
                 />
@@ -30,12 +30,12 @@ const StatsCardsSection = ({ stats }) => {
 
             <div className="cards-container" style={{ marginTop: "20px" }}>
                 <CardStats
-                    title="Pending Orders"
+                    title="Đơn hàng chờ xử lý"
                     value={stats.pendingOrders}
                     color="warning"
                 />
                 <CardStats
-                    title="Completed Orders"
+                    title="Đơn hàng hoàn thành"
                     value={stats.completedOrders}
                     color="success"
                 />

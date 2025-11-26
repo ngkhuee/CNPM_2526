@@ -1,0 +1,49 @@
+.order-status-header {
+    background: #fff3e0;
+    padding: 16px;
+    margin-bottom: 8px;
+    border-left: 4px solid #ff6b35;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.order-status-header .status-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.order-status-header .status-left {
+    flex: 1;
+}
+
+.order-status-header .status-left h3 {
+    font-size: 18px;
+    font-weight: 700;
+    color: #ff6b35;
+    margin: 0;
+}
+
+.order-status-header .status-icon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 50px;
+    height: 50px;
+}
+
+.order-status-header .drone-info {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 10px;
+    background: #f0f0f0;
+    border-radius: 6px;
+}
+
+.order-status-header .drone-info span {
+    font-size: 12px;
+    color: #666;
+    font-weight: 500;
+}

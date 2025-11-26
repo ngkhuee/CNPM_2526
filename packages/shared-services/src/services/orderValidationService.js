@@ -100,21 +100,23 @@ export const getStatusBadgeStyle = (status) => {
         backgroundColor:
             status === "delivered"
                 ? "#4caf50"
-                : status === "delivering" ||
-                    status === "picking_up" ||
-                    status === "picked_up"
-                    ? "#2196f3"
-                    : status === "preparing" || status === "ready"
-                        ? "#ff9800"
-                        : status === "confirmed"
-                            ? "#8bc34a"
-                            : status === "paid"
-                                ? "#9c27b0"
-                                : status === "cancelled"
-                                    ? "#f44336"
-                                    : status === "rejected"
-                                        ? "#d32f2f"
-                                        : "#757575",
+                : status === "arrived"
+                    ? "#ffc107"
+                    : status === "delivering" ||
+                        status === "picking_up" ||
+                        status === "picked_up"
+                        ? "#2196f3"
+                        : status === "preparing" || status === "ready"
+                            ? "#ff9800"
+                            : status === "confirmed"
+                                ? "#8bc34a"
+                                : status === "pending"
+                                    ? "#9c27b0"
+                                    : status === "cancelled"
+                                        ? "#f44336"
+                                        : status === "rejected"
+                                            ? "#d32f2f"
+                                            : "#757575",
     };
 
     return styles;

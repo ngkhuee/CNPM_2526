@@ -3,7 +3,7 @@ import { getImageUrl, formatRating } from "shared-utils";
 
 const RevenueTable = ({ restaurants, formatCurrency }) => {
     if (!restaurants || restaurants.length === 0) {
-        return <p>No revenue data available</p>;
+        return <p>Chưa có dữ liệu doanh thu</p>;
     }
 
     const getRankColor = (index) => {
@@ -43,7 +43,7 @@ const RevenueTable = ({ restaurants, formatCurrency }) => {
                             fontWeight: "600",
                         }}
                     >
-                        Rank
+                        Hạng
                     </th>
                     <th
                         style={{
@@ -52,7 +52,7 @@ const RevenueTable = ({ restaurants, formatCurrency }) => {
                             fontWeight: "600",
                         }}
                     >
-                        Restaurant
+                        Nhà hàng
                     </th>
                     <th
                         style={{
@@ -61,7 +61,7 @@ const RevenueTable = ({ restaurants, formatCurrency }) => {
                             fontWeight: "600",
                         }}
                     >
-                        Orders
+                        Đơn hàng
                     </th>
                     <th
                         style={{
@@ -70,7 +70,7 @@ const RevenueTable = ({ restaurants, formatCurrency }) => {
                             fontWeight: "600",
                         }}
                     >
-                        Revenue
+                        Doanh thu
                     </th>
                     <th
                         style={{
@@ -79,7 +79,7 @@ const RevenueTable = ({ restaurants, formatCurrency }) => {
                             fontWeight: "600",
                         }}
                     >
-                        Avg Order
+                        TB/Đơn hàng
                     </th>
                 </tr>
             </thead>

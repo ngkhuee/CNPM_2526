@@ -8,20 +8,20 @@ const TransactionHistory = ({ transactions, loading, error }) => {
             case "approved":
                 return (
                     <span className="status-badge status-approved">
-                        <MdCheckCircle /> Approved
+                        <MdCheckCircle /> Đã duyệt
                     </span>
                 );
             case "rejected":
                 return (
                     <span className="status-badge status-rejected">
-                        <MdCancel /> Rejected
+                        <MdCancel /> Từ chối
                     </span>
                 );
             case "pending":
             default:
                 return (
                     <span className="status-badge status-pending">
-                        <MdHourglassEmpty /> Pending
+                        <MdHourglassEmpty /> Đang chờ
                     </span>
                 );
         }
@@ -40,7 +40,7 @@ const TransactionHistory = ({ transactions, loading, error }) => {
     if (loading) {
         return (
             <div className="transaction-history-container">
-                <p className="loading">Loading transaction history...</p>
+                <p className="loading">Đang tải lịch sử giao dịch...</p>
             </div>
         );
     }
@@ -57,9 +57,9 @@ const TransactionHistory = ({ transactions, loading, error }) => {
         return (
             <div className="transaction-history-container">
                 <div className="empty-state">
-                    <p>No transactions yet</p>
+                    <p>Chưa có giao dịch nào</p>
                     <p className="empty-description">
-                        Your withdrawal requests will appear here
+                        Yêu cầu rút tiền của bạn sẽ xuất hiện tại đây
                     </p>
                 </div>
             </div>
@@ -72,11 +72,11 @@ const TransactionHistory = ({ transactions, loading, error }) => {
                 <table className="transaction-table">
                     <thead>
                         <tr>
-                            <th>Transaction ID</th>
-                            <th>Amount</th>
-                            <th>Status</th>
-                            <th>Requested Date</th>
-                            <th>Approved Date</th>
+                            <th>Mã giao dịch</th>
+                            <th>Số tiền</th>
+                            <th>Trạng thái</th>
+                            <th>Ngày yêu cầu</th>
+                            <th>Ngày duyệt</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -108,11 +108,11 @@ const TransactionHistory = ({ transactions, loading, error }) => {
             {/* Summary */}
             <div className="transaction-summary">
                 <div className="summary-item">
-                    <label>Total Transactions:</label>
+                    <label>Tổng giao dịch:</label>
                     <span>{transactions.length}</span>
                 </div>
                 <div className="summary-item">
-                    <label>Total Amount:</label>
+                    <label>Tổng số tiền:</label>
                     <span>
                         {formatCurrency(
                             transactions.reduce((sum, t) => sum + t.amount, 0)
@@ -120,7 +120,7 @@ const TransactionHistory = ({ transactions, loading, error }) => {
                     </span>
                 </div>
                 <div className="summary-item">
-                    <label>Approved:</label>
+                    <label>Đã duyệt:</label>
                     <span>
                         {formatCurrency(
                             transactions
@@ -130,7 +130,7 @@ const TransactionHistory = ({ transactions, loading, error }) => {
                     </span>
                 </div>
                 <div className="summary-item">
-                    <label>Pending:</label>
+                    <label>Đang chờ:</label>
                     <span>
                         {formatCurrency(
                             transactions

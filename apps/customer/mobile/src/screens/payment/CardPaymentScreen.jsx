@@ -58,7 +58,7 @@ const CardPaymentScreen = ({ orderId }) => {
             setOrder(data);
         } catch (error) {
             console.error('[CardPaymentScreen] Error fetching order:', error);
-            Alert.alert('Error', 'Failed to load order');
+            Alert.alert('Lỗi', 'Không thể tải đơn hàng');
             navigate('orders');
         } finally {
             setLoading(false);
@@ -73,11 +73,11 @@ const CardPaymentScreen = ({ orderId }) => {
             stopAutoCancel(order.id);
 
             setPaymentStatus('completed');
-            showToast('success', 'Payment successful!');
+            showToast('success', 'Thanh toán thành công!');
 
-            // Update order status to 'paid' (payment completed, waiting for restaurant confirmation)
+            // Update payment_status to 'paid' and status to 'paid' (waiting for restaurant confirmation)
             await orderService.updateOrder(order.id, {
-                payment_status: 'completed',
+                payment_status: 'paid',
                 status: 'paid',
             });
 
@@ -86,7 +86,7 @@ const CardPaymentScreen = ({ orderId }) => {
             }, 1500);
         } catch (error) {
             console.error('[CardPaymentScreen] Payment error:', error);
-            showToast('error', 'Failed to process payment');
+            showToast('error', 'Không thể xử lý thanh toán');
             setProcessing(false);
         }
     };
@@ -95,20 +95,20 @@ const CardPaymentScreen = ({ orderId }) => {
         try {
             setProcessing(true);
             Alert.alert(
-                'Payment Failed',
-                'Your payment has failed. Would you like to try again?',
+                'Thanh toán thất bại',
+                'Thanh toán của bạn không thành công. Bạn có muốn thử lại không?',
                 [
                     {
-                        text: 'Cancel Order',
+                        text: 'Hủy đơn hàng',
                         onPress: async () => {
                             await orderService.updateOrder(order.id, { status: 'cancelled' });
-                            showToast('info', 'Order cancelled');
+                            showToast('info', 'Đã hủy đơn hàng');
                             navigate('orders');
                         },
                         style: 'destructive',
                     },
                     {
-                        text: 'Try Again',
+                        text: 'Thử lại',
                         onPress: () => {
                             setProcessing(false);
                             setPaymentStatus('pending');
@@ -119,7 +119,7 @@ const CardPaymentScreen = ({ orderId }) => {
             );
         } catch (error) {
             console.error('[CardPaymentScreen] Error:', error);
-            showToast('error', 'Failed to handle payment failure');
+            showToast('error', 'Không thể xử lý thanh toán thất bại');
         }
     };
 
@@ -166,9 +166,9 @@ const CardPaymentScreen = ({ orderId }) => {
             <SafeAreaView style={styles.container}>
                 <View style={styles.errorContainer}>
                     <MaterialIcons name="error-outline" size={48} color="#e53935" />
-                    <Text style={styles.errorText}>Order not found</Text>
+                    <Text style={styles.errorText}>Không tìm thấy đơn hàng</Text>
                     <TouchableOpacity style={styles.backButton} onPress={handleBack}>
-                        <Text style={styles.backButtonText}>Go Back</Text>
+                        <Text style={styles.backButtonText}>Quay lại</Text>
                     </TouchableOpacity>
                 </View>
             </SafeAreaView>
@@ -186,7 +186,7 @@ const CardPaymentScreen = ({ orderId }) => {
                         <MaterialIcons name="arrow-back" size={24} color="#1a1a1a" />
                     </TouchableOpacity>
                 )}
-                <Text style={styles.headerTitle}>Card Payment</Text>
+                <Text style={styles.headerTitle}>Thanh toán thẻ</Text>
                 <View style={{ width: 24 }} />
             </View>
 
@@ -195,19 +195,19 @@ const CardPaymentScreen = ({ orderId }) => {
                     <>
                         {/* Order Summary */}
                         <View style={styles.section}>
-                            <Text style={styles.sectionTitle}>Order Summary</Text>
+                            <Text style={styles.sectionTitle}>Tóm tắt đơn hàng</Text>
                             <View style={styles.infoRow}>
-                                <Text style={styles.infoLabel}>Order ID:</Text>
+                                <Text style={styles.infoLabel}>Mã đơn:</Text>
                                 <Text style={styles.infoValue}>{order.id}</Text>
                             </View>
                             <View style={styles.infoRow}>
-                                <Text style={styles.infoLabel}>Subtotal:</Text>
+                                <Text style={styles.infoLabel}>Tạm tính:</Text>
                                 <Text style={styles.infoValue}>
                                     ₫{(order.subtotal || 0).toLocaleString('vi-VN')}
                                 </Text>
                             </View>
                             <View style={styles.infoRow}>
-                                <Text style={styles.infoLabel}>Delivery:</Text>
+                                <Text style={styles.infoLabel}>Phí giao:</Text>
                                 <Text style={styles.infoValue}>
                                     ₫{(order.deliveryFee || 0).toLocaleString('vi-VN')}
                                 </Text>
@@ -215,7 +215,7 @@ const CardPaymentScreen = ({ orderId }) => {
                             {order.discountAmount > 0 && (
                                 <View style={[styles.infoRow, styles.discountRow]}>
                                     <Text style={[styles.infoLabel, styles.discountLabel]}>
-                                        Discount:
+                                        Giảm giá:
                                     </Text>
                                     <Text style={[styles.infoValue, styles.discountValue]}>
                                         -₫{(order.discountAmount || 0).toLocaleString('vi-VN')}
@@ -224,7 +224,7 @@ const CardPaymentScreen = ({ orderId }) => {
                             )}
                             <View style={styles.divider} />
                             <View style={styles.infoRow}>
-                                <Text style={styles.infoLabel}>Total Amount:</Text>
+                                <Text style={styles.infoLabel}>Tổng cộng:</Text>
                                 <Text style={styles.totalValue}>
                                     ₫{(order.totalPrice || 0).toLocaleString('vi-VN')}
                                 </Text>
@@ -233,20 +233,20 @@ const CardPaymentScreen = ({ orderId }) => {
 
                         {/* Demo Account Section */}
                         <View style={styles.section}>
-                            <Text style={styles.sectionTitle}>Demo Account Information</Text>
+                            <Text style={styles.sectionTitle}>Thông tin tài khoản thử nghiệm</Text>
                             <View style={styles.accountBox}>
                                 <View style={styles.accountRow}>
-                                    <Text style={styles.accountLabel}>Account Name:</Text>
+                                    <Text style={styles.accountLabel}>Tên tài khoản:</Text>
                                     <Text style={styles.accountValue}>{DEMO_ACCOUNT.accountName}</Text>
                                 </View>
                                 <View style={styles.accountRow}>
-                                    <Text style={styles.accountLabel}>Account Number:</Text>
+                                    <Text style={styles.accountLabel}>Số tài khoản:</Text>
                                     <Text style={styles.accountValue}>
                                         {DEMO_ACCOUNT.accountNumber}
                                     </Text>
                                 </View>
                                 <View style={styles.accountRow}>
-                                    <Text style={styles.accountLabel}>Bank:</Text>
+                                    <Text style={styles.accountLabel}>Ngân hàng:</Text>
                                     <Text style={styles.accountValue}>{DEMO_ACCOUNT.bankName}</Text>
                                 </View>
                                 <View style={styles.accountRow}>
@@ -257,20 +257,20 @@ const CardPaymentScreen = ({ orderId }) => {
                             <View style={styles.noticeBox}>
                                 <MaterialIcons name="info" size={16} color="#d9a506" />
                                 <Text style={styles.noticeText}>
-                                    This is a demo account for testing purposes only.
+                                    Đây là tài khoản thử nghiệm chỉ dành cho mục đích kiểm tra.
                                 </Text>
                             </View>
                         </View>
 
                         {/* Card Form Section */}
                         <View style={styles.section}>
-                            <Text style={styles.sectionTitle}>Enter Card Details (Optional)</Text>
+                            <Text style={styles.sectionTitle}>Nhập thông tin thẻ (Tùy chọn)</Text>
                             <Text style={styles.formNote}>
-                                Leave blank to use demo account above
+                                Để trống để sử dụng tài khoản thử nghiệm ở trên
                             </Text>
 
                             <View style={styles.formGroup}>
-                                <Text style={styles.label}>Card Number</Text>
+                                <Text style={styles.label}>Số thẻ</Text>
                                 <TextInput
                                     style={styles.input}
                                     placeholder="1234 5678 9012 3456"
@@ -288,10 +288,10 @@ const CardPaymentScreen = ({ orderId }) => {
                             </View>
 
                             <View style={styles.formGroup}>
-                                <Text style={styles.label}>Card Holder Name</Text>
+                                <Text style={styles.label}>Tên chủ thẻ</Text>
                                 <TextInput
                                     style={styles.input}
-                                    placeholder="Name on card"
+                                    placeholder="Tên trên thẻ"
                                     placeholderTextColor="#ccc"
                                     value={paymentForm.cardHolder}
                                     onChangeText={(text) =>
@@ -303,7 +303,7 @@ const CardPaymentScreen = ({ orderId }) => {
 
                             <View style={styles.rowInputs}>
                                 <View style={[styles.formGroup, { flex: 1 }]}>
-                                    <Text style={styles.label}>Expiry Date</Text>
+                                    <Text style={styles.label}>Ngày hết hạn</Text>
                                     <TextInput
                                         style={styles.input}
                                         placeholder="MM/YY"
@@ -352,7 +352,7 @@ const CardPaymentScreen = ({ orderId }) => {
                                 ) : (
                                     <>
                                         <MaterialIcons name="check-circle" size={20} color="#fff" />
-                                        <Text style={styles.buttonText}>Confirm Payment Success</Text>
+                                        <Text style={styles.buttonText}>Xác nhận thanh toán thành công</Text>
                                     </>
                                 )}
                             </TouchableOpacity>
@@ -367,7 +367,7 @@ const CardPaymentScreen = ({ orderId }) => {
                                 ) : (
                                     <>
                                         <MaterialIcons name="error" size={20} color="#fff" />
-                                        <Text style={styles.buttonText}>Simulate Payment Failed</Text>
+                                        <Text style={styles.buttonText}>Giả lập thanh toán thất bại</Text>
                                     </>
                                 )}
                             </TouchableOpacity>
@@ -377,7 +377,7 @@ const CardPaymentScreen = ({ orderId }) => {
                         <View style={styles.noticeSection}>
                             <MaterialIcons name="info" size={20} color="#1976d2" />
                             <Text style={styles.noticeText}>
-                                These are demo buttons for testing. Card details are not actually processed.
+                                Đây là các nút thử nghiệm. Thông tin thẻ sẽ không được xử lý thực tế.
                             </Text>
                         </View>
                     </>
@@ -386,19 +386,18 @@ const CardPaymentScreen = ({ orderId }) => {
                         {/* Success Screen */}
                         <View style={styles.successSection}>
                             <MaterialIcons name="check-circle" size={64} color="#1976d2" />
-                            <Text style={styles.successTitle}>Payment Successful!</Text>
+                            <Text style={styles.successTitle}>Thanh toán thành công!</Text>
                             <Text style={styles.successText}>
-                                ₫{(order.totalPrice || 0).toLocaleString('vi-VN')} charged
+                                ₫{(order.totalPrice || 0).toLocaleString('vi-VN')} đã được thanh toán
                             </Text>
                             <Text style={styles.successSubtext}>
-                                Your order has been confirmed. The restaurant will start preparing your food
-                                shortly.
+                                Đơn hàng của bạn đã được xác nhận. Nhà hàng sẽ sớm chuẩn bị món ăn của bạn.
                             </Text>
                             <TouchableOpacity
                                 style={styles.successButton}
                                 onPress={() => navigate('tracking', { orderId: order.id })}
                             >
-                                <Text style={styles.successButtonText}>Track Order</Text>
+                                <Text style={styles.successButtonText}>Theo dõi đơn hàng</Text>
                             </TouchableOpacity>
                         </View>
                     </>

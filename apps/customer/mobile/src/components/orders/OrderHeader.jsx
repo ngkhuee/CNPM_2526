@@ -6,7 +6,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 export default function OrderHeader({ currentCount, historyCount }) {
     return (
         <View style={styles.header}>
-            <Text style={styles.title}>My Orders</Text>
+            <Text style={styles.title}>Đơn hàng của tôi</Text>
             {/* <View style={styles.stats}>
                 <View style={styles.statItem}>
                     <MaterialIcons name="local-shipping" size={20} color="#FF6B35" />

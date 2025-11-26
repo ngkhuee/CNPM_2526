@@ -60,14 +60,14 @@ const Payments = () => {
         <div className="main-content">
             <div className="payments-page">
                 <h2>
-                    <MdAttachMoney /> Payment Management
+                    <MdAttachMoney /> Quản lý Thanh toán
                 </h2>
-                <p className="subtitle">Manage withdrawal requests from restaurants</p>
+                <p className="subtitle">Quản lý yêu cầu rút tiền từ nhà hàng</p>
 
                 {/* Summary Cards */}
                 <div className="summary-cards">
                     <div className="summary-card pending">
-                        <div className="card-label">Pending</div>
+                        <div className="card-label">Chờ duyệt</div>
                         <div className="card-count">{pendingWithdrawals.length}</div>
                         <div className="card-amount">
                             {(totalPending / 1000000).toFixed(1)}M VND
@@ -75,7 +75,7 @@ const Payments = () => {
                     </div>
 
                     <div className="summary-card approved">
-                        <div className="card-label">Approved</div>
+                        <div className="card-label">Đã duyệt</div>
                         <div className="card-count">
                             {completedWithdrawals.filter((w) => w.status === "approved").length}
                         </div>
@@ -90,7 +90,7 @@ const Payments = () => {
                     </div>
 
                     <div className="summary-card rejected">
-                        <div className="card-label">Rejected</div>
+                        <div className="card-label">Từ chối</div>
                         <div className="card-count">
                             {completedWithdrawals.filter((w) => w.status === "rejected").length}
                         </div>
@@ -116,7 +116,7 @@ const Payments = () => {
                                 setStatusFilter("all");
                             }}
                         >
-                            Pending Requests ({pendingWithdrawals.length})
+                            Chờ xử lý ({pendingWithdrawals.length})
                         </button>
                         <button
                             className={`tab ${activeTab === "completed" ? "active" : ""}`}
@@ -126,7 +126,7 @@ const Payments = () => {
                                 setStatusFilter("all");
                             }}
                         >
-                            Completed ({completedWithdrawals.length})
+                            Đã hoàn thành ({completedWithdrawals.length})
                         </button>
                     </div>
 
@@ -144,10 +144,10 @@ const Payments = () => {
                 {error && <div className="error-message">{error}</div>}
 
                 {loading ? (
-                    <div className="loading">Loading payments...</div>
+                    <div className="loading">Đang tải thanh toán...</div>
                 ) : displayData.length === 0 ? (
                     <div className="empty-state">
-                        <p>No withdrawals to display</p>
+                        <p>Không có yêu cầu rút tiền</p>
                     </div>
                 ) : (
                     <PaymentTable

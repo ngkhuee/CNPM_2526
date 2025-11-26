@@ -45,7 +45,7 @@ const RestaurantItem = ({
               fontWeight: "600",
             }}
           >
-            Closed
+            Đóng cửa
           </div>
         )}
       </div>

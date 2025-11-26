@@ -38,7 +38,7 @@ const Reviews = () => {
             const result = await addReply(selectedReview.id, replyText);
 
             if (result.success) {
-                alert("Reply sent successfully!");
+                alert("Đã gửi phản hồi thành công!");
                 setShowReplyModal(false);
                 setSelectedReview(null);
                 return { success: true, message: result.message };
@@ -47,7 +47,7 @@ const Reviews = () => {
             }
         } catch (err) {
             console.error("Error submitting reply:", err);
-            return { success: false, message: "An error occurred" };
+            return { success: false, message: "Có lỗi xảy ra" };
         } finally {
             setSubmitting(false);
         }
@@ -75,7 +75,7 @@ const Reviews = () => {
                 <div className="reviews-page">
                     <div className="loading-state">
                         <div className="spinner"></div>
-                        <p>Loading reviews...</p>
+                        <p>Đang tải đánh giá...</p>
                     </div>
                 </div>
             </div>
@@ -87,8 +87,8 @@ const Reviews = () => {
             <div className="reviews-page">
                 {/* Header */}
                 <div className="reviews-header">
-                    <h2>Reviews Management</h2>
-                    <p className="subtitle">View and reply to customer reviews</p>
+                    <h2>Quản lý Đánh giá</h2>
+                    <p className="subtitle">Xem và phản hồi đánh giá của khách hàng</p>
                 </div>
 
                 {/* Stats Cards */}
@@ -96,7 +96,7 @@ const Reviews = () => {
                     <div className="stat-card">
                         <div className="stat-icon"><MdStar /></div>
                         <div className="stat-content">
-                            <div className="stat-label">Rating</div>
+                            <div className="stat-label">Đánh giá</div>
                             <div className="stat-value">{formatRating(stats.avgRating)}/5</div>
                         </div>
                     </div>
@@ -104,7 +104,7 @@ const Reviews = () => {
                     <div className="stat-card">
                         <div className="stat-icon"><MdRateReview /></div>
                         <div className="stat-content">
-                            <div className="stat-label">Total Reviews</div>
+                            <div className="stat-label">Tổng đánh giá</div>
                             <div className="stat-value">{stats.total}</div>
                         </div>
                     </div>
@@ -112,7 +112,7 @@ const Reviews = () => {
                     <div className="stat-card">
                         <div className="stat-icon"><MdHourglassEmpty /></div>
                         <div className="stat-content">
-                            <div className="stat-label">Pending Replies</div>
+                            <div className="stat-label">Chờ phản hồi</div>
                             <div className="stat-value">{stats.pending}</div>
                         </div>
                     </div>
@@ -120,7 +120,7 @@ const Reviews = () => {
                     <div className="stat-card">
                         <div className="stat-icon"><MdCheckCircle /></div>
                         <div className="stat-content">
-                            <div className="stat-label">Replied</div>
+                            <div className="stat-label">Đã phản hồi</div>
                             <div className="stat-value">{stats.replied}</div>
                         </div>
                     </div>
@@ -132,19 +132,19 @@ const Reviews = () => {
                         className={`tab ${filter === "all" ? "active" : ""}`}
                         onClick={() => setFilter("all")}
                     >
-                        All ({stats.total})
+                        Tất cả ({stats.total})
                     </button>
                     <button
                         className={`tab ${filter === "pending" ? "active" : ""}`}
                         onClick={() => setFilter("pending")}
                     >
-                        Pending ({stats.pending})
+                        Chờ phản hồi ({stats.pending})
                     </button>
                     <button
                         className={`tab ${filter === "replied" ? "active" : ""}`}
                         onClick={() => setFilter("replied")}
                     >
-                        Replied ({stats.replied})
+                        Đã phản hồi ({stats.replied})
                     </button>
                 </div>
 
@@ -152,7 +152,7 @@ const Reviews = () => {
                 {error && (
                     <div className="error-banner">
                         <span><MdError /> {error}</span>
-                        <button onClick={() => fetchReviews(filter)}>Retry</button>
+                        <button onClick={() => fetchReviews(filter)}>Thử lại</button>
                     </div>
                 )}
 
@@ -171,10 +171,10 @@ const Reviews = () => {
                         <div className="empty-state">
                             <p>
                                 {filter === "all"
-                                    ? "No reviews yet"
+                                    ? "Chưa có đánh giá nào"
                                     : filter === "pending"
-                                        ? "All reviews have been replied!"
-                                        : "No reviews found"}
+                                        ? "Tất cả đánh giá đã được phản hồi!"
+                                        : "Không tìm thấy đánh giá"}
                             </p>
                         </div>
                     )}
@@ -187,7 +187,7 @@ const Reviews = () => {
                             disabled={currentPage === 1}
                             onClick={() => setCurrentPage(currentPage - 1)}
                         >
-                            <MdNavigateBefore /> Previous
+                            <MdNavigateBefore /> Trước
                         </button>
 
                         <div className="page-numbers">
@@ -206,7 +206,7 @@ const Reviews = () => {
                             disabled={currentPage === totalPages}
                             onClick={() => setCurrentPage(currentPage + 1)}
                         >
-                            Next <MdNavigateNext />
+                            Tiếp <MdNavigateNext />
                         </button>
                     </div>
                 )}

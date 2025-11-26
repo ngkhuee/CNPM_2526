@@ -26,11 +26,11 @@ export const ArrivedPopup = ({ visible, onClose }) => {
                         <MaterialIcons name="check-circle" size={60} color="#4caf50" />
                     </View>
 
-                    <Text style={styles.title}>Order Arrived!</Text>
+                    <Text style={styles.title}>Đơn hàng đã đến!</Text>
 
                     <Text style={styles.message}>
-                        Your order has arrived at the destination.{'\n'}
-                        Please confirm when you receive it.
+                        Đơn hàng của bạn đã đến nơi.{'\n'}
+                        Vui lòng xác nhận khi bạn nhận được hàng.
                     </Text>
 
                     <TouchableOpacity
@@ -38,7 +38,7 @@ export const ArrivedPopup = ({ visible, onClose }) => {
                         onPress={onClose}
                         activeOpacity={0.8}
                     >
-                        <Text style={styles.buttonText}>Got It</Text>
+                        <Text style={styles.buttonText}>Đã hiểu</Text>
                     </TouchableOpacity>
                 </View>
             </View>

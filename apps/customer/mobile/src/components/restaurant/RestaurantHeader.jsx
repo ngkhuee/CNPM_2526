@@ -38,7 +38,7 @@ export const RestaurantHeader = ({ restaurant }) => {
                     <View style={styles.quickInfoItem}>
                         <MaterialIcons name="schedule" size={16} color="#ff6b35" />
                         <Text style={styles.quickInfoText}>
-                            {restaurant.deliveryTimeMinutes} mins
+                            {restaurant.deliveryTimeMinutes} phút
                         </Text>
                     </View>
                     <View style={styles.quickInfoItem}>
@@ -58,7 +58,7 @@ export const RestaurantHeader = ({ restaurant }) => {
                             color="#fff"
                         />
                         <Text style={styles.statusText}>
-                            {isOpen ? 'Open Now' : 'Closed'}
+                            {isOpen ? 'Đang mở cửa' : 'Đã đóng cửa'}
                         </Text>
                     </View>
                     {todayHours && (
@@ -78,10 +78,10 @@ export const RestaurantHeader = ({ restaurant }) => {
                     <View style={styles.closedBanner}>
                         <MaterialIcons name="info" size={20} color="#ff9800" />
                         <View style={styles.closedBannerText}>
-                            <Text style={styles.closedBannerTitle}>Currently Closed</Text>
+                            <Text style={styles.closedBannerTitle}>Hiện đang đóng cửa</Text>
                             {todayHours && (
                                 <Text style={styles.closedBannerSubtitle}>
-                                    Opens at {todayHours.open}
+                                    Mở cửa lúc {todayHours.open}
                                 </Text>
                             )}
                         </View>
@@ -92,7 +92,7 @@ export const RestaurantHeader = ({ restaurant }) => {
                 {restaurant.status === 'blocked' && (
                     <View style={styles.blockedBanner}>
                         <MaterialIcons name="lock" size={20} color="#d32f2f" />
-                        <Text style={styles.blockedText}>Restaurant is closed</Text>
+                        <Text style={styles.blockedText}>Nhà hàng đã ngừng hoạt động</Text>
                     </View>
                 )}
             </View>

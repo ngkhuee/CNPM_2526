@@ -92,26 +92,26 @@ const Promotions = () => {
   const validatePromotion = (promo) => {
     // Check code
     if (!promo.code || promo.code.trim().length < 3) {
-      alert("Code must be at least 3 characters!");
+      alert("Mã phải có ít nhất 3 ký tự!");
       return false;
     }
 
     // Check value
     const value = Number(promo.value);
     if (!promo.value || value <= 0) {
-      alert("Value must be greater than 0!");
+      alert("Giá trị phải lớn hơn 0!");
       return false;
     }
 
     // Check percentage range
     if (promo.type === "percentage" && (value < 1 || value > 100)) {
-      alert("Percentage must be between 1 and 100!");
+      alert("Phần trăm phải từ 1 đến 100!");
       return false;
     }
 
     // Check fixed amount
     if (promo.type === "fixed" && value < 1000) {
-      alert("Fixed discount must be at least 1,000₫!");
+      alert("Số tiền giảm cố định phải ít nhất 1.000₫!");
       return false;
     }
 
@@ -120,13 +120,13 @@ const Promotions = () => {
     const endDate = new Date(promo.endDate);
 
     if (endDate <= startDate) {
-      alert("End date must be after start date!");
+      alert("Ngày kết thúc phải sau ngày bắt đầu!");
       return false;
     }
 
     // Check minOrderValue
     if (promo.minOrderValue && Number(promo.minOrderValue) < 0) {
-      alert("Minimum order value cannot be negative!");
+      alert("Giá trị đơn hàng tối thiểu không thể âm!");
       return false;
     }
 
@@ -136,7 +136,7 @@ const Promotions = () => {
       promo.maxDiscount &&
       Number(promo.maxDiscount) <= 0
     ) {
-      alert("Maximum discount must be greater than 0!");
+      alert("Giảm tối đa phải lớn hơn 0!");
       return false;
     }
 
@@ -152,7 +152,7 @@ const Promotions = () => {
     }
 
     if (!currentUser || !currentUser.restaurantId) {
-      alert(" Restaurant ID not found!");
+      alert(" Không tìm thấy ID nhà hàng!");
       return;
     }
 
@@ -256,7 +256,7 @@ const Promotions = () => {
 
   // Delete promotion
   const handleDelete = async (id) => {
-    if (window.confirm("Are you sure you want to delete this promotion?")) {
+    if (window.confirm("Bạn có chắc chắn muốn xóa khuyến mãi này không?")) {
       const result = await deletePromotion(id);
       if (result.success) {
         await fetchPromotions();
@@ -272,37 +272,37 @@ const Promotions = () => {
     <div className="main-content">
       <div className="promotions-page">
         <div className="promotions-header">
-          <h2>My Restaurant Promotions</h2>
+          <h2>Khuyến mãi của tôi</h2>
           <button
             className="add-btn"
             onClick={handleOpenModal}
             disabled={loading}
           >
-            <MdAdd /> Add Promotion
+            <MdAdd /> Thêm khuyến mãi
           </button>
         </div>
 
-        {loading && <p>Loading promotions...</p>}
+        {loading && <p>Đang tải khuyến mãi...</p>}
 
         <table className="promotions-table">
           <thead>
             <tr>
-              <th>Code</th>
-              <th>Name</th>
-              <th>Description</th>
-              <th>Type</th>
-              <th>Value</th>
-              <th>Start Date</th>
-              <th>End Date</th>
-              <th>Status</th>
-              <th>Actions</th>
+              <th>Mã</th>
+              <th>Tên</th>
+              <th>Mô tả</th>
+              <th>Loại</th>
+              <th>Giá trị</th>
+              <th>Ngày bắt đầu</th>
+              <th>Ngày kết thúc</th>
+              <th>Trạng thái</th>
+              <th>Thao tác</th>
             </tr>
           </thead>
           <tbody>
             {restaurantPromotions.length === 0 ? (
               <tr>
                 <td colSpan="9" style={{ textAlign: "center" }}>
-                  No promotions yet. Create your first promotion!
+                  Chưa có khuyến mãi. Tạo khuyến mãi đầu tiên của bạn!
                 </td>
               </tr>
             ) : (
@@ -315,8 +315,8 @@ const Promotions = () => {
                   <td>{promo.description}</td>
                   <td>
                     {promo.type === "percentage"
-                      ? "Percentage"
-                      : "Fixed Amount"}
+                      ? "Phần trăm"
+                      : "Số tiền cố định"}
                   </td>
                   <td>
                     {promo.type === "percentage"
@@ -337,9 +337,9 @@ const Promotions = () => {
                     <span
                       className={`status-badge ${promo.status.toLowerCase()}`}
                     >
-                      {promo.status === "active" && "Active"}
-                      {promo.status === "upcoming" && "Upcoming"}
-                      {promo.status === "expired" && "Expired"}
+                      {promo.status === "active" && "Hoạt động"}
+                      {promo.status === "upcoming" && "Sắp diễn ra"}
+                      {promo.status === "expired" && "Hết hạn"}
                     </span>
                   </td>
                   <td>
@@ -366,10 +366,10 @@ const Promotions = () => {
         {showModal && (
           <div className="modal-overlay" onClick={handleCloseModal}>
             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-              <h3>Add New Promotion</h3>
+              <h3>Thêm khuyến mãi mới</h3>
               <form onSubmit={handleAddPromotion}>
                 <label>
-                  Code:
+                  Mã:
                   <input
                     type="text"
                     value={newPromo.code}
@@ -379,47 +379,47 @@ const Promotions = () => {
                         code: e.target.value.toUpperCase(),
                       })
                     }
-                    placeholder="e.g., SUMMER20"
+                    placeholder="Ví dụ: SUMMER20"
                     required
                   />
                 </label>
                 <label>
-                  Name:
+                  Tên:
                   <input
                     type="text"
                     value={newPromo.name}
                     onChange={(e) =>
                       setNewPromo({ ...newPromo, name: e.target.value })
                     }
-                    placeholder="e.g., Summer Sale"
+                    placeholder="Ví dụ: Khuyến mãi mùa hè"
                     required
                   />
                 </label>
                 <label>
-                  Description:
+                  Mô tả:
                   <textarea
                     value={newPromo.description}
                     onChange={(e) =>
                       setNewPromo({ ...newPromo, description: e.target.value })
                     }
-                    placeholder="Describe your promotion..."
+                    placeholder="Mô tả khuyến mãi..."
                     required
                   />
                 </label>
                 <label>
-                  Type:
+                  Loại:
                   <select
                     value={newPromo.type}
                     onChange={(e) =>
                       setNewPromo({ ...newPromo, type: e.target.value })
                     }
                   >
-                    <option value="percentage">Percentage (%)</option>
-                    <option value="fixed">Fixed Amount (₫)</option>
+                    <option value="percentage">Phần trăm (%)</option>
+                    <option value="fixed">Số tiền cố định (₫)</option>
                   </select>
                 </label>
                 <label>
-                  Value:
+                  Giá trị:
                   <input
                     type="number"
                     value={newPromo.value}
@@ -436,7 +436,7 @@ const Promotions = () => {
                   />
                 </label>
                 <label>
-                  Min Order Value (₫):
+                  Giá trị đơn hàng tối thiểu (₫):
                   <input
                     type="number"
                     value={newPromo.minOrderValue}
@@ -450,7 +450,7 @@ const Promotions = () => {
                   />
                 </label>
                 <label>
-                  Max Discount (₫):
+                  Giảm tối đa (₫):
                   <input
                     type="number"
                     value={newPromo.maxDiscount}
@@ -464,7 +464,7 @@ const Promotions = () => {
                   />
                 </label>
                 <label>
-                  Start Date:
+                  Ngày bắt đầu:
                   <input
                     type="date"
                     value={newPromo.startDate}
@@ -475,7 +475,7 @@ const Promotions = () => {
                   />
                 </label>
                 <label>
-                  End Date:
+                  Ngày kết thúc:
                   <input
                     type="date"
                     value={newPromo.endDate}
@@ -487,20 +487,19 @@ const Promotions = () => {
                 </label>
                 <div className="info-note">
                   <small>
-                    ℹ️ Status will be automatically determined based on start
-                    and end dates
+                    ℹ️ Trạng thái sẽ được tự động xác định dựa trên ngày bắt đầu và kết thúc
                   </small>
                 </div>
                 <div className="modal-buttons">
                   <button type="submit" className="submit-btn">
-                    Add
+                    Thêm
                   </button>
                   <button
                     type="button"
                     className="cancel-btn"
                     onClick={handleCloseModal}
                   >
-                    Cancel
+                    Hủy
                   </button>
                 </div>
               </form>
@@ -512,10 +511,10 @@ const Promotions = () => {
         {showEditModal && (
           <div className="modal-overlay" onClick={handleCloseEditModal}>
             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-              <h3>Edit Promotion</h3>
+              <h3>Chỉnh sửa khuyến mãi</h3>
               <form onSubmit={handleEditSubmit}>
                 <label>
-                  Code:
+                  Mã:
                   <input
                     type="text"
                     value={editPromo.code}
@@ -529,7 +528,7 @@ const Promotions = () => {
                   />
                 </label>
                 <label>
-                  Name:
+                  Tên:
                   <input
                     type="text"
                     value={editPromo.name}
@@ -540,7 +539,7 @@ const Promotions = () => {
                   />
                 </label>
                 <label>
-                  Description:
+                  Mô tả:
                   <textarea
                     value={editPromo.description}
                     onChange={(e) =>
@@ -553,19 +552,19 @@ const Promotions = () => {
                   />
                 </label>
                 <label>
-                  Type:
+                  Loại:
                   <select
                     value={editPromo.type}
                     onChange={(e) =>
                       setEditPromo({ ...editPromo, type: e.target.value })
                     }
                   >
-                    <option value="percentage">Percentage (%)</option>
-                    <option value="fixed">Fixed Amount (₫)</option>
+                    <option value="percentage">Phần trăm (%)</option>
+                    <option value="fixed">Số tiền cố định (₫)</option>
                   </select>
                 </label>
                 <label>
-                  Value:
+                  Giá trị:
                   <input
                     type="number"
                     value={editPromo.value}
@@ -579,7 +578,7 @@ const Promotions = () => {
                   />
                 </label>
                 <label>
-                  Min Order Value (₫):
+                  Giá trị đơn hàng tối thiểu (₫):
                   <input
                     type="number"
                     value={editPromo.minOrderValue}
@@ -592,7 +591,7 @@ const Promotions = () => {
                   />
                 </label>
                 <label>
-                  Max Discount (₫):
+                  Giảm tối đa (₫):
                   <input
                     type="number"
                     value={editPromo.maxDiscount}
@@ -605,14 +604,14 @@ const Promotions = () => {
                   />
                 </label>
                 <label>
-                  Start Date:
+                  Ngày bắt đầu:
                   <input
                     type="date"
                     value={
                       editPromo.startDate
                         ? new Date(editPromo.startDate)
-                            .toISOString()
-                            .split("T")[0]
+                          .toISOString()
+                          .split("T")[0]
                         : ""
                     }
                     onChange={(e) =>
@@ -622,14 +621,14 @@ const Promotions = () => {
                   />
                 </label>
                 <label>
-                  End Date:
+                  Ngày kết thúc:
                   <input
                     type="date"
                     value={
                       editPromo.endDate
                         ? new Date(editPromo.endDate)
-                            .toISOString()
-                            .split("T")[0]
+                          .toISOString()
+                          .split("T")[0]
                         : ""
                     }
                     onChange={(e) =>
@@ -640,20 +639,19 @@ const Promotions = () => {
                 </label>
                 <div className="info-note">
                   <small>
-                    ℹ️ Status will be automatically updated based on start and
-                    end dates
+                    ℹ️ Trạng thái sẽ được tự động cập nhật dựa trên ngày bắt đầu và kết thúc
                   </small>
                 </div>
                 <div className="modal-buttons">
                   <button type="submit" className="submit-btn">
-                    Save
+                    Lưu
                   </button>
                   <button
                     type="button"
                     className="cancel-btn"
                     onClick={handleCloseEditModal}
                   >
-                    Cancel
+                    Hủy
                   </button>
                 </div>
               </form>

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext } from "react";
+import React, { useEffect, useState, useContext, useCallback, useMemo } from "react";
 import "./Orders.css";
 import { OrderContext } from "../../Context/OrderContext";
 import { RestaurantContext } from "../../Context/RestaurantContext";
@@ -6,7 +6,7 @@ import { AuthContext } from "../../Context/AuthContext";
 import { MdRefresh, MdVisibility, MdNotifications } from "react-icons/md";
 import { HiOutlineChevronUpDown } from "react-icons/hi2";
 import { OrderDetailModal, Pagination } from "shared-ui";
-import { droneSimulation } from "shared-services";
+import { orderService } from "shared-services";
 import { useOrderManagement } from "../../hooks/useOrderManagement";
 import { useDroneAssignment } from "../../hooks/useDroneAssignment";
 import { useOrderRejection } from "../../hooks/useOrderRejection";
@@ -38,21 +38,64 @@ const Orders = () => {
     const [searchId, setSearchId] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 10;
+    const [droneStatuses, setDroneStatuses] = useState({}); // {orderId: {stage, droneInfo}}
+
+    // ✅ Filter restaurant orders FIRST before using in callbacks - use useMemo to prevent infinite loop
+    const restaurantOrders = useMemo(() => {
+        return orders.filter(
+            (order) =>
+                order.restaurant_id === currentUser?.restaurantId ||
+                order.restaurantId === currentUser?.restaurantId
+        );
+    }, [orders, currentUser?.restaurantId]);
+
+    // Fetch drone statuses for confirmed/preparing orders
+    const fetchDroneStatuses = useCallback(async () => {
+        const ordersToCheck = restaurantOrders.filter(
+            (o) => o.status === "confirmed" || o.status === "preparing"
+        );
+
+        const statusPromises = ordersToCheck.map(async (order) => {
+            try {
+                const status = await orderService.getDroneStatus(order.id);
+                return { orderId: order.id, status };
+            } catch (error) {
+                console.error(`Failed to fetch drone status for order ${order.id}:`, error);
+                return { orderId: order.id, status: null };
+            }
+        });
+
+        const results = await Promise.all(statusPromises);
+        const newStatuses = {};
+        results.forEach(({ orderId, status }) => {
+            if (status) {
+                newStatuses[orderId] = {
+                    stage: status.drone_journey_stage,
+                    droneId: status.drone_id,
+                    droneInfo: status.drone,
+                };
+            }
+        });
+        setDroneStatuses(newStatuses);
+    }, [orders, currentUser?.restaurantId]);
 
     useEffect(() => {
-        // New orders = 'paid' status (payment completed, waiting for restaurant confirmation)
-        const paidOrders = restaurantOrders.filter((o) => o.status === "paid");
+        // New orders = status='paid' (customer paid, waiting for restaurant confirmation)
+        const paidOrders = restaurantOrders.filter(
+            (o) => o.status === "paid"
+        );
         setNewOrdersCount(paidOrders.length);
         if (paidOrders.length > 0) {
             console.log(`[Order Alert] ${paidOrders.length} new order(s) waiting for confirmation!`);
         }
-    }, [orders]);
+    }, [restaurantOrders]); // restaurantOrders is now memoized, safe to use
 
-    const restaurantOrders = orders.filter(
-        (order) =>
-            order.restaurant_id === currentUser?.restaurantId ||
-            order.restaurantId === currentUser?.restaurantId
-    );
+    // Poll drone statuses every 3 seconds
+    useEffect(() => {
+        fetchDroneStatuses(); // Initial fetch
+        const interval = setInterval(fetchDroneStatuses, 3000);
+        return () => clearInterval(interval);
+    }, [fetchDroneStatuses]);
 
     const handleRefresh = async () => {
         if (currentUser?.restaurantId) {
@@ -62,42 +105,56 @@ const Orders = () => {
 
     const handleConfirmOrder = async (orderId) => {
         try {
+            // Backend will automatically assign drone via polling service
             await updateOrderStatus(orderId, "confirmed");
-            const droneResult = await assignDroneToOrder(orderId);
-            if (droneResult.success) {
-                toast.success("Order confirmed and drone assigned!");
-            }
+            toast.success("Đã xác nhận đơn hàng! Đang tìm drone...");
         } catch (error) {
             console.error("Error confirming order:", error);
-            toast.error("Failed to confirm order");
+            toast.error("Không thể xác nhận đơn hàng");
         }
     };
 
     const handleStartPreparing = async (orderId) => {
         const result = await updateOrderStatus(orderId, "preparing");
         if (result?.success !== false) {
-            toast.success("Started preparing order!");
+            toast.success("Đã bắt đầu chuẩn bị đơn hàng!");
         }
     };
 
     const handleMarkReady = async (orderId) => {
         try {
+            // Validate: drone must be at restaurant
+            const droneStatus = droneStatuses[orderId];
+            if (!droneStatus || droneStatus.stage !== "at_restaurant") {
+                toast.error("Không thể đánh dấu sẵn sàng: Drone chưa đến nhà hàng");
+                return;
+            }
+
             await updateOrderStatus(orderId, "ready");
+            toast.success("Đơn hàng đã sẵn sàng giao!");
 
-            // Assign drone if not already assigned
-            const droneAssignmentResult = await assignDroneToOrder(orderId);
-
-            if (droneAssignmentResult.success || droneAssignmentResult.message === "Order confirmed but no drones available") {
-                toast.success("Order is ready for delivery!");
-                droneSimulation.autoTriggerDelivery(orderId).catch((error) => {
-                    console.error("Failed to start drone delivery:", error);
+            // Trigger drone delivery simulation via backend endpoint
+            try {
+                const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:4000";
+                const response = await fetch(`${API_BASE_URL}/orders/${orderId}/simulate-delivery`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
                 });
-            } else {
-                toast.error("Failed to assign drone to order");
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || 'Failed to start delivery');
+                }
+                console.log('Drone delivery started successfully');
+            } catch (error) {
+                console.error("Failed to start drone delivery:", error);
+                toast.error("Không thể bắt đầu giao hàng: " + error.message);
             }
         } catch (error) {
             console.error("Error marking order as ready:", error);
-            toast.error("Failed to mark order as ready");
+            toast.error("Không thể đánh dấu đơn hàng sẵn sàng");
         }
     };
 
@@ -128,6 +185,7 @@ const Orders = () => {
             preparing: "status-preparing",
             ready: "status-ready",
             delivering: "status-delivering",
+            arrived: "status-arrived",
             delivered: "status-delivered",
             cancelled: "status-cancelled",
             rejected: "status-rejected",
@@ -138,6 +196,26 @@ const Orders = () => {
     const filteredOrders = restaurantOrders
         .filter((order) => {
             if (filter === "all") return true;
+            if (filter === "new") {
+                // New orders = paid but not confirmed yet
+                return order.status === "paid";
+            }
+            if (filter === "preparing") {
+                // Preparing = confirmed, preparing, ready
+                return ["confirmed", "preparing", "ready"].includes(order.status);
+            }
+            if (filter === "delivering") {
+                // Delivering = picking_up, picked_up, delivering
+                return ["picking_up", "picked_up", "delivering"].includes(order.status);
+            }
+            if (filter === "completed") {
+                // Completed = delivered
+                return order.status === "delivered";
+            }
+            if (filter === "cancelled") {
+                // Cancelled/Rejected
+                return ["cancelled", "rejected"].includes(order.status);
+            }
             return order.status === filter;
         })
         .filter((order) => {
@@ -173,7 +251,7 @@ const Orders = () => {
     if (orderLoading) {
         return (
             <div className="main-content">
-                <div className="loading">Loading orders...</div>
+                <div className="loading">Đang tải đơn hàng...</div>
             </div>
         );
     }
@@ -183,7 +261,7 @@ const Orders = () => {
             <div className="orders-page">
                 <div className="orders-header">
                     <div>
-                        <h2>Order Management</h2>
+                        <h2>Quản lý Đơn hàng</h2>
                         <p className="restaurant-name">
                             {currentRestaurant?.name || "Restaurant"}
                         </p>
@@ -193,7 +271,7 @@ const Orders = () => {
                         disabled={orderLoading}
                         className="refresh-btn"
                     >
-                        <MdRefresh /> {orderLoading ? "Refreshing..." : "Refresh"}
+                        <MdRefresh /> {orderLoading ? "Đang làm mới..." : "Làm mới"}
                     </button>
                 </div>
 
@@ -213,10 +291,9 @@ const Orders = () => {
                     >
                         <MdNotifications style={{ fontSize: "32px" }} />
                         <div>
-                            <strong>New Order{newOrdersCount > 1 ? "s" : ""}!</strong>
+                            <strong>Đơn hàng mới!</strong>
                             <p style={{ margin: "5px 0 0 0", fontSize: "14px" }}>
-                                You have {newOrdersCount} new order
-                                {newOrdersCount > 1 ? "s" : ""} waiting for confirmation
+                                Bạn có {newOrdersCount} đơn hàng mới đang chờ xác nhận
                             </p>
                         </div>
                     </div>
@@ -225,7 +302,7 @@ const Orders = () => {
                 <div className="orders-filter">
                     <input
                         type="text"
-                        placeholder="Search by Order ID..."
+                        placeholder="Tìm theo Mã đơn hàng..."
                         value={searchId}
                         onChange={(e) => setSearchId(e.target.value)}
                         style={{
@@ -241,70 +318,64 @@ const Orders = () => {
                         className={filter === "all" ? "active" : ""}
                         onClick={() => setFilter("all")}
                     >
-                        All ({restaurantOrders.length})
+                        Tất cả ({restaurantOrders.length})
                     </button>
                     <button
-                        className={filter === "paid" ? "active" : ""}
-                        onClick={() => setFilter("paid")}
+                        className={filter === "new" ? "active" : ""}
+                        onClick={() => setFilter("new")}
                         style={{
                             background: newOrdersCount > 0 ? "#ff6b35" : "",
                             color: newOrdersCount > 0 ? "white" : "",
                         }}
                     >
-                        New Orders (
+                        Mới (
                         {restaurantOrders.filter((o) => o.status === "paid").length})
-                    </button>
-                    <button
-                        className={filter === "confirmed" ? "active" : ""}
-                        onClick={() => setFilter("confirmed")}
-                    >
-                        Confirmed (
-                        {restaurantOrders.filter((o) => o.status === "confirmed").length})
                     </button>
                     <button
                         className={filter === "preparing" ? "active" : ""}
                         onClick={() => setFilter("preparing")}
                     >
-                        Preparing (
-                        {restaurantOrders.filter((o) => o.status === "preparing").length})
-                    </button>
-                    <button
-                        className={filter === "ready" ? "active" : ""}
-                        onClick={() => setFilter("ready")}
-                    >
-                        Ready ({restaurantOrders.filter((o) => o.status === "ready").length}
-                        )
+                        Đang chuẩn bị (
+                        {restaurantOrders.filter((o) => ["confirmed", "preparing", "ready"].includes(o.status)).length})
                     </button>
                     <button
                         className={filter === "delivering" ? "active" : ""}
                         onClick={() => setFilter("delivering")}
                     >
-                        Delivering (
-                        {restaurantOrders.filter((o) => o.status === "delivering").length})
+                        Đang giao (
+                        {restaurantOrders.filter((o) => ["picking_up", "picked_up", "delivering"].includes(o.status)).length})
                     </button>
                     <button
-                        className={filter === "delivered" ? "active" : ""}
-                        onClick={() => setFilter("delivered")}
+                        className={filter === "completed" ? "active" : ""}
+                        onClick={() => setFilter("completed")}
                     >
-                        Delivered (
+                        Hoàn thành (
                         {restaurantOrders.filter((o) => o.status === "delivered").length})
+                    </button>
+                    <button
+                        className={filter === "cancelled" ? "active" : ""}
+                        onClick={() => setFilter("cancelled")}
+                    >
+                        Đã hủy (
+                        {restaurantOrders.filter((o) => ["cancelled", "rejected"].includes(o.status)).length})
                     </button>
                 </div>
 
                 {filteredOrders.length === 0 ? (
-                    <div className="no-data">No orders found</div>
+                    <div className="no-data">Không tìm thấy đơn hàng</div>
                 ) : (
                     <>
                         <div className="orders-table-container">
                             <table className="orders-table">
                                 <thead>
                                     <tr>
-                                        <th>Order ID</th>
-                                        <th>Customer</th>
-                                        <th>Items</th>
-                                        <th>Total</th>
-                                        <th>Payment</th>
-                                        <th>Status</th>
+                                        <th>Mã đơn hàng</th>
+                                        <th>Khách hàng</th>
+                                        <th>Sản phẩm</th>
+                                        <th>Tổng tiền</th>
+                                        <th>Thanh toán</th>
+                                        <th>Trạng thái</th>
+                                        <th>Drone</th>
                                         <th>
                                             <div
                                                 style={{
@@ -319,7 +390,7 @@ const Orders = () => {
                                                 }
                                                 title="Click to change sort order"
                                             >
-                                                Time
+                                                Thời gian
                                                 <HiOutlineChevronUpDown
                                                     style={{
                                                         transform:
@@ -333,7 +404,7 @@ const Orders = () => {
                                                 />
                                             </div>
                                         </th>
-                                        <th>Actions</th>
+                                        <th>Thao tác</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -359,7 +430,7 @@ const Orders = () => {
                                                     ))}
                                                     {order.items?.length > 2 && (
                                                         <span className="more-items">
-                                                            +{order.items.length - 2} more
+                                                            +{order.items.length - 2} món khác
                                                         </span>
                                                     )}
                                                 </div>
@@ -385,6 +456,25 @@ const Orders = () => {
                                                     {order.status}
                                                 </span>
                                             </td>
+                                            <td>
+                                                {droneStatuses[order.id] ? (
+                                                    <div style={{ fontSize: "12px" }}>
+                                                        <span
+                                                            className={`status-badge ${droneStatuses[order.id].stage === "at_restaurant"
+                                                                ? "status-success"
+                                                                : droneStatuses[order.id].stage === "going_to_restaurant"
+                                                                    ? "status-info"
+                                                                    : "status-warning"
+                                                                }`}
+                                                            style={{ fontSize: "11px" }}
+                                                        >
+                                                            {droneStatuses[order.id].stage || "-"}
+                                                        </span>
+                                                    </div>
+                                                ) : (
+                                                    <span style={{ color: "#999", fontSize: "12px" }}>-</span>
+                                                )}
+                                            </td>
                                             <td className="order-time">
                                                 {new Date(
                                                     getOrderField(order, "createdAt", "created_at")
@@ -404,7 +494,7 @@ const Orders = () => {
                                                 >
                                                     <button
                                                         className="btn-view"
-                                                        title="View details"
+                                                        title="Xem chi tiết"
                                                         onClick={() => openOrderDetail(order)}
                                                     >
                                                         <MdVisibility />
@@ -425,7 +515,7 @@ const Orders = () => {
                                                                     fontSize: "12px",
                                                                 }}
                                                             >
-                                                                Confirm
+                                                                Xác nhận
                                                             </button>
                                                             <button
                                                                 className="btn-reject"
@@ -440,7 +530,7 @@ const Orders = () => {
                                                                     fontSize: "12px",
                                                                 }}
                                                             >
-                                                                Reject
+                                                                Từ chối
                                                             </button>
                                                         </>
                                                     )}
@@ -459,26 +549,35 @@ const Orders = () => {
                                                                 fontSize: "12px",
                                                             }}
                                                         >
-                                                            Start Preparing
+                                                            Bắt đầu chuẩn bị
                                                         </button>
                                                     )}
 
                                                     {order.status === "preparing" && (
-                                                        <button
-                                                            className="btn-ready"
-                                                            onClick={() => handleMarkReady(order.id)}
-                                                            style={{
-                                                                background: "#ff9800",
-                                                                color: "white",
-                                                                padding: "6px 12px",
-                                                                border: "none",
-                                                                borderRadius: "4px",
-                                                                cursor: "pointer",
-                                                                fontSize: "12px",
-                                                            }}
-                                                        >
-                                                            Mark Ready
-                                                        </button>
+                                                        <>
+                                                            <button
+                                                                className="btn-ready"
+                                                                onClick={() => handleMarkReady(order.id)}
+                                                                disabled={droneStatuses[order.id]?.stage !== "at_restaurant"}
+                                                                style={{
+                                                                    background: droneStatuses[order.id]?.stage === "at_restaurant" ? "#ff9800" : "#ccc",
+                                                                    color: "white",
+                                                                    padding: "6px 12px",
+                                                                    border: "none",
+                                                                    borderRadius: "4px",
+                                                                    cursor: droneStatuses[order.id]?.stage === "at_restaurant" ? "pointer" : "not-allowed",
+                                                                    fontSize: "12px",
+                                                                }}
+                                                                title={droneStatuses[order.id]?.stage !== "at_restaurant" ? "Đang chờ drone đến..." : "Đánh dấu sẵn sàng"}
+                                                            >
+                                                                Sẵn sàng
+                                                            </button>
+                                                            {droneStatuses[order.id]?.stage !== "at_restaurant" && (
+                                                                <span style={{ fontSize: "11px", color: "#666", marginLeft: "4px" }}>
+                                                                    (Đang chờ drone)
+                                                                </span>
+                                                            )}
+                                                        </>
                                                     )}
                                                 </div>
                                             </td>

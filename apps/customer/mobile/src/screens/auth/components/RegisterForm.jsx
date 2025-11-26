@@ -6,13 +6,13 @@ import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 export const RegisterForm = ({ formData, updateField, toggleTerms, onSubmit, loading }) => {
     return (
         <View style={styles.formContainer}>
-            <Text style={styles.formTitle}>Create New Account</Text>
+            <Text style={styles.formTitle}>Tạo tài khoản mới</Text>
 
             <View style={styles.inputGroup}>
-                <Text style={styles.label}>Full Name</Text>
+                <Text style={styles.label}>Họ và tên</Text>
                 <TextInput
                     style={styles.input}
-                    placeholder="Enter your name"
+                    placeholder="Nhập họ tên của bạn"
                     placeholderTextColor="#999"
                     editable={!loading}
                     value={formData.name}
@@ -24,7 +24,7 @@ export const RegisterForm = ({ formData, updateField, toggleTerms, onSubmit, loa
                 <Text style={styles.label}>Email</Text>
                 <TextInput
                     style={styles.input}
-                    placeholder="Enter your email"
+                    placeholder="Nhập email của bạn"
                     placeholderTextColor="#999"
                     keyboardType="email-address"
                     autoCapitalize="none"
@@ -35,10 +35,10 @@ export const RegisterForm = ({ formData, updateField, toggleTerms, onSubmit, loa
             </View>
 
             <View style={styles.inputGroup}>
-                <Text style={styles.label}>Password</Text>
+                <Text style={styles.label}>Mật khẩu</Text>
                 <TextInput
                     style={styles.input}
-                    placeholder="Enter your password"
+                    placeholder="Nhập mật khẩu của bạn"
                     placeholderTextColor="#999"
                     secureTextEntry={true}
                     editable={!loading}
@@ -48,10 +48,10 @@ export const RegisterForm = ({ formData, updateField, toggleTerms, onSubmit, loa
             </View>
 
             <View style={styles.inputGroup}>
-                <Text style={styles.label}>Confirm Password</Text>
+                <Text style={styles.label}>Xác nhận mật khẩu</Text>
                 <TextInput
                     style={styles.input}
-                    placeholder="Confirm your password"
+                    placeholder="Nhập lại mật khẩu"
                     placeholderTextColor="#999"
                     secureTextEntry={true}
                     editable={!loading}
@@ -61,10 +61,10 @@ export const RegisterForm = ({ formData, updateField, toggleTerms, onSubmit, loa
             </View>
 
             <View style={styles.inputGroup}>
-                <Text style={styles.label}>Phone (Optional)</Text>
+                <Text style={styles.label}>Số điện thoại (Tùy chọn)</Text>
                 <TextInput
                     style={styles.input}
-                    placeholder="Enter your phone"
+                    placeholder="Nhập số điện thoại"
                     placeholderTextColor="#999"
                     keyboardType="phone-pad"
                     editable={!loading}
@@ -84,7 +84,7 @@ export const RegisterForm = ({ formData, updateField, toggleTerms, onSubmit, loa
                     )}
                 </View>
                 <Text style={styles.checkboxLabel}>
-                    I agree to Terms and Conditions
+                    Tôi đồng ý với Điều khoản và Điều kiện
                 </Text>
             </TouchableOpacity>
 
@@ -96,7 +96,7 @@ export const RegisterForm = ({ formData, updateField, toggleTerms, onSubmit, loa
                 {loading ? (
                     <ActivityIndicator color="#fff" size="small" />
                 ) : (
-                    <Text style={styles.submitButtonText}>Create Account</Text>
+                    <Text style={styles.submitButtonText}>Tạo tài khoản</Text>
                 )}
             </TouchableOpacity>
         </View>

@@ -14,32 +14,32 @@ import { MaterialIcons } from '@expo/vector-icons';
 
 // HCMC Districts data
 const HCMC_DISTRICTS = [
-    'District 1',
-    'District 2',
-    'District 3',
-    'District 4',
-    'District 5',
-    'District 6',
-    'District 7',
-    'District 8',
-    'District 9',
-    'District 10',
-    'District 11',
-    'District 12',
-    'Binh Tan',
-    'Binh Thanh',
-    'Can Tho',
-    'Cu Chi',
-    'Go Vap',
-    'Hoc Mon',
-    'Nha Be',
-    'Phu Nhuan',
-    'Tan Binh',
-    'Tan Phu',
-    'Thu Duc City',
+    'Quận 1',
+    'Quận 2',
+    'Quận 3',
+    'Quận 4',
+    'Quận 5',
+    'Quận 6',
+    'Quận 7',
+    'Quận 8',
+    'Quận 9',
+    'Quận 10',
+    'Quận 11',
+    'Quận 12',
+    'Quận Bình Tân',
+    'Quận Bình Thạnh',
+    'Quận Cần Giờ',
+    'Huyện Củ Chi',
+    'Quận Gò Vấp',
+    'Huyện Hóc Môn',
+    'Huyện Nhà Bè',
+    'Quận Phú Nhuận',
+    'Quận Tân Bình',
+    'Quận Tân Phú',
+    'Thành phố Thủ Đức',
 ];
 
-const CITIES = ['Ho Chi Minh'];
+const CITIES = ['TP. Hồ Chí Minh'];
 
 export default function AddressForm({
     newAddress,
@@ -100,17 +100,17 @@ export default function AddressForm({
     );
     return (
         <View style={styles.addressForm}>
-            <Text style={styles.formTitle}>Add New Address</Text>
+            <Text style={styles.formTitle}>Thêm địa chỉ mới</Text>
 
             {/* City/Province */}
             <View style={styles.formGroup}>
-                <Text style={styles.label}>City/Province</Text>
+                <Text style={styles.label}>Tỉnh/Thành phố</Text>
                 <TouchableOpacity
                     style={styles.input}
                     onPress={() => setShowCityPicker(true)}
                 >
                     <Text style={styles.selectText}>
-                        {newAddress.city || 'Select city/province'}
+                        {newAddress.city || 'Chọn tỉnh/thành phố'}
                     </Text>
                     <MaterialIcons name="arrow-drop-down" size={24} color="#FF6B35" />
                 </TouchableOpacity>
@@ -118,13 +118,13 @@ export default function AddressForm({
 
             {/* District */}
             <View style={styles.formGroup}>
-                <Text style={styles.label}>District</Text>
+                <Text style={styles.label}>Quận/Huyện</Text>
                 <TouchableOpacity
                     style={styles.input}
                     onPress={() => setShowDistrictPicker(true)}
                 >
                     <Text style={styles.selectText}>
-                        {newAddress.district || 'Select district'}
+                        {newAddress.district || 'Chọn quận/huyện'}
                     </Text>
                     <MaterialIcons name="arrow-drop-down" size={24} color="#FF6B35" />
                 </TouchableOpacity>
@@ -133,28 +133,28 @@ export default function AddressForm({
             {/* Street Address */}
             <View style={styles.formGroup}>
                 <Text style={styles.label}>
-                    Street Address
+                    Số nhà, đường
                     {newAddress.lat && newAddress.lng && (
-                        <Text style={styles.gpsIndicator}> (GPS-filled)</Text>
+                        <Text style={styles.gpsIndicator}> (Đã lấy GPS)</Text>
                     )}
                 </Text>
                 <TextInput
                     style={styles.input}
                     value={newAddress.address_line}
                     onChangeText={value => onInputChange('address_line', value)}
-                    placeholder="Street address, building number, etc."
+                    placeholder="Số nhà, tên đường, tòa nhà..."
                     placeholderTextColor="#ccc"
                 />
             </View>
 
             {/* Note */}
             <View style={styles.formGroup}>
-                <Text style={styles.label}>Note (Optional)</Text>
+                <Text style={styles.label}>Ghi chú (Tùy chọn)</Text>
                 <TextInput
                     style={styles.input}
                     value={newAddress.note}
                     onChangeText={value => onInputChange('note', value)}
-                    placeholder="e.g., Near the park, Gate 2, etc."
+                    placeholder="VD: Gần công viên, Cổng số 2..."
                     placeholderTextColor="#ccc"
                 />
             </View>
@@ -166,7 +166,7 @@ export default function AddressForm({
                 ) : (
                     <>
                         <MaterialIcons name="gps-fixed" size={18} color="#FF6B35" />
-                        <Text style={styles.gpsButtonText}>Get Current GPS Location</Text>
+                        <Text style={styles.gpsButtonText}>Lấy vị trí GPS hiện tại</Text>
                     </>
                 )}
             </TouchableOpacity>
@@ -182,7 +182,7 @@ export default function AddressForm({
                     )}
                 </TouchableOpacity>
                 <Text style={styles.checkboxLabel}>
-                    Set as default delivery address
+                    Đặt làm địa chỉ giao hàng mặc định
                 </Text>
             </View>
 
@@ -196,14 +196,14 @@ export default function AddressForm({
                     {saveLoading ? (
                         <ActivityIndicator color="#fff" size="small" />
                     ) : (
-                        <Text style={styles.buttonText}>Add Address</Text>
+                        <Text style={styles.buttonText}>Thêm địa chỉ</Text>
                     )}
                 </TouchableOpacity>
                 <TouchableOpacity
                     style={[styles.button, styles.buttonSecondary]}
                     onPress={onCancel}
                 >
-                    <Text style={styles.buttonSecondaryText}>Cancel</Text>
+                    <Text style={styles.buttonSecondaryText}>Hủy</Text>
                 </TouchableOpacity>
             </View>
 
@@ -211,7 +211,7 @@ export default function AddressForm({
             {renderPickerModal(
                 showCityPicker,
                 () => setShowCityPicker(false),
-                'Select City',
+                'Chọn tỉnh/thành',
                 CITIES,
                 newAddress.city,
                 (city) => onInputChange('city', city)
@@ -221,7 +221,7 @@ export default function AddressForm({
             {renderPickerModal(
                 showDistrictPicker,
                 () => setShowDistrictPicker(false),
-                'Select District',
+                'Chọn quận/huyện',
                 HCMC_DISTRICTS,
                 newAddress.district,
                 (district) => onInputChange('district', district)

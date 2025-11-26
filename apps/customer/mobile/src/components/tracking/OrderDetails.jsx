@@ -25,16 +25,16 @@ export const OrderDetails = ({ order }) => {
         <>
             {/* Combined Order Info & Items */}
             <View style={styles.section}>
-                <Text style={styles.sectionTitle}>Order Details</Text>
+                <Text style={styles.sectionTitle}>Chi tiết đơn hàng</Text>
 
                 {/* Order Info */}
                 <View style={styles.infoSection}>
                     <View style={styles.detailRow}>
-                        <Text style={styles.detailLabel}>Order ID</Text>
+                        <Text style={styles.detailLabel}>Mã đơn hàng</Text>
                         <Text style={styles.detailValue}>#{order.id?.substring(0, 12)}</Text>
                     </View>
                     <View style={styles.detailRow}>
-                        <Text style={styles.detailLabel}>Restaurant</Text>
+                        <Text style={styles.detailLabel}>Nhà hàng</Text>
                         <Text style={styles.detailValue}>{order.restaurant_name}</Text>
                     </View>
                 </View>
@@ -43,7 +43,7 @@ export const OrderDetails = ({ order }) => {
                 {order?.items && order.items.length > 0 && (
                     <>
                         <View style={styles.itemsHeader}>
-                            <Text style={styles.itemsTitle}>Items</Text>
+                            <Text style={styles.itemsTitle}>Sản phẩm</Text>
                         </View>
                         <FlatList
                             data={order.items}
@@ -58,13 +58,13 @@ export const OrderDetails = ({ order }) => {
                 {/* Price Summary */}
                 <View style={styles.summarySection}>
                     <View style={styles.summaryRow}>
-                        <Text style={styles.summaryLabel}>Subtotal</Text>
+                        <Text style={styles.summaryLabel}>Tạm tính</Text>
                         <Text style={styles.summaryValue}>
                             ₫{(order.subtotal || 0).toLocaleString('vi-VN')}
                         </Text>
                     </View>
                     <View style={styles.summaryRow}>
-                        <Text style={styles.summaryLabel}>Delivery Fee</Text>
+                        <Text style={styles.summaryLabel}>Phí giao hàng</Text>
                         <Text style={styles.summaryValue}>
                             ₫{(order.deliveryFee || order.delivery_fee || 0).toLocaleString('vi-VN')}
                         </Text>
@@ -72,7 +72,7 @@ export const OrderDetails = ({ order }) => {
                     {(order.discountAmount || order.discount_amount) > 0 && (
                         <View style={[styles.summaryRow, styles.discountRow]}>
                             <Text style={styles.discountLabel}>
-                                Discount {order.promo_code && `(${order.promo_code})`}
+                                Giảm giá {order.promo_code && `(${order.promo_code})`}
                             </Text>
                             <Text style={styles.discountValue}>
                                 -₫{(order.discountAmount || order.discount_amount || 0).toLocaleString('vi-VN')}
@@ -80,7 +80,7 @@ export const OrderDetails = ({ order }) => {
                         </View>
                     )}
                     <View style={[styles.summaryRow, styles.totalRow]}>
-                        <Text style={styles.totalLabel}>Total</Text>
+                        <Text style={styles.totalLabel}>Tổng cộng</Text>
                         <Text style={styles.totalValue}>
                             ₫{(order.totalPrice || order.total_amount || 0).toLocaleString('vi-VN')}
                         </Text>

@@ -3,11 +3,11 @@ import "./Sidebar.css";
 import { assets } from "../../assets/assets";
 import { NavLink, useNavigate } from "react-router-dom";
 import { AdminAuthContext } from "../../Context/AdminAuthContext";
+import { DroneIcon } from "shared-ui";
 import {
   MdDashboard,
   MdShoppingCart,
   MdPeople,
-  MdLocalShipping,
   MdSettings,
   MdLogout,
   MdPerson,
@@ -30,7 +30,7 @@ const Sidebar = () => {
       <div className="sidebar-top">
         <div className="sidebar-header">
           <img src={assets.logo} alt="Logo" className="sidebar-logo" />
-          <h3>Admin Panel</h3>
+          <h3>Bảng quản trị</h3>
         </div>
 
         {/* Menu admin */}
@@ -42,7 +42,7 @@ const Sidebar = () => {
           }
         >
           <MdDashboard size={24} />
-          <p>Dashboard</p>
+          <p>Bảng điều khiển</p>
         </NavLink>
 
         <NavLink
@@ -52,7 +52,7 @@ const Sidebar = () => {
           }
         >
           <MdShoppingCart size={24} />
-          <p>Orders</p>
+          <p>Đơn hàng</p>
         </NavLink>
 
         <NavLink
@@ -62,7 +62,7 @@ const Sidebar = () => {
           }
         >
           <MdPerson size={24} />
-          <p>Users</p>
+          <p>Người dùng</p>
         </NavLink>
 
         <NavLink
@@ -72,7 +72,7 @@ const Sidebar = () => {
           }
         >
           <MdPeople size={24} />
-          <p>Restaurants</p>
+          <p>Nhà hàng</p>
         </NavLink>
 
         <NavLink
@@ -81,8 +81,8 @@ const Sidebar = () => {
             isActive ? "sidebar-option active" : "sidebar-option"
           }
         >
-          <MdLocalShipping size={24} />
-          <p>Delivery Drones</p>
+          <DroneIcon size={24} color="currentColor" />
+          <p>Drone giao hàng</p>
         </NavLink>
 
         <NavLink
@@ -92,7 +92,7 @@ const Sidebar = () => {
           }
         >
           <MdLocalOffer size={24} />
-          <p>Promotions</p>
+          <p>Khuyến mãi</p>
         </NavLink>
 
         <NavLink
@@ -102,7 +102,7 @@ const Sidebar = () => {
           }
         >
           <MdAttachMoney size={24} />
-          <p>Payments</p>
+          <p>Thanh toán</p>
         </NavLink>
       </div>
 
@@ -115,12 +115,12 @@ const Sidebar = () => {
           }
         >
           <MdSettings size={24} />
-          <p>Settings</p>
+          <p>Cài đặt</p>
         </NavLink>
 
         <button onClick={handleLogout} className="logout-btn">
           <MdLogout size={24} />
-          <p>Logout</p>
+          <p>Đăng xuất</p>
         </button>
       </div>
     </div>

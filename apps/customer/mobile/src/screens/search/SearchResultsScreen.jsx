@@ -96,7 +96,7 @@ export default function SearchResultsScreen({ searchQuery, onBack, onNavigate })
                     <MaterialIcons name="arrow-back" size={24} color="#333" />
                 </TouchableOpacity>
                 <View style={styles.headerContent}>
-                    <Text style={styles.headerTitle}>Search Results</Text>
+                    <Text style={styles.headerTitle}>Kết quả tìm kiếm</Text>
                     <Text style={styles.searchQuery} numberOfLines={1}>
                         "{searchQuery}"
                     </Text>
@@ -107,7 +107,7 @@ export default function SearchResultsScreen({ searchQuery, onBack, onNavigate })
             {!loading && (
                 <View style={styles.resultsInfo}>
                     <Text style={styles.resultsCount}>
-                        {foodList.length} result{foodList.length !== 1 ? 's' : ''} found
+                        Tìm thấy {foodList.length} kết quả
                     </Text>
                 </View>
             )}
@@ -121,7 +121,7 @@ export default function SearchResultsScreen({ searchQuery, onBack, onNavigate })
                 {loading ? (
                     <View style={styles.centerContainer}>
                         <ActivityIndicator size="large" color="#FF6B35" />
-                        <Text style={styles.loadingText}>Searching...</Text>
+                        <Text style={styles.loadingText}>Đang tìm kiếm...</Text>
                     </View>
                 ) : error ? (
                     <View style={styles.centerContainer}>
@@ -131,9 +131,9 @@ export default function SearchResultsScreen({ searchQuery, onBack, onNavigate })
                 ) : foodList.length === 0 ? (
                     <View style={styles.emptyContainer}>
                         <MaterialIcons name="search-off" size={48} color="#ddd" />
-                        <Text style={styles.emptyTitle}>No Results Found</Text>
+                        <Text style={styles.emptyTitle}>Không tìm thấy kết quả</Text>
                         <Text style={styles.emptyText}>
-                            Try searching with different keywords
+                            Hãy thử tìm kiếm với từ khóa khác
                         </Text>
                     </View>
                 ) : (
@@ -149,6 +149,7 @@ export default function SearchResultsScreen({ searchQuery, onBack, onNavigate })
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        paddingTop: 40,
         backgroundColor: '#f8f8f8',
     },
     header: {

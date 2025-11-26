@@ -49,14 +49,14 @@ const ReviewScreen = ({ orderId }) => {
             setLoading(true);
             const data = await orderService.getOrderDetail(orderId);
             if (data.status !== 'delivered') {
-                Alert.alert('Error', 'Can only review delivered orders');
+                Alert.alert('Lỗi', 'Chỉ có thể đánh giá đơn hàng đã giao');
                 navigate('order-detail', { orderId: orderId });
                 return;
             }
             setOrder(data);
         } catch (error) {
             console.error('[ReviewScreen] Error fetching order:', error);
-            Alert.alert('Error', 'Failed to load order');
+            Alert.alert('Lỗi', 'Không thể tải đơn hàng');
             navigate('order-detail', { orderId: orderId });
         } finally {
             setLoading(false);
@@ -84,12 +84,12 @@ const ReviewScreen = ({ orderId }) => {
         if (!selectedItem || !order || !user) return;
 
         if (rating === 0) {
-            Alert.alert('Error', 'Please select a rating');
+            Alert.alert('Lỗi', 'Vui lòng chọn số sao');
             return;
         }
 
         if (!comment.trim() || comment.trim().length < 10) {
-            Alert.alert('Error', 'Review must be at least 10 characters');
+            Alert.alert('Lỗi', 'Đánh giá phải có ít nhất 10 ký tự');
             return;
         }
 
@@ -106,7 +106,7 @@ const ReviewScreen = ({ orderId }) => {
             });
 
             if (result.success) {
-                showToast('success', 'Review submitted!');
+                showToast('success', 'Đã gửi đánh giá!');
                 setShowReviewModal(false);
 
                 // Update reviewedFoods state
@@ -118,11 +118,11 @@ const ReviewScreen = ({ orderId }) => {
 
                 setSelectedItem(null);
             } else {
-                Alert.alert('Error', result.message || 'Failed to submit review');
+                Alert.alert('Lỗi', result.message || 'Không thể gửi đánh giá');
             }
         } catch (error) {
             console.error('[ReviewScreen] Error submitting review:', error);
-            Alert.alert('Error', 'Failed to submit review');
+            Alert.alert('Lỗi', 'Không thể gửi đánh giá');
         } finally {
             setSubmitting(false);
         }
@@ -141,7 +141,7 @@ const ReviewScreen = ({ orderId }) => {
             <SafeAreaView style={styles.container}>
                 <View style={styles.errorContainer}>
                     <MaterialIcons name="error-outline" size={48} color="#e53935" />
-                    <Text style={styles.errorText}>Order not found</Text>
+                    <Text style={styles.errorText}>Không tìm thấy đơn hàng</Text>
                 </View>
             </SafeAreaView>
         );
@@ -154,25 +154,25 @@ const ReviewScreen = ({ orderId }) => {
                 <TouchableOpacity onPress={() => navigate('order-detail', { orderId: order.id })}>
                     <MaterialIcons name="arrow-back" size={24} color="#1a1a1a" />
                 </TouchableOpacity>
-                <Text style={styles.headerTitle}>Rate Items</Text>
+                <Text style={styles.headerTitle}>Đánh giá sản phẩm</Text>
                 <View style={{ width: 24 }} />
             </View>
 
             <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
                 {/* Order Summary */}
                 <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Order Summary</Text>
+                    <Text style={styles.sectionTitle}>Tóm tắt đơn hàng</Text>
                     <View style={styles.orderCard}>
                         <Text style={styles.restaurantName}>{order.restaurant_name}</Text>
                         <Text style={styles.orderInfo}>
-                            Order #{order.id?.substring(0, 8)} • {order.items?.length} items
+                            Đơn #{order.id?.substring(0, 8)} • {order.items?.length} món
                         </Text>
                     </View>
                 </View>
 
                 {/* Items List */}
                 <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Rate Each Item</Text>
+                    <Text style={styles.sectionTitle}>Đánh giá từng món</Text>
                     {order.items && order.items.length > 0 ? (
                         <View style={styles.itemsContainer}>
                             {order.items.map((item, idx) => {
@@ -183,12 +183,12 @@ const ReviewScreen = ({ orderId }) => {
                                     <View key={idx} style={styles.itemCard}>
                                         <View style={styles.itemInfo}>
                                             <Text style={styles.itemName}>{item.name || item.food_name}</Text>
-                                            <Text style={styles.itemQuantity}>Qty: {item.quantity}</Text>
+                                            <Text style={styles.itemQuantity}>SL: {item.quantity}</Text>
                                         </View>
                                         {isReviewed ? (
                                             <View style={styles.reviewedBadge}>
                                                 <MaterialIcons name="check-circle" size={20} color="#4caf50" />
-                                                <Text style={styles.reviewedText}>Reviewed</Text>
+                                                <Text style={styles.reviewedText}>Đã đánh giá</Text>
                                             </View>
                                         ) : (
                                             <TouchableOpacity
@@ -196,7 +196,7 @@ const ReviewScreen = ({ orderId }) => {
                                                 onPress={() => handleOpenReview(item)}
                                             >
                                                 <MaterialIcons name="star" size={16} color="#fff" />
-                                                <Text style={styles.reviewButtonText}>Rate</Text>
+                                                <Text style={styles.reviewButtonText}>Đánh giá</Text>
                                             </TouchableOpacity>
                                         )}
                                     </View>
@@ -204,7 +204,7 @@ const ReviewScreen = ({ orderId }) => {
                             })}
                         </View>
                     ) : (
-                        <Text style={styles.noItemsText}>No items in this order</Text>
+                        <Text style={styles.noItemsText}>Không có sản phẩm trong đơn hàng này</Text>
                     )}
                 </View>
 
@@ -212,7 +212,7 @@ const ReviewScreen = ({ orderId }) => {
                 <View style={styles.noticeSection}>
                     <MaterialIcons name="info" size={20} color="#1976d2" />
                     <Text style={styles.noticeText}>
-                        Your reviews help other customers and the restaurant improve their service.
+                        Đánh giá của bạn giúp khách hàng khác và nhà hàng cải thiện dịch vụ.
                     </Text>
                 </View>
             </ScrollView>
@@ -222,7 +222,7 @@ const ReviewScreen = ({ orderId }) => {
                 <View style={styles.modalOverlay}>
                     <View style={styles.modal}>
                         <View style={styles.modalHeader}>
-                            <Text style={styles.modalTitle}>Rate {selectedItem.name}</Text>
+                            <Text style={styles.modalTitle}>Đánh giá {selectedItem.name}</Text>
                             <TouchableOpacity onPress={() => setShowReviewModal(false)}>
                                 <MaterialIcons name="close" size={24} color="#1a1a1a" />
                             </TouchableOpacity>
@@ -231,7 +231,7 @@ const ReviewScreen = ({ orderId }) => {
                         <ScrollView style={styles.modalContent} showsVerticalScrollIndicator={false}>
                             {/* Rating Section */}
                             <View style={styles.ratingSection}>
-                                <Text style={styles.ratingLabel}>How was this item?</Text>
+                                <Text style={styles.ratingLabel}>Món này thế nào?</Text>
                                 <View style={styles.starsContainer}>
                                     {[1, 2, 3, 4, 5].map(star => (
                                         <TouchableOpacity
@@ -249,21 +249,21 @@ const ReviewScreen = ({ orderId }) => {
                                 </View>
                                 {rating > 0 && (
                                     <Text style={styles.ratingValue}>
-                                        {rating === 1 && '⭐ Poor'}
-                                        {rating === 2 && '⭐⭐ Fair'}
-                                        {rating === 3 && '⭐⭐⭐ Good'}
-                                        {rating === 4 && '⭐⭐⭐⭐ Very Good'}
-                                        {rating === 5 && '⭐⭐⭐⭐⭐ Excellent'}
+                                        {rating === 1 && '⭐ Kém'}
+                                        {rating === 2 && '⭐⭐ Tạm'}
+                                        {rating === 3 && '⭐⭐⭐ Tốt'}
+                                        {rating === 4 && '⭐⭐⭐⭐ Rất tốt'}
+                                        {rating === 5 && '⭐⭐⭐⭐⭐ Xuất sắc'}
                                     </Text>
                                 )}
                             </View>
 
                             {/* Comment Section */}
                             <View style={styles.commentSection}>
-                                <Text style={styles.commentLabel}>Your Comment</Text>
+                                <Text style={styles.commentLabel}>Nhận xét của bạn</Text>
                                 <TextInput
                                     style={styles.commentInput}
-                                    placeholder="Share your experience with this dish..."
+                                    placeholder="Chia sẻ trải nghiệm của bạn với món này..."
                                     placeholderTextColor="#aaa"
                                     value={comment}
                                     onChangeText={setComment}
@@ -282,7 +282,7 @@ const ReviewScreen = ({ orderId }) => {
                                 style={styles.cancelButton}
                                 onPress={() => setShowReviewModal(false)}
                             >
-                                <Text style={styles.cancelButtonText}>Cancel</Text>
+                                <Text style={styles.cancelButtonText}>Hủy</Text>
                             </TouchableOpacity>
                             <TouchableOpacity
                                 style={[
@@ -295,7 +295,7 @@ const ReviewScreen = ({ orderId }) => {
                                 {submitting ? (
                                     <ActivityIndicator color="#fff" size="small" />
                                 ) : (
-                                    <Text style={styles.submitButtonText}>Submit</Text>
+                                    <Text style={styles.submitButtonText}>Gửi</Text>
                                 )}
                             </TouchableOpacity>
                         </View>

@@ -14,10 +14,10 @@ const CategoryModal = ({
     return (
         <div className="modal-overlay" onClick={onClose}>
             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-                <h3>{isEditing ? "Edit Category" : "Add New Category"}</h3>
+                <h3>{isEditing ? "Chỉnh sửa Danh mục" : "Thêm Danh mục mới"}</h3>
                 <form onSubmit={onSubmit}>
                     <label>
-                        Name:
+                        Tên:
                         <input
                             type="text"
                             value={currentCategory.name}
@@ -26,32 +26,32 @@ const CategoryModal = ({
                         />
                     </label>
                     <label>
-                        Description:
+                        Mô tả:
                         <textarea
                             value={currentCategory.description}
                             onChange={(e) => onChange("description", e.target.value)}
                         />
                     </label>
                     <label>
-                        Status:
+                        Trạng thái:
                         <select
                             value={currentCategory.status}
                             onChange={(e) => onChange("status", e.target.value)}
                         >
-                            <option value="Active">Active</option>
-                            <option value="Inactive">Inactive</option>
+                            <option value="Active">Hoạt động</option>
+                            <option value="Inactive">Không hoạt động</option>
                         </select>
                     </label>
                     <div className="modal-buttons">
                         <button type="submit" className="submit-btn" disabled={loading}>
-                            {loading ? (isEditing ? "Saving..." : "Adding...") : isEditing ? "Save" : "Add"}
+                            {loading ? (isEditing ? "Đang lưu..." : "Đang thêm...") : isEditing ? "Lưu" : "Thêm"}
                         </button>
                         <button
                             type="button"
                             className="cancel-btn"
                             onClick={onClose}
                         >
-                            Cancel
+                            Hủy
                         </button>
                     </div>
                 </form>

@@ -16,7 +16,7 @@ const PaymentFilter = ({
                 <MdSearch className="search-icon" />
                 <input
                     type="text"
-                    placeholder="Search by ID or restaurant name..."
+                    placeholder="Tìm theo ID hoặc tên nhà hàng..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="search-input"
@@ -32,9 +32,9 @@ const PaymentFilter = ({
                         onChange={(e) => setStatusFilter(e.target.value)}
                         className="filter-select"
                     >
-                        <option value="all">All Status</option>
-                        <option value="approved">Approved</option>
-                        <option value="rejected">Rejected</option>
+                        <option value="all">Tất cả</option>
+                        <option value="approved">Đã duyệt</option>
+                        <option value="rejected">Từ chối</option>
                     </select>
                 </div>
             )}

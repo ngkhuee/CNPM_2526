@@ -20,13 +20,13 @@ const ReviewModal = ({
             onClick={onClose}
         >
             <div className="review-modal" onClick={(e) => e.stopPropagation()}>
-                <h3>Rate Food</h3>
+                <h3>Đánh giá món ăn</h3>
                 <p style={{ fontSize: "16px", fontWeight: "600", color: "#333" }}>
                     {itemName}
                 </p>
 
                 <div className="rating-section">
-                    <label>Food Quality:</label>
+                    <label>Chất lượng món ăn:</label>
                     <div className="stars">
                         {[1, 2, 3, 4, 5].map((star) => (
                             <span
@@ -43,24 +43,24 @@ const ReviewModal = ({
                             </span>
                         ))}
                     </div>
-                    <p>{rating}/5 stars</p>
+                    <p>{rating}/5 sao</p>
                 </div>
 
                 <div className="comment-section">
-                    <label>Your comment:</label>
+                    <label>Bình luận của bạn:</label>
                     <textarea
                         value={comment}
                         onChange={(e) => onCommentChange(e.target.value)}
-                        placeholder="Share your experience with this dish..."
+                        placeholder="Chia sẻ trải nghiệm của bạn về món ăn này..."
                         rows="4"
                     />
                 </div>
 
                 <div className="modal-actions">
                     <button onClick={onSubmit} disabled={submitting}>
-                        {submitting ? "Submitting..." : "Submit Review"}
+                        {submitting ? "Đang gửi..." : "Gửi đánh giá"}
                     </button>
-                    <button onClick={onClose}>Cancel</button>
+                    <button onClick={onClose}>Hủy</button>
                 </div>
             </div>
         </div>

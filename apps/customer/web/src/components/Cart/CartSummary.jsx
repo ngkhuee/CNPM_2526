@@ -16,36 +16,36 @@ const CartSummary = ({
     return (
         <div className="cart-bottom">
             <div className="cart-total">
-                <h2>Cart Totals</h2>
+                <h2>Tổng giỏ hàng</h2>
                 <div>
                     <div className="cart-total-details">
-                        <p>Subtotal</p>
+                        <p>Tạm tính</p>
                         <p>{formatCurrency(subtotal)}</p>
                     </div>
                     {appliedPromo && (
                         <div className="cart-total-details">
-                            <p>Discount ({appliedPromo.code})</p>
+                            <p>Giảm giá ({appliedPromo.code})</p>
                             <p>-{formatCurrency(discountAmount)}</p>
                         </div>
                     )}
                     <hr />
                     <div className="cart-total-details">
-                        <p>Delivery Fee</p>
+                        <p>Phí giao hàng</p>
                         <p>{formatCurrency(deliveryFee)}</p>
                     </div>
                     <hr />
                     <div className="cart-total-details">
-                        <b>Total</b>
+                        <b>Tổng cộng</b>
                         <b>{formatCurrency(total)}</b>
                     </div>
                 </div>
-                <button onClick={onCheckout}>PROCEED TO CHECKOUT</button>
+                <button onClick={onCheckout}>TIẾN HÀNH THANH TOÁN</button>
             </div>
 
             <div className="cart-promocode">
-                <h2>Promo Code</h2>
+                <h2>Mã khuyến mãi</h2>
                 {loadingPromos ? (
-                    <p>Loading promotions...</p>
+                    <p>Đang tải khuyến mãi...</p>
                 ) : (
                     <div className="promo-list">
                         {promotions.map((promo) => (
@@ -53,19 +53,19 @@ const CartSummary = ({
                                 <span>
                                     {promo.code} -{" "}
                                     {promo.type === "fixed_amount" || promo.type === "fixed"
-                                        ? `Save ${formatCurrency(promo.value)}`
-                                        : `Save ${promo.value}%`}
+                                        ? `Tiết kiệm ${formatCurrency(promo.value)}`
+                                        : `Tiết kiệm ${promo.value}%`}
                                 </span>
                                 {appliedPromo && appliedPromo.id === promo.id ? (
                                     <button className="remove-btn" onClick={onRemovePromo}>
-                                        Remove
+                                        Bỏ
                                     </button>
                                 ) : (
                                     <button
                                         className="apply-btn"
                                         onClick={() => onApplyPromo(promo)}
                                     >
-                                        Apply
+                                        Áp dụng
                                     </button>
                                 )}
                             </div>

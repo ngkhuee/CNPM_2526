@@ -7,19 +7,19 @@ const UserFilter = ({ filter, onFilterChange, getFilteredCount }) => {
                 className={filter === "all" ? "active" : ""}
                 onClick={() => onFilterChange("all")}
             >
-                All ({getFilteredCount("all")})
+                Tất cả ({getFilteredCount("all")})
             </button>
             <button
                 className={filter === "active" ? "active" : ""}
                 onClick={() => onFilterChange("active")}
             >
-                Active ({getFilteredCount("active")})
+                Hoạt động ({getFilteredCount("active")})
             </button>
             <button
                 className={filter === "blocked" ? "active" : ""}
                 onClick={() => onFilterChange("blocked")}
             >
-                Blocked ({getFilteredCount("blocked")})
+                Đã khóa ({getFilteredCount("blocked")})
             </button>
         </div>
     );

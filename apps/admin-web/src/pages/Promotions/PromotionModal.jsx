@@ -13,11 +13,11 @@ const PromotionModal = ({
     return (
         <div className="modal-backdrop" onClick={onClose}>
             <div className="modal" onClick={(e) => e.stopPropagation()}>
-                <h3>{isEditing ? "Edit Promotion" : "Create Promotion"}</h3>
+                <h3>{isEditing ? "Sửa khuyến mãi" : "Tạo khuyến mãi"}</h3>
                 <form onSubmit={onSubmit}>
                     <div className="form-row">
                         <div className="form-group">
-                            <label>Code *</label>
+                            <label>Mã *</label>
                             <input
                                 type="text"
                                 value={formData.code}
@@ -29,52 +29,52 @@ const PromotionModal = ({
                             />
                         </div>
                         <div className="form-group">
-                            <label>Status</label>
+                            <label>Trạng thái</label>
                             <select
                                 value={formData.status}
                                 onChange={(e) => onChange("status", e.target.value)}
                             >
-                                <option value="active">Active</option>
-                                <option value="inactive">Inactive</option>
+                                <option value="active">Hoạt động</option>
+                                <option value="inactive">Tạm ngưng</option>
                             </select>
                         </div>
                     </div>
 
                     <div className="form-group">
-                        <label>Name *</label>
+                        <label>Tên *</label>
                         <input
                             type="text"
                             value={formData.name}
                             onChange={(e) => onChange("name", e.target.value)}
                             required
-                            placeholder="Summer Sale"
+                            placeholder="Khuyến mãi mùa hè"
                         />
                     </div>
 
                     <div className="form-group">
-                        <label>Description *</label>
+                        <label>Mô tả *</label>
                         <textarea
                             value={formData.description}
                             onChange={(e) => onChange("description", e.target.value)}
                             required
-                            placeholder="Get discount on all orders"
+                            placeholder="Giảm giá cho tất cả đơn hàng"
                             rows={3}
                         />
                     </div>
 
                     <div className="form-row">
                         <div className="form-group">
-                            <label>Type *</label>
+                            <label>Loại *</label>
                             <select
                                 value={formData.type}
                                 onChange={(e) => onChange("type", e.target.value)}
                             >
-                                <option value="percentage">Percentage (%)</option>
-                                <option value="fixed">Fixed Amount (₫)</option>
+                                <option value="percentage">Phần trăm (%)</option>
+                                <option value="fixed">Số tiền cố định (₫)</option>
                             </select>
                         </div>
                         <div className="form-group">
-                            <label>Value *</label>
+                            <label>Giá trị *</label>
                             <input
                                 type="number"
                                 value={formData.value}
@@ -87,7 +87,7 @@ const PromotionModal = ({
 
                     <div className="form-row">
                         <div className="form-group">
-                            <label>Min Order Value</label>
+                            <label>Đơn tối thiểu</label>
                             <input
                                 type="number"
                                 value={formData.minOrderValue}
@@ -96,7 +96,7 @@ const PromotionModal = ({
                             />
                         </div>
                         <div className="form-group">
-                            <label>Max Discount</label>
+                            <label>Giảm tối đa</label>
                             <input
                                 type="number"
                                 value={formData.maxDiscount}
@@ -108,7 +108,7 @@ const PromotionModal = ({
 
                     <div className="form-row">
                         <div className="form-group">
-                            <label>Start Date *</label>
+                            <label>Ngày bắt đầu *</label>
                             <input
                                 type="date"
                                 value={formData.startDate}
@@ -117,7 +117,7 @@ const PromotionModal = ({
                             />
                         </div>
                         <div className="form-group">
-                            <label>End Date *</label>
+                            <label>Ngày kết thúc *</label>
                             <input
                                 type="date"
                                 value={formData.endDate}
@@ -128,7 +128,7 @@ const PromotionModal = ({
                     </div>
 
                     <div className="form-group">
-                        <label>Usage Limit</label>
+                        <label>Giới hạn sử dụng</label>
                         <input
                             type="number"
                             value={formData.usageLimit}
@@ -139,14 +139,14 @@ const PromotionModal = ({
 
                     <div className="modal-actions">
                         <button type="submit" className="btn-save">
-                            {isEditing ? "Update" : "Create"}
+                            {isEditing ? "Cập nhật" : "Tạo mới"}
                         </button>
                         <button
                             type="button"
                             className="btn-cancel"
                             onClick={onClose}
                         >
-                            Cancel
+                            Hủy
                         </button>
                     </div>
                 </form>

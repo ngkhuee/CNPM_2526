@@ -22,7 +22,7 @@ const LoginPopup = ({ setShowLogin }) => {
 
     // Chỉ check agree khi Sign Up
     if (currState === "Sign Up" && !agree) {
-      alert("Please agree to the terms");
+      alert("Vui lòng đồng ý với điều khoản");
       return;
     }
 
@@ -38,10 +38,10 @@ const LoginPopup = ({ setShowLogin }) => {
         });
 
         if (response.success) {
-          alert("Account created! Please login.");
+          alert("Tạo tài khoản thành công! Vui lòng đăng nhập.");
           setCurrState("Login");
         } else {
-          alert(response.message || "Registration failed");
+          alert(response.message || "Đăng ký thất bại");
         }
       } else {
         // Login using AuthContext hook
@@ -65,7 +65,7 @@ const LoginPopup = ({ setShowLogin }) => {
               // Check if customer account is blocked
               if (userData.status === "blocked") {
                 alert(
-                  "Your account has been blocked by admin.\n\nPlease contact support for more information."
+                  "Tài khoản của bạn đã bị khóa bởi quản trị viên.\n\nVui lòng liên hệ hỗ trợ để biết thêm chi tiết."
                 );
                 // Logout and clear data
                 localStorage.removeItem("token");
@@ -75,7 +75,7 @@ const LoginPopup = ({ setShowLogin }) => {
               }
 
               if (userData.status !== "active") {
-                alert("Your account is not active. Please contact support.");
+                alert("Tài khoản của bạn chưa được kích hoạt. Vui lòng liên hệ hỗ trợ.");
                 // Logout and clear data
                 localStorage.removeItem("token");
                 localStorage.removeItem("user");
@@ -85,7 +85,7 @@ const LoginPopup = ({ setShowLogin }) => {
             }
           } catch (validationError) {
             console.error("Status validation error:", validationError);
-            alert("Unable to validate account status. Please try again later.");
+            alert("Không thể xác thực trạng thái tài khoản. Vui lòng thử lại sau.");
             localStorage.removeItem("token");
             localStorage.removeItem("user");
             setLoading(false);
@@ -141,7 +141,7 @@ const LoginPopup = ({ setShowLogin }) => {
             <input
               name="name"
               type="text"
-              placeholder="Your Name"
+              placeholder="Tên của bạn"
               value={data.name}
               onChange={onChangeHandler}
               required
@@ -150,7 +150,7 @@ const LoginPopup = ({ setShowLogin }) => {
           <input
             name="email"
             type="email"
-            placeholder="Your Email"
+            placeholder="Email của bạn"
             value={data.email}
             onChange={onChangeHandler}
             required
@@ -158,7 +158,7 @@ const LoginPopup = ({ setShowLogin }) => {
           <input
             name="password"
             type="password"
-            placeholder="Password"
+            placeholder="Mật khẩu"
             value={data.password}
             onChange={onChangeHandler}
             required
@@ -173,29 +173,29 @@ const LoginPopup = ({ setShowLogin }) => {
               checked={agree}
               onChange={(e) => setAgree(e.target.checked)}
             />
-            <p>By continuing, I agree to the terms of use & privacy policy.</p>
+            <p>Tiếp tục nghĩa là tôi đồng ý với điều khoản sử dụng & chính sách bảo mật.</p>
           </div>
         )}
 
         <button type="submit" disabled={loading}>
           {loading
-            ? "Please wait..."
+            ? "Vui lòng chờ..."
             : currState === "Sign Up"
-              ? "Create Account"
-              : "Login"}
+              ? "Tạo tài khoản"
+              : "Đăng nhập"}
         </button>
 
         <p>
           {currState === "Sign Up"
-            ? "Already have an account? "
-            : "Create a new account? "}
+            ? "Đã có tài khoản? "
+            : "Tạo tài khoản mới? "}
           <span
             style={{ cursor: "pointer", color: "blue" }}
             onClick={() =>
               setCurrState(currState === "Sign Up" ? "Login" : "Sign Up")
             }
           >
-            {currState === "Sign Up" ? "Login here" : "Click here"}
+            {currState === "Sign Up" ? "Đăng nhập tại đây" : "Nhấn vào đây"}
           </span>
         </p>
       </form>

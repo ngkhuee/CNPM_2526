@@ -232,9 +232,9 @@ export default function RestaurantDetail({ onNavigate, onSelectFood }) {
                     </TouchableOpacity>
                 </View>
                 <View style={styles.errorContainer}>
-                    <Text style={styles.errorText}>{error || 'Restaurant not found'}</Text>
+                    <Text style={styles.errorText}>{error || 'Không tìm thấy nhà hàng'}</Text>
                     <TouchableOpacity style={styles.retryBtn} onPress={refetch}>
-                        <Text style={styles.retryBtnText}>Retry</Text>
+                        <Text style={styles.retryBtnText}>Thử lại</Text>
                     </TouchableOpacity>
                 </View>
             </SafeAreaView>
@@ -295,7 +295,7 @@ export default function RestaurantDetail({ onNavigate, onSelectFood }) {
             return (
                 <View style={styles.noFoodContainer}>
                     <MaterialIcons name="fastfood" size={32} color="#ccc" />
-                    <Text style={styles.noFoodText}>No products in this category</Text>
+                    <Text style={styles.noFoodText}>Không có sản phẩm trong danh mục này</Text>
                 </View>
             );
         }
@@ -338,7 +338,7 @@ export default function RestaurantDetail({ onNavigate, onSelectFood }) {
                             filteredFoods.length === 0 ? (
                                 <View style={styles.emptyContainer}>
                                     <MaterialIcons name="search-off" size={48} color="#ccc" />
-                                    <Text style={styles.emptyText}>No products found</Text>
+                                    <Text style={styles.emptyText}>Không tìm thấy sản phẩm</Text>
                                 </View>
                             ) : null
                         }

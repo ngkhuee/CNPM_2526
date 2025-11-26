@@ -27,13 +27,13 @@ const Navbar = ({ setShowLogin }) => {
           end
           className={({ isActive }) => (isActive ? "active" : "")}
         >
-          Home
+          Trang chủ
         </NavLink>
         <NavLink
           to="/menu"
           className={({ isActive }) => (isActive ? "active" : "")}
         >
-          Menu
+          Thực đơn
         </NavLink>
         <NavLink
           to="/register-restaurant"
@@ -41,9 +41,9 @@ const Navbar = ({ setShowLogin }) => {
             isActive ? "active partner-link" : "partner-link"
           }
         >
-          <MdStorefront style={{ verticalAlign: "middle" }} /> Become a Partner
+          <MdStorefront style={{ verticalAlign: "middle" }} /> Trở thành đối tác
         </NavLink>
-        <a href="#footer">Contact Us</a>
+        <a href="#footer">Liên hệ</a>
       </ul>
 
       <div className="navbar-right">
@@ -53,7 +53,7 @@ const Navbar = ({ setShowLogin }) => {
         </NavLink>
 
         {!user ? (
-          <button onClick={() => setShowLogin(true)}>Login</button>
+          <button onClick={() => setShowLogin(true)}>Đăng nhập</button>
         ) : (
           <div className="navbar-profile">
             <img
@@ -63,14 +63,14 @@ const Navbar = ({ setShowLogin }) => {
             />
             <ul className="navbar-profile-dropdown">
               <li onClick={() => navigate("/profile")}>
-                <img src={assets.profile_icon} alt="" /> <p>Profile</p>
+                <img src={assets.profile_icon} alt="" /> <p>Hồ sơ</p>
               </li>
               <li onClick={() => navigate("/myorders")}>
-                <img src={assets.bag_icon} alt="" /> <p>Orders</p>
+                <img src={assets.bag_icon} alt="" /> <p>Đơn hàng</p>
               </li>
               <hr />
               <li onClick={logoutHandler}>
-                <img src={assets.logout_icon} alt="" /> <p>Logout</p>
+                <img src={assets.logout_icon} alt="" /> <p>Đăng xuất</p>
               </li>
             </ul>
           </div>

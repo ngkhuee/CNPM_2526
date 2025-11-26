@@ -77,7 +77,7 @@ const CartItem = ({ item, onUpdateQuantity, onRemove }) => {
                 {/* Note */}
                 {item.note && (
                     <Text style={styles.note} numberOfLines={1}>
-                        Note: {item.note}
+                        Ghi chú: {item.note}
                     </Text>
                 )}
 

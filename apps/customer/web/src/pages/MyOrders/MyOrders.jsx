@@ -112,7 +112,7 @@ const MyOrders = () => {
 
       const order = orders.find((o) => o.id === selectedOrderId);
       if (!order) {
-        alert("Order not found");
+        alert("Không tìm thấy đơn hàng");
         return;
       }
 
@@ -122,7 +122,7 @@ const MyOrders = () => {
       console.log("handleSubmitReview - foodId:", foodId);
       if (!foodId) {
         console.error("Food ID not found in item:", selectedOrderItem);
-        alert("Food ID not found");
+        alert("Không tìm thấy ID món ăn");
         return;
       }
 
@@ -136,7 +136,7 @@ const MyOrders = () => {
       });
 
       if (result.success) {
-        alert(result.message || "Thank you for your review!");
+        alert(result.message || "Cảm ơn bạn đã đánh giá!");
         setShowReviewModal(false);
         setSelectedOrderItem(null);
         setSelectedOrderId(null);
@@ -147,11 +147,11 @@ const MyOrders = () => {
           [foodId]: true,
         }));
       } else {
-        alert(result.message || "Error submitting review");
+        alert(result.message || "Lỗi gửi đánh giá");
       }
     } catch (error) {
       console.error("Error submitting review:", error);
-      alert("Error submitting review");
+      alert("Lỗi gửi đánh giá");
     } finally {
       setSubmitting(false);
     }
@@ -161,10 +161,10 @@ const MyOrders = () => {
     setRefreshing(true);
     try {
       await fetchUserOrders();
-      alert("Order list updated!");
+      alert("Danh sách đơn hàng đã cập nhật!");
     } catch (error) {
       console.error("Refresh error:", error);
-      alert("Error loading orders");
+      alert("Lỗi tải đơn hàng");
     } finally {
       setRefreshing(false);
     }
@@ -172,12 +172,12 @@ const MyOrders = () => {
 
   const handleCancelOrder = async (order) => {
     if (!canCancelOrder(order)) {
-      alert("This order cannot be cancelled at this stage");
+      alert("Đơn hàng này không thể hủy ở giai đoạn này");
       return;
     }
 
     const confirmCancel = window.confirm(
-      `Are you sure you want to cancel order #${order.id}?\nThis action cannot be undone.`
+      `Bạn có chắc chắn muốn hủy đơn hàng #${order.id}?\nThao tác này không thể hoàn tác.`
     );
     if (!confirmCancel) return;
 
@@ -185,14 +185,14 @@ const MyOrders = () => {
       const result = await cancelOrder(order);
 
       if (result.success) {
-        alert(result.message || "Order cancelled successfully!");
+        alert(result.message || "Hủy đơn hàng thành công!");
         await fetchUserOrders();
       } else {
-        alert(result.message || "Failed to cancel order. Please try again.");
+        alert(result.message || "Không thể hủy đơn hàng. Vui lòng thử lại.");
       }
     } catch (error) {
       console.error("Error cancelling order:", error);
-      alert("Failed to cancel order. Please try again.");
+      alert("Không thể hủy đơn hàng. Vui lòng thử lại.");
     }
   };
 
@@ -230,7 +230,7 @@ const MyOrders = () => {
           marginBottom: "20px",
         }}
       >
-        <h2>Your Order</h2>
+        <h2>Đơn hàng của bạn</h2>
         <button
           onClick={handleRefresh}
           disabled={refreshing}
@@ -247,7 +247,7 @@ const MyOrders = () => {
             fontSize: "14px",
           }}
         >
-          <MdRefresh /> {refreshing ? "Loading..." : "Refresh"}
+          <MdRefresh /> {refreshing ? "Đang tải..." : "Làm mới"}
         </button>
       </div>
 
@@ -278,7 +278,7 @@ const MyOrders = () => {
             transition: "all 0.3s ease",
           }}
         >
-          Current Order ({currentOrders.length})
+          Đơn hiện tại ({currentOrders.length})
         </button>
         <button
           onClick={() => {
@@ -298,7 +298,7 @@ const MyOrders = () => {
             transition: "all 0.3s ease",
           }}
         >
-          History ({historyOrders.length})
+          Lịch sử ({historyOrders.length})
         </button>
       </div>
 
@@ -306,8 +306,8 @@ const MyOrders = () => {
         <div style={{ textAlign: "center", padding: "40px" }}>
           <p>
             {activeTab === "current"
-              ? "You have no orders in progress"
-              : "You have no completed orders"}
+              ? "Bạn không có đơn hàng nào đang xử lý"
+              : "Bạn chưa có đơn hàng nào hoàn thành"}
           </p>
           {activeTab === "current" && (
             <button
@@ -322,7 +322,7 @@ const MyOrders = () => {
                 cursor: "pointer",
               }}
             >
-              Order Now
+              Đặt hàng ngay
             </button>
           )}
         </div>
@@ -355,7 +355,7 @@ const MyOrders = () => {
                     >
                       <MdTimer size={16} />
                       <span>
-                        <b>Payment expires in:</b> {formatTimeLeft(timeLeft)}
+                        <b>Thanh toán hết hạn sau:</b> {formatTimeLeft(timeLeft)}
                       </span>
                     </div>
                   )}
@@ -378,23 +378,23 @@ const MyOrders = () => {
 
                   <div className="order-summary">
                     <div className="summary-row">
-                      <span>Subtotal:</span>
+                      <span>Tạm tính:</span>
                       <span>{formatCurrency(order.subtotal || order.sub_total || 0)}</span>
                     </div>
                     {(order.discount_amount || order.discountAmount) > 0 && (
                       <div className="summary-row discount">
-                        <span>Discount:</span>
+                        <span>Giảm giá:</span>
                         <span>-{formatCurrency(order.discount_amount || order.discountAmount || 0)}</span>
                       </div>
                     )}
                     {(order.delivery_fee || order.deliveryFee) > 0 && (
                       <div className="summary-row">
-                        <span>Delivery Fee:</span>
+                        <span>Phí giao hàng:</span>
                         <span>{formatCurrency(order.delivery_fee || order.deliveryFee || 0)}</span>
                       </div>
                     )}
                     <p className="order-total">
-                      <b>Total:</b>{" "}
+                      <b>Tổng cộng:</b>{" "}
                       {formatCurrency(order.total_amount || order.totalAmount || 0)}
                     </p>
                   </div>

@@ -4,72 +4,8 @@
  */
 
 import apiClient from './apiClient';
-
-/**
- * Transform order từ snake_case (API) sang camelCase (App)
- */
-const transformOrder = (order) => {
-    if (!order) return null;
-
-    return {
-        id: order.id,
-        status: order.status,
-        totalPrice: order.total_amount || order.totalPrice || 0,
-        createdAt: order.created_at,
-        created_at: order.created_at,
-        updatedAt: order.updated_at,
-        updated_at: order.updated_at,
-        restaurantId: order.restaurant_id,
-        restaurant_id: order.restaurant_id,
-        restaurantName: order.restaurant?.name || 'Unknown Restaurant',
-        restaurant_name: order.restaurant?.name || 'Unknown Restaurant',
-        restaurantAddress: order.restaurant?.address || '',
-        restaurant_address: order.restaurant?.address || '',
-        deliveryAddress: order.customer?.address || (order.delivery_address || ''),
-        delivery_address: order.customer?.address || (order.delivery_address || ''),
-        items: (order.items || []).map(item => ({
-            id: item.menu_id,
-            foodId: item.menu_id,
-            menu_id: item.menu_id,
-            name: item.name,
-            quantity: item.quantity,
-            price: item.unit_price || item.price,
-            unit_price: item.unit_price || item.price,
-            subtotal: item.subtotal || (item.quantity * (item.unit_price || item.price || 0)),
-        })),
-        paymentMethod: order.payment_method,
-        paymentStatus: order.payment_status,
-        payment_status: order.payment_status,
-        subtotal: order.subtotal || 0,
-        deliveryFee: order.delivery_fee || 0,
-        delivery_fee: order.delivery_fee || 0,
-        discountAmount: order.discount_amount || 0,
-        discount_amount: order.discount_amount || 0,
-        customer: order.customer || {
-            name: order.customerName,
-            phone: order.customerPhone,
-            address: order.delivery_address,
-            email: order.customer?.email,
-            id: order.customer?.id,
-        },
-        customerName: order.customer?.name || order.customerName,
-        customerPhone: order.customer?.phone || order.customerPhone,
-        specialInstructions: order.special_instructions,
-        special_instructions: order.special_instructions,
-        // Tracking fields
-        drone_id: order.drone_id,
-        droneId: order.drone_id,
-        estimated_delivery_time: order.estimated_delivery_time,
-        estimatedDeliveryTime: order.estimated_delivery_time,
-        pickup_gps: order.pickup_gps,
-        dropoff_gps: order.dropoff_gps || order.delivery_gps,
-        current_gps: order.current_gps,
-        order_number: order.order_number,
-        orderNumber: order.order_number,
-        promo_code: order.promo_code || order.promotion_code,
-        promotion_code: order.promo_code || order.promotion_code,
-    };
-};
+// ✅ Import unified transformer
+import { transformOrderFromAPI, transformOrderToAPI } from '../utils/orderTransformer';
 
 /**
  * Lấy danh sách orders của user
@@ -81,12 +17,11 @@ export const getOrders = async () => {
     try {
         // API endpoint tự động lọc orders theo user_id từ token
         const response = await apiClient.get('/orders');
-        // console.log('[orderService.getOrders] Response:', response);
 
-        // Transform orders từ snake_case sang camelCase
+        // ✅ Transform orders using unified transformer
         const transformedOrders = Array.isArray(response)
-            ? response.map(transformOrder)
-            : response.orders?.map(transformOrder) || [];
+            ? response.map(transformOrderFromAPI)
+            : response.orders?.map(transformOrderFromAPI) || [];
 
         console.log('[orderService.getOrders] Transformed:', transformedOrders.length, 'orders');
 
@@ -107,7 +42,8 @@ export const getOrderDetail = async (orderId) => {
     try {
         const response = await apiClient.get(`/orders/${orderId}`);
         console.log('[orderService.getOrderDetail] Response:', response);
-        return transformOrder(response);
+        // ✅ Use unified transformer
+        return transformOrderFromAPI(response);
     } catch (error) {
         console.error('[orderService.getOrderDetail] Error:', error.message);
         throw error;
@@ -133,56 +69,21 @@ export const submitOrder = async (orderData) => {
     try {
         console.log('[orderService.submitOrder] Submitting order:', orderData);
 
-        // Map frontend format to backend schema (match web's orderService)
-        const backendPayload = {
-            restaurant_id: orderData.restaurantId || orderData.restaurant_id,
-            items: (orderData.items || []).map(item => ({
-                menu_id: item.foodId || item.food_id || item.id || item.menu_id, // Support multiple field names
-                name: item.name,
-                quantity: item.quantity,
-                unit_price: item.price || item.unit_price,
-                subtotal: (item.price || item.unit_price) * item.quantity,
-            })),
-            subtotal: orderData.subtotal,
-            delivery_fee: orderData.deliveryFee || orderData.delivery_fee || 0,
-            discount_amount: orderData.discountAmount || orderData.discount_amount || 0,
-            total_amount: orderData.total_amount || orderData.totalAmount,
-            payment_method: orderData.payment_method || orderData.paymentMethod || 'momo',
-            status: orderData.status || 'pending',
-            payment_status: orderData.payment_status || orderData.paymentStatus || 'pending',
-            special_instructions: orderData.special_instructions || orderData.specialInstructions || '',
-            customer: {
-                name: orderData.customer?.name || 'Customer',
-                phone: orderData.customer?.phone || '',
-                address: orderData.customer?.address || '',
-                email: orderData.customer?.email || '',
-            },
-            delivery_address: orderData.delivery_address || orderData.deliveryAddress,
-            delivery_address_id: orderData.delivery_address_id || orderData.deliveryAddressId,
-            dropoff_gps: orderData.dropoff_gps || orderData.gps,
-            promotion_code: orderData.promotion_code || orderData.promoCode || null,
-            promotion_id: orderData.promotion_id || orderData.promotionId || null,
-            order_number: orderData.order_number || `ORD-${Date.now()}`,
-            created_at: orderData.created_at || new Date().toISOString(),
-            updated_at: orderData.updated_at || new Date().toISOString(),
-        };
+        // ✅ Use unified transformer to convert to API format
+        const payload = transformOrderToAPI(orderData);
 
-        // Remove undefined/null values
-        Object.keys(backendPayload).forEach(
-            key => backendPayload[key] === undefined && delete backendPayload[key]
-        );
+        console.log('[orderService.submitOrder] API payload:', payload);
 
-        console.log('[orderService.submitOrder] Backend payload:', backendPayload);
-
-        const response = await apiClient.post('/orders', backendPayload);
+        const response = await apiClient.post('/orders', payload);
 
         console.log('[orderService.submitOrder] Success:', response);
-        return transformOrder(response);
+
+        // ✅ Transform response back to frontend format
+        return transformOrderFromAPI(response);
     } catch (error) {
         console.error('[orderService.submitOrder] Error:', error.message);
-        // Log detailed error response for debugging
         if (error.response?.data) {
-            console.error('[orderService.submitOrder] Backend error response:', error.response.data);
+            console.error('[orderService.submitOrder] Backend error:', error.response.data);
         }
         throw error;
     }

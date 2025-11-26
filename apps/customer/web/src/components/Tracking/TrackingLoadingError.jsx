@@ -8,7 +8,7 @@ const TrackingLoadingError = ({ loading, error, orderId }) => {
         return (
             <div className="tracking-page" style={{ textAlign: "center", padding: "40px" }}>
                 <div style={{ fontSize: "24px", marginBottom: "10px" }}>⏳</div>
-                <p>Loading order information...</p>
+                <p>Đang tải thông tin đơn hàng...</p>
             </div>
         );
     }
@@ -17,7 +17,7 @@ const TrackingLoadingError = ({ loading, error, orderId }) => {
         return (
             <div className="tracking-page" style={{ textAlign: "center", padding: "40px" }}>
                 <div style={{ fontSize: "24px", marginBottom: "10px" }}>❌</div>
-                <p>Order not found (#{orderId})</p>
+                <p>Không tìm thấy đơn hàng (#{orderId})</p>
                 <button
                     onClick={() => navigate("/myorders")}
                     style={{
@@ -30,7 +30,7 @@ const TrackingLoadingError = ({ loading, error, orderId }) => {
                         cursor: "pointer",
                     }}
                 >
-                    Back to Orders
+                    Quay lại đơn hàng
                 </button>
             </div>
         );

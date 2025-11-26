@@ -36,8 +36,8 @@ const Delivery = () => {
   if (loading) {
     return (
       <div className="delivery-page">
-        <h2>Delivery Monitoring</h2>
-        <p>Loading...</p>
+        <h2>Giám sát Giao hàng</h2>
+        <p>Đang tải...</p>
       </div>
     );
   }
@@ -81,18 +81,14 @@ const Delivery = () => {
   };
 
   const getDisplayStatus = (drone) => {
-    // 3 trạng thái: rảnh rỗi, đang vận chuyển, đã bị khóa
+    // 3 trạng thái chính thức: Available, Busy, Locked
     if (drone.status === "locked") {
-      return "Locked";
+      return "Đã khóa";
     }
-    if (
-      drone.status === "busy" ||
-      drone.status === "delivering" ||
-      drone.assignedOrderId
-    ) {
-      return "Delivering";
+    if (drone.status === "busy" || drone.assignedOrderId) {
+      return "Đang bận";
     }
-    return "Available";
+    return "Sẵn sàng";
   };
 
   const deliveryOrdersCount = getOrdersByStatus("delivering").length;
@@ -100,7 +96,7 @@ const Delivery = () => {
   return (
     <div className="delivery-page">
       <div className="delivery-header">
-        <h2>Delivery & Drone Management</h2>
+        <h2>Quản lý Giao hàng & Drone</h2>
       </div>
 
       <DeliveryStats
@@ -112,12 +108,12 @@ const Delivery = () => {
       <div className="delivery-content">
         <div className="section drones-section">
           <div className="section-header">
-            <h3>Drones Fleet</h3>
+            <h3>Đội bay Drone</h3>
             <div style={{ display: "flex", gap: "16px", alignItems: "center" }}>
               {/* Search bar */}
               <input
                 type="text"
-                placeholder="Search by name or ID..."
+                placeholder="Tìm theo tên hoặc ID..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 style={{
@@ -134,25 +130,25 @@ const Delivery = () => {
                   className={droneFilter === "all" ? "active" : ""}
                   onClick={() => setDroneFilter("all")}
                 >
-                  All
+                  Tất cả
                 </button>
                 <button
                   className={droneFilter === "available" ? "active" : ""}
                   onClick={() => setDroneFilter("available")}
                 >
-                  Available
+                  Sẵn sàng
                 </button>
                 <button
                   className={droneFilter === "delivering" ? "active" : ""}
                   onClick={() => setDroneFilter("delivering")}
                 >
-                  Delivering
+                  Đang giao
                 </button>
                 <button
                   className={droneFilter === "locked" ? "active" : ""}
                   onClick={() => setDroneFilter("locked")}
                 >
-                  Locked
+                  Đã khóa
                 </button>
               </div>
             </div>
@@ -163,7 +159,7 @@ const Delivery = () => {
             getFilteredDrones={getFilteredDrones}
             getStatusBadgeClass={getStatusBadgeClass}
             getDisplayStatus={getDisplayStatus}
-            onViewLocation={openLocationModal}
+            onViewLocation={(drone) => openLocationModal(drone, orders)}
             onEdit={openEditDrone}
             onToggle={handleToggleDrone}
             onDelete={handleDeleteDrone}
@@ -173,7 +169,7 @@ const Delivery = () => {
 
       <div style={{ marginTop: 18, display: "flex", gap: 8 }}>
         <button className="btn-primary" onClick={openAddDrone}>
-          + Add Drone
+          + Thêm Drone
         </button>
       </div>
 

@@ -35,7 +35,7 @@ const CategoryTable = ({
                                             (f) => f.categoryId === cat.id || f.category === cat.name
                                         ).length
                                     }{" "}
-                                    items
+                                    món
                                 </button>
                             </td>
                             <td>
@@ -62,7 +62,7 @@ const CategoryTable = ({
                 ) : (
                     <tr>
                         <td colSpan="5" style={{ textAlign: "center" }}>
-                            No categories found
+                            Không tìm thấy danh mục nào
                         </td>
                     </tr>
                 )}

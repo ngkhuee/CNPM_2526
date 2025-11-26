@@ -16,10 +16,11 @@ const CheckoutAddressSection = ({
     onBlur,
     onGetGPS,
     getFieldError,
+    setGpsLocationFn,
 }) => {
     return (
         <div className="checkout-section">
-            <h3>Delivery Address</h3>
+            <h3>Địa chỉ giao hàng</h3>
 
             {/* Address selection radio buttons */}
             <div className="address-selection">
@@ -29,7 +30,7 @@ const CheckoutAddressSection = ({
                         checked={!useNewAddress}
                         onChange={() => onSelectAddressType(false)}
                     />
-                    <span> Select saved address</span>
+                    <span> Chọn địa chỉ đã lưu</span>
                 </label>
                 <label>
                     <input
@@ -37,7 +38,7 @@ const CheckoutAddressSection = ({
                         checked={useNewAddress}
                         onChange={() => onSelectAddressType(true)}
                     />
-                    <span> Enter new address</span>
+                    <span> Nhập địa chỉ mới</span>
                 </label>
             </div>
 
@@ -49,14 +50,14 @@ const CheckoutAddressSection = ({
                             key={addr.id}
                             className={`address-card ${selectedAddressId === addr.id ? "selected" : ""
                                 }`}
-                            onClick={() => onSelectSavedAddress(addr)}
+                            onClick={() => onSelectSavedAddress(addr, setGpsLocationFn)}
                         >
                             <strong>{addr.address_line}</strong>
                             <br />
                             <small>
                                 {addr.district}, {addr.city}
                                 {addr.is_default && (
-                                    <span className="default-badge">(Default)</span>
+                                    <span className="default-badge">(Mặc định)</span>
                                 )}
                             </small>
                         </div>
@@ -73,7 +74,7 @@ const CheckoutAddressSection = ({
                             value={customer.address}
                             onChange={onAddressInput}
                             onBlur={() => onBlur("address")}
-                            placeholder="Enter detailed address"
+                            placeholder="Nhập địa chỉ chi tiết"
                             style={{
                                 borderColor: getFieldError("address") ? "#dc3545" : "auto",
                             }}
@@ -83,9 +84,9 @@ const CheckoutAddressSection = ({
                             onClick={onGetGPS}
                             disabled={loadingGPS}
                             className="gps-button"
-                            title="Get GPS coordinates"
+                            title="Lấy tọa độ GPS"
                         >
-                            <MdLocationOn /> {loadingGPS ? "Getting GPS..." : "Use My Location"}
+                            <MdLocationOn /> {loadingGPS ? "Đang lấy GPS..." : "Dùng vị trí của tôi"}
                         </button>
                     </div>
                     {getFieldError("address") && (
@@ -107,7 +108,7 @@ const CheckoutAddressSection = ({
                                 color: "#155724",
                             }}
                         >
-                            GPS Location: {gpsLocation.lat.toFixed(6)},{" "}
+                            Vị trí GPS: {gpsLocation.lat.toFixed(6)},{" "}
                             {gpsLocation.lng.toFixed(6)}
                         </div>
                     )}

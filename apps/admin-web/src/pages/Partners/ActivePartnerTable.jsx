@@ -5,19 +5,19 @@ import { MdVisibility, MdBlock, MdDelete } from "react-icons/md";
 
 const ActivePartnerTable = ({ restaurants, onViewDetails, onBlock, onDelete }) => {
     if (restaurants.length === 0) {
-        return <div className="empty-state">No active restaurants</div>;
+        return <div className="empty-state">Không có nhà hàng hoạt động</div>;
     }
 
     return (
         <table className="partners-table">
             <thead>
                 <tr>
-                    <th>Restaurant</th>
+                    <th>Nhà hàng</th>
                     <th>Email</th>
-                    <th>Phone</th>
-                    <th>Rating</th>
-                    <th>Status</th>
-                    <th>Actions</th>
+                    <th>Điện thoại</th>
+                    <th>Đánh giá</th>
+                    <th>Trạng thái</th>
+                    <th>Thao tác</th>
                 </tr>
             </thead>
             <tbody>
@@ -37,12 +37,12 @@ const ActivePartnerTable = ({ restaurants, onViewDetails, onBlock, onDelete }) =
                         <td>{r.phone}</td>
                         <td>
                             <span className="rating">
-                                Rating: {r.rating?.toFixed(1) || "N/A"}
+                                Đánh giá: {r.rating?.toFixed(1) || "N/A"}
                             </span>
                         </td>
                         <td>
                             <span className="status-badge status-active">
-                                {r.isOpen ? "Open" : "Closed"}
+                                {r.isOpen ? "Mở cửa" : "Đóng cửa"}
                             </span>
                         </td>
                         <td>
@@ -50,21 +50,21 @@ const ActivePartnerTable = ({ restaurants, onViewDetails, onBlock, onDelete }) =
                                 <Link
                                     to={`/admin/partners/${r.id}`}
                                     className="btn-view"
-                                    title="View Details"
+                                    title="Xem chi tiết"
                                 >
                                     <MdVisibility />
                                 </Link>
                                 <button
                                     className="btn-block"
                                     onClick={() => onBlock(r.id)}
-                                    title="Block Restaurant"
+                                    title="Khóa nhà hàng"
                                 >
                                     <MdBlock />
                                 </button>
                                 <button
                                     className="btn-delete"
                                     onClick={() => onDelete(r.id)}
-                                    title="Delete Restaurant"
+                                    title="Xóa nhà hàng"
                                 >
                                     <MdDelete />
                                 </button>

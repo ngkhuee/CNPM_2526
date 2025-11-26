@@ -298,6 +298,11 @@
   color: #004085;
 }
 
+.status-badge.status-arrived {
+  background: #fff3cd;
+  color: #856404;
+}
+
 .status-badge.status-delivered {
   background: #d4edda;
   color: #155724;
@@ -306,6 +311,25 @@
 .status-badge.status-cancelled {
   background: #f8d7da;
   color: #721c24;
+}
+
+/* Drone Status Badges */
+.status-badge.status-warning {
+  background: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffc107;
+}
+
+.status-badge.status-info {
+  background: #cfe2ff;
+  color: #084298;
+  border: 1px solid #0d6efd;
+}
+
+.status-badge.status-success {
+  background: #d4edda;
+  color: #155724;
+  border: 1px solid #28a745;
 }
 
 .order-time {
@@ -520,11 +544,13 @@
 
 /* Animation */
 @keyframes pulse {
+
   0%,
   100% {
     opacity: 1;
     transform: scale(1);
   }
+
   50% {
     opacity: 0.5;
     transform: scale(1.2);

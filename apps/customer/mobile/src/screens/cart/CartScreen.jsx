@@ -60,9 +60,9 @@ const CartScreen = ({ onNavigate }) => {
                             color="#ff6b35"
                             style={styles.lockIcon}
                         />
-                        <Text style={styles.modalTitle}>Login Required</Text>
+                        <Text style={styles.modalTitle}>Yêu cầu đăng nhập</Text>
                         <Text style={styles.modalSubtitle}>
-                            Sign in to view and manage your cart
+                            Đăng nhập để xem và quản lý giỏ hàng của bạn
                         </Text>
 
                         <TouchableOpacity
@@ -71,7 +71,7 @@ const CartScreen = ({ onNavigate }) => {
                                 navigate('login');
                             }}
                         >
-                            <Text style={styles.modalLoginButtonText}>Login</Text>
+                            <Text style={styles.modalLoginButtonText}>Đăng nhập</Text>
                         </TouchableOpacity>
                     </View>
                 </SafeAreaView>
@@ -105,12 +105,12 @@ const CartScreen = ({ onNavigate }) => {
 
             if (updatedCart) {
                 setLocalCart(updatedCart);
-                showToast('success', 'Item removed');
+                showToast('success', 'Đã xóa sản phẩm');
                 console.log('[CartScreen] Item removed from API:', itemMenuId);
             }
         } catch (error) {
             console.error('[CartScreen] Error removing item:', error.message);
-            showToast('error', 'Failed to remove item');
+            showToast('error', 'Không thể xóa sản phẩm');
         }
     };
 
@@ -144,7 +144,7 @@ const CartScreen = ({ onNavigate }) => {
             }
         } catch (error) {
             console.error('[CartScreen] Error updating item:', error.message);
-            showToast('error', 'Failed to update item');
+            showToast('error', 'Không thể cập nhật sản phẩm');
         }
     };
 
@@ -175,7 +175,7 @@ const CartScreen = ({ onNavigate }) => {
                 {/* Summary - only show total */}
                 <View style={styles.summary}>
                     <View style={styles.totalRow}>
-                        <Text style={styles.totalLabel}>Total</Text>
+                        <Text style={styles.totalLabel}>Tổng cộng</Text>
                         <Text style={styles.totalValue}>
                             {formatCurrency(subtotal)}
                         </Text>
@@ -194,7 +194,7 @@ const CartScreen = ({ onNavigate }) => {
                     }}
                 >
                     {/* <MaterialIcons name="arrow-forward" size={20} color="#fff" /> */}
-                    <Text style={styles.checkoutText}>Proceed to Checkout</Text>
+                    <Text style={styles.checkoutText}>Tiến hành thanh toán</Text>
                 </TouchableOpacity>
 
                 {/* Continue Shopping */}
@@ -202,7 +202,7 @@ const CartScreen = ({ onNavigate }) => {
                     style={styles.continueButton}
                     onPress={() => onNavigate('home')}
                 >
-                    <Text style={styles.continueText}>Continue Shopping</Text>
+                    <Text style={styles.continueText}>Tiếp tục mua sắm</Text>
                 </TouchableOpacity>
             </View>
         );
@@ -221,15 +221,15 @@ const CartScreen = ({ onNavigate }) => {
                             size={80}
                             color="#ddd"
                         />
-                        <Text style={styles.emptyTitle}>Your Cart is Empty</Text>
+                        <Text style={styles.emptyTitle}>Giỏ hàng trống</Text>
                         <Text style={styles.emptySubtitle}>
-                            Add items from your favorite restaurants
+                            Thêm món từ các nhà hàng yêu thích của bạn
                         </Text>
                         <TouchableOpacity
                             style={styles.browseButton}
                             onPress={() => onNavigate('home')}
                         >
-                            <Text style={styles.browseButtonText}>Browse Restaurants</Text>
+                            <Text style={styles.browseButtonText}>Khám phá nhà hàng</Text>
                         </TouchableOpacity>
                     </View>
                 </SafeAreaView>
@@ -243,7 +243,7 @@ const CartScreen = ({ onNavigate }) => {
             <SafeAreaView style={styles.container}>
                 {/* Header */}
                 <View style={styles.header}>
-                    <Text style={styles.headerTitle}>Cart</Text>
+                    <Text style={styles.headerTitle}>Giỏ hàng</Text>
                     <View style={styles.headerBadge}>
                         <Text style={styles.headerBadgeText}>{totalItems}</Text>
                     </View>
@@ -252,7 +252,7 @@ const CartScreen = ({ onNavigate }) => {
                 {/* Restaurant Info */}
                 <View style={styles.restaurantInfo}>
                     <MaterialIcons name="restaurant" size={20} color="#ff6b35" />
-                    <Text style={styles.restaurantName}>{localCart?.restaurant_name || 'Your Cart'}</Text>
+                    <Text style={styles.restaurantName}>{localCart?.restaurant_name || 'Giỏ hàng của bạn'}</Text>
                 </View>
 
                 {/* Items List */}

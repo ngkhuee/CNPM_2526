@@ -6,28 +6,49 @@ import DroneIcon from './DroneIcon';
 
 export const OrderStatusHeader = ({ order, isDelivered }) => {
     const isDelivering = order?.status === 'delivering';
+    const isCancelled = order?.status === 'cancelled';
+    const isRejected = order?.status === 'rejected';
+
+    // Determine status text and color
+    let statusText = 'Đang xử lý';
+    let statusColor = '#ff6b35';
+    let iconName = 'schedule';
+
+    if (isDelivered) {
+        statusText = 'Đã giao hàng';
+        statusColor = '#4caf50';
+        iconName = 'check-circle';
+    } else if (isCancelled) {
+        statusText = 'Đã hủy';
+        statusColor = '#f44336';
+        iconName = 'cancel';
+    } else if (isRejected) {
+        statusText = 'Bị từ chối';
+        statusColor = '#d32f2f';
+        iconName = 'cancel';
+    }
 
     return (
-        <View style={styles.statusHeader}>
+        <View style={[styles.statusHeader, { borderLeftColor: statusColor, backgroundColor: isCancelled || isRejected ? '#ffebee' : '#fff3e0' }]}>
             <View style={styles.statusContent}>
                 <View style={styles.statusLeft}>
-                    <Text style={styles.statusHeaderText}>
-                        {isDelivered ? 'Delivered' : 'In Progress'}
+                    <Text style={[styles.statusHeaderText, { color: statusColor }]}>
+                        {statusText}
                     </Text>
-                    {/* <Text style={styles.estimatedTime}>
-                        {order.estimated_delivery_time
-                            ? `Arrives by ${new Date(order.estimated_delivery_time).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}`
-                            : 'Calculating...'}
-                    </Text> */}
+                    {(isCancelled || isRejected) && order.rejection_reason && (
+                        <Text style={styles.reasonText}>
+                            {order.rejection_reason}
+                        </Text>
+                    )}
                 </View>
                 <View style={styles.statusIcon}>
                     {isDelivering ? (
-                        <DroneIcon size={36} color="#ff6b35" />
+                        <DroneIcon size={36} color={statusColor} />
                     ) : (
                         <MaterialIcons
-                            name={isDelivered ? 'check-circle' : 'schedule'}
+                            name={iconName}
                             size={36}
-                            color={isDelivered ? '#4caf50' : '#ff6b35'}
+                            color={statusColor}
                         />
                     )}
                 </View>
@@ -71,6 +92,12 @@ const styles = StyleSheet.create({
         fontSize: 13,
         color: '#666',
         marginTop: 4,
+    },
+    reasonText: {
+        fontSize: 13,
+        color: '#666',
+        marginTop: 4,
+        fontStyle: 'italic',
     },
     statusIcon: {
         justifyContent: 'center',

@@ -41,7 +41,7 @@ const FoodEditModal = ({ food, isOpen, onClose, onSubmit, categories, restaurant
                 // Store the image path from server response
                 setEditFood((prev) => ({ ...prev, image: uploadResult.path }));
             } else {
-                setUploadError("Failed to upload image");
+                setUploadError("Tải ảnh lên thất bại");
             }
         } catch (error) {
             console.error("Image upload error:", error);
@@ -58,7 +58,7 @@ const FoodEditModal = ({ food, isOpen, onClose, onSubmit, categories, restaurant
         const hasCategory = editFood.category && String(editFood.category).trim();
 
         if (!hasCategoryId && !hasCategory) {
-            alert("Please select a category!");
+            alert("Vui lòng chọn danh mục!");
             return;
         }
         onSubmit(editFood);
@@ -69,10 +69,10 @@ const FoodEditModal = ({ food, isOpen, onClose, onSubmit, categories, restaurant
     return (
         <div className="modal-overlay" onClick={onClose}>
             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-                <h3>Edit Food</h3>
+                <h3>Chỉnh sửa món ăn</h3>
                 <form onSubmit={handleSubmit}>
                     <label>
-                        Name:
+                        Tên:
                         <input
                             type="text"
                             value={editFood.name}
@@ -83,7 +83,7 @@ const FoodEditModal = ({ food, isOpen, onClose, onSubmit, categories, restaurant
                         />
                     </label>
                     <label>
-                        Category <span style={{ color: "red" }}>*</span>:
+                        Danh mục <span style={{ color: "red" }}>*</span>:
                         <select
                             value={editFood.categoryId || editFood.category}
                             onChange={(e) =>
@@ -95,7 +95,7 @@ const FoodEditModal = ({ food, isOpen, onClose, onSubmit, categories, restaurant
                             }
                             required
                         >
-                            <option value="">-- Select a category (Required) --</option>
+                            <option value="">-- Chọn danh mục (Bắt buộc) --</option>
                             {categories.map((cat) => (
                                 <option key={cat.id} value={cat.id}>
                                     {cat.name}
@@ -118,7 +118,7 @@ const FoodEditModal = ({ food, isOpen, onClose, onSubmit, categories, restaurant
                         </select>
                     </label>
                     <label>
-                        Price:
+                        Giá:
                         <input
                             type="number"
                             value={editFood.price}
@@ -129,7 +129,7 @@ const FoodEditModal = ({ food, isOpen, onClose, onSubmit, categories, restaurant
                         />
                     </label>
                     <label>
-                        Description:
+                        Mô tả:
                         <textarea
                             value={editFood.description}
                             onChange={(e) =>
@@ -139,22 +139,22 @@ const FoodEditModal = ({ food, isOpen, onClose, onSubmit, categories, restaurant
                         />
                     </label>
                     <label>
-                        Image:
+                        Ảnh:
                         <input
                             type="file"
                             accept="image/*"
                             onChange={(e) => handleImageChange(e.target.files[0])}
                             disabled={uploading}
                         />
-                        {uploading && <span style={{ color: "blue" }}>Uploading...</span>}
+                        {uploading && <span style={{ color: "blue" }}>Đang tải lên...</span>}
                         {uploadError && <span style={{ color: "red" }}>{uploadError}</span>}
                     </label>
                     <div className="modal-buttons">
                         <button type="submit" className="submit-btn" disabled={uploading}>
-                            Save
+                            Lưu
                         </button>
                         <button type="button" className="cancel-btn" onClick={onClose}>
-                            Cancel
+                            Hủy
                         </button>
                     </div>
                 </form>

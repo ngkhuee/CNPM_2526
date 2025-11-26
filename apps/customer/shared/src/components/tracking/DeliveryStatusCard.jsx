@@ -64,14 +64,14 @@ export const DeliveryStatusCard = ({
             {/* Delivery Progress Percentage */}
             {order?.status === "delivering" && (
                 <div style={{ fontSize: "14px", marginBottom: "10px" }}>
-                    {Math.round(droneProgress * 100)}% complete
+                    {Math.round(droneProgress * 100)}% hoàn thành
                 </div>
             )}
 
             {/* Drone Location */}
             {order?.current_gps && order?.status === "delivering" && (
                 <p style={{ fontSize: "12px", marginTop: "8px", opacity: 0.9 }}>
-                    Position: {order.current_gps.lat?.toFixed(6)},{" "}
+                    Vị trí: {order.current_gps.lat?.toFixed(6)},{" "}
                     {order.current_gps.lng?.toFixed(6)}
                 </p>
             )}
@@ -113,11 +113,11 @@ export const DeliveryStatusCard = ({
                             }
                         }}
                     >
-                        {confirming ? "Confirming..." : "Confirm Received"}
+                        {confirming ? "Đang xác nhận..." : "Xác nhận đã nhận hàng"}
                     </button>
 
                     <p style={{ fontSize: "12px", marginTop: "8px", opacity: 0.9 }}>
-                        Automatic confirmation in 5 minutes if you don't click the button
+                        Tự động xác nhận sau 5 phút nếu bạn không nhấn nút
                     </p>
                 </>
             )}

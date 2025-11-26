@@ -111,7 +111,7 @@ const Pagination = ({
                 className="pagination-prev"
             >
                 <MdNavigateBefore size={18} />
-                Previous
+                Trước
             </button>
 
             {/* Page Numbers */}
@@ -178,7 +178,7 @@ const Pagination = ({
                 }}
                 className="pagination-next"
             >
-                Next
+                Sau
                 <MdNavigateNext size={18} />
             </button>
 
@@ -191,7 +191,7 @@ const Pagination = ({
                     whiteSpace: "nowrap",
                 }}
             >
-                Page {currentPage} of {totalPages} ({totalItems} items)
+                Trang {currentPage}/{totalPages} ({totalItems} mục)
             </div>
         </div>
     );

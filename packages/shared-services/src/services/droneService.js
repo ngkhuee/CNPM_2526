@@ -103,7 +103,7 @@ export const assignDroneToOrder = async (droneId, orderId) => {
   try {
     const response = await apiClient.patch(ENDPOINTS.DRONES.BY_ID(droneId), {
       assigned_order_id: orderId,
-      status: "delivering",
+      status: "busy", // FIX: Use "busy" instead of "delivering"
     });
     return response;
   } catch (error) {

@@ -93,8 +93,9 @@ export const OrderCardWeb = ({
             {/* Actions */}
             <div className="order-actions" style={{ marginTop: "15px", display: "flex", gap: "10px" }}>
                 {showTrackButton &&
-                    order.status !== "paid" &&
-                    order.status !== "pending" && (
+                    order.status !== "pending" &&
+                    order.status !== "cancelled" &&
+                    order.status !== "rejected" && (
                         <button
                             onClick={() => onTrack?.(order.id || order._id)}
                             style={{
@@ -134,7 +135,7 @@ export const OrderCardWeb = ({
                     </button>
                 )}
 
-                {order.status === "paid" && (
+                {order.status === "pending" && order.payment_status === "paid" && (
                     <p
                         style={{
                             color: "#666",

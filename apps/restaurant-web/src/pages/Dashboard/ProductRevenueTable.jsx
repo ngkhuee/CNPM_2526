@@ -10,7 +10,7 @@ const ProductRevenueTable = ({ data = [], loading = false }) => {
     if (loading) {
         return (
             <div className="product-table-container">
-                <div className="table-skeleton">Loading products...</div>
+                <div className="table-skeleton">Đang tải sản phẩm...</div>
             </div>
         );
     }
@@ -18,7 +18,7 @@ const ProductRevenueTable = ({ data = [], loading = false }) => {
     if (!data || data.length === 0) {
         return (
             <div className="product-table-container">
-                <div className="table-empty">No product data available</div>
+                <div className="table-empty">Chưa có dữ liệu sản phẩm</div>
             </div>
         );
     }
@@ -27,7 +27,7 @@ const ProductRevenueTable = ({ data = [], loading = false }) => {
         <div className="product-table-container">
             <div className="table-header">
                 <div className="table-title">
-                    <MdShoppingCart /> Top 10 Products by Revenue
+                    <MdShoppingCart /> Top 10 Sản phẩm theo Doanh thu
                 </div>
             </div>
 
@@ -35,10 +35,10 @@ const ProductRevenueTable = ({ data = [], loading = false }) => {
                 <table className="product-table">
                     <thead>
                         <tr>
-                            <th>Rank</th>
-                            <th>Product Name</th>
-                            <th>Quantity Sold</th>
-                            <th>Revenue</th>
+                            <th>Hạng</th>
+                            <th>Tên sản phẩm</th>
+                            <th>Số lượng bán</th>
+                            <th>Doanh thu</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -60,11 +60,11 @@ const ProductRevenueTable = ({ data = [], loading = false }) => {
 
             <div className="table-summary">
                 <div className="summary-stat">
-                    <span className="stat-label">Total Products:</span>
+                    <span className="stat-label">Tổng sản phẩm:</span>
                     <span className="stat-value">{data.length}</span>
                 </div>
                 <div className="summary-stat">
-                    <div className="stat-label">Total Revenue:</div>
+                    <div className="stat-label">Tổng doanh thu:</div>
                     <span className="stat-value">
                         {formatCurrency(data.reduce((sum, item) => sum + (item.revenue || 0), 0))}
                     </span>

@@ -39,17 +39,17 @@ const Profile = () => {
 
   // Address management handlers
   const handleDeleteAddress = async (addressId) => {
-    if (!window.confirm("Are you sure you want to delete this address?")) return;
+    if (!window.confirm("Bạn có chắc muốn xóa địa chỉ này?")) return;
     try {
       const result = await deleteAddressHook(addressId);
       if (result.success) {
-        alert("Address deleted successfully");
+        alert("Xóa địa chỉ thành công");
       } else {
-        alert(`Error deleting address: ${result.message}`);
+        alert(`Lỗi xóa địa chỉ: ${result.message}`);
       }
     } catch (error) {
       console.error("Error deleting address:", error);
-      alert("Error deleting address");
+      alert("Lỗi xóa địa chỉ");
     }
   };
 
@@ -57,13 +57,13 @@ const Profile = () => {
     try {
       const result = await setDefaultAddress(addressId);
       if (result.success) {
-        alert("Address set as default successfully");
+        alert("Đặt địa chỉ mặc định thành công");
       } else {
-        alert(`Error: ${result.message}`);
+        alert(`Lỗi: ${result.message}`);
       }
     } catch (error) {
       console.error("Error setting default:", error);
-      alert("Error setting default address");
+      alert("Lỗi đặt địa chỉ mặc định");
     }
   };
 
@@ -95,7 +95,7 @@ const Profile = () => {
   };
 
   if (!user) {
-    return <div className="profile-page">Please login first</div>;
+    return <div className="profile-page">Vui lòng đăng nhập trước</div>;
   }
 
   return (
@@ -117,13 +117,13 @@ const Profile = () => {
             className={`sidebar-btn ${activeTab === "account" ? "active" : ""}`}
             onClick={() => setActiveTab("account")}
           >
-            Account Info
+            Thông tin tài khoản
           </button>
           <button
             className={`sidebar-btn ${activeTab === "address" ? "active" : ""}`}
             onClick={() => setActiveTab("address")}
           >
-            My Addresses
+            Địa chỉ của tôi
           </button>
         </div>
 
@@ -132,7 +132,7 @@ const Profile = () => {
           {/* Account Info Section */}
           {activeTab === "account" && (
             <div className="profile-content-section">
-              <h2>Account Information</h2>
+              <h2>Thông tin tài khoản</h2>
               <div className="profile-form">
                 <div className="form-group">
                   <label>Email</label>
@@ -145,31 +145,31 @@ const Profile = () => {
                 </div>
 
                 <div className="form-group">
-                  <label>Full Name</label>
+                  <label>Họ và tên</label>
                   <input
                     type="text"
                     value={formData.name}
                     onChange={(e) => handleInputChange("name", e.target.value)}
                     disabled={!editing}
-                    placeholder="Enter full name"
+                    placeholder="Nhập họ và tên"
                   />
                   {editing && <div className="checkmark">✓</div>}
                 </div>
 
                 <div className="form-group">
-                  <label>Phone Number</label>
+                  <label>Số điện thoại</label>
                   <input
                     type="tel"
                     value={formData.phone}
                     onChange={(e) => handleInputChange("phone", e.target.value)}
                     disabled={!editing}
-                    placeholder="Enter phone number"
+                    placeholder="Nhập số điện thoại"
                   />
                   {editing && <div className="checkmark">✓</div>}
                 </div>
 
                 <div className="form-group">
-                  <label>Gender</label>
+                  <label>Giới tính</label>
                   <div className="radio-group">
                     <label>
                       <input
@@ -179,7 +179,7 @@ const Profile = () => {
                         onChange={(e) => handleInputChange("gender", e.target.value)}
                         disabled={!editing}
                       />
-                      Male
+                      Nam
                     </label>
                     <label>
                       <input
@@ -189,13 +189,13 @@ const Profile = () => {
                         onChange={(e) => handleInputChange("gender", e.target.value)}
                         disabled={!editing}
                       />
-                      Female
+                      Nữ
                     </label>
                   </div>
                 </div>
 
                 <div className="form-group">
-                  <label>Date of Birth</label>
+                  <label>Ngày sinh</label>
                   <input
                     type="date"
                     value={formData.dob}
@@ -205,7 +205,7 @@ const Profile = () => {
                       if (dob <= today) {
                         handleInputChange("dob", e.target.value);
                       } else {
-                        alert("Date of birth cannot be greater than today");
+                        alert("Ngày sinh không thể lớn hơn hôm nay");
                       }
                     }}
                     disabled={!editing}
@@ -217,15 +217,15 @@ const Profile = () => {
                   {editing ? (
                     <>
                       <button onClick={handleSaveClick} disabled={profileLoading} className="btn-primary">
-                        {profileLoading ? "Saving..." : "Save"}
+                        {profileLoading ? "Đang lưu..." : "Lưu"}
                       </button>
                       <button onClick={() => setEditing(false)} className="btn-secondary">
-                        Cancel
+                        Hủy
                       </button>
                     </>
                   ) : (
                     <button onClick={() => setEditing(true)} className="btn-primary">
-                      Edit
+                      Chỉnh sửa
                     </button>
                   )}
                 </div>
@@ -237,21 +237,21 @@ const Profile = () => {
           {activeTab === "address" && (
             <div className="profile-content-section">
               <div className="profile-addresses-header">
-                <h2>Delivery Addresses</h2>
+                <h2>Địa chỉ giao hàng</h2>
                 <button
                   onClick={() => setShowAddressForm(!showAddressForm)}
                   className="btn-add-address"
                 >
-                  + Add Address
+                  + Thêm địa chỉ
                 </button>
               </div>
 
               {showAddressForm && (
                 <div className="address-form">
-                  <h3>Add New Delivery Address</h3>
+                  <h3>Thêm địa chỉ giao hàng mới</h3>
                   <div className="form-row">
                     <div className="form-group">
-                      <label>City/Province</label>
+                      <label>Tỉnh/Thành phố</label>
                       <select
                         value={newAddress.city}
                         onChange={(e) => {
@@ -259,30 +259,30 @@ const Profile = () => {
                           handleAddressInputChange("district", "");
                         }}
                       >
-                        <option value="">Select city/province</option>
-                        <option value="Ho Chi Minh">Ho Chi Minh City</option>
+                        <option value="">Chọn tỉnh/thành phố</option>
+                        <option value="Ho Chi Minh">TP. Hồ Chí Minh</option>
                       </select>
                     </div>
 
                     <div className="form-group">
-                      <label>District</label>
+                      <label>Quận/Huyện</label>
                       <select
                         value={newAddress.district}
                         onChange={(e) => handleAddressInputChange("district", e.target.value)}
                       >
-                        <option value="">Select district</option>
+                        <option value="">Chọn quận/huyện</option>
                         {newAddress.city === "Ho Chi Minh" && (
                           <>
-                            <option value="District 1">District 1</option>
-                            <option value="District 2">District 2</option>
-                            <option value="District 3">District 3</option>
-                            <option value="District 4">District 4</option>
-                            <option value="District 5">District 5</option>
-                            <option value="District 6">District 6</option>
-                            <option value="District 7">District 7</option>
-                            <option value="District 8">District 8</option>
-                            <option value="District 9">District 9</option>
-                            <option value="District 10">District 10</option>
+                            <option value="District 1">Quận 1</option>
+                            <option value="District 2">Quận 2</option>
+                            <option value="District 3">Quận 3</option>
+                            <option value="District 4">Quận 4</option>
+                            <option value="District 5">Quận 5</option>
+                            <option value="District 6">Quận 6</option>
+                            <option value="District 7">Quận 7</option>
+                            <option value="District 8">Quận 8</option>
+                            <option value="District 9">Quận 9</option>
+                            <option value="District 10">Quận 10</option>
                           </>
                         )}
                       </select>
@@ -291,10 +291,10 @@ const Profile = () => {
 
                   <div className="form-group">
                     <label>
-                      Street Address
+                      Địa chỉ chi tiết
                       {newAddress.lat && newAddress.lng && (
                         <span style={{ color: "#4caf50", fontWeight: "600", marginLeft: "8px" }}>
-                          (GPS-filled)
+                          (Đã lấy GPS)
                         </span>
                       )}
                     </label>
@@ -302,17 +302,17 @@ const Profile = () => {
                       type="text"
                       value={newAddress.address_line}
                       onChange={(e) => handleAddressInputChange("address_line", e.target.value)}
-                      placeholder="Street address, building number, etc."
+                      placeholder="Số nhà, tên đường, tòa nhà, v.v."
                     />
                   </div>
 
                   <div className="form-group">
-                    <label>Note (Optional)</label>
+                    <label>Ghi chú (Tùy chọn)</label>
                     <input
                       type="text"
                       value={newAddress.note || ""}
                       onChange={(e) => handleAddressInputChange("note", e.target.value)}
-                      placeholder="e.g., Near the park, Gate 2, etc."
+                      placeholder="Ví dụ: Gần công viên, Cổng số 2, v.v."
                     />
                   </div>
 
@@ -322,8 +322,8 @@ const Profile = () => {
                     className="gps-btn"
                   >
                     {newAddress.lat && newAddress.lng
-                      ? "Get Current GPS Location"
-                      : "Get Current GPS Location"}
+                      ? "Lấy vị trí GPS hiện tại"
+                      : "Lấy vị trí GPS hiện tại"}
                   </button>
 
                   <div className="form-group">
@@ -334,7 +334,7 @@ const Profile = () => {
                         onChange={(e) => handleAddressInputChange("isDefault", e.target.checked)}
                         style={{ width: "18px", height: "18px", cursor: "pointer" }}
                       />
-                      Set as default delivery address
+                      Đặt làm địa chỉ giao hàng mặc định
                     </label>
                   </div>
 
@@ -344,7 +344,7 @@ const Profile = () => {
                       disabled={addressFormLoading}
                       className="btn-primary"
                     >
-                      {addressFormLoading ? "Adding..." : "Add Address"}
+                      {addressFormLoading ? "Đang thêm..." : "Thêm địa chỉ"}
                     </button>
                   </div>
                 </div>

@@ -41,49 +41,49 @@ const Sidebar = () => {
             to="/dashboard"
             className={({ isActive }) => (isActive ? "active" : "")}
           >
-            <MdDashboard /> Dashboard
+            <MdDashboard /> Bảng điều khiển
           </NavLink>
           <NavLink
             to="/categories"
             className={({ isActive }) => (isActive ? "active" : "")}
           >
-            <MdCategory /> Categories
+            <MdCategory /> Danh mục
           </NavLink>
           <NavLink
             to="/list"
             className={({ isActive }) => (isActive ? "active" : "")}
           >
-            <MdRestaurantMenu /> Food List
+            <MdRestaurantMenu /> Danh sách món ăn
           </NavLink>
           <NavLink
             to="/orders"
             className={({ isActive }) => (isActive ? "active" : "")}
           >
-            <MdShoppingCart /> Orders
+            <MdShoppingCart /> Đơn hàng
           </NavLink>
           <NavLink
             to="/reviews"
             className={({ isActive }) => (isActive ? "active" : "")}
           >
-            <MdRateReview /> Reviews
+            <MdRateReview /> Đánh giá
           </NavLink>
           <NavLink
             to="/promotions"
             className={({ isActive }) => (isActive ? "active" : "")}
           >
-            <MdCardGiftcard /> Promotions
+            <MdCardGiftcard /> Khuyến mãi
           </NavLink>
           <NavLink
             to="/restaurant-info"
             className={({ isActive }) => (isActive ? "active" : "")}
           >
-            <MdInfo /> Restaurant Info
+            <MdInfo /> Thông tin nhà hàng
           </NavLink>
           <NavLink
             to="/payment"
             className={({ isActive }) => (isActive ? "active" : "")}
           >
-            <MdAttachMoney /> Payment & Withdrawal
+            <MdAttachMoney /> Thanh toán & Rút tiền
           </NavLink>
         </nav>
       </div>
@@ -91,7 +91,7 @@ const Sidebar = () => {
       {/* Footer - Logout */}
       <div className="sidebar-footer">
         <button className="logout-btn" onClick={handleLogout}>
-          <MdLogout /> Logout
+          <MdLogout /> Đăng xuất
         </button>
       </div>
     </div>

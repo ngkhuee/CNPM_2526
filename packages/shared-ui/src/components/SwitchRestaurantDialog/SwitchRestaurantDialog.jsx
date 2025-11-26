@@ -39,21 +39,21 @@ const SwitchRestaurantDialog = ({
                 </div>
 
                 {/* Title & Message */}
-                <h2 className="dialog-title">Switch Restaurant?</h2>
+                <h2 className="dialog-title">Đổi nhà hàng?</h2>
 
                 <div className="dialog-content">
                     <p className="dialog-message">
-                        Your cart currently contains items from{" "}
+                        Giỏ hàng của bạn hiện có các món từ{" "}
                         <strong>{currentRestaurant}</strong>.
                     </p>
 
                     <p className="dialog-info">
-                        If you select items from <strong>{newRestaurant}</strong>, your
-                        current cart will be cleared.
+                        Nếu bạn chọn món từ <strong>{newRestaurant}</strong>, giỏ
+                        hàng hiện tại sẽ bị xóa.
                     </p>
 
                     <p className="dialog-warning">
-                        <em>Each order can only contain items from one restaurant</em>
+                        <em>Mỗi đơn hàng chỉ có thể chứa món từ một nhà hàng</em>
                     </p>
                 </div>
 
@@ -65,7 +65,7 @@ const SwitchRestaurantDialog = ({
                         disabled={isLoading}
                         style={{ width: '100%' }}
                     >
-                        {isLoading ? "Switching..." : "Switch Restaurant"}
+                        {isLoading ? "Đang đổi..." : "Đổi nhà hàng"}
                     </button>
 
                     {onGoToCheckout && (
@@ -85,7 +85,7 @@ const SwitchRestaurantDialog = ({
                                 fontWeight: '500'
                             }}
                         >
-                            Go to Checkout
+                            Đi đến thanh toán
                         </button>
                     )}
 
@@ -95,7 +95,7 @@ const SwitchRestaurantDialog = ({
                         disabled={isLoading}
                         style={{ width: '100%' }}
                     >
-                        Cancel
+                        Hủy
                     </button>
                 </div>
             </div>

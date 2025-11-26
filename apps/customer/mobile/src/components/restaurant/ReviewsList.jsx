@@ -22,8 +22,8 @@ export const ReviewsList = ({ reviews, avgRating }) => {
         return (
             <View style={styles.emptyReviewsContainer}>
                 <MaterialIcons name="rate-review" size={32} color="#ccc" />
-                <Text style={styles.emptyReviewsText}>No reviews yet</Text>
-                <Text style={styles.emptyReviewsSubtext}>Be the first to review this restaurant</Text>
+                <Text style={styles.emptyReviewsText}>Chưa có đánh giá nào</Text>
+                <Text style={styles.emptyReviewsSubtext}>Hãy là người đầu tiên đánh giá nhà hàng này</Text>
             </View>
         );
     }
@@ -36,7 +36,7 @@ export const ReviewsList = ({ reviews, avgRating }) => {
                     <MaterialIcons name="star" size={18} color="#ffc107" />
                     <Text style={styles.ratingValue}>{avgRating}</Text>
                     <Text style={styles.reviewCountBadge}>/ 5</Text>
-                    <Text style={styles.allReviewsText}>• All Reviews ({reviews.length})</Text>
+                    <Text style={styles.allReviewsText}>• Tất cả đánh giá ({reviews.length})</Text>
                 </View>
             </View>
 
@@ -47,7 +47,7 @@ export const ReviewsList = ({ reviews, avgRating }) => {
                     <View style={styles.reviewHeader}>
                         <View style={styles.reviewUserInfo}>
                             <Text style={styles.reviewUserName}>
-                                {review.user?.name || 'Anonymous'}
+                                {review.user?.name || 'Ẩn danh'}
                             </Text>
                             {renderStars(review.rating || 0)}
                         </View>
@@ -69,7 +69,7 @@ export const ReviewsList = ({ reviews, avgRating }) => {
                         <View style={styles.restaurantReply}>
                             <View style={styles.replyHeader}>
                                 <MaterialIcons name="reply" size={14} color="#ff6b35" />
-                                <Text style={styles.replyLabel}>Restaurant's Reply</Text>
+                                <Text style={styles.replyLabel}>Phản hồi từ nhà hàng</Text>
                             </View>
                             <Text style={styles.replyText}>{review.restaurant_reply}</Text>
                         </View>
@@ -84,24 +84,24 @@ const styles = StyleSheet.create({
     emptyReviewsContainer: { alignItems: 'center', paddingVertical: 32 },
     emptyReviewsText: { fontSize: 13, fontWeight: '500', color: '#999', marginTop: 8 },
     emptyReviewsSubtext: { fontSize: 12, color: '#bbb', marginTop: 4 },
-    reviewsHeaderContainer: { 
+    reviewsHeaderContainer: {
         marginBottom: 20,
         paddingBottom: 12,
         borderBottomWidth: 1,
         borderBottomColor: '#f0f0f0',
     },
-    ratingBadge: { 
-        flexDirection: 'row', 
-        alignItems: 'center', 
+    ratingBadge: {
+        flexDirection: 'row',
+        alignItems: 'center',
         gap: 6,
     },
-    ratingValue: { 
-        fontSize: 20, 
-        fontWeight: '700', 
+    ratingValue: {
+        fontSize: 20,
+        fontWeight: '700',
         color: '#333',
     },
-    reviewCountBadge: { 
-        fontSize: 14, 
+    reviewCountBadge: {
+        fontSize: 14,
         color: '#999',
         fontWeight: '500',
     },
@@ -111,33 +111,33 @@ const styles = StyleSheet.create({
         fontWeight: '500',
         marginLeft: 4,
     },
-    reviewItem: { 
+    reviewItem: {
         paddingVertical: 16,
-        borderBottomWidth: 1, 
+        borderBottomWidth: 1,
         borderBottomColor: '#f5f5f5',
     },
-    reviewHeader: { 
-        flexDirection: 'row', 
-        justifyContent: 'space-between', 
-        alignItems: 'flex-start', 
+    reviewHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'flex-start',
         marginBottom: 10,
     },
     reviewUserInfo: { flex: 1 },
-    reviewUserName: { 
-        fontSize: 14, 
-        fontWeight: '600', 
-        color: '#333', 
+    reviewUserName: {
+        fontSize: 14,
+        fontWeight: '600',
+        color: '#333',
         marginBottom: 6,
     },
     starsContainer: { flexDirection: 'row', gap: 2 },
-    reviewDate: { 
-        fontSize: 12, 
+    reviewDate: {
+        fontSize: 12,
         color: '#999',
     },
-    foodNameTag: { 
-        fontSize: 12, 
-        color: '#ff6b35', 
-        fontWeight: '600', 
+    foodNameTag: {
+        fontSize: 12,
+        color: '#ff6b35',
+        fontWeight: '600',
         marginBottom: 8,
         backgroundColor: '#fff3e0',
         paddingHorizontal: 8,
@@ -145,9 +145,9 @@ const styles = StyleSheet.create({
         borderRadius: 4,
         alignSelf: 'flex-start',
     },
-    reviewComment: { 
-        fontSize: 13, 
-        color: '#333', 
+    reviewComment: {
+        fontSize: 13,
+        color: '#333',
         lineHeight: 20,
         marginBottom: 8,
     },
@@ -158,20 +158,20 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         marginTop: 10,
     },
-    replyHeader: { 
-        flexDirection: 'row', 
-        alignItems: 'center', 
-        gap: 6, 
+    replyHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 6,
         marginBottom: 6,
     },
-    replyLabel: { 
-        fontSize: 12, 
-        fontWeight: '600', 
+    replyLabel: {
+        fontSize: 12,
+        fontWeight: '600',
         color: '#ff6b35',
     },
-    replyText: { 
-        fontSize: 13, 
-        color: '#555', 
+    replyText: {
+        fontSize: 13,
+        color: '#555',
         lineHeight: 18,
     },
 });

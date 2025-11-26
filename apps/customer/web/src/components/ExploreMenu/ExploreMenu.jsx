@@ -19,9 +19,9 @@ const calculateDistance = (lat1, lng1, lat2, lng2) => {
   const a =
     Math.sin(dLat / 2) * Math.sin(dLat / 2) +
     Math.cos((lat1 * Math.PI) / 180) *
-      Math.cos((lat2 * Math.PI) / 180) *
-      Math.sin(dLng / 2) *
-      Math.sin(dLng / 2);
+    Math.cos((lat2 * Math.PI) / 180) *
+    Math.sin(dLng / 2) *
+    Math.sin(dLng / 2);
 
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   const distance = R * c; // Distance in km
@@ -44,10 +44,10 @@ const ExploreMenu = ({
     }
 
     return [
-      { id: "Top Rated", label: "Top Rated", Icon: MdStar },
+      { id: "Top Rated", label: "Đánh giá cao", Icon: MdStar },
       {
         id: "Best Selling",
-        label: "Best Selling",
+        label: "Bán chạy",
         Icon: MdLocalFireDepartment,
       },
     ];
@@ -108,10 +108,10 @@ const ExploreMenu = ({
           }}
         >
           <MdLocationOn size={32} style={{ color: "#ff6b35" }} />
-          Restaurants Near You
+          Nhà hàng Gần bạn
         </h2>
         <p style={{ color: "#666", marginBottom: "20px" }}>
-          Some restaurants within 5km of your location
+          Một số nhà hàng trong bán kính 5km từ vị trí của bạn
         </p>
         <div className="explore-menu-list">
           {nearbyRestaurants.slice(0, 10).map((restaurant) => (
@@ -158,11 +158,11 @@ const ExploreMenu = ({
     <div className="explore-menu" id="explore-menu">
       <h1 style={{ display: "flex", alignItems: "center", gap: "10px" }}>
         <MdRestaurant size={32} />
-        Discover Delicious Food
+        Khám phá Món ngon
       </h1>
       <p className="explore-menu-text">
-        Explore our curated selection of top-rated dishes and bestsellers. Find
-        your next favorite meal!
+        Khám phá bộ sưu tập món ăn được đánh giá cao và bán chạy nhất.
+        Tìm món yêu thích tiếp theo của bạn!
       </p>
 
       {/* Filter Options - Only Top Rated and Best Selling */}

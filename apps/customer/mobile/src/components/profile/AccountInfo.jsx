@@ -27,7 +27,7 @@ export default function AccountInfo({
     );
     return (
         <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Account Information</Text>
+            <Text style={styles.sectionTitle}>Thông tin tài khoản</Text>
 
             {/* Email - Read Only */}
             <View style={styles.formGroup}>
@@ -42,7 +42,7 @@ export default function AccountInfo({
 
             {/* Full Name */}
             <View style={styles.formGroup}>
-                <Text style={styles.label}>Full Name</Text>
+                <Text style={styles.label}>Họ và tên</Text>
                 <View style={styles.inputContainer}>
                     <TextInput
                         style={[styles.input, !editing && styles.disabledInput]}
@@ -50,7 +50,7 @@ export default function AccountInfo({
                         onChangeText={value => onInputChange('name', value)}
                         editable={editing}
                         placeholderTextColor="#ccc"
-                        placeholder="Enter full name"
+                        placeholder="Nhập họ tên"
                     />
                     {editing && <MaterialIcons name="check-circle" size={20} color="#4caf50" />}
                 </View>
@@ -58,14 +58,14 @@ export default function AccountInfo({
 
             {/* Phone */}
             <View style={styles.formGroup}>
-                <Text style={styles.label}>Phone Number</Text>
+                <Text style={styles.label}>Số điện thoại</Text>
                 <View style={styles.inputContainer}>
                     <TextInput
                         style={[styles.input, !editing && styles.disabledInput]}
                         value={formData.phone}
                         onChangeText={value => onInputChange('phone', value)}
                         editable={editing}
-                        placeholder="Enter phone number"
+                        placeholder="Nhập số điện thoại"
                         placeholderTextColor="#ccc"
                         keyboardType="phone-pad"
                     />
@@ -75,7 +75,7 @@ export default function AccountInfo({
 
             {/* Gender */}
             <View style={styles.formGroup}>
-                <Text style={styles.label}>Gender</Text>
+                <Text style={styles.label}>Giới tính</Text>
                 <View style={styles.radioGroup}>
                     <TouchableOpacity
                         style={styles.radioOption}
@@ -87,7 +87,7 @@ export default function AccountInfo({
                                 formData.gender === 'Male' && styles.radioButtonSelected,
                             ]}
                         />
-                        <Text style={styles.radioLabel}>Male</Text>
+                        <Text style={styles.radioLabel}>Nam</Text>
                     </TouchableOpacity>
 
                     <TouchableOpacity
@@ -100,18 +100,18 @@ export default function AccountInfo({
                                 formData.gender === 'Female' && styles.radioButtonSelected,
                             ]}
                         />
-                        <Text style={styles.radioLabel}>Female</Text>
+                        <Text style={styles.radioLabel}>Nữ</Text>
                     </TouchableOpacity>
                 </View>
             </View>
 
             {/* Date of Birth */}
             <View style={styles.formGroup}>
-                <Text style={styles.label}>Date of Birth</Text>
+                <Text style={styles.label}>Ngày sinh</Text>
                 {!editing ? (
                     <View style={[styles.input, styles.disabledInput, { justifyContent: 'center' }]}>
                         <Text style={{ color: formData.dob ? '#333' : '#ccc', fontSize: 14 }}>
-                            {formData.dob ? new Date(formData.dob).toLocaleDateString() : 'Select date of birth'}
+                            {formData.dob ? new Date(formData.dob).toLocaleDateString() : 'Chọn ngày sinh'}
                         </Text>
                     </View>
                 ) : (
@@ -123,7 +123,7 @@ export default function AccountInfo({
                         }}
                     >
                         <Text style={{ fontSize: 14, color: '#333', flex: 1 }}>
-                            {formData.dob ? new Date(formData.dob).toLocaleDateString() : 'Tap to select date'}
+                            {formData.dob ? new Date(formData.dob).toLocaleDateString() : 'Chạm để chọn ngày'}
                         </Text>
                         <MaterialIcons name="calendar-today" size={20} color="#FF6B35" />
                     </TouchableOpacity>
@@ -159,14 +159,14 @@ export default function AccountInfo({
                             {saveLoading ? (
                                 <ActivityIndicator color="#fff" size="small" />
                             ) : (
-                                <Text style={styles.buttonText}>Save Changes</Text>
+                                <Text style={styles.buttonText}>Lưu thay đổi</Text>
                             )}
                         </TouchableOpacity>
                         <TouchableOpacity
                             style={[styles.button, styles.buttonSecondary]}
                             onPress={onCancel}
                         >
-                            <Text style={styles.buttonSecondaryText}>Cancel</Text>
+                            <Text style={styles.buttonSecondaryText}>Hủy</Text>
                         </TouchableOpacity>
                     </>
                 ) : (
@@ -175,7 +175,7 @@ export default function AccountInfo({
                         onPress={onEdit}
                     >
                         <MaterialIcons name="edit" size={18} color="#fff" />
-                        <Text style={[styles.buttonText, { marginLeft: 8 }]}>Edit Profile</Text>
+                        <Text style={[styles.buttonText, { marginLeft: 8 }]}>Chỉnh sửa hồ sơ</Text>
                     </TouchableOpacity>
                 )}
             </View>
@@ -186,7 +186,7 @@ export default function AccountInfo({
                 onPress={onLogout}
             >
                 <MaterialIcons name="logout" size={18} color="#fff" />
-                <Text style={[styles.buttonText, { marginLeft: 8 }]}>Logout</Text>
+                <Text style={[styles.buttonText, { marginLeft: 8 }]}>Đăng xuất</Text>
             </TouchableOpacity>
         </View>
     );

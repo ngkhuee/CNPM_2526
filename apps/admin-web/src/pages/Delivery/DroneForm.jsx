@@ -15,15 +15,15 @@ const DroneForm = ({
         <Modal
             isOpen={isOpen}
             onClose={onClose}
-            title={editingDrone ? "Edit Drone" : "Add Drone"}
+            title={editingDrone ? "Sửa Drone" : "Thêm Drone"}
         >
             <div className="drone-form">
                 <div className="form-group">
-                    <label htmlFor="drone-name">Drone Name *</label>
+                    <label htmlFor="drone-name">Tên Drone *</label>
                     <input
                         id="drone-name"
                         className="form-input"
-                        placeholder="Enter drone identifier (e.g., DRONE-001)"
+                        placeholder="Nhập mã drone (VD: DRONE-001)"
                         value={formData?.identifier || ""}
                         onChange={(e) =>
                             onFormChange({
@@ -35,68 +35,27 @@ const DroneForm = ({
                 </div>
 
                 {!editingDrone && (
-                    <>
-                        <div className="form-group">
-                            <label htmlFor="drone-address">Location Address</label>
-                            <div style={{ display: "flex", gap: "8px" }}>
-                                <input
-                                    id="drone-address"
-                                    className="form-input"
-                                    placeholder="Enter address (e.g., Warehouse HCM)"
-                                    value={formData?.address || ""}
-                                    onChange={(e) =>
-                                        onFormChange({
-                                            ...formData,
-                                            address: e.target.value,
-                                        })
-                                    }
-                                />
-                                <button
-                                    onClick={onGeocodeAddress}
-                                    disabled={geocoding}
-                                    className="btn-secondary"
-                                    style={{ minWidth: "120px" }}
-                                >
-                                    {geocoding ? "Geocoding..." : "Search"}
-                                </button>
-                            </div>
-                        </div>
-
-                        <div style={{ display: "flex", gap: "16px" }}>
-                            <div className="form-group" style={{ flex: 1 }}>
-                                <label htmlFor="drone-lat">Latitude</label>
-                                <input
-                                    id="drone-lat"
-                                    className="form-input"
-                                    placeholder="Latitude"
-                                    value={formData?.latitude || ""}
-                                    onChange={(e) =>
-                                        onFormChange({
-                                            ...formData,
-                                            latitude: e.target.value,
-                                        })
-                                    }
-                                    disabled={geocoding}
-                                />
-                            </div>
-                            <div className="form-group" style={{ flex: 1 }}>
-                                <label htmlFor="drone-lng">Longitude</label>
-                                <input
-                                    id="drone-lng"
-                                    className="form-input"
-                                    placeholder="Longitude"
-                                    value={formData?.longitude || ""}
-                                    onChange={(e) =>
-                                        onFormChange({
-                                            ...formData,
-                                            longitude: e.target.value,
-                                        })
-                                    }
-                                    disabled={geocoding}
-                                />
-                            </div>
-                        </div>
-                    </>
+                    <div
+                        style={{
+                            background: "#e3f2fd",
+                            border: "1px solid #2196f3",
+                            borderRadius: "8px",
+                            padding: "12px",
+                            marginTop: "8px",
+                            fontSize: "14px",
+                            color: "#1565c0"
+                        }}
+                    >
+                        <p style={{ margin: 0 }}>
+                            <strong>ℹ️ Tự động cấu hình:</strong>
+                        </p>
+                        <ul style={{ margin: "8px 0 0 20px", padding: 0 }}>
+                            <li>Vị trí căn cứ: 273 An Dương Vương, TP. HCM</li>
+                            <li>Pin: 100%</li>
+                            <li>Trạng thái: Sẵn sàng</li>
+                            <li>Tải trọng tối đa: 5kg</li>
+                        </ul>
+                    </div>
                 )}
 
                 <div className="form-actions">
@@ -113,13 +72,13 @@ const DroneForm = ({
                             <polyline points="17 21 17 13 7 13 7 21" />
                             <polyline points="7 3 7 8 15 8" />
                         </svg>
-                        Save
+                        Lưu
                     </button>
                     <button
                         onClick={onClose}
                         className="btn-default"
                     >
-                        Cancel
+                        Hủy
                     </button>
                 </div>
             </div>

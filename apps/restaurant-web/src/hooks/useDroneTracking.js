@@ -50,6 +50,7 @@ export const useDroneTracking = () => {
 
   useEffect(() => {
     fetchData();
+    // No auto-refresh - only refresh when user manually clicks
   }, []);
 
   // Get drones by status

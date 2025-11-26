@@ -3,11 +3,11 @@ import { useParams, useNavigate } from "react-router-dom";
 import { formatCurrency, formatRating } from "@utils/formatters";
 import { useRestaurantRating } from "shared-hooks";
 import { orderService, restaurantService } from "shared-services";
+import { DroneIcon } from "shared-ui";
 import {
     MdArrowBack,
     MdStar,
     MdTrendingUp,
-    MdLocalShipping,
     MdShoppingCart,
 } from "react-icons/md";
 import "./RestaurantDetail.css";
@@ -138,7 +138,7 @@ const RestaurantDetail = () => {
     if (loading) {
         return (
             <div className="main-content">
-                <div className="loading">Loading restaurant details...</div>
+                <div className="loading">Đang tải thông tin nhà hàng...</div>
             </div>
         );
     }
@@ -146,7 +146,7 @@ const RestaurantDetail = () => {
     if (!restaurant) {
         return (
             <div className="main-content">
-                <div className="error">Restaurant not found</div>
+                <div className="error">Không tìm thấy nhà hàng</div>
             </div>
         );
     }
@@ -157,7 +157,7 @@ const RestaurantDetail = () => {
                 {/* Header */}
                 <div className="detail-header">
                     <button className="back-btn" onClick={() => navigate("/admin/partners")}>
-                        <MdArrowBack /> Back to Restaurants
+                        <MdArrowBack /> Quay lại Danh sách
                     </button>
                     <h2>{restaurant.name}</h2>
                 </div>
@@ -165,26 +165,26 @@ const RestaurantDetail = () => {
                 {/* Restaurant Info */}
                 <div className="info-section">
                     <div className="info-card">
-                        <h3>Restaurant Information</h3>
+                        <h3>Thông tin Nhà hàng</h3>
                         <div className="info-grid">
                             <div className="info-item">
-                                <span className="info-label">Address:</span>
+                                <span className="info-label">Địa chỉ:</span>
                                 <span className="info-value">{restaurant.address}</span>
                             </div>
                             <div className="info-item">
-                                <span className="info-label">Rating:</span>
+                                <span className="info-label">Đánh giá:</span>
                                 <span className="info-value">
-                                    <MdStar /> {formatRating(rating !== null ? rating : restaurant.rating)} ({totalReviews} reviews)
+                                    <MdStar /> {formatRating(rating !== null ? rating : restaurant.rating)} ({totalReviews} lượt)
                                 </span>
                             </div>
                             <div className="info-item">
-                                <span className="info-label">Status:</span>
+                                <span className="info-label">Trạng thái:</span>
                                 <span className={`status-badge status-${restaurant.status}`}>
                                     {restaurant.status.toUpperCase()}
                                 </span>
                             </div>
                             <div className="info-item">
-                                <span className="info-label">Phone:</span>
+                                <span className="info-label">Điện thoại:</span>
                                 <span className="info-value">{restaurant.phone}</span>
                             </div>
                         </div>
@@ -198,10 +198,10 @@ const RestaurantDetail = () => {
                             <MdShoppingCart />
                         </div>
                         <div className="stat-content">
-                            <div className="stat-label">Total Orders</div>
+                            <div className="stat-label">Tổng đơn hàng</div>
                             <div className="stat-value">{stats?.totalOrders || 0}</div>
                             <div className="stat-detail">
-                                Completed: {stats?.completedOrders || 0}
+                                Hoàn thành: {stats?.completedOrders || 0}
                             </div>
                         </div>
                     </div>
@@ -211,21 +211,21 @@ const RestaurantDetail = () => {
                             <MdTrendingUp />
                         </div>
                         <div className="stat-content">
-                            <div className="stat-label">Total Revenue</div>
+                            <div className="stat-label">Tổng doanh thu</div>
                             <div className="stat-value">{formatCurrency(stats?.totalRevenue || 0)}</div>
                             <div className="stat-detail">
-                                Today: {formatCurrency(stats?.todayRevenue || 0)}
+                                Hôm nay: {formatCurrency(stats?.todayRevenue || 0)}
                             </div>
                         </div>
                     </div>
 
                     <div className="stat-card">
                         <div className="stat-icon week">
-                            <MdLocalShipping />
+                            <DroneIcon size={32} color="currentColor" />
                         </div>
                         <div className="stat-content">
-                            <div className="stat-label">This Week</div>
-                            <div className="stat-value">{stats?.thisWeekOrders || 0} orders</div>
+                            <div className="stat-label">Tuần này</div>
+                            <div className="stat-value">{stats?.thisWeekOrders || 0} đơn</div>
                             <div className="stat-detail">
                                 {formatCurrency(stats?.weekRevenue || 0)}
                             </div>
@@ -238,12 +238,12 @@ const RestaurantDetail = () => {
                                 $
                             </div>
                             <div className="stat-content">
-                                <div className="stat-label">Available Balance</div>
+                                <div className="stat-label">Số dư khả dụng</div>
                                 <div className="stat-value">
                                     {formatCurrency(balance.available_balance)}
                                 </div>
                                 <div className="stat-detail">
-                                    Withdrawn: {formatCurrency(balance.total_withdrawn)}
+                                    Đã rút: {formatCurrency(balance.total_withdrawn)}
                                 </div>
                             </div>
                         </div>
@@ -253,14 +253,14 @@ const RestaurantDetail = () => {
                 {/* Top Products */}
                 {topProducts.length > 0 && (
                     <div className="products-section">
-                        <h3>Top 5 Products</h3>
+                        <h3>Top 5 Sản phẩm</h3>
                         <div className="products-table-wrapper">
                             <table className="products-table">
                                 <thead>
                                     <tr>
-                                        <th>Product</th>
-                                        <th>Quantity Sold</th>
-                                        <th>Revenue</th>
+                                        <th>Sản phẩm</th>
+                                        <th>Số lượng bán</th>
+                                        <th>Doanh thu</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -282,16 +282,16 @@ const RestaurantDetail = () => {
                 {/* Recent Orders */}
                 {orders.length > 0 && (
                     <div className="orders-section">
-                        <h3>Recent Orders ({orders.length})</h3>
+                        <h3>Đơn hàng gần đây ({orders.length})</h3>
                         <div className="orders-table-wrapper">
                             <table className="orders-table">
                                 <thead>
                                     <tr>
-                                        <th>Order ID</th>
-                                        <th>Customer</th>
-                                        <th>Amount</th>
-                                        <th>Status</th>
-                                        <th>Date</th>
+                                        <th>Mã đơn</th>
+                                        <th>Khách hàng</th>
+                                        <th>Số tiền</th>
+                                        <th>Trạng thái</th>
+                                        <th>Ngày</th>
                                     </tr>
                                 </thead>
                                 <tbody>

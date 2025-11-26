@@ -13,7 +13,7 @@ import {
 import { MaterialIcons } from '@expo/vector-icons';
 import { NavigationContext } from '../../contexts/NavigationContext';
 import { useOrderTracking } from '../../hooks/useOrderTracking';
-import { useDeliveryTracking, ORDER_TIMELINE } from '../../hooks/useDeliveryTracking';
+import { useDeliveryTracking, ORDER_TIMELINE, CANCELLED_TIMELINE } from '../../hooks/useDeliveryTracking';
 import apiClient from '../../services/apiClient';
 import { OrderStatusHeader } from '../../components/tracking/OrderStatusHeader';
 import { OrderTimeline } from '../../components/tracking/OrderTimeline';
@@ -26,7 +26,6 @@ import { ArrivedPopup } from '../../components/tracking/ArrivedPopup';
 const TrackingScreen = ({ orderId }) => {
     const { navigate } = useContext(NavigationContext);
     const [autoRefreshEnabled, setAutoRefreshEnabled] = useState(true);
-    const [simulatingDelivery, setSimulatingDelivery] = useState(false);
 
     // Custom hooks - useOrderTracking with adaptive polling
     const { order, loading, refreshing, handleRefresh, setAutoRefresh } = useOrderTracking(orderId, navigate);
@@ -67,25 +66,6 @@ const TrackingScreen = ({ orderId }) => {
         navigate('review', { orderId: order?.id });
     };
 
-    // Trigger drone delivery simulation using apiClient (with token)
-    const handleSimulateDelivery = async () => {
-        console.log('[TrackingScreen] Starting simulation for order:', orderId);
-        setSimulatingDelivery(true);
-        try {
-            const url = `/orders/${orderId}/simulate-delivery`;
-            console.log('[TrackingScreen] POST to:', url);
-            const data = await apiClient.post(url);
-            console.log('[TrackingScreen] Simulation started:', data);
-            Alert.alert('Success', 'Drone delivery simulation started!');
-            handleRefresh();
-        } catch (error) {
-            console.error('[TrackingScreen] Simulate error:', error);
-            Alert.alert('Error', error.response?.data?.message || 'Failed to start simulation');
-        } finally {
-            setSimulatingDelivery(false);
-        }
-    };
-
     // Loading state
     if (loading) {
         return (
@@ -122,16 +102,6 @@ const TrackingScreen = ({ orderId }) => {
                 </TouchableOpacity>
                 <Text style={styles.headerTitle}>Order Tracking</Text>
                 <View style={styles.headerActions}>
-                    {/* Simulate Delivery Button - only for pending/confirmed/ready */}
-                    {(['pending', 'confirmed', 'ready'].includes(order?.status)) && (
-                        <TouchableOpacity
-                            onPress={handleSimulateDelivery}
-                            disabled={simulatingDelivery}
-                            style={[styles.headerBtn, { opacity: simulatingDelivery ? 0.5 : 1 }]}
-                        >
-                            <MaterialIcons name="flight-takeoff" size={20} color="#ff6b35" />
-                        </TouchableOpacity>
-                    )}
                     <TouchableOpacity
                         onPress={handleAutoRefreshToggle}
                         style={[styles.headerBtn, autoRefreshEnabled && styles.headerBtnActive]}
@@ -160,8 +130,11 @@ const TrackingScreen = ({ orderId }) => {
                 {/* Order Status Header */}
                 <OrderStatusHeader order={order} isDelivered={isDelivered} />
 
-                {/* Timeline - Always visible */}
-                <OrderTimeline timeline={ORDER_TIMELINE} currentStatusIndex={currentStatusIndex} />
+                {/* Timeline - Show cancelled timeline for cancelled/rejected orders */}
+                <OrderTimeline
+                    timeline={order?.status === 'cancelled' || order?.status === 'rejected' ? CANCELLED_TIMELINE : ORDER_TIMELINE}
+                    currentStatusIndex={currentStatusIndex}
+                />
 
                 {/* Delivery Information */}
                 <DeliveryInfo order={order} />

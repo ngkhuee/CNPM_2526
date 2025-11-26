@@ -18,7 +18,7 @@ const CheckoutOrderSummary = ({
 
     return (
         <div className="checkout-summary">
-            <h3>Order Summary</h3>
+            <h3>Tóm tắt đơn hàng</h3>
 
             {/* Items List */}
             {cart?.items && cart.items.length > 0 && (
@@ -27,7 +27,7 @@ const CheckoutOrderSummary = ({
                         <div key={idx} className="order-item">
                             <div className="order-item-info">
                                 <span className="item-name">{item.name || item.food_name}</span>
-                                <span className="item-quantity">Qty: {item.quantity}</span>
+                                <span className="item-quantity">SL: {item.quantity}</span>
                             </div>
                             <span className="item-price">
                                 {formatCurrency((item.unit_price || item.price || 0) * item.quantity)}
@@ -83,7 +83,7 @@ const CheckoutOrderSummary = ({
                         }}
                     >
                         <MdLocalOffer />
-                        {showPromoCodes ? "Hide Promotions" : "Apply Promotion"}
+                        {showPromoCodes ? "Ẩn khuyến mãi" : "Áp dụng khuyến mãi"}
                     </button>
                 )}
 
@@ -100,7 +100,7 @@ const CheckoutOrderSummary = ({
                         }}
                     >
                         {loadingPromos ? (
-                            <p style={{ textAlign: "center", color: "#999" }}>Loading...</p>
+                            <p style={{ textAlign: "center", color: "#999" }}>Đang tải...</p>
                         ) : promotions && promotions.length > 0 ? (
                             promotions.map((promo) => (
                                 <div
@@ -143,7 +143,7 @@ const CheckoutOrderSummary = ({
                             ))
                         ) : (
                             <p style={{ textAlign: "center", color: "#999" }}>
-                                No promotions available
+                                Không có khuyến mãi
                             </p>
                         )}
                     </div>
@@ -153,12 +153,12 @@ const CheckoutOrderSummary = ({
             {/* Totals */}
             <div className="order-total">
                 <div className="total-row" style={{ marginBottom: "8px" }}>
-                    <span style={{ fontSize: "14px", color: "#666" }}>Subtotal:</span>
+                    <span style={{ fontSize: "14px", color: "#666" }}>Tạm tính:</span>
                     <span style={{ fontSize: "14px" }}>{formatCurrency(subtotal)}</span>
                 </div>
                 {discountAmount > 0 && (
                     <div className="total-row" style={{ marginBottom: "8px" }}>
-                        <span style={{ fontSize: "14px", color: "#4caf50" }}>Discount:</span>
+                        <span style={{ fontSize: "14px", color: "#4caf50" }}>Giảm giá:</span>
                         <span style={{ fontSize: "14px", color: "#4caf50" }}>
                             -{formatCurrency(discountAmount)}
                         </span>
@@ -166,12 +166,12 @@ const CheckoutOrderSummary = ({
                 )}
                 {deliveryFee > 0 && (
                     <div className="total-row" style={{ marginBottom: "8px" }}>
-                        <span style={{ fontSize: "14px", color: "#666" }}>Delivery Fee:</span>
+                        <span style={{ fontSize: "14px", color: "#666" }}>Phí giao hàng:</span>
                         <span style={{ fontSize: "14px" }}>{formatCurrency(deliveryFee)}</span>
                     </div>
                 )}
                 <div className="total-row" style={{ marginTop: "12px" }}>
-                    <span>Total:</span>
+                    <span>Tổng cộng:</span>
                     <span className="total-amount">{formatCurrency(total)}</span>
                 </div>
             </div>

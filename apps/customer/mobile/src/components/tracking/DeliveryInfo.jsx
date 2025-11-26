@@ -6,20 +6,20 @@ import { MaterialIcons } from '@expo/vector-icons';
 export const DeliveryInfo = ({ order }) => {
     return (
         <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Delivery Information</Text>
+            <Text style={styles.sectionTitle}>Thông tin giao hàng</Text>
 
             <View style={styles.infoGrid}>
                 {/* From: Restaurant */}
                 <View style={styles.infoBox}>
                     <View style={styles.infoBoxHeader}>
                         <MaterialIcons name="restaurant" size={18} color="#ff6b35" />
-                        <Text style={styles.infoBoxTitle}>From</Text>
+                        <Text style={styles.infoBoxTitle}>Từ</Text>
                     </View>
                     <Text style={styles.infoBoxValue} numberOfLines={2}>
-                        {order.restaurant_name || 'Restaurant'}
+                        {order.restaurant_name || 'Nhà hàng'}
                     </Text>
                     <Text style={styles.infoBoxAddress} numberOfLines={2}>
-                        {order.restaurant_address || 'No address'}
+                        {order.restaurant_address || 'Không có địa chỉ'}
                     </Text>
                 </View>
 
@@ -27,13 +27,13 @@ export const DeliveryInfo = ({ order }) => {
                 <View style={styles.infoBox}>
                     <View style={styles.infoBoxHeader}>
                         <MaterialIcons name="home" size={18} color="#1976d2" />
-                        <Text style={styles.infoBoxTitle}>To</Text>
+                        <Text style={styles.infoBoxTitle}>Đến</Text>
                     </View>
                     <Text style={styles.infoBoxValue} numberOfLines={2}>
-                        {order.customer?.name || 'Customer'}
+                        {order.customer?.name || 'Khách hàng'}
                     </Text>
                     <Text style={styles.infoBoxAddress} numberOfLines={2}>
-                        {order.customer?.address || 'No address'}
+                        {order.customer?.address || 'Không có địa chỉ'}
                     </Text>
                 </View>
             </View>

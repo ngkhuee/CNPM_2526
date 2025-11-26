@@ -40,11 +40,11 @@ export default function FoodCard({ item, onPress }) {
             <View style={styles.content}>
                 <View style={styles.nameRow}>
                     <Text style={styles.name} numberOfLines={2}>
-                        {item.name || 'Unknown Item'}
+                        {item.name || 'Món ăn'}
                     </Text>
                     {soldCount > 0 ? (
                         <View style={[styles.soldBadge, { marginLeft: 'auto' }]}>
-                            <Text style={styles.soldText}>Sold {soldCount}</Text>
+                            <Text style={styles.soldText}>Đã bán {soldCount}</Text>
                         </View>
                     ) : null}
                 </View>

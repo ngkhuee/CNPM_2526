@@ -57,16 +57,16 @@ const Category = () => {
     <div className="main-content">
       <div className="category-page">
         <div className="category-header">
-          <h2>Manage Categories</h2>
+          <h2>Quản lý Danh mục</h2>
           <button className="add-btn" onClick={handleOpenModal}>
-            <MdAdd /> Add Category
+            <MdAdd /> Thêm danh mục
           </button>
         </div>
 
         <div className="category-filters">
           <input
             type="text"
-            placeholder="Search category..."
+            placeholder="Tìm danh mục..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />

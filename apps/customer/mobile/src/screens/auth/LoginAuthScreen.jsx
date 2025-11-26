@@ -66,7 +66,7 @@ export default function LoginAuthScreen({ onBackPress }) {
                         onPress={() => setActiveTab('login')}
                     >
                         <Text style={[styles.tabText, activeTab === 'login' && styles.activeTabText]}>
-                            Login
+                            Đăng nhập
                         </Text>
                     </TouchableOpacity>
                     <TouchableOpacity
@@ -74,7 +74,7 @@ export default function LoginAuthScreen({ onBackPress }) {
                         onPress={() => setActiveTab('register')}
                     >
                         <Text style={[styles.tabText, activeTab === 'register' && styles.activeTabText]}>
-                            Register
+                            Đăng ký
                         </Text>
                     </TouchableOpacity>
                 </View>

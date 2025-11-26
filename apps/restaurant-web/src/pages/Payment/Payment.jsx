@@ -35,12 +35,12 @@ const Payment = () => {
         try {
             const result = await submitWithdrawal(amount);
             if (result.success) {
-                setSubmitSuccess(`Withdrawal request submitted successfully! Amount: ${formatCurrency(amount)}`);
+                setSubmitSuccess(`Yêu cầu rút tiền thành công! Số tiền: ${formatCurrency(amount)}`);
                 setActiveTab("history");
                 fetchBalance();
                 fetchTransactions();
             } else {
-                setSubmitError(result.message || "Failed to submit withdrawal request");
+                setSubmitError(result.message || "Không thể gửi yêu cầu rút tiền");
             }
         } catch (err) {
             setSubmitError(err.message || "An error occurred");
@@ -51,28 +51,28 @@ const Payment = () => {
         <div className="main-content">
             <div className="payment-page">
                 <h2>
-                    <MdAttachMoney /> Payment & Withdrawal Management
+                    <MdAttachMoney /> Quản lý Thanh toán & Rút tiền
                 </h2>
-                <p className="subtitle">Manage your earnings and withdraw funds</p>
+                <p className="subtitle">Quản lý thu nhập và rút tiền</p>
 
                 {/* Balance Cards */}
                 <div className="balance-cards">
                     <div className="balance-card primary">
-                        <div className="card-label">Available Balance</div>
+                        <div className="card-label">Số dư khả dụng</div>
                         <div className="card-amount">{formatCurrency(availableBalance)}</div>
-                        <div className="card-description">Ready to withdraw</div>
+                        <div className="card-description">Sẵn sàng rút tiền</div>
                     </div>
 
                     <div className="balance-card secondary">
-                        <div className="card-label">Total Earned</div>
+                        <div className="card-label">Tổng thu nhập</div>
                         <div className="card-amount">{formatCurrency(totalEarned)}</div>
-                        <div className="card-description">All-time earnings</div>
+                        <div className="card-description">Thu nhập từ trước đến nay</div>
                     </div>
 
                     <div className="balance-card secondary">
-                        <div className="card-label">Total Withdrawn</div>
+                        <div className="card-label">Tổng đã rút</div>
                         <div className="card-amount">{formatCurrency(totalWithdrawn)}</div>
-                        <div className="card-description">Total withdrawals</div>
+                        <div className="card-description">Tổng số tiền đã rút</div>
                     </div>
                 </div>
 
@@ -83,13 +83,13 @@ const Payment = () => {
                             className={`tab ${activeTab === "form" ? "active" : ""}`}
                             onClick={() => setActiveTab("form")}
                         >
-                            <MdAttachMoney /> Request Withdrawal
+                            <MdAttachMoney /> Yêu cầu rút tiền
                         </button>
                         <button
                             className={`tab ${activeTab === "history" ? "active" : ""}`}
                             onClick={() => setActiveTab("history")}
                         >
-                            <MdHistory /> Transaction History
+                            <MdHistory /> Lịch sử giao dịch
                         </button>
                     </div>
 

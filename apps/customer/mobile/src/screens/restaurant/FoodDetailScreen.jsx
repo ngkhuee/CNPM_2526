@@ -171,7 +171,7 @@ export default function FoodDetailScreen({ foodItem, onNavigate }) {
         return (
             <SafeAreaView style={styles.container}>
                 <View style={styles.errorContainer}>
-                    <Text style={styles.errorText}>Product not found</Text>
+                    <Text style={styles.errorText}>Không tìm thấy sản phẩm</Text>
                 </View>
             </SafeAreaView>
         );
@@ -338,7 +338,7 @@ export default function FoodDetailScreen({ foodItem, onNavigate }) {
                 setShowLoginModal(true);
                 showToast('error', 'Please login to add items to cart');
             } else {
-                showToast('error', `Failed to add to cart: ${error.message || 'Unknown error'}`);
+                showToast('error', `Không thể thêm vào giỏ: ${error.message || 'Lỗi không xác định'}`);
             }
         } finally {
             setIsAdding(false);
@@ -347,7 +347,7 @@ export default function FoodDetailScreen({ foodItem, onNavigate }) {
 
     const renderReviewItem = ({ item }) => {
         const reviewDate = new Date(item.created_at).toLocaleDateString('vi-VN');
-        const userName = item.user?.name || 'Anonymous';
+        const userName = item.user?.name || 'Ẩn danh';
         const rating = Math.round(item.rating) || 0;
 
         return (
@@ -394,7 +394,7 @@ export default function FoodDetailScreen({ foodItem, onNavigate }) {
                     <View style={styles.restaurantReply}>
                         <View style={styles.replyHeader}>
                             <MaterialIcons name="business" size={14} color="#ff6b35" />
-                            <Text style={styles.replyLabel}>Restaurant's Reply</Text>
+                            <Text style={styles.replyLabel}>Phản hồi từ nhà hàng</Text>
                         </View>
                         <Text style={styles.replyText}>{item.restaurant_reply}</Text>
                     </View>
@@ -411,7 +411,7 @@ export default function FoodDetailScreen({ foodItem, onNavigate }) {
                     <TouchableOpacity style={styles.backBtn} onPress={handleBack}>
                         <MaterialIcons name="arrow-back" size={24} color="#333" />
                     </TouchableOpacity>
-                    <Text style={styles.headerTitle}>Product Details</Text>
+                    <Text style={styles.headerTitle}>Chi tiết sản phẩm</Text>
                     <View style={{ width: 40 }} />
                 </View>
 
@@ -460,17 +460,17 @@ export default function FoodDetailScreen({ foodItem, onNavigate }) {
                                 )}
                             </View>
                             <Text style={styles.ratingText}>
-                                {ratingFormatted} ({reviewCount} reviews)
+                                {ratingFormatted} ({reviewCount} đánh giá)
                             </Text>
                         </View>
                     ) : (
-                        <Text style={styles.noRatingText}>No reviews yet</Text>
+                        <Text style={styles.noRatingText}>Chưa có đánh giá</Text>
                     )}
 
                     {/* Sold Count (if available) */}
                     {soldCount > 0 && (
                         <Text style={styles.soldText}>
-                            {soldCount.toLocaleString()} sold
+                            Đã bán {soldCount.toLocaleString()}
                         </Text>
                     )}
 
@@ -479,7 +479,7 @@ export default function FoodDetailScreen({ foodItem, onNavigate }) {
 
                     {/* Quantity Selector */}
                     <View style={styles.quantitySection}>
-                        <Text style={styles.quantityLabel}>Quantity</Text>
+                        <Text style={styles.quantityLabel}>Số lượng</Text>
                         <View style={styles.quantityControl}>
                             <TouchableOpacity
                                 style={styles.quantityButton}
@@ -500,7 +500,7 @@ export default function FoodDetailScreen({ foodItem, onNavigate }) {
 
                 {/* Reviews Section */}
                 <View style={styles.reviewsSection}>
-                    <Text style={styles.reviewsTitle}>Customer Reviews</Text>
+                    <Text style={styles.reviewsTitle}>Đánh giá của khách hàng</Text>
 
                     {reviewsLoading ? (
                         <View style={styles.reviewsLoadingContainer}>
@@ -509,7 +509,7 @@ export default function FoodDetailScreen({ foodItem, onNavigate }) {
                     ) : reviews.length === 0 ? (
                         <View style={styles.noReviewsContainer}>
                             <MaterialIcons name="rate-review" size={32} color="#ccc" />
-                            <Text style={styles.noReviewsText}>No reviews yet</Text>
+                            <Text style={styles.noReviewsText}>Chưa có đánh giá</Text>
                         </View>
                     ) : (
                         <FlatList
@@ -539,7 +539,7 @@ export default function FoodDetailScreen({ foodItem, onNavigate }) {
                     ) : (
                         <>
                             <MaterialIcons name="shopping-cart" size={20} color="#fff" />
-                            <Text style={styles.addToCartText}>Add to Cart</Text>
+                            <Text style={styles.addToCartText}>Thêm vào giỏ</Text>
                         </>
                     )}
                 </TouchableOpacity>

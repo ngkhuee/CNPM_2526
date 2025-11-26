@@ -26,7 +26,7 @@ export const CheckoutOrderSummary = ({
         <View style={styles.section}>
             <View style={styles.sectionHeader}>
                 <MaterialIcons name="receipt" size={20} color="#ff6b35" />
-                <Text style={styles.sectionTitle}>Order Summary</Text>
+                <Text style={styles.sectionTitle}>Tóm tắt đơn hàng</Text>
             </View>
 
             {/* Restaurant Name */}
@@ -42,7 +42,7 @@ export const CheckoutOrderSummary = ({
             {/* Items List */}
             {items.length > 0 && (
                 <View style={styles.itemsContainer}>
-                    <Text style={styles.itemsTitle}>Items ({items.length})</Text>
+                    <Text style={styles.itemsTitle}>Sản phẩm ({items.length})</Text>
                     <ScrollView scrollEnabled={!compact} style={styles.itemsList}>
                         {items.map((item, index) => (
                             <View key={`${item.id}-${index}`} style={styles.itemRow}>
@@ -64,14 +64,14 @@ export const CheckoutOrderSummary = ({
             {/* Summary */}
             <View style={styles.summaryContainer}>
                 <View style={styles.summaryRow}>
-                    <Text style={styles.summaryLabel}>Subtotal</Text>
+                    <Text style={styles.summaryLabel}>Tạm tính</Text>
                     <Text style={styles.summaryValue}>
                         ₫{subtotal.toLocaleString('vi-VN')}
                     </Text>
                 </View>
 
                 <View style={styles.summaryRow}>
-                    <Text style={styles.summaryLabel}>Delivery</Text>
+                    <Text style={styles.summaryLabel}>Phí giao hàng</Text>
                     <Text style={styles.summaryValue}>
                         ₫{deliveryFee.toLocaleString('vi-VN')}
                     </Text>
@@ -80,7 +80,7 @@ export const CheckoutOrderSummary = ({
                 {discountAmount > 0 && (
                     <View style={[styles.summaryRow, styles.discountRow]}>
                         <Text style={[styles.summaryLabel, styles.discountLabel]}>
-                            Discount {promoCode && `(${promoCode})`}
+                            Giảm giá {promoCode && `(${promoCode})`}
                         </Text>
                         <Text style={[styles.summaryValue, styles.discountValue]}>
                             -₫{discountAmount.toLocaleString('vi-VN')}
@@ -91,7 +91,7 @@ export const CheckoutOrderSummary = ({
                 <View style={styles.divider} />
 
                 <View style={[styles.summaryRow, styles.totalRow]}>
-                    <Text style={styles.totalLabel}>Total</Text>
+                    <Text style={styles.totalLabel}>Tổng cộng</Text>
                     <Text style={styles.totalValue}>
                         ₫{total.toLocaleString('vi-VN')}
                     </Text>

@@ -11,9 +11,9 @@ const PaymentTable = ({ data = [], onApprove, onReject, isLoading, activeTab }) 
         try {
             const result = await onApprove(withdrawalId);
             if (result.success) {
-                alert("Withdrawal approved successfully!");
+                alert("Đã duyệt yêu cầu rút tiền!");
             } else {
-                alert(`Error: ${result.message}`);
+                alert(`Lỗi: ${result.message}`);
             }
         } finally {
             setSubmitting((prev) => ({ ...prev, [withdrawalId]: false }));
@@ -21,14 +21,14 @@ const PaymentTable = ({ data = [], onApprove, onReject, isLoading, activeTab }) 
     };
 
     const handleReject = async (withdrawalId) => {
-        if (window.confirm("Are you sure you want to reject this withdrawal?")) {
+        if (window.confirm("Bạn có chắc chắn muốn từ chối yêu cầu này?")) {
             setSubmitting((prev) => ({ ...prev, [withdrawalId]: true }));
             try {
                 const result = await onReject(withdrawalId);
                 if (result.success) {
-                    alert("Withdrawal rejected!");
+                    alert("Đã từ chối yêu cầu rút tiền!");
                 } else {
-                    alert(`Error: ${result.message}`);
+                    alert(`Lỗi: ${result.message}`);
                 }
             } finally {
                 setSubmitting((prev) => ({ ...prev, [withdrawalId]: false }));
@@ -37,7 +37,7 @@ const PaymentTable = ({ data = [], onApprove, onReject, isLoading, activeTab }) 
     };
 
     if (data.length === 0) {
-        return <div className="empty-message">No data to display</div>;
+        return <div className="empty-message">Không có dữ liệu</div>;
     }
 
     return (
@@ -46,11 +46,11 @@ const PaymentTable = ({ data = [], onApprove, onReject, isLoading, activeTab }) 
                 <thead>
                     <tr>
                         <th>ID</th>
-                        <th>Restaurant</th>
-                        <th>Amount</th>
-                        <th>Status</th>
-                        <th>Request Date</th>
-                        <th>Actions</th>
+                        <th>Nhà hàng</th>
+                        <th>Số tiền</th>
+                        <th>Trạng thái</th>
+                        <th>Ngày yêu cầu</th>
+                        <th>Thao tác</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -76,19 +76,19 @@ const PaymentTable = ({ data = [], onApprove, onReject, isLoading, activeTab }) 
                                             className="btn-approve"
                                             onClick={() => handleApprove(withdrawal.id)}
                                             disabled={submitting[withdrawal.id]}
-                                            title="Approve"
+                                            title="Duyệt"
                                         >
                                             <MdCheckCircle size={18} />
-                                            {submitting[withdrawal.id] ? "..." : "Approve"}
+                                            {submitting[withdrawal.id] ? "..." : "Duyệt"}
                                         </button>
                                         <button
                                             className="btn-reject"
                                             onClick={() => handleReject(withdrawal.id)}
                                             disabled={submitting[withdrawal.id]}
-                                            title="Reject"
+                                            title="Từ chối"
                                         >
                                             <MdCancel size={18} />
-                                            {submitting[withdrawal.id] ? "..." : "Reject"}
+                                            {submitting[withdrawal.id] ? "..." : "Từ chối"}
                                         </button>
                                     </div>
                                 ) : (

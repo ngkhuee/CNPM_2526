@@ -1,104 +1,46 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useTrackingLogic } from "customer-shared";
-import { TrackingHeader, DeliveryStatusCard, OrderTimeline } from "customer-shared";
+import { OrderTimeline } from "customer-shared";
 import { formatCurrency } from "shared-utils";
 import { droneProgressService } from "shared-services";
+import { DroneIcon, DroneTrackingMap } from "shared-ui";
 import "./Tracking.css";
-import { MdLocationOn, MdRestaurant, MdHome, MdArrowBack, MdFlight } from "react-icons/md";
+import { MdLocationOn, MdRestaurant, MdHome, MdArrowBack } from "react-icons/md";
 import {
   TrackingLoadingError,
   TrackingOrderDetails,
   TrackingControls,
+  OrderStatusHeader,
+  ArrivedPopup,
 } from "../../components/Tracking";
+import { useOrderTracking } from "../../hooks/useOrderTracking";
+import { useDeliveryTracking } from "../../hooks/useDeliveryTracking";
 
 const Tracking = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const [showOrderDetails, setShowOrderDetails] = useState(false);
 
+  // Use new hooks with adaptive polling
+  const { order, loading, refreshing, handleRefresh, refetch, setAutoRefresh } = useOrderTracking(id);
   const {
-    order,
-    loading,
-    error,
-    confirming,
-    droneProgress,
-    arrivalTime,
-    droneArrived,
-    confirmDelivery,
-    refreshTracking,
-  } = useTrackingLogic(id);
+    currentStatusIndex,
+    isDelivered,
+    showMap,
+    showArrivedPopup,
+    handleCloseArrivedPopup,
+    handleConfirmDelivery,
+  } = useDeliveryTracking(order, refetch);
 
-  const [refreshing, setRefreshing] = useState(false);
   const [autoRefreshEnabled, setAutoRefreshEnabled] = useState(true);
-  const [simulatingDelivery, setSimulatingDelivery] = useState(false);
 
-  const handleRefresh = async () => {
-    setRefreshing(true);
-    try {
-      await refreshTracking();
-    } catch (err) {
-      console.error("Refresh error:", err);
-      alert("Failed to refresh order data");
-    } finally {
-      setRefreshing(false);
-    }
-  };
-
-  // Trigger drone delivery simulation
-  const handleSimulateDelivery = async () => {
-    setSimulatingDelivery(true);
-    try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_BASE_URL || "http://localhost:4000"}/orders/${id}/simulate-delivery`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-        }
-      );
-      if (response.ok) {
-        alert("Drone delivery simulation started!");
-        await refreshTracking();
-      } else {
-        alert("Failed to start delivery simulation");
-      }
-    } catch (error) {
-      console.error("Simulation error:", error);
-      alert("Error: " + error.message);
-    } finally {
-      setSimulatingDelivery(false);
-    }
-  };
-
-  // Auto-refresh
+  // Sync auto-refresh state
   useEffect(() => {
-    if (!order || !autoRefreshEnabled) return;
+    setAutoRefresh(autoRefreshEnabled);
+  }, [autoRefreshEnabled]);
 
-    const activeStatuses = [
-      "confirmed",
-      "preparing",
-      "ready",
-      "picking_up",
-      "picked_up",
-      "delivering",
-    ];
-
-    if (!activeStatuses.includes(order.status)) return;
-
-    const intervalId = setInterval(async () => {
-      try {
-        await refreshTracking();
-      } catch (error) {
-        console.error("Auto-refresh error:", error);
-      }
-    }, 3000);
-
-    return () => clearInterval(intervalId);
-  }, [order, autoRefreshEnabled, refreshTracking]);
-
-  // Show loading or error state
-  const errorState = <TrackingLoadingError loading={loading} error={error} orderId={id} />;
-  if (loading || error || !order) return errorState;
+  // Show loading state
+  if (loading || !order) return <TrackingLoadingError loading={loading} error={null} orderId={id} />;
 
   // Handle both lat/lng and latitude/longitude formats
   const normalizeGPS = (gps) => {
@@ -129,11 +71,18 @@ const Tracking = () => {
           gap: "8px",
         }}
       >
-        <MdArrowBack /> Back
+        <MdArrowBack /> Quay lại
       </button>
 
-      {/* Header */}
-      <TrackingHeader order={order} onRefresh={handleRefresh} refreshing={refreshing} />
+      {/* Status Header */}
+      <OrderStatusHeader order={order} isDelivered={isDelivered} />
+
+      {/* Arrived Popup */}
+      <ArrivedPopup
+        visible={showArrivedPopup}
+        order={order}
+        onClose={handleCloseArrivedPopup}
+      />
 
       {/* Controls */}
       <TrackingControls
@@ -141,17 +90,14 @@ const Tracking = () => {
         autoRefreshEnabled={autoRefreshEnabled}
         onRefresh={handleRefresh}
         onToggleAutoRefresh={() => setAutoRefreshEnabled(!autoRefreshEnabled)}
-        orderStatus={order?.status}
-        onSimulateDelivery={handleSimulateDelivery}
-        simulatingDelivery={simulatingDelivery}
       />
 
       {/* Order Timeline */}
       <div className="order-timeline-section">
         <div className="timeline-header">
-          <h3>Order Journey</h3>
+          <h3>Hành trình đơn hàng</h3>
           <button className="btn-view-details" onClick={() => setShowOrderDetails(true)}>
-            View Order Details
+            Xem chi tiết đơn hàng
           </button>
         </div>
         <OrderTimeline order={order} />
@@ -162,7 +108,7 @@ const Tracking = () => {
         <div className="modal-overlay" onClick={() => setShowOrderDetails(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
-              <h3>Order Details</h3>
+              <h3>Chi tiết đơn hàng</h3>
               <button className="modal-close" onClick={() => setShowOrderDetails(false)}>
                 ×
               </button>
@@ -172,70 +118,38 @@ const Tracking = () => {
         </div>
       )}
 
-      {/* Delivery Status */}
-      <DeliveryStatusCard
-        order={order}
-        droneProgress={droneProgress}
-        droneArrived={droneArrived}
-        onConfirmDelivery={confirmDelivery}
-        confirming={confirming}
-      />
-
       {/* Map Section */}
       <div className="delivery-map-section" style={{ marginTop: "30px" }}>
         <h3 style={{ display: "flex", alignItems: "center", gap: "8px" }}>
           <MdLocationOn size={24} color="#ff6b35" />
-          Delivery Route
+          Tuyến giao hàng
         </h3>
 
-        {/* Legend - Restaurant & Delivery Info */}
-        <div
-          style={{
-            display: "flex",
-            gap: "30px",
-            padding: "15px",
-            background: "#f5f5f5",
-            borderRadius: "8px",
-            flexWrap: "wrap",
-            marginBottom: "20px",
-          }}
-        >
-          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-            <MdRestaurant size={24} color="#ff6b35" />
-            <span>
-              <b>Restaurant:</b> {order.restaurant?.name || order.restaurantName || "Restaurant"}
-            </span>
+        {/* Drone Tracking Map */}
+        {showMap && order && (
+          <div style={{ marginBottom: "20px" }}>
+            <DroneTrackingMap
+              restaurantLocation={{
+                lat: pickupGPS.lat,
+                lng: pickupGPS.lng,
+                name: order.restaurant?.name || order.restaurantName || "Restaurant",
+                address: order.pickup_address || "Pickup Location"
+              }}
+              deliveryLocation={{
+                lat: dropoffGPS.lat,
+                lng: dropoffGPS.lng,
+                address: order.customer?.address || order.customerAddress || order.delivery_address || order.address || "Your Location"
+              }}
+              droneLocation={order.current_gps ? {
+                lat: order.current_gps.lat || order.current_gps.latitude,
+                lng: order.current_gps.lng || order.current_gps.longitude
+              } : null}
+              droneId={order.drone_id}
+              droneJourneyStage={order.drone_journey_stage}
+              hideBaseLocation={true}
+            />
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-            <MdHome size={24} color="#4caf50" />
-            <span>
-              <b>Delivery:</b> {order.customer?.address || order.customerAddress || order.delivery_address || order.address || "Your Location"}
-            </span>
-          </div>
-          {order.drone_id && (
-            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-              <MdFlight size={24} color="#ff6b35" style={{ transform: "rotate(45deg)" }} />
-              <span>
-                <b>Drone:</b> {order.drone_id}
-              </span>
-            </div>
-          )}
-        </div>
-
-        {/* Map */}
-        <div className="map-container" style={{ position: "relative", marginBottom: "20px" }}>
-          <iframe
-            title="Delivery Map"
-            width="100%"
-            height="450"
-            frameBorder="0"
-            scrolling="no"
-            marginHeight="0"
-            marginWidth="0"
-            src={`https://www.openstreetmap.org/export/embed.html?bbox=${dropoffGPS.lng - 0.02},${dropoffGPS.lat - 0.02},${dropoffGPS.lng + 0.02},${dropoffGPS.lat + 0.02}&layer=mapnik&marker=${dropoffGPS.lat},${dropoffGPS.lng}`}
-            style={{ border: "1px solid #ccc", borderRadius: 8 }}
-          />
-        </div>
+        )}
 
         {/* GPS Position */}
         {order.current_gps && order.status === "delivering" && (
@@ -248,13 +162,11 @@ const Tracking = () => {
               fontSize: "13px",
             }}
           >
-            <b>Drone Position:</b> {order.current_gps.lat?.toFixed(6)},{" "}
+            <b>Vị trí Drone:</b> {order.current_gps.lat?.toFixed(6)},{" "}
             {order.current_gps.lng?.toFixed(6)}
           </div>
         )}
-      </div>
-
-      {/* Items Table
+      </div>      {/* Items Table
       {order.items && order.items.length > 0 && (
         <div style={{ marginTop: "30px" }}>
           <h3>Order Items</h3>

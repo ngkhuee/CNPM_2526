@@ -31,7 +31,8 @@ const PaymentMoMo = () => {
 
   // Countdown timer for pending payment
   useEffect(() => {
-    if (!order || order.status !== "pending") return;
+    if (!order || order.status === "cancelled" || order.status === "rejected" || order.status === "paid") return;
+    if (order.status !== "pending" && order.payment_status === "paid") return;
 
     const PENDING_TIMEOUT = 30 * 60 * 1000; // 30 minutes
     const createdAt = new Date(order.created_at).getTime();
@@ -54,23 +55,39 @@ const PaymentMoMo = () => {
     try {
       console.log("Processing payment for order:", orderId);
 
-      // Step 1: Update order status to 'paid'
-      const result = await updateOrderStatus(orderId, "paid");
-      if (!result.success) {
-        alert(`Error updating order: ${result.message}`);
+      // Update payment_status to 'paid' and status to 'paid'
+      const response = await fetch(
+        `${import.meta.env.VITE_API_BASE_URL || "http://localhost:4000"}/orders/${orderId}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`
+          },
+          body: JSON.stringify({
+            payment_status: "paid",
+            status: "paid",
+            updated_at: new Date().toISOString()
+          })
+        }
+      );
+
+      if (!response.ok) {
+        alert("Lỗi cập nhật trạng thái thanh toán");
         setLoading(false);
         return;
       }
 
-      console.log("Order status updated to 'paid'");
+      console.log("Payment successful - status updated to 'paid', waiting for restaurant confirmation");
 
-      // Show success message and redirect to tracking
-      // Note: Drone will be assigned when restaurant confirms the order
-      alert("Payment successful! Your order is waiting for restaurant confirmation.");
+      // Refresh order data
+      await fetchUserOrders();
+
+      alert("Thanh toán thành công! Đơn hàng của bạn đang chờ nhà hàng xác nhận.");
       navigate(`/tracking/${orderId}`);
     } catch (error) {
       console.error("Payment error:", error);
-      alert("An error occurred while processing payment!");
+      alert("Có lỗi xảy ra khi xử lý thanh toán!");
     } finally {
       setLoading(false);
     }
@@ -93,7 +110,7 @@ const PaymentMoMo = () => {
     if (order?.status === "pending" && timeLeft && timeLeft > 0) {
       const minutes = Math.ceil(timeLeft / 60);
       const confirmed = window.confirm(
-        `⏱️ Warning!\n\nYour order will be automatically cancelled in ${minutes} minute${minutes > 1 ? "s" : ""}.\n\nAre you sure you want to leave the payment page?\n\nClick OK to go back to orders, or Cancel to stay on this page.`
+        `⏱️ Cảnh báo!\n\nĐơn hàng của bạn sẽ tự động bị hủy sau ${minutes} phút.\n\nBạn có chắc muốn rời trang thanh toán?\n\nNhấn OK để quay lại đơn hàng, hoặc Hủy để ở lại trang này.`
       );
       if (confirmed) {
         navigate("/myorders");
@@ -105,7 +122,7 @@ const PaymentMoMo = () => {
 
   const handleCancelOrder = async () => {
     const confirmCancel = window.confirm(
-      "Are you sure you want to cancel this order?\nThis action cannot be undone."
+      "Bạn có chắc muốn hủy đơn hàng này?\nThao tác này không thể hoàn tác."
     );
     if (!confirmCancel) return;
 
@@ -113,11 +130,11 @@ const PaymentMoMo = () => {
     try {
       console.log("Cancelling order:", orderId);
       await updateOrderStatus(orderId, "cancelled");
-      alert("Order cancelled successfully!");
+      alert("Hủy đơn hàng thành công!");
       navigate("/myorders");
     } catch (error) {
       console.error("Error cancelling order:", error);
-      alert("Error cancelling order. Please try again!");
+      alert("Lỗi hủy đơn hàng. Vui lòng thử lại!");
     } finally {
       setCancelling(false);
     }
@@ -126,7 +143,59 @@ const PaymentMoMo = () => {
   if (!order) {
     return (
       <div className="payment-momo-page">
-        <p>Loading order information...</p>
+        <p>Đang tải thông tin đơn hàng...</p>
+      </div>
+    );
+  }
+
+  // Check if order is already cancelled or rejected
+  if (order.status === "cancelled" || order.status === "rejected") {
+    return (
+      <div className="payment-momo-page">
+        <div className="payment-container">
+          <div className="payment-header">
+            <MdError size={60} color="#dc3545" />
+            <h1 style={{ color: "#dc3545" }}>Đơn hàng {order.status === "cancelled" ? "đã hủy" : "bị từ chối"}</h1>
+            <p className="order-id">Order #{order.id || order._id}</p>
+          </div>
+          <div style={{ textAlign: "center", padding: "20px" }}>
+            <p>Đơn hàng này đã bị {order.status === "cancelled" ? "hủy" : "từ chối"}. Không thể thanh toán.</p>
+            {order.status === "rejected" && order.rejection_reason && (
+              <p style={{ color: "#666", marginTop: "10px", fontSize: "14px" }}>
+                Lý do: {order.rejection_reason}
+              </p>
+            )}
+          </div>
+          <div className="payment-footer">
+            <button className="btn-back" onClick={() => navigate("/myorders")}>
+              Quay lại đơn hàng
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Check if order is already paid
+  if (order.status === "paid" || (order.payment_status === "paid" && order.status !== "pending")) {
+    return (
+      <div className="payment-momo-page">
+        <div className="payment-container">
+          <div className="payment-header">
+            <MdCheckCircle size={60} color="#4caf50" />
+            <h1 style={{ color: "#4caf50" }}>Đã thanh toán</h1>
+            <p className="order-id">Order #{order.id || order._id}</p>
+          </div>
+          <div style={{ textAlign: "center", padding: "20px" }}>
+            <p>Đơn hàng này đã được thanh toán.</p>
+            <p style={{ color: "#666", marginTop: "10px" }}>Trạng thái: {order.status}</p>
+          </div>
+          <div className="payment-footer">
+            <button className="btn-back" onClick={() => navigate(`/tracking/${order.id || order._id}`)}>
+              Xem theo dõi
+            </button>
+          </div>
+        </div>
       </div>
     );
   }
@@ -145,12 +214,12 @@ const PaymentMoMo = () => {
           {paymentFailed ? (
             <>
               <MdError size={60} color="#dc3545" />
-              <h1 style={{ color: "#dc3545" }}>Payment Failed</h1>
+              <h1 style={{ color: "#dc3545" }}>Thanh toán thất bại</h1>
             </>
           ) : (
             <>
               <MdPayment size={60} color="#d82d8b" />
-              <h1>MoMo Payment</h1>
+              <h1>Thanh toán MoMo</h1>
             </>
           )}
           <p className="order-id">Order #{order.id || order._id}</p>
@@ -174,47 +243,47 @@ const PaymentMoMo = () => {
             <MdWarning size={24} />
             <div>
               <p style={{ margin: "0 0 4px 0", fontWeight: "600", fontSize: "15px" }}>
-                Payment Timeout Warning
+                Cảnh báo thời gian thanh toán
               </p>
               <p style={{ margin: "0", fontSize: "14px" }}>
-                Complete your payment within <strong>{formatTimeLeft(timeLeft)}</strong> or your order will be automatically cancelled.
+                Hoàn tất thanh toán trong <strong>{formatTimeLeft(timeLeft)}</strong> hoặc đơn hàng sẽ tự động bị hủy.
               </p>
             </div>
           </div>
         )}
 
         <div className="payment-details">
-          <h3>Payment Information</h3>
+          <h3>Thông tin thanh toán</h3>
           <div className="detail-row">
-            <span>Subtotal:</span>
+            <span>Tạm tính:</span>
             <strong>{formatCurrency(order.subtotal || order.sub_total || 0)}</strong>
           </div>
           {(order.discount_amount || order.discountAmount) > 0 && (
             <div className="detail-row discount">
-              <span>Discount:</span>
+              <span>Giảm giá:</span>
               <strong style={{ color: "#28a745" }}>-{formatCurrency(order.discount_amount || order.discountAmount || 0)}</strong>
             </div>
           )}
           {(order.delivery_fee || order.deliveryFee) > 0 && (
             <div className="detail-row">
-              <span>Delivery Fee:</span>
+              <span>Phí giao hàng:</span>
               <strong>{formatCurrency(order.delivery_fee || order.deliveryFee || 0)}</strong>
             </div>
           )}
           <div className="detail-row" style={{ borderTop: "1px solid #ddd", paddingTop: "10px", marginTop: "10px", fontWeight: "600" }}>
-            <span>Total Amount:</span>
+            <span>Tổng thanh toán:</span>
             <strong style={{ color: "#ff7e5f", fontSize: "18px" }}>{formatCurrency(order.totalAmount || order.total_amount || 0)}</strong>
           </div>
           <div className="detail-row">
-            <span>Payment Method:</span>
-            <strong>MoMo Wallet</strong>
+            <span>Phương thức thanh toán:</span>
+            <strong>Ví MoMo</strong>
           </div>
           {paymentFailed && (
             <div className="detail-row" style={{ marginTop: "15px" }}>
               <span style={{ color: "#dc3545", fontWeight: "600" }}>
-                Status:
+                Trạng thái:
               </span>
-              <strong style={{ color: "#dc3545" }}>Payment Failed</strong>
+              <strong style={{ color: "#dc3545" }}>Thanh toán thất bại</strong>
             </div>
           )}
         </div>
@@ -234,10 +303,10 @@ const PaymentMoMo = () => {
               }}
             >
               <p style={{ margin: 0, fontWeight: "600", display: "flex", alignItems: "center", gap: "8px" }}>
-                <MdError /> Payment Failed
+                <MdError /> Thanh toán thất bại
               </p>
               <p style={{ margin: "8px 0 0 0", fontSize: "14px" }}>
-                Your order is still pending payment. You can retry or cancel the order.
+                Đơn hàng của bạn vẫn đang chờ thanh toán. Bạn có thể thử lại hoặc hủy đơn hàng.
               </p>
             </div>
 
@@ -261,7 +330,7 @@ const PaymentMoMo = () => {
                   justifyContent: "center",
                 }}
               >
-                <MdPayment /> Retry Payment
+                <MdPayment /> Thử lại thanh toán
               </button>
               <button
                 className="btn-cancel-order"
@@ -283,7 +352,7 @@ const PaymentMoMo = () => {
                   justifyContent: "center",
                 }}
               >
-                <MdError /> {cancelling ? "Cancelling..." : "Cancel Order"}
+                <MdError /> {cancelling ? "Đang hủy..." : "Hủy đơn hàng"}
               </button>
             </div>
           </>
@@ -292,9 +361,9 @@ const PaymentMoMo = () => {
           <>
             <div className="payment-instructions">
               <p>
-                <strong>Simulate MoMo Payment</strong>
+                <strong>Mô phỏng thanh toán MoMo</strong>
               </p>
-              <p>Select payment result:</p>
+              <p>Chọn kết quả thanh toán:</p>
             </div>
 
             <div className="payment-actions">
@@ -303,14 +372,14 @@ const PaymentMoMo = () => {
                 onClick={handlePaymentSuccess}
                 disabled={loading}
               >
-                <MdCheckCircle /> Payment Successful
+                <MdCheckCircle /> Thanh toán thành công
               </button>
               <button
                 className="btn-failed"
                 onClick={handlePaymentFailed}
                 disabled={loading}
               >
-                <MdError /> Payment Failed
+                <MdError /> Thanh toán thất bại
               </button>
             </div>
           </>

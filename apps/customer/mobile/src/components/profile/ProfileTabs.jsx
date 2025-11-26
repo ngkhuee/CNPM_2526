@@ -21,7 +21,7 @@ export default function ProfileTabs({ activeTab, onTabChange }) {
                         activeTab === 'account' && styles.tabButtonTextActive,
                     ]}
                 >
-                    Account
+                    Tài khoản
                 </Text>
             </TouchableOpacity>
 
@@ -40,7 +40,7 @@ export default function ProfileTabs({ activeTab, onTabChange }) {
                         activeTab === 'address' && styles.tabButtonTextActive,
                     ]}
                 >
-                    Addresses
+                    Địa chỉ
                 </Text>
             </TouchableOpacity>
         </View>

@@ -10,15 +10,15 @@ const Delivery = () => {
   if (loading) {
     return (
       <div className="delivery-page">
-        <h2>Delivery Monitoring (Realtime)</h2>
-        <p>Loading...</p>
+        <h2>Theo dõi Giao hàng (Thời gian thực)</h2>
+        <p>Đang tải...</p>
       </div>
     );
   }
 
   return (
     <div className="delivery-page">
-      <h2>Delivery Monitoring (Realtime)</h2>
+      <h2>Theo dõi Giao hàng (Thời gian thực)</h2>
       <MapDroneRealtime initialDrones={drones} initialOrders={orders} />
     </div>
   );

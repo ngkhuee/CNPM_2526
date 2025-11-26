@@ -10,17 +10,17 @@ const CheckoutCustomerForm = ({
 }) => {
     return (
         <div className="checkout-section">
-            <h3>Customer Information</h3>
+            <h3>Thông tin Khách hàng</h3>
 
             {/* Full Name */}
-            <label>Full Name</label>
+            <label>Họ và tên</label>
             <input
                 type="text"
                 name="name"
                 value={customer.name}
                 onChange={onInput}
                 onBlur={() => onBlur("name")}
-                placeholder="Enter full name"
+                placeholder="Nhập họ và tên"
                 style={{
                     borderColor: getFieldError("name") ? "#dc3545" : "auto",
                 }}
@@ -30,14 +30,14 @@ const CheckoutCustomerForm = ({
             )}
 
             {/* Phone Number */}
-            <label>Phone Number</label>
+            <label>Số điện thoại</label>
             <input
                 type="text"
                 name="phone"
                 value={customer.phone}
                 onChange={onInput}
                 onBlur={() => onBlur("phone")}
-                placeholder="Enter phone number"
+                placeholder="Nhập số điện thoại"
                 style={{
                     borderColor: getFieldError("phone") ? "#dc3545" : "auto",
                 }}

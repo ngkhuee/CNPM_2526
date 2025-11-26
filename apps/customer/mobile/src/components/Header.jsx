@@ -16,7 +16,7 @@ export default function Header({
 
     // Truncate address if too long (max 30 chars)
     const truncateAddress = (addr) => {
-        if (!addr) return 'Select location';
+        if (!addr) return 'Chọn vị trí';
         return addr.length > 30 ? addr.substring(0, 27) + '...' : addr;
     };
 
@@ -74,7 +74,7 @@ export default function Header({
                 <MaterialIcons name="search" size={20} color="#999" />
                 <TextInput
                     style={styles.searchInput}
-                    placeholder="Search food..."
+                    placeholder="Tìm kiếm món ăn..."
                     placeholderTextColor="#ccc"
                     onFocus={handleSearchFocus}
                     onBlur={handleSearchBlur}

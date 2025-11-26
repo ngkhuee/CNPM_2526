@@ -96,7 +96,7 @@ export const OrderTimeline = ({ timeline, currentStatusIndex }) => {
 
     return (
         <View style={styles.timelineContainer}>
-            <Text style={styles.timelineTitle}>Order Progress</Text>
+            <Text style={styles.timelineTitle}>Tiến trình đơn hàng</Text>
             <ScrollView
                 ref={scrollViewRef}
                 horizontal

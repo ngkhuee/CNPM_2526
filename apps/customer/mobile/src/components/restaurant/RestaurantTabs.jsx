@@ -16,7 +16,7 @@ export const RestaurantTabs = ({ activeTab, onTabChange }) => {
                     color={activeTab === 'menu' ? '#ff6b35' : '#999'}
                 />
                 <Text style={[styles.tabText, activeTab === 'menu' && styles.tabTextActive]}>
-                    Menu
+                    Thực đơn
                 </Text>
             </TouchableOpacity>
 
@@ -30,7 +30,7 @@ export const RestaurantTabs = ({ activeTab, onTabChange }) => {
                     color={activeTab === 'reviews' ? '#ff6b35' : '#999'}
                 />
                 <Text style={[styles.tabText, activeTab === 'reviews' && styles.tabTextActive]}>
-                    Reviews
+                    Đánh giá
                 </Text>
             </TouchableOpacity>
         </View>

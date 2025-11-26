@@ -59,7 +59,7 @@ export default function OrderCard({
             <View style={styles.cardHeader}>
                 <View style={styles.restaurantInfo}>
                     <Text style={styles.restaurantName}>{order.restaurantName}</Text>
-                    <Text style={styles.orderId}>Order #{order.id}</Text>
+                    <Text style={styles.orderId}>Đơn #{order.id}</Text>
                 </View>
                 <View
                     style={[
@@ -79,7 +79,7 @@ export default function OrderCard({
                 <View style={styles.itemsHeader}>
                     <MaterialIcons name="shopping-bag" size={16} color="#666" />
                     <Text style={styles.itemsLabel}>
-                        {order.items?.length || 0} item{(order.items?.length || 0) > 1 ? 's' : ''}
+                        {order.items?.length || 0} sản phẩm
                     </Text>
                 </View>
                 {order.items?.slice(0, expandedItems ? undefined : 2).map((item, idx) => (
@@ -93,7 +93,7 @@ export default function OrderCard({
                         onPress={() => setExpandedItems(true)}
                     >
                         <Text style={styles.moreItems}>
-                            + {(order.items?.length || 0) - 2} more item{((order.items?.length || 0) - 2) > 1 ? 's' : ''}
+                            + {(order.items?.length || 0) - 2} sản phẩm khác
                         </Text>
                         <MaterialIcons name="expand-more" size={16} color="#999" />
                     </TouchableOpacity>
@@ -104,7 +104,7 @@ export default function OrderCard({
                         onPress={() => setExpandedItems(false)}
                     >
                         <Text style={styles.moreItems}>
-                            Show less
+                            Thu gọn
                         </Text>
                         <MaterialIcons name="expand-less" size={16} color="#999" />
                     </TouchableOpacity>
@@ -116,13 +116,13 @@ export default function OrderCard({
                 <View style={styles.infoRow}>
                     <MaterialIcons name="location-on" size={16} color="#FF6B35" />
                     <Text style={styles.infoText} numberOfLines={1}>
-                        {order.deliveryAddress || 'No address'}
+                        {order.deliveryAddress || 'Chưa có địa chỉ'}
                     </Text>
                 </View>
                 <View style={styles.infoRow}>
                     <MaterialIcons name="schedule" size={16} color="#FF6B35" />
                     <Text style={styles.infoText}>
-                        {dateString || 'Date unavailable'} {timeString ? `• ${timeString}` : ''}
+                        {dateString || 'Ngày không xác định'} {timeString ? `• ${timeString}` : ''}
                     </Text>
                 </View>
             </View>
@@ -130,7 +130,7 @@ export default function OrderCard({
             {/* Footer with Price and Actions */}
             <View style={styles.cardFooter}>
                 <View>
-                    <Text style={styles.totalLabel}>Total</Text>
+                    <Text style={styles.totalLabel}>Tổng cộng</Text>
                     <Text style={styles.totalPrice}>
                         {displayPrice}₫
                     </Text>
@@ -142,7 +142,7 @@ export default function OrderCard({
                             onPress={() => navigate('tracking', { orderId: order.id })}
                         >
                             <MaterialIcons name="location-on" size={16} color="#1976d2" />
-                            <Text style={styles.trackBtnText}>Track</Text>
+                            <Text style={styles.trackBtnText}>Theo dõi</Text>
                         </TouchableOpacity>
                     )}
                     {isPending && !isPaid && (
@@ -151,7 +151,7 @@ export default function OrderCard({
                             onPress={() => navigate('payment', { orderId: order.id })}
                         >
                             <MaterialIcons name="payment" size={16} color="#fff" />
-                            <Text style={styles.paymentBtnText}>Pay Now</Text>
+                            <Text style={styles.paymentBtnText}>Thanh toán</Text>
                         </TouchableOpacity>
                     )}
                     {canCancel && (
@@ -160,7 +160,7 @@ export default function OrderCard({
                             onPress={() => onCancel(order.id)}
                         >
                             <MaterialIcons name="close" size={16} color="#f44336" />
-                            <Text style={styles.cancelBtnText}>Cancel</Text>
+                            <Text style={styles.cancelBtnText}>Hủy</Text>
                         </TouchableOpacity>
                     )}
                     {isCompleted && (
@@ -169,7 +169,7 @@ export default function OrderCard({
                             onPress={() => onRetry(order.id)}
                         >
                             <MaterialIcons name="refresh" size={16} color="#FF6B35" />
-                            <Text style={styles.retryBtnText}>Reorder</Text>
+                            <Text style={styles.retryBtnText}>Đặt lại</Text>
                         </TouchableOpacity>
                     )}
                 </View>

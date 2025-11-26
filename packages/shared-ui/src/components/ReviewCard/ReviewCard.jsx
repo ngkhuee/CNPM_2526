@@ -48,7 +48,7 @@ const ReviewCard = ({ review, foodName, onReplyClick, showReplyButton = true }) 
 
             {/* Customer info */}
             <div className="review-customer-info">
-                <span className="review-customer-name">{review.user_id || "Customer"}</span>
+                <span className="review-customer-name">{review.user_id || "Khách hàng"}</span>
                 <span className="review-date">• {formatDate(review.created_at)}</span>
             </div>
 
@@ -60,7 +60,7 @@ const ReviewCard = ({ review, foodName, onReplyClick, showReplyButton = true }) 
             {/* Restaurant reply (if exists) */}
             {review.restaurant_reply && (
                 <div className="review-reply">
-                    <div className="reply-label"><MdCheckCircle size={16} style={{ marginRight: "6px" }} /> Restaurant Reply:</div>
+                    <div className="reply-label"><MdCheckCircle size={16} style={{ marginRight: "6px" }} /> Phản hồi của nhà hàng:</div>
                     <p>{review.restaurant_reply}</p>
                 </div>
             )}
@@ -74,11 +74,11 @@ const ReviewCard = ({ review, foodName, onReplyClick, showReplyButton = true }) 
                     >
                         {review.restaurant_reply ? (
                             <>
-                                <MdModeEdit size={14} /> Edit Reply
+                                <MdModeEdit size={14} /> Sửa phản hồi
                             </>
                         ) : (
                             <>
-                                <MdChatBubbleOutline size={14} /> Reply
+                                <MdChatBubbleOutline size={14} /> Phản hồi
                             </>
                         )}
                     </button>

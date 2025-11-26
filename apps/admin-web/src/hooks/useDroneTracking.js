@@ -75,12 +75,11 @@ export const useDroneTracking = () => {
     }
   }, []);
 
-  // Initial fetch
+  // Initial fetch only - no auto-refresh
+  // Data will update when user manually clicks refresh or views specific drone
   useEffect(() => {
     fetchData();
-  }, [fetchData]);
-
-  // Refresh function for manual reload
+  }, [fetchData]);  // Refresh function for manual reload
   const refresh = useCallback(() => {
     fetchData();
   }, [fetchData]);
