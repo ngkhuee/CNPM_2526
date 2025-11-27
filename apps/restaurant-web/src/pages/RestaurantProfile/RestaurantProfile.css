@@ -454,3 +454,51 @@ textarea {
 .hours-input::placeholder {
   color: #bbb;
 }
+
+/* 24h Time Input Component */
+.time-input-24h {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 6px 10px;
+  transition: border-color 0.2s;
+}
+
+.time-input-24h:hover {
+  border-color: #ff9800;
+}
+
+.time-input-24h:focus-within {
+  border-color: #ff9800;
+  box-shadow: 0 0 3px rgba(255, 152, 0, 0.2);
+}
+
+.time-select {
+  border: none;
+  background: transparent;
+  font-size: 14px;
+  font-family: monospace;
+  padding: 4px 2px;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  text-align: center;
+  min-width: 35px;
+  overflow-y: auto;
+}
+
+.time-select:focus {
+  outline: none;
+  background: #fff3e0;
+  border-radius: 3px;
+}
+
+.time-colon {
+  font-weight: 600;
+  color: #666;
+  font-size: 14px;
+}

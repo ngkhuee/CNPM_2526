@@ -205,8 +205,9 @@ const CheckoutScreen = () => {
             ...prev,
             address: address.address_line || address.address,
             addressId: address.id,
+            // Use {lat, lng} format for consistency across platforms
             gps: address.latitude && address.longitude
-                ? { latitude: address.latitude, longitude: address.longitude }
+                ? { lat: address.latitude, lng: address.longitude }
                 : null,
         }));
     };

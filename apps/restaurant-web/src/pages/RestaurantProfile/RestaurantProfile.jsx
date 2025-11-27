@@ -28,6 +28,61 @@ const DAYS_OF_WEEK = [
   "sunday",
 ];
 
+const DAY_NAMES_VI = {
+  monday: "Thứ Hai",
+  tuesday: "Thứ Ba",
+  wednesday: "Thứ Tư",
+  thursday: "Thứ Năm",
+  friday: "Thứ Sáu",
+  saturday: "Thứ Bảy",
+  sunday: "Chủ Nhật",
+};
+
+// Time input component with 24h format (separate hour and minute selects)
+const TimeInput24h = ({ value, onChange, id }) => {
+  const [hour, minute] = (value || "00:00").split(":").map((v) => v.padStart(2, "0"));
+
+  const handleHourChange = (e) => {
+    const newHour = e.target.value.padStart(2, "0");
+    onChange(`${newHour}:${minute}`);
+  };
+
+  const handleMinuteChange = (e) => {
+    const newMinute = e.target.value.padStart(2, "0");
+    onChange(`${hour}:${newMinute}`);
+  };
+
+  return (
+    <div className="time-input-24h">
+      <select
+        id={`${id}-hour`}
+        value={parseInt(hour, 10)}
+        onChange={handleHourChange}
+        className="time-select"
+      >
+        {Array.from({ length: 24 }, (_, i) => (
+          <option key={i} value={i}>
+            {i.toString().padStart(2, "0")}
+          </option>
+        ))}
+      </select>
+      <span className="time-colon">:</span>
+      <select
+        id={`${id}-minute`}
+        value={parseInt(minute, 10)}
+        onChange={handleMinuteChange}
+        className="time-select"
+      >
+        {Array.from({ length: 60 }, (_, i) => (
+          <option key={i} value={i}>
+            {i.toString().padStart(2, "0")}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+};
+
 const RestaurantProfile = () => {
   const { currentRestaurant, updateRestaurant, fetchRestaurantInfo } =
     useContext(RestaurantContext);
@@ -368,37 +423,23 @@ const RestaurantProfile = () => {
                     {DAYS_OF_WEEK.map((day) => (
                       <div key={day} className="hours-input-group">
                         <label htmlFor={`hours-${day}`} className="day-label">
-                          {day.charAt(0).toUpperCase() + day.slice(1)}
+                          {DAY_NAMES_VI[day]}
                         </label>
                         <div className="time-inputs">
-                          <input
+                          <TimeInput24h
                             id={`open-${day}`}
-                            type="time"
                             value={formData.opening_hours[day]?.open || "09:00"}
-                            onChange={(e) =>
-                              handleChange(
-                                `opening_hours.${day}.open`,
-                                e.target.value
-                              )
+                            onChange={(value) =>
+                              handleChange(`opening_hours.${day}.open`, value)
                             }
-                            className="hours-input"
-                            title="Opening time (HH:mm)"
                           />
                           <span className="time-separator">đến</span>
-                          <input
+                          <TimeInput24h
                             id={`close-${day}`}
-                            type="time"
-                            value={
-                              formData.opening_hours[day]?.close || "22:00"
+                            value={formData.opening_hours[day]?.close || "22:00"}
+                            onChange={(value) =>
+                              handleChange(`opening_hours.${day}.close`, value)
                             }
-                            onChange={(e) =>
-                              handleChange(
-                                `opening_hours.${day}.close`,
-                                e.target.value
-                              )
-                            }
-                            className="hours-input"
-                            title="Closing time (HH:mm)"
                           />
                         </div>
                       </div>
@@ -428,10 +469,10 @@ const RestaurantProfile = () => {
                   <p>
                     <strong>Trạng thái:</strong> {currentRestaurant.status}
                   </p>
-                  <p>
+                  {/* <p>
                     <strong>Ngày mở:</strong>{" "}
                     {new Date(currentRestaurant.openedAt).toLocaleDateString()}
-                  </p>
+                  </p> */}
                 </div>
               )}
 

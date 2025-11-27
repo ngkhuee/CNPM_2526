@@ -26,7 +26,8 @@ export const useGeolocation = () => {
             });
 
             const { latitude, longitude } = result.coords;
-            setLocation({ latitude, longitude });
+            // Use {lat, lng} format for consistency across platforms
+            setLocation({ lat: latitude, lng: longitude });
 
             // Reverse geocode to get address
             try {
@@ -55,7 +56,7 @@ export const useGeolocation = () => {
                 setAddress(`${latitude.toFixed(4)}, ${longitude.toFixed(4)}`);
             }
 
-            return { latitude, longitude };
+            return { lat: latitude, lng: longitude };
         } catch (err) {
             console.error('Geolocation error:', err);
             setError(err.message);

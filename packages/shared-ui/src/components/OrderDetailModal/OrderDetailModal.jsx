@@ -98,17 +98,29 @@ export const OrderDetailModal = ({ isOpen, onClose, order, enableAutoRefresh = f
     ? getFormattedDate(displayOrder.updated_at || displayOrder.updatedAt)
     : null;
 
+  // Helper to normalize GPS format (handle both {lat,lng} and {latitude,longitude})
+  const normalizeGPS = (gps) => {
+    if (!gps) return null;
+    return {
+      lat: gps.lat ?? gps.latitude,
+      lng: gps.lng ?? gps.longitude,
+    };
+  };
+
   // Get restaurant and delivery locations for map
+  const pickupGPS = normalizeGPS(displayOrder.pickup_gps);
+  const dropoffGPS = normalizeGPS(displayOrder.dropoff_gps);
+
   const restaurantLocation = {
-    lat: displayOrder.restaurant?.location?.lat || displayOrder.restaurant?.latitude || displayOrder.pickup_gps?.lat || 10.776,
-    lng: displayOrder.restaurant?.location?.lng || displayOrder.restaurant?.longitude || displayOrder.pickup_gps?.lng || 106.7,
+    lat: displayOrder.restaurant?.location?.lat || displayOrder.restaurant?.latitude || pickupGPS?.lat || 10.776,
+    lng: displayOrder.restaurant?.location?.lng || displayOrder.restaurant?.longitude || pickupGPS?.lng || 106.7,
     name: displayOrder.restaurant?.name || displayOrder.restaurantName || "Nhà hàng",
     address: displayOrder.pickup_address || displayOrder.restaurant?.address || "Vị trí lấy hàng",
   };
 
   const deliveryLocation = {
-    lat: displayOrder.dropoff_gps?.lat || displayOrder.customer?.latitude || 10.776,
-    lng: displayOrder.dropoff_gps?.lng || displayOrder.customer?.longitude || 106.7,
+    lat: dropoffGPS?.lat || displayOrder.customer?.latitude || 10.776,
+    lng: dropoffGPS?.lng || displayOrder.customer?.longitude || 106.7,
     address: displayOrder.customer?.address || displayOrder.delivery_address || displayOrder.address || "Vị trí giao hàng",
   };
 
