@@ -37,7 +37,7 @@ const OrderTable = ({ orders, onOrderSelect, getStatusBadgeClass }) => {
             <table className="orders-table">
                 <thead>
                     <tr>
-                        <th>Mã ĐH</th>
+                        <th>Mã đơn hàng</th>
                         <th>Khách hàng</th>
                         <th>Sản phẩm</th>
                         <th>Tổng tiền</th>

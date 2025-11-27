@@ -337,13 +337,13 @@ export const OrderDetailModal = ({ isOpen, onClose, order, enableAutoRefresh = f
             </span>
           </p>
           <p>
-            <strong>Phương thức TT:</strong>
+            <strong>Phương thức thanh toán:</strong>
             <span className="odm-payment-badge">
               {displayOrder.payment_method || displayOrder.paymentMethod || "N/A"}
             </span>
           </p>
           <p>
-            <strong>Trạng thái TT:</strong>
+            <strong>Trạng thái thanh toán:</strong>
             <span>
               {displayOrder.payment_status || displayOrder.paymentStatus || "N/A"}
             </span>

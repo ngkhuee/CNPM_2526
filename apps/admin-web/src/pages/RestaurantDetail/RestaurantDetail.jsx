@@ -296,27 +296,34 @@ const RestaurantDetail = () => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {orders.slice(0, 10).map((order) => (
-                                        <tr key={order.id}>
-                                            <td>
-                                                <code>{order.id}</code>
-                                            </td>
-                                            <td>{order.customer?.name || order.customerName || order.userName || order.user_id || "N/A"}</td>
-                                            <td className="amount">
-                                                {formatCurrency(order.total_amount || order.totalAmount || 0)}
-                                            </td>
-                                            <td>
-                                                <span className={`status-badge status-${order.status}`}>
-                                                    {order.status}
-                                                </span>
-                                            </td>
-                                            <td className="date">
-                                                {order.created_at || order.createdAt
-                                                    ? new Date(order.created_at || order.createdAt).toLocaleDateString("vi-VN")
-                                                    : "Invalid Date"}
-                                            </td>
-                                        </tr>
-                                    ))}
+                                    {[...orders]
+                                        .sort((a, b) => {
+                                            const dateA = new Date(a.created_at || a.createdAt);
+                                            const dateB = new Date(b.created_at || b.createdAt);
+                                            return dateB - dateA; // Newest first
+                                        })
+                                        .slice(0, 10)
+                                        .map((order) => (
+                                            <tr key={order.id}>
+                                                <td>
+                                                    <code>{order.id}</code>
+                                                </td>
+                                                <td>{order.customer?.name || order.customerName || order.userName || order.user_id || "N/A"}</td>
+                                                <td className="amount">
+                                                    {formatCurrency(order.total_amount || order.totalAmount || 0)}
+                                                </td>
+                                                <td>
+                                                    <span className={`status-badge status-${order.status}`}>
+                                                        {order.status}
+                                                    </span>
+                                                </td>
+                                                <td className="date">
+                                                    {order.created_at || order.createdAt
+                                                        ? new Date(order.created_at || order.createdAt).toLocaleDateString("vi-VN")
+                                                        : "Invalid Date"}
+                                                </td>
+                                            </tr>
+                                        ))}
                                 </tbody>
                             </table>
                         </div>

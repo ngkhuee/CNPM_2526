@@ -72,7 +72,7 @@ const Sidebar = () => {
           }
         >
           <MdPeople size={24} />
-          <p>Nhà hàng</p>
+          <p>Đối tác</p>
         </NavLink>
 
         <NavLink

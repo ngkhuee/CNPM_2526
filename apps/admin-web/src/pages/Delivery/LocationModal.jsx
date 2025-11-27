@@ -84,7 +84,7 @@ const LocationModal = ({ isOpen, onClose, locationCoords }) => {
                   }}
                 >
                   <MdCheckCircle size={20} />
-                  Drone sẵn sàng tại vị trí căn cứ
+                  Drone sẵn sàng tại Yummy
                 </div>
               ) : locationCoords.droneStatus === "locked" ? (
                 <div

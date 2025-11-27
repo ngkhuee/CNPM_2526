@@ -7,7 +7,7 @@ const TrackingLoadingError = ({ loading, error, orderId }) => {
     if (loading) {
         return (
             <div className="tracking-page" style={{ textAlign: "center", padding: "40px" }}>
-                <div style={{ fontSize: "24px", marginBottom: "10px" }}>⏳</div>
+                {/* <div style={{ fontSize: "24px", marginBottom: "10px" }}>⏳</div> */}
                 <p>Đang tải thông tin đơn hàng...</p>
             </div>
         );

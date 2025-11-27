@@ -23,7 +23,7 @@ const DroneForm = ({
                     <input
                         id="drone-name"
                         className="form-input"
-                        placeholder="Nhập mã drone (VD: DRONE-001)"
+                        placeholder="Nhập tên drone (VD: DRONE-001)"
                         value={formData?.identifier || ""}
                         onChange={(e) =>
                             onFormChange({
@@ -34,7 +34,7 @@ const DroneForm = ({
                     />
                 </div>
 
-                {!editingDrone && (
+                {/* {!editingDrone && (
                     <div
                         style={{
                             background: "#e3f2fd",
@@ -47,7 +47,7 @@ const DroneForm = ({
                         }}
                     >
                         <p style={{ margin: 0 }}>
-                            <strong>ℹ️ Tự động cấu hình:</strong>
+                            <strong>Tự động cấu hình:</strong>
                         </p>
                         <ul style={{ margin: "8px 0 0 20px", padding: 0 }}>
                             <li>Vị trí căn cứ: 273 An Dương Vương, TP. HCM</li>
@@ -56,11 +56,11 @@ const DroneForm = ({
                             <li>Tải trọng tối đa: 5kg</li>
                         </ul>
                     </div>
-                )}
+                )} */}
 
                 <div className="form-actions">
                     <button onClick={onSave} className="btn-primary">
-                        <svg
+                        {/* <svg
                             width="16"
                             height="16"
                             viewBox="0 0 24 24"
@@ -71,8 +71,8 @@ const DroneForm = ({
                             <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
                             <polyline points="17 21 17 13 7 13 7 21" />
                             <polyline points="7 3 7 8 15 8" />
-                        </svg>
-                        Lưu
+                        </svg> */}
+                        Kết nối
                     </button>
                     <button
                         onClick={onClose}

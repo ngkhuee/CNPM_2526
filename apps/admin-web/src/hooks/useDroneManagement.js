@@ -189,15 +189,21 @@ export const useDroneManagement = (onSuccess) => {
 
   // Open location modal
   const openLocationModal = useCallback((drone, orders = []) => {
-    // Extract address from current_location (can be string or object)
+    // Extract address from current_location or currentLocation (handle both cases)
     let address = "Unknown location";
-    if (drone.current_location) {
-      if (typeof drone.current_location === "string") {
-        address = drone.current_location;
-      } else if (drone.current_location.address) {
-        address = drone.current_location.address;
+    const currentLoc = drone.currentLocation || drone.current_location;
+
+    if (currentLoc) {
+      if (typeof currentLoc === "string") {
+        address = currentLoc;
+      } else if (currentLoc.address) {
+        address = currentLoc.address;
       }
     }
+
+    // Get coordinates - prefer from currentLocation if available
+    const lat = currentLoc?.lat || drone.latitude;
+    const lng = currentLoc?.lng || drone.longitude;
 
     // Find assigned order if drone has one
     let orderInfo = null;
@@ -216,12 +222,12 @@ export const useDroneManagement = (onSuccess) => {
     }
 
     setLocationCoords(
-      drone.latitude && drone.longitude
+      lat && lng
         ? {
-          lat: drone.latitude,
-          lng: drone.longitude,
+          lat: lat,
+          lng: lng,
           address: address,
-          updated_at: new Date().toISOString(), // Always use current time when opening modal
+          updated_at: drone.updated_at || new Date().toISOString(),
           orderInfo: orderInfo,
           droneStatus: drone.status,
         }
