@@ -16,12 +16,13 @@ import {
 import { formatCurrency, isRestaurantOpen, reverseGeocode } from "shared-utils";
 import { restaurantService } from "shared-services";
 import { useNavigate } from "react-router-dom";
-import { MdError, MdSave } from "react-icons/md";
+import { MdError, MdSave, MdCreditCard } from "react-icons/md";
 import {
   CheckoutCustomerForm,
   CheckoutAddressSection,
   CheckoutOrderSummary,
 } from "../../components/Checkout";
+import momoIcon from "../../assets/momo.png";
 
 const CheckoutInfo = () => {
   // Contexts
@@ -74,6 +75,7 @@ const CheckoutInfo = () => {
   const [useNewAddress, setUseNewAddress] = useState(true);
   const [selectedAddressId, setSelectedAddressId] = useState(null);
   const [saveAddressChecked, setSaveAddressChecked] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState("momo"); // momo or card
 
   // Auto-fetch GPS on mount
   useEffect(() => {
@@ -199,14 +201,16 @@ const CheckoutInfo = () => {
       let finalGpsLocation = gpsLocation;
       let addressIdForOrder = selectedAddressId;
 
-      if (useNewAddress) {
-        if (!finalGpsLocation) {
-          const geocoded = await geocodeAddressToCoords(customer.address);
-          if (geocoded) {
-            finalGpsLocation = geocoded;
-          }
+      // Always try to get GPS if not available - whether using new or saved address
+      if (!finalGpsLocation) {
+        const geocoded = await geocodeAddressToCoords(customer.address);
+        if (geocoded) {
+          finalGpsLocation = geocoded;
+          console.log("Geocoded address to GPS:", geocoded);
         }
+      }
 
+      if (useNewAddress) {
         if (user && saveAddressChecked) {
           const savedAddress = await saveAddressToDatabase(
             {
@@ -231,7 +235,8 @@ const CheckoutInfo = () => {
         cart.restaurant_id,
         addressIdForOrder,
         finalGpsLocation,
-        appliedPromotion
+        appliedPromotion,
+        paymentMethod
       );
 
       if (!checkoutResult.success) {
@@ -252,7 +257,12 @@ const CheckoutInfo = () => {
       await clearCart();
 
       if (lastOrderId) {
-        navigate(`/payment-momo/${lastOrderId}`);
+        // Navigate to appropriate payment page based on payment method
+        if (paymentMethod === "card") {
+          navigate(`/payment-card/${lastOrderId}`);
+        } else {
+          navigate(`/payment-momo/${lastOrderId}`);
+        }
       } else {
         navigate("/myorders");
       }
@@ -268,6 +278,35 @@ const CheckoutInfo = () => {
     appliedPromotion,
     deliveryFeeValue
   );
+
+  // Validate and apply promotion with min order check
+  const handleApplyPromotion = (promo) => {
+    const minOrderValue = promo.minOrderValue || promo.min_order_value || 0;
+
+    // Check minimum order value
+    if (minOrderValue > 0 && subtotal < minOrderValue) {
+      alert(`Đơn tối thiểu: ${formatCurrency(minOrderValue)}. Đơn hiện tại: ${formatCurrency(subtotal)}`);
+      return;
+    }
+
+    // Check date range
+    const now = new Date();
+    const startDate = new Date(promo.startDate || promo.start_date);
+    const endDate = new Date(promo.endDate || promo.end_date);
+
+    if (now < startDate) {
+      alert('Khuyến mãi chưa bắt đầu');
+      return;
+    }
+
+    if (now > endDate) {
+      alert('Khuyến mãi đã hết hạn');
+      return;
+    }
+
+    // All validations passed
+    setAppliedPromotion(promo);
+  };
 
   return (
     <div className="checkout-page">
@@ -336,11 +375,46 @@ const CheckoutInfo = () => {
                     checked={saveAddressChecked}
                     onChange={(e) => setSaveAddressChecked(e.target.checked)}
                   />
-                  <MdSave style={{ marginLeft: "8px", marginRight: "4px" }} />
+                  {/* <MdSave style={{ marginLeft: "8px", marginRight: "4px" }} /> */}
                   <span>Lưu địa chỉ này cho các đơn hàng sau</span>
                 </label>
               </div>
             )}
+
+            {/* Payment Method Selection */}
+            <div className="payment-method-section">
+              <h3>Phương thức thanh toán</h3>
+              <div className="payment-options">
+                <label
+                  className={`payment-option ${paymentMethod === "momo" ? "active" : ""}`}
+                  onClick={() => setPaymentMethod("momo")}
+                >
+                  <input
+                    type="radio"
+                    name="paymentMethod"
+                    value="momo"
+                    checked={paymentMethod === "momo"}
+                    onChange={() => setPaymentMethod("momo")}
+                  />
+                  <img src={momoIcon} alt="MoMo" className="payment-icon" />
+                  <span>Ví MoMo</span>
+                </label>
+                <label
+                  className={`payment-option ${paymentMethod === "card" ? "active" : ""}`}
+                  onClick={() => setPaymentMethod("card")}
+                >
+                  <input
+                    type="radio"
+                    name="paymentMethod"
+                    value="card"
+                    checked={paymentMethod === "card"}
+                    onChange={() => setPaymentMethod("card")}
+                  />
+                  <MdCreditCard className="payment-icon card-icon" />
+                  <span>Thẻ tín dụng/Ghi nợ</span>
+                </label>
+              </div>
+            </div>
 
             <button
               type="submit"
@@ -368,7 +442,7 @@ const CheckoutInfo = () => {
           appliedPromo={appliedPromotion}
           promotions={applicablePromotions}
           loadingPromos={loadingPromos}
-          onApplyPromo={setAppliedPromotion}
+          onApplyPromo={handleApplyPromotion}
           onRemovePromo={() => setAppliedPromotion(null)}
         />
       </div>

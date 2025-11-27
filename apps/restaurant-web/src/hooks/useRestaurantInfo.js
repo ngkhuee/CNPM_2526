@@ -32,6 +32,7 @@ export const useRestaurantInfo = () => {
             setLoading(true);
             setError(null);
             console.log("Fetching restaurant info for ID:", restaurantId);
+            // Nhà hàng pending/blocked đã bị chặn ở Login rồi, không cần allowInactive
             const restaurant = await restaurantService.getById(restaurantId);
             console.log("Restaurant info fetched:", restaurant);
             setCurrentRestaurant(restaurant);

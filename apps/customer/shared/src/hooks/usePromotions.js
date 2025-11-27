@@ -48,13 +48,16 @@ export const usePromotions = (restaurantId = null) => {
     return promotions.filter((promo) => {
       if (promo.status !== "active") return false;
 
-      // Admin/system promotions (scope = "system", restaurant_id = null) - apply to all restaurants
-      if (promo.scope === "system" && !promo.restaurant_id) {
+      // Note: promotionService maps restaurant_id to restaurantId (camelCase)
+      const promoRestaurantId = promo.restaurantId || promo.restaurant_id;
+
+      // Admin/system promotions (scope = "system", restaurantId = null) - apply to all restaurants
+      if (promo.scope === "system" && !promoRestaurantId) {
         return true;
       }
 
       // Restaurant-specific promotions (scope = "restaurant") - only for that restaurant
-      if (promo.scope === "restaurant" && promo.restaurant_id === restId) {
+      if (promo.scope === "restaurant" && promoRestaurantId === restId) {
         return true;
       }
 
@@ -74,21 +77,25 @@ export const usePromotions = (restaurantId = null) => {
     }
 
     // Check if promotion applies to this restaurant
-    if (promo.scope === "restaurant" && promo.restaurant_id !== restaurantId) {
+    // Note: promotionService maps restaurant_id to restaurantId (camelCase)
+    if (promo.scope === "restaurant" && promo.restaurantId !== restaurantId) {
       return { valid: false, message: "This promotion does not apply to this restaurant" };
     }
 
-    if (promo.min_order_value && orderTotal < promo.min_order_value) {
+    // Check minOrderValue (camelCase from promotionService mapping)
+    const minOrderValue = promo.minOrderValue || promo.min_order_value || 0;
+    if (minOrderValue && orderTotal < minOrderValue) {
       return {
         valid: false,
-        message: `Minimum order value ₫${(promo.min_order_value || 0).toLocaleString('vi-VN')}`,
+        message: `Minimum order value ₫${minOrderValue.toLocaleString('vi-VN')}`,
       };
     }
 
     // Check if promotion is within date range
+    // Support both camelCase (startDate/endDate) and snake_case (start_date/end_date)
     const now = new Date();
-    const startDate = new Date(promo.start_date);
-    const endDate = new Date(promo.end_date);
+    const startDate = new Date(promo.startDate || promo.start_date);
+    const endDate = new Date(promo.endDate || promo.end_date);
 
     if (now < startDate) {
       return { valid: false, message: "Promotion has not started yet" };
@@ -108,11 +115,12 @@ export const usePromotions = (restaurantId = null) => {
     let discount = 0;
     if (promo.type === "percentage") {
       discount = subtotal * (promo.value / 100);
-      // Apply max discount if set
-      if (promo.maxDiscount && discount > promo.maxDiscount) {
-        discount = promo.maxDiscount;
+      // Apply max discount if set (support both camelCase and snake_case)
+      const maxDiscount = promo.maxDiscount || promo.max_discount;
+      if (maxDiscount && discount > maxDiscount) {
+        discount = maxDiscount;
       }
-    } else if (promo.type === "fixed") {
+    } else if (promo.type === "fixed" || promo.type === "fixed_amount") {
       discount = promo.value;
     }
 

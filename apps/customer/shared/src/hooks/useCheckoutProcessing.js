@@ -67,7 +67,8 @@ export const useCheckoutProcessing = (user) => {
             customer,
             addressId,
             gpsLocation,
-            promotion = null
+            promotion = null,
+            paymentMethod = "momo"
         ) => {
             const pickupGPS = await getRestaurantLocation(restaurantId);
 
@@ -122,7 +123,7 @@ export const useCheckoutProcessing = (user) => {
                 discountAmount: discountAmount,
                 status: "pending",
                 payment_status: "pending",
-                payment_method: "online",
+                payment_method: paymentMethod,
             };
         },
         [getRestaurantLocation]
@@ -136,10 +137,11 @@ export const useCheckoutProcessing = (user) => {
      * @param {string} addressId - Address ID
      * @param {Object} gpsLocation - GPS location
      * @param {Object} promotion - Applied promotion
+     * @param {string} paymentMethod - Payment method (momo, card)
      * @returns {Promise<Object>} - Result with orders array
      */
     const processCheckoutOrders = useCallback(
-        async (customer, orderItems, restaurantId, addressId, gpsLocation, promotion = null) => {
+        async (customer, orderItems, restaurantId, addressId, gpsLocation, promotion = null, paymentMethod = "momo") => {
             setLoadingSubmit(true);
             setCheckoutError(null);
 
@@ -178,7 +180,8 @@ export const useCheckoutProcessing = (user) => {
                     customer,
                     addressId,
                     gpsLocation,
-                    applicablePromo
+                    applicablePromo,
+                    paymentMethod
                 );
 
                 const orders = [orderData];

@@ -25,15 +25,15 @@ export const profileService = {
     },
 
     // Mock function for demo - remove in production
-    getMockUser: () => ({
-        id: '1',
-        name: 'John Doe',
-        email: 'john@example.com',
-        phone: '0123456789',
-        gender: 'Male',
-        dob: '1990-01-01',
-        avatar: null,
-    }),
+    // getMockUser: () => ({
+    //     id: '1',
+    //     name: 'John Doe',
+    //     email: 'john@example.com',
+    //     phone: '0123456789',
+    //     gender: 'Male',
+    //     dob: '1990-01-01',
+    //     avatar: null,
+    // }),
 };
 
 export const addressService = {

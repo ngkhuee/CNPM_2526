@@ -7,32 +7,35 @@ import apiClient from './apiClient';
 
 export const restaurantService = {
     /**
-     * Lấy tất cả restaurants
+     * Lấy tất cả restaurants (chỉ lấy những nhà hàng đã được duyệt và không bị khóa)
      */
     async getAll(params = {}) {
         try {
             const response = await apiClient.get('/restaurants', { params });
-            return (Array.isArray(response) ? response : []).map((restaurant) => ({
-                id: restaurant.id,
-                name: restaurant.name,
-                description: restaurant.description,
-                address: restaurant.address,
-                latitude: restaurant.latitude,
-                longitude: restaurant.longitude,
-                phone: restaurant.phone,
-                email: restaurant.email,
-                image: restaurant.image,
-                bannerImage: restaurant.banner_image,
-                primaryCategory: restaurant.primary_category,
-                rating: restaurant.rating || 0,
-                totalReviews: restaurant.total_reviews || 0,
-                isOpen: restaurant.is_open,
-                openingHours: restaurant.opening_hours,
-                deliveryTimeMinutes: restaurant.delivery_time_minutes,
-                minOrderAmount: restaurant.min_order_amount,
-                createdAt: restaurant.created_at,
-                updatedAt: restaurant.updated_at,
-            }));
+            return (Array.isArray(response) ? response : [])
+                .filter((restaurant) => restaurant.status === 'active') // Only show approved & not blocked restaurants
+                .map((restaurant) => ({
+                    id: restaurant.id,
+                    name: restaurant.name,
+                    description: restaurant.description,
+                    address: restaurant.address,
+                    latitude: restaurant.latitude,
+                    longitude: restaurant.longitude,
+                    phone: restaurant.phone,
+                    email: restaurant.email,
+                    image: restaurant.image,
+                    bannerImage: restaurant.banner_image,
+                    primaryCategory: restaurant.primary_category,
+                    rating: restaurant.rating || 0,
+                    totalReviews: restaurant.total_reviews || 0,
+                    isOpen: restaurant.is_open,
+                    openingHours: restaurant.opening_hours,
+                    deliveryTimeMinutes: restaurant.delivery_time_minutes,
+                    minOrderAmount: restaurant.min_order_amount,
+                    status: restaurant.status,
+                    createdAt: restaurant.created_at,
+                    updatedAt: restaurant.updated_at,
+                }));
         } catch (error) {
             console.error('[restaurantService.getAll] Error:', error);
             throw error;
@@ -40,12 +43,18 @@ export const restaurantService = {
     },
 
     /**
-     * Lấy restaurant theo ID
+     * Lấy restaurant theo ID (chỉ trả về nếu nhà hàng đã được duyệt)
      */
     async getById(id) {
         try {
             const response = await apiClient.get(`/restaurants/${id}`);
             if (!response) return null;
+
+            // Check if restaurant is active (approved by admin, not blocked)
+            if (response.status !== 'active') {
+                console.warn(`[restaurantService.getById] Restaurant ${id} is not active (status: ${response.status})`);
+                return null;
+            }
 
             return {
                 id: response.id,
@@ -65,6 +74,7 @@ export const restaurantService = {
                 openingHours: response.opening_hours,
                 deliveryTimeMinutes: response.delivery_time_minutes,
                 minOrderAmount: response.min_order_amount,
+                status: response.status,
                 createdAt: response.created_at,
                 updatedAt: response.updated_at,
             };

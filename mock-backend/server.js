@@ -107,8 +107,8 @@ const simulateDroneToRestaurant = (orderId, droneId) => {
     console.log(`[DRONE SIM] Order ${orderId}: drone leaving base NOW, going to restaurant`);
 
     // Step 2: Simulate GPS movement from base to restaurant using RECURSIVE setTimeout
-    const steps = 20; // 20 steps
-    const interval = 100; // 100ms per step = 2 seconds total
+    const steps = 30; // 30 steps for smooth movement
+    const interval = 500; // 500ms per step = 15 seconds total
     let currentStep = 0;
 
     const moveStep = () => {
@@ -258,15 +258,56 @@ const simulateDroneToCustomer = (orderId) => {
 
       // Simulate GPS movement from restaurant to customer
       const pickup = order.pickup_gps || { latitude: 10.776, longitude: 106.7 };
-      const dropoff = order.dropoff_gps || { latitude: 10.7867657, longitude: 106.7001391 };
+
+      // Get dropoff GPS - try multiple sources
+      let dropoff = order.dropoff_gps;
+
+      // If no dropoff_gps, try to get from address
+      if (!dropoff && order.address_id) {
+        const address = db.get("addresses").find({ id: order.address_id }).value();
+        if (address && address.latitude && address.longitude) {
+          dropoff = { latitude: address.latitude, longitude: address.longitude };
+          console.log(`[DRONE SIM] Using address GPS for dropoff: ${address.latitude}, ${address.longitude}`);
+        }
+      }
+
+      // If still no dropoff, try to get from customer or generate offset from pickup
+      if (!dropoff) {
+        // Generate a reasonable dropoff location ~2-3km from pickup (typical delivery distance)
+        const pickupLatVal = pickup.latitude || pickup.lat || 10.776;
+        const pickupLngVal = pickup.longitude || pickup.lng || 106.7;
+        // Add ~0.01-0.02 degrees (~1-2km) offset to simulate delivery distance
+        const offsetLat = (Math.random() * 0.02) - 0.01 + 0.01; // Always positive
+        const offsetLng = (Math.random() * 0.02) - 0.01 + 0.01;
+        dropoff = {
+          latitude: pickupLatVal + offsetLat,
+          longitude: pickupLngVal + offsetLng
+        };
+        console.log(`[DRONE SIM] Generated dropoff GPS: ${dropoff.latitude.toFixed(6)}, ${dropoff.longitude.toFixed(6)} (no GPS in order)`);
+
+        // Save generated GPS back to order for consistency
+        db.get("orders")
+          .find({ id: orderId })
+          .assign({
+            dropoff_gps: {
+              lat: dropoff.latitude,
+              lng: dropoff.longitude,
+              latitude: dropoff.latitude,
+              longitude: dropoff.longitude,
+            },
+          })
+          .write();
+      }
 
       const pickupLat = pickup.latitude || pickup.lat || 10.776;
       const pickupLng = pickup.longitude || pickup.lng || 106.7;
       const dropoffLat = dropoff.latitude || dropoff.lat || 10.7867657;
       const dropoffLng = dropoff.longitude || dropoff.lng || 106.7001391;
 
-      const steps = 40; // 40 steps - nhiều steps hơn để thấy di chuyển mượt
-      const interval = 200; // 200ms per step = 8 seconds total
+      console.log(`[DRONE SIM] Route: (${pickupLat.toFixed(6)}, ${pickupLng.toFixed(6)}) -> (${dropoffLat.toFixed(6)}, ${dropoffLng.toFixed(6)})`);
+
+      const steps = 60; // 60 steps for smooth movement
+      const interval = 500; // 500ms per step = 30 seconds total
       let currentStep = 0;
 
       const moveToCustomer = () => {
@@ -507,36 +548,103 @@ const resumeStuckSimulations = () => {
         console.log(`[RESUME] Order ${order.id} stuck in ready state, restarting delivery simulation...`);
         simulateDroneToCustomer(order.id);
         return;
-      } else if (order.drone_journey_stage === "going_to_customer") {
-        console.log(`[RESUME] Order ${order.id} stuck in going_to_customer, completing delivery...`);
-        // Complete the delivery to customer immediately
+      } else if (order.drone_journey_stage === "going_to_customer" && order.status === "delivering") {
+        // Order is mid-delivery - continue from current position instead of completing instantly
+        console.log(`[RESUME] Order ${order.id} in going_to_customer stage, continuing delivery simulation...`);
+
+        // Calculate remaining distance and continue the simulation
+        const currentGPS = order.current_gps;
         const dropoff = order.dropoff_gps || { lat: 10.7867657, lng: 106.7001391 };
         const dropoffLat = dropoff.latitude || dropoff.lat || 10.7867657;
         const dropoffLng = dropoff.longitude || dropoff.lng || 106.7001391;
 
-        db.get("orders")
-          .find({ id: order.id })
-          .assign({
-            drone_journey_stage: "at_customer",
-            status: "arrived",
-            updated_at: new Date().toISOString(),
-          })
-          .write();
+        if (currentGPS && currentGPS.lat && currentGPS.lng) {
+          // Continue simulation from current position
+          const currentLat = currentGPS.lat || currentGPS.latitude;
+          const currentLng = currentGPS.lng || currentGPS.longitude;
 
-        db.get("drones")
-          .find({ id: order.drone_id })
-          .assign({
-            latitude: dropoffLat,
-            longitude: dropoffLng,
-            current_location: {
-              lat: dropoffLat,
-              lng: dropoffLng,
-            },
-            updated_at: new Date().toISOString(),
-          })
-          .write();
+          // Calculate progress (approximate)
+          const pickup = order.pickup_gps || { lat: 10.776, lng: 106.7 };
+          const pickupLat = pickup.latitude || pickup.lat || 10.776;
+          const pickupLng = pickup.longitude || pickup.lng || 106.7;
 
-        console.log(`[RESUME] Order ${order.id} drone now at customer`);
+          const totalDist = Math.sqrt(Math.pow(dropoffLat - pickupLat, 2) + Math.pow(dropoffLng - pickupLng, 2));
+          const remainingDist = Math.sqrt(Math.pow(dropoffLat - currentLat, 2) + Math.pow(dropoffLng - currentLng, 2));
+          const progress = 1 - (remainingDist / totalDist);
+
+          // Calculate remaining steps (40 total steps, 500ms each)
+          const remainingSteps = Math.max(1, Math.round((1 - progress) * 40));
+          const stepInterval = 500;
+          let currentStep = 0;
+
+          console.log(`[RESUME] Order ${order.id}: Progress ${Math.round(progress * 100)}%, ${remainingSteps} steps remaining`);
+
+          const continueToCustomer = () => {
+            currentStep++;
+            if (currentStep > remainingSteps) {
+              // Arrived at customer
+              console.log(`[RESUME] ✅ Order ${order.id}: drone ARRIVED at customer (resumed)`);
+
+              db.get("orders")
+                .find({ id: order.id })
+                .assign({
+                  status: "arrived",
+                  drone_journey_stage: "at_customer",
+                  current_gps: {
+                    lat: dropoffLat,
+                    lng: dropoffLng,
+                    latitude: dropoffLat,
+                    longitude: dropoffLng,
+                  },
+                  updated_at: new Date().toISOString(),
+                })
+                .write();
+
+              db.get("drones")
+                .find({ id: order.drone_id })
+                .assign({
+                  latitude: dropoffLat,
+                  longitude: dropoffLng,
+                  current_location: { lat: dropoffLat, lng: dropoffLng },
+                  updated_at: new Date().toISOString(),
+                })
+                .write();
+              return;
+            }
+
+            // Calculate current position
+            const stepProgress = currentStep / remainingSteps;
+            const newLat = currentLat + (dropoffLat - currentLat) * stepProgress;
+            const newLng = currentLng + (dropoffLng - currentLng) * stepProgress;
+
+            db.get("orders")
+              .find({ id: order.id })
+              .assign({
+                current_gps: { lat: newLat, lng: newLng, latitude: newLat, longitude: newLng },
+                updated_at: new Date().toISOString(),
+              })
+              .write();
+
+            db.get("drones")
+              .find({ id: order.drone_id })
+              .assign({
+                latitude: newLat,
+                longitude: newLng,
+                current_location: { lat: newLat, lng: newLng },
+                updated_at: new Date().toISOString(),
+              })
+              .write();
+
+            setTimeout(continueToCustomer, stepInterval);
+          };
+
+          // Start continuing the delivery
+          setTimeout(continueToCustomer, stepInterval);
+        } else {
+          // No current GPS, restart full simulation
+          console.log(`[RESUME] Order ${order.id}: No current GPS, restarting full delivery simulation...`);
+          simulateDroneToCustomer(order.id);
+        }
       }
     }
   });

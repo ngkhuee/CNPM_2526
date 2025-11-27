@@ -65,7 +65,7 @@ export const useCheckoutProcessing = () => {
             delivery_fee: deliveryFee,
             discount_amount: discountAmount,
             total_amount: totalAmount,
-            payment_method: 'momo',
+            payment_method: checkoutData.paymentMethod || 'momo',
             payment_status: 'pending',  // Track payment separately
             status: 'pending',           // Order status stays pending until restaurant confirms
             customer: {

@@ -1,19 +1,15 @@
 // components/tracking/ArrivedPopup.jsx
 import React from 'react';
-import { MdCheckCircle, MdClose } from 'react-icons/md';
+import { MdCheckCircle } from 'react-icons/md';
 import { DroneIcon } from 'shared-ui';
 import './ArrivedPopup.css';
 
-export const ArrivedPopup = ({ visible, order, onClose }) => {
+export const ArrivedPopup = ({ visible, order, onConfirmDelivery }) => {
     if (!visible) return null;
 
     return (
-        <div className="arrived-popup-overlay" onClick={onClose}>
+        <div className="arrived-popup-overlay">
             <div className="arrived-popup-content" onClick={(e) => e.stopPropagation()}>
-                <button className="arrived-popup-close" onClick={onClose}>
-                    <MdClose size={24} />
-                </button>
-
                 <div className="arrived-popup-icon">
                     <DroneIcon size={60} color="#4caf50" />
                 </div>
@@ -22,7 +18,7 @@ export const ArrivedPopup = ({ visible, order, onClose }) => {
 
                 <p className="arrived-popup-message">
                     Đơn hàng của bạn đã được giao đến vị trí.
-                    Vui lòng nhận hàng của bạn.
+                    Nhấn nút bên dưới để xác nhận bạn đã nhận được hàng.
                 </p>
 
                 <div className="arrived-popup-info">
@@ -32,13 +28,13 @@ export const ArrivedPopup = ({ visible, order, onClose }) => {
                     )}
                 </div>
 
-                <button className="arrived-popup-confirm" onClick={onClose}>
+                <button className="arrived-popup-confirm" onClick={onConfirmDelivery}>
                     <MdCheckCircle size={20} />
-                    <span>Tôi đã nhận được hàng</span>
+                    <span>Xác nhận đã nhận hàng</span>
                 </button>
 
                 <p className="arrived-popup-note">
-                    Đơn hàng sẽ tự động được đánh dấu đã giao sau 10 phút
+                    Đơn hàng sẽ tự động hoàn thành sau 10 phút nếu không xác nhận
                 </p>
             </div>
         </div>

@@ -5,7 +5,7 @@ import './DroneTrackingMap.css';
  * DroneTrackingMap Component
  * Displays a map with 3 locations: base depot, restaurant (pickup), delivery (dropoff)
  * Shows drone current position and route between active waypoints
- * Uses Leaflet for map rendering
+ * Uses Leaflet for map rendering with smooth animation
  */
 export const DroneTrackingMap = ({
     restaurantLocation, // {lat, lng, name}
@@ -24,6 +24,11 @@ export const DroneTrackingMap = ({
     const [mapLoaded, setMapLoaded] = useState(false);
     const [error, setError] = useState(null);
 
+    // Animation refs for smooth drone movement
+    const animationRef = useRef(null);
+    const currentDronePos = useRef(null);
+    const targetDronePos = useRef(null);
+
     // Normalize GPS coordinates
     const normalizeGPS = (gps) => {
         if (!gps) return null;
@@ -32,6 +37,66 @@ export const DroneTrackingMap = ({
             lng: gps.lng || gps.longitude || 106.7,
         };
     };
+
+    // Smooth animation function using linear interpolation
+    const animateDroneTo = (targetLat, targetLng, duration = 400) => {
+        if (!markers.current.drone) return;
+
+        // Cancel any existing animation
+        if (animationRef.current) {
+            cancelAnimationFrame(animationRef.current);
+        }
+
+        // Get current position
+        const currentLatLng = markers.current.drone.getLatLng();
+        const startLat = currentLatLng.lat;
+        const startLng = currentLatLng.lng;
+
+        // Don't animate if positions are the same
+        if (Math.abs(startLat - targetLat) < 0.000001 && Math.abs(startLng - targetLng) < 0.000001) {
+            return;
+        }
+
+        const startTime = performance.now();
+
+        const animate = (currentTime) => {
+            const elapsed = currentTime - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+
+            // Ease-out cubic for smoother deceleration
+            const easeProgress = 1 - Math.pow(1 - progress, 3);
+
+            // Interpolate position
+            const newLat = startLat + (targetLat - startLat) * easeProgress;
+            const newLng = startLng + (targetLng - startLng) * easeProgress;
+
+            // Update marker position
+            if (markers.current.drone) {
+                markers.current.drone.setLatLng([newLat, newLng]);
+
+                // Update current position ref
+                currentDronePos.current = { lat: newLat, lng: newLng };
+            }
+
+            // Continue animation if not complete
+            if (progress < 1) {
+                animationRef.current = requestAnimationFrame(animate);
+            } else {
+                animationRef.current = null;
+            }
+        };
+
+        animationRef.current = requestAnimationFrame(animate);
+    };
+
+    // Cleanup animation on unmount
+    useEffect(() => {
+        return () => {
+            if (animationRef.current) {
+                cancelAnimationFrame(animationRef.current);
+            }
+        };
+    }, []);
 
     // Initialize Leaflet map
     useEffect(() => {
@@ -180,7 +245,8 @@ export const DroneTrackingMap = ({
         if (drone) {
             // Update or create drone marker - SVG custom drone icon with pulse animation
             if (markers.current.drone) {
-                markers.current.drone.setLatLng([drone.lat, drone.lng]);
+                // Use smooth animation instead of instant position update
+                animateDroneTo(drone.lat, drone.lng, 400);
             } else {
                 const droneMarkerHtml = `
           <div class="map-marker drone-marker" style="animation: pulse 1.5s infinite;">
@@ -220,6 +286,9 @@ export const DroneTrackingMap = ({
                     }),
                 }).addTo(map.current)
                     .bindPopup(`<b>${droneId || 'Drone'}</b><br/>Current Position`);
+
+                // Initialize current drone position ref
+                currentDronePos.current = { lat: drone.lat, lng: drone.lng };
             }
 
             // Remove old active route if exists

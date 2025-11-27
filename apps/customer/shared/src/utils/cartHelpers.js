@@ -23,7 +23,7 @@ export const applyPromoCode = (subtotal, promotion) => {
     if (promotion.maxDiscount) {
       discount = Math.min(discount, promotion.maxDiscount);
     }
-  } else if (promotion.type === "fixed") {
+  } else if (promotion.type === "fixed" || promotion.type === "fixed_amount") {
     // Fixed amount discount
     discount = promotion.value;
   }

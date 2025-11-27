@@ -63,19 +63,21 @@ export const useOrderTracking = (orderId, onNavigate) => {
     const getPollingInterval = (status) => {
         switch (status) {
             case 'delivering':
+            case 'arrived':
                 return 500; // 500ms - very fast updates during delivery to track drone
             case 'confirmed':
             case 'preparing':
-                return 3000; // 3 seconds - fast during preparation to see drone movement
-            case 'pending':
-                return 10000; // 10 seconds - medium during payment
             case 'ready':
-                return 5000; // 5 seconds - medium when waiting for pickup
+                return 1000; // 1 second - fast during preparation/ready to see drone movement
+            case 'pending':
+            case 'paid':
+                return 5000; // 5 seconds - medium during payment
             case 'delivered':
             case 'cancelled':
+            case 'rejected':
                 return null; // Stop polling
             default:
-                return 10000;
+                return 5000;
         }
     };
 

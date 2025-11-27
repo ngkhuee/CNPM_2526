@@ -4,13 +4,18 @@ import { isRestaurantOpen } from "shared-utils";
 
 export const restaurantService = {
   // GET /restaurants?lat={lat}&lng={lng}&radius=5000 - Lấy danh sách nhà hàng gần
-  async getAll(params = {}) {
+  // Note: By default, only returns ACTIVE restaurants for customer-facing apps
+  async getAll(params = {}, includeAll = false) {
     try {
       const response = await apiClient.get(ENDPOINTS.RESTAURANTS.BASE, {
         params, // Support lat, lng, radius, time parameters
       });
+      // Filter only ACTIVE restaurants unless includeAll is true (for admin)
+      const filteredRestaurants = includeAll
+        ? response
+        : response.filter((r) => r.status === 'active');
       // Map backend to frontend
-      return response.map((restaurant) => ({
+      return filteredRestaurants.map((restaurant) => ({
         id: restaurant.id,
         _id: restaurant.id,
         restaurantId: restaurant.id,
@@ -48,12 +53,20 @@ export const restaurantService = {
   },
 
   // GET /restaurants/:id - Chi tiết nhà hàng
-  async getById(id) {
+  // Note: Returns null if restaurant is not active (for customer-facing apps)
+  async getById(id, allowInactive = false) {
     try {
       console.log("restaurantService.getById() called with id:", id);
       console.log("Endpoint:", ENDPOINTS.RESTAURANTS.BY_ID(id));
       const response = await apiClient.get(ENDPOINTS.RESTAURANTS.BY_ID(id));
       console.log("Raw response:", response);
+
+      // Check if restaurant is active (unless allowInactive is true for admin/restaurant-web)
+      if (!allowInactive && response.status !== 'active') {
+        console.warn(`Restaurant ${id} is not active (status: ${response.status})`);
+        return null;
+      }
+
       // Map backend to frontend
       return {
         id: response.id,

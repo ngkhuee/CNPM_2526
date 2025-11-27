@@ -5,19 +5,19 @@ import { Alert } from 'react-native';
 import * as orderService from '../services/orderService';
 import { showToast } from '../utils/toastHelper';
 
-// Simplified timeline: Paid → Confirmed → Preparing → Delivering → Completed
+// Simplified timeline: Đã thanh toán → Đã xác nhận → Đang chuẩn bị → Đang giao → Hoàn thành
 export const ORDER_TIMELINE = [
-    { status: 'paid', label: 'Paid', icon: 'check-circle' },
-    { status: 'confirmed', label: 'Confirmed', icon: 'check-circle' },
-    { status: 'preparing', label: 'Preparing', icon: 'local-dining' },
-    { status: 'delivering', label: 'Delivering', icon: 'local-shipping' },
-    { status: 'delivered', label: 'Completed', icon: 'flag' },
+    { status: 'paid', label: 'Đã thanh toán', icon: 'check-circle' },
+    { status: 'confirmed', label: 'Đã xác nhận', icon: 'check-circle' },
+    { status: 'preparing', label: 'Đang chuẩn bị', icon: 'local-dining' },
+    { status: 'delivering', label: 'Đang giao', icon: 'local-shipping' },
+    { status: 'delivered', label: 'Hoàn thành', icon: 'flag' },
 ];
 
 // Cancelled/Rejected timeline
 export const CANCELLED_TIMELINE = [
-    { status: 'paid', label: 'Paid', icon: 'check-circle' },
-    { status: 'cancelled', label: 'Cancelled', icon: 'cancel' },
+    { status: 'paid', label: 'Đã thanh toán', icon: 'check-circle' },
+    { status: 'cancelled', label: 'Đã hủy', icon: 'cancel' },
 ];
 
 export const useDeliveryTracking = (order, onRefetch) => {
@@ -128,15 +128,18 @@ export const useDeliveryTracking = (order, onRefetch) => {
         }
     };
 
-    // Handle closing arrived popup - immediately move to delivered status
+    // Handle closing arrived popup - just close popup, don't auto-complete
+    // Let customer confirm manually or wait for 10-minute auto-timer
     const handleCloseArrivedPopup = () => {
         setShowArrivedPopup(false);
-        // Immediately perform auto-delivery when popup is closed
-        performAutoDelivery();
+        // Don't auto-complete - customer should confirm receipt or wait for auto-timer
+        // This gives customer time to actually receive and check their order
     };
 
-    // Show map when delivering, arrived or delivered
-    const showMap = order?.status === 'delivering' || order?.status === 'arrived' || order?.status === 'delivered';
+    // Show map when drone is assigned (confirmed onwards) - so customer can track drone from restaurant
+    // Drone is assigned when status = confirmed, and starts flying to restaurant
+    const showMap = order?.drone_id || order?.droneId ||
+        ['confirmed', 'preparing', 'ready', 'delivering', 'arrived', 'delivered'].includes(order?.status);
 
     // Cleanup on unmount
     useEffect(() => {
@@ -170,5 +173,6 @@ export const useDeliveryTracking = (order, onRefetch) => {
         // Arrival popup
         showArrivedPopup,
         handleCloseArrivedPopup,
+        handleConfirmDelivery: performAutoDelivery, // Direct confirmation without Alert
     };
 };

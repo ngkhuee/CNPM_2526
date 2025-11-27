@@ -35,7 +35,8 @@ const RestaurantDetail = () => {
         setLoading(true);
         try {
             // Get restaurant info using service (includes auth token)
-            const restaurantData = await restaurantService.getById(restaurantId);
+            // Pass allowInactive=true for admin to view any restaurant status
+            const restaurantData = await restaurantService.getById(restaurantId, true);
             setRestaurant(restaurantData);
 
             if (!restaurantData) {

@@ -1,24 +1,15 @@
 // components/tracking/ArrivedPopup.jsx
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Modal, View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 
-export const ArrivedPopup = ({ visible, onClose }) => {
-    // Auto-close popup after 5 seconds
-    useEffect(() => {
-        if (visible) {
-            const timer = setTimeout(() => {
-                onClose();
-            }, 5000);
-            return () => clearTimeout(timer);
-        }
-    }, [visible, onClose]);
+export const ArrivedPopup = ({ visible, onConfirmDelivery }) => {
     return (
         <Modal
             visible={visible}
             transparent
             animationType="fade"
-            onRequestClose={onClose}
+            onRequestClose={() => { }} // Prevent closing by back button
         >
             <View style={styles.overlay}>
                 <View style={styles.popup}>
@@ -30,16 +21,21 @@ export const ArrivedPopup = ({ visible, onClose }) => {
 
                     <Text style={styles.message}>
                         Đơn hàng của bạn đã đến nơi.{'\n'}
-                        Vui lòng xác nhận khi bạn nhận được hàng.
+                        Nhấn nút bên dưới để xác nhận bạn đã nhận được hàng.
                     </Text>
 
                     <TouchableOpacity
-                        style={styles.button}
-                        onPress={onClose}
+                        style={styles.confirmButton}
+                        onPress={onConfirmDelivery}
                         activeOpacity={0.8}
                     >
-                        <Text style={styles.buttonText}>Đã hiểu</Text>
+                        <MaterialIcons name="done-all" size={20} color="#fff" />
+                        <Text style={styles.confirmButtonText}>Xác nhận đã nhận hàng</Text>
                     </TouchableOpacity>
+
+                    <Text style={styles.note}>
+                        Đơn hàng sẽ tự động hoàn thành sau 10 phút nếu không xác nhận.
+                    </Text>
                 </View>
             </View>
         </Modal>
@@ -82,19 +78,29 @@ const styles = StyleSheet.create({
         color: '#666',
         textAlign: 'center',
         lineHeight: 22,
-        marginBottom: 24,
+        marginBottom: 20,
     },
-    button: {
-        backgroundColor: '#ff6b35',
+    confirmButton: {
+        backgroundColor: '#4caf50',
         paddingHorizontal: 40,
         paddingVertical: 14,
         borderRadius: 8,
         width: '100%',
         alignItems: 'center',
+        flexDirection: 'row',
+        justifyContent: 'center',
+        gap: 8,
     },
-    buttonText: {
+    confirmButtonText: {
         color: '#fff',
         fontSize: 16,
         fontWeight: '600',
+    },
+    note: {
+        fontSize: 11,
+        color: '#999',
+        textAlign: 'center',
+        marginTop: 16,
+        fontStyle: 'italic',
     },
 });

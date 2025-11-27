@@ -251,10 +251,37 @@ const CheckoutScreen = () => {
     };
 
     /**
-     * Handle apply promo from list
+     * Handle apply promo from list - WITH VALIDATION
      */
     const handleApplyPromoFromList = (promo) => {
         console.log('[CheckoutScreen] Applying promo from list:', promo);
+
+        // Validate minimum order value before applying
+        const minOrderValue = promo.minOrderValue || promo.min_order_value || 0;
+        if (minOrderValue > 0 && subtotal < minOrderValue) {
+            showToast('error', `Đơn tối thiểu: ₫${minOrderValue.toLocaleString('vi-VN')}. Đơn hiện tại: ₫${subtotal.toLocaleString('vi-VN')}`);
+            setShowPromosModal(false);
+            return;
+        }
+
+        // Validate date range
+        const now = new Date();
+        const startDate = new Date(promo.startDate || promo.start_date);
+        const endDate = new Date(promo.endDate || promo.end_date);
+
+        if (now < startDate) {
+            showToast('error', 'Khuyến mãi chưa bắt đầu');
+            setShowPromosModal(false);
+            return;
+        }
+
+        if (now > endDate) {
+            showToast('error', 'Khuyến mãi đã hết hạn');
+            setShowPromosModal(false);
+            return;
+        }
+
+        // All validations passed
         setAppliedPromo(promo);
         setPromoCode(promo.code);
         setShowPromosModal(false);
@@ -675,7 +702,7 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: '#ddd',
         borderRadius: 8,
-        paddingHorizontal: 12,
+        paddingHorizontal: 16,
         gap: 8,
     },
     promoInput: {
@@ -722,6 +749,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#fff',
         borderTopWidth: 1,
         borderTopColor: '#eee',
+        paddingBottom: 30,
     },
     placeOrderButton: {
         backgroundColor: '#ff6b35',

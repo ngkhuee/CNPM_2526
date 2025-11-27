@@ -136,8 +136,8 @@ const CheckoutOrderSummary = ({
                                         {promo.type === "percentage"
                                             ? `${promo.value}% off`
                                             : `${formatCurrency(promo.value)} off`}
-                                        {promo.min_order_value > 0 &&
-                                            ` • Min order: ${formatCurrency(promo.min_order_value)}`}
+                                        {(promo.minOrderValue || promo.min_order_value) > 0 &&
+                                            ` • Min order: ${formatCurrency(promo.minOrderValue || promo.min_order_value)}`}
                                     </div>
                                 </div>
                             ))

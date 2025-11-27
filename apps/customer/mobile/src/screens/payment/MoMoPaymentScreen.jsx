@@ -22,7 +22,9 @@ import { showToast } from '../../utils/toastHelper';
 import { useOrderAutoCancel } from '../../hooks/useOrderAutoCancel';
 
 // Demo QR Code (base64 PNG - valid 1x1 transparent PNG placeholder)
-const DEMO_QR = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
+// const DEMO_QR = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
+const DEMO_QR = require('../../../assets/qr-code-github.jpeg');
+
 
 const MoMoPaymentScreen = ({ orderId }) => {
     const { navigate } = useContext(NavigationContext);
@@ -61,18 +63,22 @@ const MoMoPaymentScreen = ({ orderId }) => {
             // Stop auto-cancel timer since payment is completed
             stopAutoCancel(order.id);
 
-            setPaymentStatus('completed');
-            showToast('success', 'Thanh toán thành công!');
-
             // Update payment_status to 'paid' and status to 'paid' (waiting for restaurant confirmation)
             await orderService.updateOrder(order.id, {
                 payment_status: 'paid',
                 status: 'paid',
             });
 
+            // Wait a bit longer to ensure backend has updated
+            await new Promise(resolve => setTimeout(resolve, 500));
+
+            setPaymentStatus('completed');
+            showToast('success', 'Thanh toán thành công!');
+
+            // Navigate to tracking after short delay
             setTimeout(() => {
                 navigate('tracking', { orderId: order.id });
-            }, 1500);
+            }, 1000);
         } catch (error) {
             console.error('[MoMoPaymentScreen] Payment error:', error);
             showToast('error', 'Không thể xử lý thanh toán');
@@ -195,12 +201,12 @@ const MoMoPaymentScreen = ({ orderId }) => {
                         {/* QR Code Demo */}
                         <View style={styles.qrSection}>
                             <Text style={styles.sectionTitle}>Quét mã QR để thanh toán</Text>
-                            <Text style={styles.qrNote}>
+                            {/* <Text style={styles.qrNote}>
                                 Đây là mã QR thử nghiệm. Trong sản phẩm thực tế, quét mã này bằng ứng dụng MoMo.
-                            </Text>
+                            </Text> */}
                             <View style={styles.qrContainer}>
                                 <Image
-                                    source={{ uri: DEMO_QR }}
+                                    source={DEMO_QR}
                                     style={styles.qrCode}
                                     resizeMode="contain"
                                 />

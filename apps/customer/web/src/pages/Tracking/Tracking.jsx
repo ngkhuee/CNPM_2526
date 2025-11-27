@@ -81,7 +81,7 @@ const Tracking = () => {
       <ArrivedPopup
         visible={showArrivedPopup}
         order={order}
-        onClose={handleCloseArrivedPopup}
+        onConfirmDelivery={handleConfirmDelivery}
       />
 
       {/* Controls */}

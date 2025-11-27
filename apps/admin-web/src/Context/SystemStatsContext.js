@@ -28,10 +28,10 @@ export const SystemStatsProvider = ({ children }) => {
       setLoading(true);
       setError(null);
 
-      // Fetch all data in parallel
+      // Fetch all data in parallel - includeAll for admin to see all restaurants
       const [allOrders, allRestaurants, allUsers] = await Promise.all([
         orderService.getAll(),
-        restaurantService.getAll(),
+        restaurantService.getAll({}, true), // includeAll=true for admin
         authService.getAllUsers
           ? authService.getAllUsers()
           : Promise.resolve([]),

@@ -36,8 +36,8 @@ export const usePaymentManagement = () => {
         ? await withdrawalsResponse.json()
         : [];
 
-      // Use restaurantService to get restaurants (includes auth)
-      const restaurantsData = await restaurantService.getAll();
+      // Use restaurantService to get restaurants (includes auth) - includeAll for admin
+      const restaurantsData = await restaurantService.getAll({}, true);
 
       // Join withdrawals with restaurant info
       const enriched = withdrawalsData.map((w) => {

@@ -16,6 +16,8 @@ export default function CartModalItem({
     onRemove,
 }) {
     const imageUrl = getImageUrl(item.image);
+    // Support multiple ID fields: item_id (API), menu_id, food_id, id
+    const itemId = item.item_id || item.menu_id || item.food_id || item.id;
 
     return (
         <View style={styles.container}>
@@ -40,7 +42,7 @@ export default function CartModalItem({
             <View style={styles.qtyControl}>
                 <TouchableOpacity
                     style={styles.qtyBtn}
-                    onPress={() => onUpdateQuantity(item.id, item.quantity - 1)}
+                    onPress={() => onUpdateQuantity(itemId, item.quantity - 1)}
                 >
                     <MaterialIcons name="remove" size={16} color="#fff" />
                 </TouchableOpacity>
@@ -49,7 +51,7 @@ export default function CartModalItem({
 
                 <TouchableOpacity
                     style={styles.qtyBtn}
-                    onPress={() => onUpdateQuantity(item.id, item.quantity + 1)}
+                    onPress={() => onUpdateQuantity(itemId, item.quantity + 1)}
                 >
                     <MaterialIcons name="add" size={16} color="#fff" />
                 </TouchableOpacity>
@@ -63,7 +65,7 @@ export default function CartModalItem({
             {/* Delete Button */}
             <TouchableOpacity
                 style={styles.deleteBtn}
-                onPress={() => onRemove(item.id)}
+                onPress={() => onRemove(itemId)}
             >
                 <MaterialIcons name="close" size={18} color="#ff6b35" />
             </TouchableOpacity>

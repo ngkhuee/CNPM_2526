@@ -73,12 +73,9 @@ export const useDeliveryTracking = (order, onRefetch) => {
         }, 10 * 60 * 1000);
     };
 
-    // Handle customer confirming delivery
-    const handleConfirmDelivery = () => {
-        const confirmed = window.confirm('Vui lòng xác nhận bạn đã nhận được đơn hàng');
-        if (confirmed) {
-            performAutoDelivery();
-        }
+    // Handle customer confirming delivery - directly confirm without popup
+    const handleConfirmDelivery = async () => {
+        await performAutoDelivery();
     };
 
     // Perform the actual delivery confirmation (auto-delivery)
@@ -92,7 +89,6 @@ export const useDeliveryTracking = (order, onRefetch) => {
 
             // Update order to delivered
             await orderService.updateStatus(order.id, 'delivered');
-            alert('Đã đánh dấu giao hàng thành công');
 
             // Reset UI state
             setShowArrivedPopup(false);
@@ -105,11 +101,9 @@ export const useDeliveryTracking = (order, onRefetch) => {
         }
     };
 
-    // Handle closing arrived popup - immediately move to delivered status
+    // Handle closing arrived popup - NOT used anymore since we removed close button
     const handleCloseArrivedPopup = () => {
-        setShowArrivedPopup(false);
-        // Immediately perform auto-delivery when popup is closed
-        performAutoDelivery();
+        // Do nothing - customer must confirm
     };
 
     // Show map when drone is assigned (has drone_id or droneId)

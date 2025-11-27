@@ -9,11 +9,11 @@ const CheckoutCustomerForm = ({
     getFieldError,
 }) => {
     return (
-        <div className="checkout-section">
+        <div className="checkout-section" style={{ marginBottom: "20px" }}>
             <h3>Thông tin Khách hàng</h3>
 
             {/* Full Name */}
-            <label>Họ và tên</label>
+            <label className="checkout-header" style={{ marginBottom: "14px", marginTop: "20px" }}>Họ và tên</label>
             <input
                 type="text"
                 name="name"
@@ -30,7 +30,7 @@ const CheckoutCustomerForm = ({
             )}
 
             {/* Phone Number */}
-            <label>Số điện thoại</label>
+            <label className="checkout-header" style={{ marginBottom: "14px", marginTop: "20px" }}>Số điện thoại</label>
             <input
                 type="text"
                 name="phone"

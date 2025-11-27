@@ -16,7 +16,7 @@ const mapPromotionToFrontend = (promo) => {
         code: promo.code,
         name: promo.name,
         description: promo.description,
-        type: promo.type, // 'percentage' or 'fixed'
+        type: promo.type, // 'percentage', 'fixed', or 'fixed_amount'
         value: promo.value,
         minOrderValue: promo.min_order_value,
         maxDiscount: promo.max_discount,
@@ -25,7 +25,8 @@ const mapPromotionToFrontend = (promo) => {
         usageLimit: promo.usage_limit,
         usedCount: promo.used_count,
         scope: promo.scope, // 'system' or 'restaurant'
-        restaurant_id: promo.restaurant_id,
+        restaurantId: promo.restaurant_id, // camelCase for consistency
+        restaurant_id: promo.restaurant_id, // keep snake_case for backward compatibility
         status: promo.status, // 'active' or 'inactive'
         createdAt: promo.created_at,
         updatedAt: promo.updated_at,

@@ -44,12 +44,14 @@ export const transformFood = (food) => {
 
 /**
  * Transform array of restaurants
+ * Only returns ACTIVE restaurants (approved by admin, not blocked)
  */
 export const transformRestaurants = (restaurants) => {
     if (!Array.isArray(restaurants)) return [];
     return restaurants
         .map(transformRestaurant)
-        .filter(item => item !== null && item !== undefined);
+        .filter(item => item !== null && item !== undefined)
+        .filter(item => item.status === 'active'); // Only show approved & not blocked restaurants
 };
 
 /**

@@ -3,6 +3,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { View, Text, StyleSheet, Animated, TouchableOpacity, Linking, ActivityIndicator } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { WebView } from 'react-native-webview';
+import { DroneIcon } from './DroneIcon';
 
 // Debug logging
 console.log('[MapSection] Component loaded');
@@ -13,7 +14,13 @@ export const MapSection = ({ order }) => {
     const webViewRef = useRef(null);
     const hasArrivedRef = useRef(false);
     const lastDroneGPSRef = useRef(null);
+
+    // Check if order is in active delivery states
+    const isActiveDelivery = ['confirmed', 'preparing', 'ready', 'delivering', 'arrived'].includes(order?.status);
     const isDelivering = order?.status === 'delivering';
+
+    // Check if drone has GPS position
+    const hasDroneGPS = order?.current_gps && (order.current_gps.lat || order.current_gps.latitude);
 
     // Normalize GPS format - handle both lat/lng and latitude/longitude
     const normalizeGPS = (gps) => {
@@ -39,9 +46,9 @@ export const MapSection = ({ order }) => {
         return R * c;
     };
 
-    // Pulse animation for delivering status
+    // Pulse animation for active delivery status
     useEffect(() => {
-        if (isDelivering) {
+        if (isActiveDelivery && hasDroneGPS) {
             const pulseAnimation = Animated.loop(
                 Animated.sequence([
                     Animated.timing(pulseAnim, {
@@ -59,7 +66,7 @@ export const MapSection = ({ order }) => {
             pulseAnimation.start();
             return () => pulseAnimation.stop();
         }
-    }, [isDelivering]);
+    }, [isActiveDelivery, hasDroneGPS]);
 
     // Fit map to show pickup and dropoff locations
     useEffect(() => {
@@ -69,7 +76,7 @@ export const MapSection = ({ order }) => {
     // Update drone position in map when current_gps changes
     useEffect(() => {
         if (!webViewRef.current) return;
-        if (!isDelivering || !order.current_gps) return;
+        if (!hasDroneGPS) return;
 
         const droneGPS = normalizeGPS(order.current_gps);
 
@@ -107,7 +114,8 @@ export const MapSection = ({ order }) => {
     const generateMapHTML = () => {
         const pickupGPS = normalizeGPS(order.pickup_gps);
         const dropoffGPS = normalizeGPS(order.dropoff_gps);
-        const droneGPS = isDelivering && order.current_gps ? normalizeGPS(order.current_gps) : null;
+        // Show drone when has current_gps (drone is assigned and moving)
+        const droneGPS = hasDroneGPS ? normalizeGPS(order.current_gps) : null;
 
         // Material Icon SVGs as escaped HTML
         const restaurantMarkerHtml = '<div style="background: #FF6B35; color: white; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 3px solid white; box-shadow: 0 2px 6px rgba(0,0,0,0.4);"><svg xmlns=\\"http://www.w3.org/2000/svg\\" viewBox=\\"0 0 24 24\\" width=\\"24\\" height=\\"24\\" fill=\\"white\\"><path d=\\"M11 9H9v2h2V9zm4 0h-2v2h2V9zm4-7H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 16h-2v2h-2v-2h-2v2h-2v-2H5v-5h14v5zm0-7H5V5h14v7z\\"/></svg></div>';
@@ -122,148 +130,196 @@ export const MapSection = ({ order }) => {
             <html>
             <head>
                 <meta charset="utf-8" />
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <meta http-equiv="Content-Security-Policy" content="default-src *; script-src * 'unsafe-inline' 'unsafe-eval'; style-src * 'unsafe-inline'; img-src * data: blob:; font-src * data:; connect-src *;">
-                <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
-                <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"><\/script>
+                <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+                <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
+                <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""><\/script>
                 <style>
-                    body { margin: 0; padding: 0; background: #f0f0f0; }
-                    #map { position: absolute; top: 0; bottom: 0; width: 100%; background: #f0f0f0; }
+                    * { margin: 0; padding: 0; box-sizing: border-box; }
+                    html, body { width: 100%; height: 100%; overflow: hidden; }
+                    #map { width: 100%; height: 100%; background: #e8e8e8; }
                     .custom-marker { font-size: 24px; }
-                    .leaflet-tile { background: #f0f0f0; }
-                    .leaflet-tile-pane { background: #f0f0f0; }
                     @keyframes pulse {
                         0%, 100% { transform: scale(1); opacity: 1; }
                         50% { transform: scale(1.2); opacity: 0.8; }
                     }
-                    .pulse-drone {
-                        animation: pulse 1.5s infinite;
-                    }
+                    .pulse-drone { animation: pulse 1.5s infinite; }
                 </style>
             </head>
             <body>
-                <div id="map"><\/div>
+                <div id="map"></div>
                 <script>
-                    let map, droneMarker, dronePolyline, pickupGPS, dropoffGPS;
+                    var map, droneMarker, dronePolyline, pickupGPS, dropoffGPS;
 
                     function initMap() {
                         try {
                             pickupGPS = { lat: ${pickupGPS.lat}, lng: ${pickupGPS.lng} };
                             dropoffGPS = { lat: ${dropoffGPS.lat}, lng: ${dropoffGPS.lng} };
-                            ${droneGPS ? `const initialDroneGPS = { lat: ${droneGPS.lat}, lng: ${droneGPS.lng} };` : `const initialDroneGPS = null;`}
+                            ${droneGPS ? `var initialDroneGPS = { lat: ${droneGPS.lat}, lng: ${droneGPS.lng} };` : `var initialDroneGPS = null;`}
 
                             // Initialize map
-                            map = L.map('map').setView([pickupGPS.lat, pickupGPS.lng], 13);
+                            map = L.map('map', {
+                                center: [pickupGPS.lat, pickupGPS.lng],
+                                zoom: 14,
+                                zoomControl: true,
+                                attributionControl: false
+                            });
                             
-                            // Add tile layer - try OpenStreetMap first
-                            const osmTileLayer = L.tileLayer('https:\/\/{s}.tile.openstreetmap.org\/{z}\/{x}\/{y}.png', {
-                                attribution: '© OpenStreetMap contributors',
+                            // Use multiple tile sources as fallback
+                            var tileLayer = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
                                 maxZoom: 19,
-                                errorTileUrl: 'data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPHN2ZyB3aWR0aD0iMjU2IiBoZWlnaHQ9IjI1NiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8cmVjdCB3aWR0aD0iMjU2IiBoZWlnaHQ9IjI1NiIgZmlsbD0iI2VhZWFlYSIvPgo8L3N2Zz4=',
-                                crossOrigin: true
+                                crossOrigin: 'anonymous'
                             });
-                            osmTileLayer.addTo(map);
-
-                            // Add drag background
-                            map.on('tileerror', function(error) {
-                                console.warn('[MAP] Tile loading error, continuing anyway');
+                            
+                            tileLayer.on('tileerror', function(error) {
+                                console.log('Tile error, trying fallback...');
                             });
+                            
+                            tileLayer.addTo(map);
 
                             // Restaurant marker
                             L.marker([pickupGPS.lat, pickupGPS.lng], {
                                 icon: L.divIcon({
                                     html: '${restaurantMarkerHtml}',
                                     iconSize: [40, 40],
+                                    iconAnchor: [20, 20],
                                     className: 'custom-marker'
                                 })
-                            }).bindPopup('${order.restaurant_name || 'Restaurant'}<br\/><small>Pickup Location<\/small>').addTo(map);
+                            }).addTo(map);
 
                             // Delivery marker
                             L.marker([dropoffGPS.lat, dropoffGPS.lng], {
                                 icon: L.divIcon({
                                     html: '${homeMarkerHtml}',
                                     iconSize: [40, 40],
+                                    iconAnchor: [20, 20],
                                     className: 'custom-marker'
                                 })
-                            }).bindPopup('${order.customer?.address || 'Delivery Location'}<br\/><small>Your Location<\/small>').addTo(map);
+                            }).addTo(map);
 
                             // Route line
                             L.polyline(
                                 [[pickupGPS.lat, pickupGPS.lng], [dropoffGPS.lat, dropoffGPS.lng]],
-                                { color: '#FF6B35', weight: 3, dashArray: '5, 5', opacity: 0.8 }
+                                { color: '#FF6B35', weight: 3, dashArray: '8, 8', opacity: 0.8 }
                             ).addTo(map);
 
-                            // Initial drone marker and route
+                            // Initial drone marker
                             if (initialDroneGPS) {
                                 droneMarker = L.marker([initialDroneGPS.lat, initialDroneGPS.lng], {
                                     icon: L.divIcon({
-                                        html: '<div class="pulse-drone">${droneMarkerHtml}<\/div>',
+                                        html: '<div class="pulse-drone">${droneMarkerHtml}</div>',
                                         iconSize: [40, 40],
+                                        iconAnchor: [20, 20],
                                         className: 'custom-marker'
                                     })
-                                }).bindPopup('${order.drone_id || 'Drone'}<br\/><small>Current Position<\/small>').addTo(map);
+                                }).addTo(map);
 
                                 dronePolyline = L.polyline(
                                     [[initialDroneGPS.lat, initialDroneGPS.lng], [dropoffGPS.lat, dropoffGPS.lng]],
                                     { color: '#1976d2', weight: 2, opacity: 0.8 }
                                 ).addTo(map);
+                                
+                                window.currentDroneLat = initialDroneGPS.lat;
+                                window.currentDroneLng = initialDroneGPS.lng;
                             }
 
-                            // Fit bounds
-                            const bounds = L.latLngBounds([
+                            // Fit bounds to show all markers
+                            var bounds = L.latLngBounds([
                                 [pickupGPS.lat, pickupGPS.lng],
                                 [dropoffGPS.lat, dropoffGPS.lng]
-                                ${droneGPS ? `, [initialDroneGPS.lat, initialDroneGPS.lng]` : ''}
                             ]);
-                            map.fitBounds(bounds, { padding: [50, 50] });
+                            if (initialDroneGPS) {
+                                bounds.extend([initialDroneGPS.lat, initialDroneGPS.lng]);
+                            }
+                            map.fitBounds(bounds, { padding: [40, 40] });
                             
-                            console.log('[MAP] Map initialized successfully');
+                            console.log('Map initialized successfully');
+                            
+                            // Force a redraw after a short delay
+                            setTimeout(function() {
+                                map.invalidateSize();
+                            }, 100);
+                            
                         } catch (error) {
-                            console.error('[MAP] Error initializing map:', error);
-                            document.body.innerHTML = '<div style="padding:20px;color:red;">Map Error: ' + error.message + '</div>';
+                            console.error('Map init error:', error.message);
+                            document.body.innerHTML = '<div style="padding:20px;color:red;text-align:center;">Map Error: ' + error.message + '</div>';
                         }
                     }
 
-                    // Exposed function to update drone position in real-time
-                    // Creates drone marker if it doesn't exist yet
+                    // Update drone position function
                     window.updateDronePosition = function(lat, lng) {
-                        if (!map) {
-                            console.warn('[MAP] Map not ready yet');
-                            return;
-                        }
+                        if (!map) return;
                         
-                        const newLatLng = L.latLng(lat, lng);
-                        
-                        // Create drone marker if it doesn't exist
                         if (!droneMarker) {
-                            console.log('[MAP] Creating new drone marker at:', lat, lng);
                             droneMarker = L.marker([lat, lng], {
                                 icon: L.divIcon({
-                                    html: '<div class="pulse-drone">${droneMarkerHtml}<\\/div>',
+                                    html: '<div class="pulse-drone">${droneMarkerHtml}</div>',
                                     iconSize: [40, 40],
+                                    iconAnchor: [20, 20],
                                     className: 'custom-marker'
                                 })
-                            }).bindPopup('${order.drone_id || 'Drone'}<br\\/><small>Current Position<\\/small>').addTo(map);
+                            }).addTo(map);
                             
-                            // Create drone route polyline
                             dronePolyline = L.polyline(
                                 [[lat, lng], [dropoffGPS.lat, dropoffGPS.lng]],
                                 { color: '#1976d2', weight: 2, opacity: 0.8 }
                             ).addTo(map);
+                            
+                            window.currentDroneLat = lat;
+                            window.currentDroneLng = lng;
                         } else {
-                            // Update existing marker position
-                            droneMarker.setLatLng(newLatLng);
+                            animateDroneTo(lat, lng, 400);
+                        }
+                    };
+                    
+                    function animateDroneTo(targetLat, targetLng, duration) {
+                        if (!droneMarker) return;
+                        
+                        if (window.droneAnimationId) {
+                            cancelAnimationFrame(window.droneAnimationId);
+                        }
+                        
+                        var startLat = window.currentDroneLat || droneMarker.getLatLng().lat;
+                        var startLng = window.currentDroneLng || droneMarker.getLatLng().lng;
+                        
+                        if (Math.abs(startLat - targetLat) < 0.000001 && Math.abs(startLng - targetLng) < 0.000001) {
+                            return;
+                        }
+                        
+                        var startTime = performance.now();
+                        
+                        function animate(currentTime) {
+                            var elapsed = currentTime - startTime;
+                            var progress = Math.min(elapsed / duration, 1);
+                            var easeProgress = 1 - Math.pow(1 - progress, 3);
+                            
+                            var newLat = startLat + (targetLat - startLat) * easeProgress;
+                            var newLng = startLng + (targetLng - startLng) * easeProgress;
+                            
+                            droneMarker.setLatLng([newLat, newLng]);
                             
                             if (dronePolyline) {
-                                dronePolyline.setLatLngs([[lat, lng], [dropoffGPS.lat, dropoffGPS.lng]]);
+                                dronePolyline.setLatLngs([[newLat, newLng], [dropoffGPS.lat, dropoffGPS.lng]]);
+                            }
+                            
+                            if (progress < 1) {
+                                window.droneAnimationId = requestAnimationFrame(animate);
+                            } else {
+                                window.currentDroneLat = targetLat;
+                                window.currentDroneLng = targetLng;
+                                window.droneAnimationId = null;
                             }
                         }
+                        
+                        window.droneAnimationId = requestAnimationFrame(animate);
+                    }
 
-                        console.log('[MAP] Drone position updated to:', lat, lng);
-                    };
-
-                    initMap();
-                <\/script>
+                    // Initialize map when DOM ready
+                    if (document.readyState === 'complete') {
+                        initMap();
+                    } else {
+                        document.addEventListener('DOMContentLoaded', initMap);
+                    }
+                </script>
             </body>
             </html>
         `;
@@ -291,7 +347,7 @@ export const MapSection = ({ order }) => {
             dropoffGPS.lng
         );
 
-        if (order.current_gps && isDelivering) {
+        if (hasDroneGPS) {
             currentDistance = calculateDistance(
                 order.current_gps.lat || order.current_gps.latitude || 10.776,
                 order.current_gps.lng || order.current_gps.longitude || 106.7,
@@ -332,7 +388,7 @@ export const MapSection = ({ order }) => {
                     {order.drone_id && (
                         <View style={styles.legendItem}>
                             <View style={[styles.legendIcon, { backgroundColor: '#1976d2' }]}>
-                                <MaterialIcons name="local-shipping" size={14} color="#fff" />
+                                <DroneIcon size={20} color="#fff" />
                             </View>
                             <View style={styles.legendText}>
                                 <Text style={styles.legendLabel}>Drone</Text>
@@ -351,21 +407,37 @@ export const MapSection = ({ order }) => {
                         source={{ html: generateMapHTML() }}
                         style={styles.map}
                         scrollEnabled={false}
-                        onLoadEnd={() => setMapLoading(false)}
-                        onError={(error) => {
-                            console.error('[MapSection] WebView Error:', error);
+                        onLoadEnd={() => {
+                            console.log('[MapSection] WebView loaded');
                             setMapLoading(false);
+                        }}
+                        onError={(syntheticEvent) => {
+                            const { nativeEvent } = syntheticEvent;
+                            console.error('[MapSection] WebView Error:', nativeEvent);
+                            setMapLoading(false);
+                        }}
+                        onHttpError={(syntheticEvent) => {
+                            const { nativeEvent } = syntheticEvent;
+                            console.warn('[MapSection] HTTP Error:', nativeEvent.statusCode);
                         }}
                         onMessage={(event) => {
                             console.log('[MapSection] WebView Message:', event.nativeEvent.data);
                         }}
                         javaScriptEnabled={true}
                         domStorageEnabled={true}
-                        useWebKit={true}
                         startInLoadingState={true}
                         mixedContentMode="always"
                         allowUniversalAccessFromFileURLs={true}
                         allowFileAccess={true}
+                        originWhitelist={['*']}
+                        androidLayerType="hardware"
+                        cacheEnabled={true}
+                        cacheMode="LOAD_DEFAULT"
+                        setSupportMultipleWindows={false}
+                        onContentProcessDidTerminate={() => {
+                            console.log('[MapSection] Content process terminated, reloading...');
+                            webViewRef.current?.reload();
+                        }}
                     />
                     {mapLoading && (
                         <View style={styles.loadingContainer}>
@@ -394,12 +466,14 @@ export const MapSection = ({ order }) => {
                             ? 'Drone giao hàng đã đến điểm đích'
                             : order?.status === 'delivered'
                                 ? 'Đơn hàng đã được giao'
-                                : 'Bản đồ sẽ hiển thị khi bắt đầu giao hàng'}
+                                : hasDroneGPS
+                                    ? 'Drone đang di chuyển đến nhà hàng'
+                                    : 'Bản đồ sẽ hiển thị khi bắt đầu giao hàng'}
                 </Text>
             </View>
 
-            {/* Distance Information */}
-            {isDelivering && order.current_gps && (
+            {/* Distance Information - Show when drone has GPS */}
+            {hasDroneGPS && (
                 <View style={styles.section}>
                     <Text style={styles.sectionTitle}>Tiến độ giao hàng</Text>
                     <View style={styles.progressCard}>

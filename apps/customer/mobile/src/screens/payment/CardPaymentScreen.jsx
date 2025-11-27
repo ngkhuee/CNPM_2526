@@ -72,18 +72,22 @@ const CardPaymentScreen = ({ orderId }) => {
             // Stop auto-cancel timer since payment is completed
             stopAutoCancel(order.id);
 
-            setPaymentStatus('completed');
-            showToast('success', 'Thanh toán thành công!');
-
             // Update payment_status to 'paid' and status to 'paid' (waiting for restaurant confirmation)
             await orderService.updateOrder(order.id, {
                 payment_status: 'paid',
                 status: 'paid',
             });
 
+            // Wait a bit longer to ensure backend has updated
+            await new Promise(resolve => setTimeout(resolve, 500));
+
+            setPaymentStatus('completed');
+            showToast('success', 'Thanh toán thành công!');
+
+            // Navigate to tracking after short delay
             setTimeout(() => {
                 navigate('tracking', { orderId: order.id });
-            }, 1500);
+            }, 1000);
         } catch (error) {
             console.error('[CardPaymentScreen] Payment error:', error);
             showToast('error', 'Không thể xử lý thanh toán');
@@ -254,12 +258,12 @@ const CardPaymentScreen = ({ orderId }) => {
                                     <Text style={styles.accountValue}>{DEMO_ACCOUNT.swift}</Text>
                                 </View>
                             </View>
-                            <View style={styles.noticeBox}>
+                            {/* <View style={styles.noticeBox}>
                                 <MaterialIcons name="info" size={16} color="#d9a506" />
                                 <Text style={styles.noticeText}>
                                     Đây là tài khoản thử nghiệm chỉ dành cho mục đích kiểm tra.
                                 </Text>
-                            </View>
+                            </View> */}
                         </View>
 
                         {/* Card Form Section */}
@@ -374,12 +378,12 @@ const CardPaymentScreen = ({ orderId }) => {
                         </View>
 
                         {/* Info Notice */}
-                        <View style={styles.noticeSection}>
+                        {/* <View style={styles.noticeSection}>
                             <MaterialIcons name="info" size={20} color="#1976d2" />
                             <Text style={styles.noticeText}>
                                 Đây là các nút thử nghiệm. Thông tin thẻ sẽ không được xử lý thực tế.
                             </Text>
-                        </View>
+                        </View> */}
                     </>
                 ) : (
                     <>

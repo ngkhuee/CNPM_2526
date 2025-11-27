@@ -103,17 +103,19 @@ export const usePromotions = (restaurantId = null) => {
             return { valid: false, message: 'This promotion is not available for this restaurant' };
         }
 
-        if (promo.min_order_value && orderTotal < promo.min_order_value) {
+        // Check minimum order value (support both camelCase and snake_case)
+        const minOrderValue = promo.minOrderValue || promo.min_order_value || 0;
+        if (minOrderValue > 0 && orderTotal < minOrderValue) {
             return {
                 valid: false,
-                message: `Minimum order: ₫${(promo.min_order_value || 0).toLocaleString('vi-VN')}`,
+                message: `Đơn tối thiểu: ₫${minOrderValue.toLocaleString('vi-VN')}`,
             };
         }
 
         // Check date range
         const now = new Date();
-        const startDate = new Date(promo.start_date);
-        const endDate = new Date(promo.end_date);
+        const startDate = new Date(promo.startDate || promo.start_date);
+        const endDate = new Date(promo.endDate || promo.end_date);
 
         if (now < startDate) {
             return { valid: false, message: 'Promotion not started yet' };

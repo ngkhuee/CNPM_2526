@@ -19,6 +19,9 @@ export default function CartModal({
     onClose,
     onCheckout,
 }) {
+    // Get unique ID from item (support multiple ID fields)
+    const getItemId = (item) => item.item_id || item.menu_id || item.food_id || item.id;
+
     const handleUpdateQuantity = (itemId, newQty) => {
         if (newQty <= 0) {
             handleRemoveItem(itemId);
@@ -26,7 +29,7 @@ export default function CartModal({
         }
 
         const updated = localCart.items.map(item =>
-            item.id === itemId ? { ...item, quantity: newQty } : item
+            getItemId(item) === itemId ? { ...item, quantity: newQty } : item
         );
 
         const newTotal = updated.reduce(
@@ -42,7 +45,7 @@ export default function CartModal({
     };
 
     const handleRemoveItem = (itemId) => {
-        const updated = localCart.items.filter(item => item.id !== itemId);
+        const updated = localCart.items.filter(item => getItemId(item) !== itemId);
         const newTotal = updated.reduce(
             (sum, item) => sum + (item.price * item.quantity),
             0
@@ -84,7 +87,7 @@ export default function CartModal({
                     <FlatList
                         data={localCart.items}
                         renderItem={renderItem}
-                        keyExtractor={(item) => item.id}
+                        keyExtractor={(item, index) => (item.item_id || item.menu_id || item.food_id || item.id || `cart-item-${index}`).toString()}
                         scrollEnabled
                     />
                 ) : (

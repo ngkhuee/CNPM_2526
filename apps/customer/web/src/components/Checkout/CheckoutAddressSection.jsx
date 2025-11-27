@@ -20,7 +20,7 @@ const CheckoutAddressSection = ({
 }) => {
     return (
         <div className="checkout-section">
-            <h3>Địa chỉ giao hàng</h3>
+            <h3 style={{ marginBottom: "20px" }}>Địa chỉ giao hàng</h3>
 
             {/* Address selection radio buttons */}
             <div className="address-selection">

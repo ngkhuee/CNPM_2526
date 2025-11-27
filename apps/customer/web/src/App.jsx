@@ -16,6 +16,7 @@ import CheckoutInfo from "./pages/CheckOutInfo/CheckOutInfo";
 import Tracking from "./pages/Tracking/Tracking";
 import Profile from "./pages/Profile/Profile";
 import PaymentMoMo from "./pages/PaymentMoMo/PaymentMoMo";
+import PaymentCard from "./pages/PaymentCard/PaymentCard";
 import RegisterRestaurant from "./pages/RegisterRestaurant/RegisterRestaurant";
 
 const App = () => {
@@ -40,6 +41,7 @@ const App = () => {
           <Route path="/tracking/:id" element={<Tracking />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/payment-momo/:orderId" element={<PaymentMoMo />} />
+          <Route path="/payment-card/:orderId" element={<PaymentCard />} />
           <Route path="/register-restaurant" element={<RegisterRestaurant />} />
         </Routes>
       </div>

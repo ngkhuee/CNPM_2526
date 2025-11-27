@@ -37,7 +37,16 @@ const TrackingScreen = ({ orderId }) => {
         showMap,
         showArrivedPopup,
         handleCloseArrivedPopup,
+        handleConfirmDelivery,
     } = useDeliveryTracking(order, () => handleRefresh());
+
+    // Debug: log showMap conditions
+    console.log('[TrackingScreen] showMap debug:', {
+        showMap,
+        status: order?.status,
+        drone_id: order?.drone_id,
+        droneId: order?.droneId,
+    });
 
     // Auto-navigate when delivered
     React.useEffect(() => {
@@ -81,12 +90,12 @@ const TrackingScreen = ({ orderId }) => {
             <SafeAreaView style={styles.container}>
                 <View style={styles.errorContainer}>
                     <MaterialIcons name="error-outline" size={48} color="#e53935" />
-                    <Text style={styles.errorText}>Order not found</Text>
+                    <Text style={styles.errorText}>Không tìm thấy đơn hàng</Text>
                     <TouchableOpacity
                         style={styles.backButton}
                         onPress={() => navigate('orders')}
                     >
-                        <Text style={styles.backButtonText}>Go Back</Text>
+                        <Text style={styles.backButtonText}>Quay lại</Text>
                     </TouchableOpacity>
                 </View>
             </SafeAreaView>
@@ -100,7 +109,7 @@ const TrackingScreen = ({ orderId }) => {
                 <TouchableOpacity onPress={handleBack}>
                     <MaterialIcons name="arrow-back" size={24} color="#1a1a1a" />
                 </TouchableOpacity>
-                <Text style={styles.headerTitle}>Order Tracking</Text>
+                <Text style={styles.headerTitle}>Theo dõi đơn hàng</Text>
                 <View style={styles.headerActions}>
                     <TouchableOpacity
                         onPress={handleAutoRefreshToggle}
@@ -160,7 +169,7 @@ const TrackingScreen = ({ orderId }) => {
             {/* Arrived Popup */}
             <ArrivedPopup
                 visible={showArrivedPopup && !isDelivered}
-                onClose={handleCloseArrivedPopup}
+                onConfirmDelivery={handleConfirmDelivery}
             />
         </SafeAreaView>
     );

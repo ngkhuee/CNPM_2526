@@ -4,8 +4,11 @@
   gap: 20px;
   background-color: #f9f9f9;
   border-radius: 8px;
-  max-width: 900px;
-  margin: 0 auto;
+  width: 100%;
+  /* margin-left: 40px; */
+  /* margin: 0; */
+  padding: 20px 40px;
+  box-sizing: border-box;
   font-family: 'Arial', sans-serif;
 }
 
@@ -17,18 +20,18 @@
 
 .add-form {
   display: flex;
-  gap: 20px;
+  gap: 50px;
   flex-wrap: wrap;
 }
 
 .add-left, .add-right {
   flex: 1;
-  min-width: 250px;
 }
 
 .label {
+  font-size: 18px;
   font-weight: 500;
-  margin-bottom: 5px;
+  margin-bottom: 12px;
 }
 
 .upload-box {
@@ -48,8 +51,9 @@
 }
 
 .upload-box img {
-  width: 150px;
-  height: 150px;
+  width: 100%;
+  max-width: 400px;
+  height: auto;
   object-fit: cover;
   margin-bottom: 5px;
   border-radius: 6px;
@@ -66,6 +70,11 @@
   border: 1px solid #ccc;
   font-size: 14px;
   box-sizing: border-box;
+}
+.add-right .restaurant-name{
+  font-weight: 600;
+  margin-bottom: 15px;
+  font-size: 16px;
 }
 
 .add-bottom {

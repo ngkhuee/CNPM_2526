@@ -10,8 +10,11 @@
  * @returns {number} Discount amount in VND
  */
 export const calculateDiscount = (promotion, orderTotal) => {
+  // Support both camelCase and snake_case for minOrderValue
+  const minOrderValue = promotion.minOrderValue || promotion.min_order_value || 0;
+
   // Check if order meets minimum value requirement
-  if (promotion.minOrderValue && orderTotal < promotion.minOrderValue) {
+  if (minOrderValue && orderTotal < minOrderValue) {
     return 0;
   }
 
@@ -21,11 +24,12 @@ export const calculateDiscount = (promotion, orderTotal) => {
     // Calculate percentage discount
     discountAmount = (orderTotal * promotion.value) / 100;
 
-    // Apply maximum discount cap if specified
-    if (promotion.maxDiscount && discountAmount > promotion.maxDiscount) {
-      discountAmount = promotion.maxDiscount;
+    // Apply maximum discount cap if specified (support both camelCase and snake_case)
+    const maxDiscount = promotion.maxDiscount || promotion.max_discount;
+    if (maxDiscount && discountAmount > maxDiscount) {
+      discountAmount = maxDiscount;
     }
-  } else if (promotion.type === "fixed") {
+  } else if (promotion.type === "fixed" || promotion.type === "fixed_amount") {
     // Fixed amount discount
     discountAmount = promotion.value;
 
@@ -45,8 +49,9 @@ export const calculateDiscount = (promotion, orderTotal) => {
  */
 export const isPromotionValid = (promotion) => {
   const now = new Date();
-  const startDate = new Date(promotion.startDate);
-  const endDate = new Date(promotion.endDate);
+  // Support both camelCase and snake_case
+  const startDate = new Date(promotion.startDate || promotion.start_date);
+  const endDate = new Date(promotion.endDate || promotion.end_date);
 
   // Check status
   if (promotion.status !== "active") {
@@ -58,8 +63,10 @@ export const isPromotionValid = (promotion) => {
     return false;
   }
 
-  // Check usage limit
-  if (promotion.usageLimit && promotion.usedCount >= promotion.usageLimit) {
+  // Check usage limit (support both camelCase and snake_case)
+  const usageLimit = promotion.usageLimit || promotion.usage_limit;
+  const usedCount = promotion.usedCount || promotion.used_count || 0;
+  if (usageLimit && usedCount >= usageLimit) {
     return false;
   }
 
@@ -79,13 +86,16 @@ export const getApplicablePromotions = (allPromotions, restaurantId) => {
       return false;
     }
 
+    // Support both camelCase and snake_case for restaurantId
+    const promoRestaurantId = promo.restaurantId || promo.restaurant_id;
+
     // Admin promotions (apply to all restaurants)
-    if (!promo.restaurantId || promo.applicableRestaurants?.length === 0) {
+    if (!promoRestaurantId || promo.applicableRestaurants?.length === 0) {
       return true;
     }
 
     // Restaurant-specific promotions
-    return promo.restaurantId === restaurantId;
+    return promoRestaurantId === restaurantId;
   });
 };
 

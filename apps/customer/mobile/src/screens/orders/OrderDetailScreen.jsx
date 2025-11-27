@@ -68,7 +68,7 @@ const OrderDetailScreen = ({ orderId }) => {
             [
                 { text: 'Không', style: 'cancel' },
                 {
-                    text: 'Có, hủy đi',
+                    text: 'Có, xác nhận hủy!',
                     style: 'destructive',
                     onPress: async () => {
                         try {
@@ -502,6 +502,7 @@ const styles = StyleSheet.create({
     },
     reviewButton: {
         backgroundColor: '#fff3e0',
+        marginBottom: 40,
     },
     reviewButtonText: {
         color: '#ff6b35',

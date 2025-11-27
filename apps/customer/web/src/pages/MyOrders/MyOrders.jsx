@@ -204,7 +204,13 @@ const MyOrders = () => {
   };
 
   const handleContinuePayment = (order) => {
-    navigate(`/payment-momo/${order.id || order._id}`);
+    // Navigate to appropriate payment page based on payment method
+    const paymentMethod = order.payment_method || order.paymentMethod || "momo";
+    if (paymentMethod === "card") {
+      navigate(`/payment-card/${order.id || order._id}`);
+    } else {
+      navigate(`/payment-momo/${order.id || order._id}`);
+    }
   };
 
   const handleReviewModalClose = () => {

@@ -92,6 +92,8 @@ export const transformOrderFromAPI = (apiOrder, options = {}) => {
         // Display fields
         restaurantName: apiOrder.restaurant?.name || 'Unknown Restaurant',
         restaurant_name: apiOrder.restaurant?.name || 'Unknown Restaurant',
+        restaurantAddress: apiOrder.restaurant?.address || apiOrder.pickup_address || '',
+        restaurant_address: apiOrder.restaurant?.address || apiOrder.pickup_address || '',
         customerName: apiOrder.customer?.name || apiOrder.user?.full_name || 'Unknown',
         customerPhone: apiOrder.customer?.phone || apiOrder.user?.phone || '',
         customerAddress: apiOrder.customer?.address || apiOrder.delivery_address || '',

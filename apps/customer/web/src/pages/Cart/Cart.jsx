@@ -10,6 +10,7 @@ import {
 } from "customer-shared";
 import { useNavigate } from "react-router-dom";
 import { restaurantService } from "shared-services";
+import { formatCurrency } from "shared-utils";
 import { CartItems, CartSummary } from "../../components/Cart";
 
 const Cart = () => {
@@ -33,6 +34,35 @@ const Cart = () => {
     appliedPromotion,
     deliveryFeeValue
   );
+
+  // Validate and apply promotion with min order check
+  const handleApplyPromotion = (promo) => {
+    const minOrderValue = promo.minOrderValue || promo.min_order_value || 0;
+
+    // Check minimum order value
+    if (minOrderValue > 0 && subtotal < minOrderValue) {
+      alert(`Đơn tối thiểu: ${formatCurrency(minOrderValue)}. Đơn hiện tại: ${formatCurrency(subtotal)}`);
+      return;
+    }
+
+    // Check date range
+    const now = new Date();
+    const startDate = new Date(promo.startDate || promo.start_date);
+    const endDate = new Date(promo.endDate || promo.end_date);
+
+    if (now < startDate) {
+      alert('Khuyến mãi chưa bắt đầu');
+      return;
+    }
+
+    if (now > endDate) {
+      alert('Khuyến mãi đã hết hạn');
+      return;
+    }
+
+    // All validations passed
+    setAppliedPromotion(promo);
+  };
 
   const handleCheckout = async () => {
     if (!user) {
@@ -80,7 +110,7 @@ const Cart = () => {
           appliedPromo={appliedPromotion}
           promotions={applicablePromotions}
           loadingPromos={loadingPromos}
-          onApplyPromo={setAppliedPromotion}
+          onApplyPromo={handleApplyPromotion}
           onRemovePromo={() => setAppliedPromotion(null)}
           onCheckout={handleCheckout}
         />

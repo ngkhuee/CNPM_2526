@@ -102,7 +102,7 @@ export default function MenuDrawer({ isVisible, onClose, onNavigate }) {
                         <View style={styles.drawerHeaderIcon}>
                             <MaterialIcons name="menu" size={24} color="#ff6b35" />
                         </View>
-                        <Text style={styles.drawerTitle}>Danh mục</Text>
+                        <Text style={styles.drawerTitle}>Mở rộng</Text>
                     </View>
                     <TouchableOpacity style={styles.closeBtn} onPress={onClose}>
                         <MaterialIcons name="close" size={24} color="#333" />

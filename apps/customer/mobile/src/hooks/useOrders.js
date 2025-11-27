@@ -66,12 +66,14 @@ export const useOrders = (userId) => {
     };
 
     // Filter orders by tab - sort by updated_at DESC (newest first)
+    // Current orders: all active orders (pending through arrived)
     const currentOrders = orders.filter(o =>
-        ['pending', 'confirmed', 'preparing', 'delivering'].includes(o.status)
+        ['pending', 'paid', 'confirmed', 'preparing', 'ready', 'delivering', 'arrived'].includes(o.status)
     ).sort((a, b) => new Date(b.updated_at || b.created_at) - new Date(a.updated_at || a.created_at));
 
+    // History orders: completed or cancelled
     const historyOrders = orders.filter(o =>
-        ['delivered', 'cancelled'].includes(o.status)
+        ['delivered', 'cancelled', 'rejected'].includes(o.status)
     ).sort((a, b) => new Date(b.updated_at || b.created_at) - new Date(a.updated_at || a.created_at));
 
     const displayOrders = activeTab === 'current' ? currentOrders : historyOrders;

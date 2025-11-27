@@ -10,12 +10,12 @@ export const useRestaurantManagement = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Fetch all restaurants
+  // Fetch all restaurants (admin sees ALL restaurants including pending/blocked)
   const fetchRestaurants = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
-      const data = await restaurantService.getAll();
+      const data = await restaurantService.getAll({}, true); // includeAll=true for admin
       setRestaurants(data || []);
     } catch (err) {
       console.error("Error fetching restaurants:", err);

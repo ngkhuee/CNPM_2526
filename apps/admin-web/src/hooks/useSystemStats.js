@@ -20,7 +20,7 @@ export const useSystemStats = () => {
 
         const [ordersData, restaurantsData] = await Promise.all([
           orderService.getAll(),
-          restaurantService.getAll(),
+          restaurantService.getAll({}, true), // includeAll=true for admin
         ]);
 
         setOrders(ordersData || []);
@@ -94,7 +94,7 @@ export const useSystemStats = () => {
       setLoading(true);
       const [ordersData, restaurantsData] = await Promise.all([
         orderService.getAll(),
-        restaurantService.getAll(),
+        restaurantService.getAll({}, true), // includeAll=true for admin
       ]);
       setOrders(ordersData || []);
       setRestaurants(restaurantsData || []);

@@ -9,7 +9,7 @@ export const RestaurantProvider = ({ children }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Fetch restaurant info
+  // Fetch restaurant info (nhà hàng pending/blocked đã bị chặn ở Login rồi)
   const fetchRestaurantInfo = async (restaurantId) => {
     try {
       setLoading(true);
