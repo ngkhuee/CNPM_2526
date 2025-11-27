@@ -11,7 +11,7 @@ export const useOrderManagement = () => {
     const refreshOrders = async () => {
         const user = authService.getCurrentUser();
         if (!user?.restaurantId) {
-            return { success: false, message: "No user or restaurantId found" };
+            return { success: false, message: "Không tìm thấy người dùng hoặc ID nhà hàng" };
         }
 
         try {
@@ -21,8 +21,8 @@ export const useOrderManagement = () => {
             setOrders(restaurantOrders);
             return { success: true, orders: restaurantOrders };
         } catch (err) {
-            console.error("Error refreshing restaurant orders:", err);
-            setError(err.message || "Failed to refresh orders");
+            console.error("Lỗi khi làm mới đơn hàng:", err);
+            setError(err.message || "Không thể làm mới đơn hàng");
             return { success: false, message: err.message };
         } finally {
             setLoading(false);
@@ -37,12 +37,12 @@ export const useOrderManagement = () => {
             setOrders((prev) =>
                 prev.map((o) => (o.id === orderId ? { ...o, ...updateData } : o))
             );
-            toast.success("Order status updated!");
+            toast.success("Đã cập nhật trạng thái đơn hàng!");
             return { success: true };
         } catch (err) {
-            console.error("Error updating order status:", err);
-            setError(err.message || "Failed to update order status");
-            toast.error("Failed to update order status");
+            console.error("Lỗi khi cập nhật trạng thái đơn hàng:", err);
+            setError(err.message || "Không thể cập nhật trạng thái đơn hàng");
+            toast.error("Không thể cập nhật trạng thái đơn hàng");
             return { success: false, message: err.message };
         } finally {
             setLoading(false);
@@ -58,8 +58,8 @@ export const useOrderManagement = () => {
             );
             return { success: true };
         } catch (err) {
-            console.error("Error updating drone status:", err);
-            setError(err.message || "Failed to update drone status");
+            console.error("Lỗi khi cập nhật trạng thái drone:", err);
+            setError(err.message || "Không thể cập nhật trạng thái drone");
             return { success: false, message: err.message };
         } finally {
             setLoading(false);

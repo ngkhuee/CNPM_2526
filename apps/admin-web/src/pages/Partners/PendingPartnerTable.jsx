@@ -12,6 +12,7 @@ const PendingPartnerTable = ({ restaurants, onApprove }) => {
         <table className="partners-table">
             <thead>
                 <tr>
+                    <th>STT</th>
                     <th>Nhà hàng</th>
                     <th>Email</th>
                     <th>Điện thoại</th>
@@ -21,8 +22,9 @@ const PendingPartnerTable = ({ restaurants, onApprove }) => {
                 </tr>
             </thead>
             <tbody>
-                {restaurants.map((r) => (
+                {restaurants.map((r, index) => (
                     <tr key={r.id} className="pending-row">
+                        <td>{r.stt || index + 1}</td>
                         <td>
                             <div className="restaurant-info">
                                 <img

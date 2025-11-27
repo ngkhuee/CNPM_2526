@@ -28,7 +28,7 @@ const ReviewCard = ({ review, foodName, onReplyClick, showReplyButton = true }) 
     // Format date
     const formatDate = (dateString) => {
         const date = new Date(dateString);
-        return date.toLocaleDateString("en-US", {
+        return date.toLocaleDateString("vi-VN", {
             year: "numeric",
             month: "short",
             day: "numeric",
@@ -39,29 +39,43 @@ const ReviewCard = ({ review, foodName, onReplyClick, showReplyButton = true }) 
         <div className="review-card">
             {/* Food name & Rating */}
             <div className="review-card-header">
-                <h4 className="review-food-name">{foodName}</h4>
-                <div className="review-rating">
-                    {renderStars(review.rating)}
-                    <span className="review-rating-text">{formatRating(review.rating)}/5</span>
+                <h4 className="review-food-name">
+                    #{review.food_id} {foodName ? `[${foodName}]` : ''}
+                </h4>
+                <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "4px" }}>
+                    <div className="review-rating">
+                        {renderStars(review.rating)}
+                        <span className="review-rating-text">{formatRating(review.rating)}/5</span>
+                    </div>
+                    <span className="review-date" style={{ fontSize: "13px", color: "#6c757d" }}>
+                        {formatDate(review.created_at)}
+                    </span>
                 </div>
-            </div>
-
-            {/* Customer info */}
-            <div className="review-customer-info">
-                <span className="review-customer-name">{review.user_id || "Khách hàng"}</span>
-                <span className="review-date">• {formatDate(review.created_at)}</span>
             </div>
 
             {/* Customer comment */}
             <div className="review-comment">
-                <p>{review.comment}</p>
+                <div className="comment-label" style={{
+                    fontSize: "13px",
+                    fontWeight: "600",
+                    color: "#495057",
+                    marginBottom: "8px",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "6px"
+                }}>
+                    Khách hàng: <span style={{ color: "#6c757d", fontWeight: "normal" }}>#{review.user_id || "Ẩn danh"}</span>
+                </div>
+                <p style={{ marginLeft: "20px" }}>{review.comment}</p>
             </div>
 
             {/* Restaurant reply (if exists) */}
             {review.restaurant_reply && (
                 <div className="review-reply">
-                    <div className="reply-label"><MdCheckCircle size={16} style={{ marginRight: "6px" }} /> Phản hồi của nhà hàng:</div>
-                    <p>{review.restaurant_reply}</p>
+                    <div className="reply-label">
+                        {/* <MdCheckCircle size={16} style={{ marginRight: "6px" }} /> */}
+                        Phản hồi của nhà hàng:</div>
+                    <p style={{ marginLeft: "20px" }}>{review.restaurant_reply}</p>
                 </div>
             )}
 

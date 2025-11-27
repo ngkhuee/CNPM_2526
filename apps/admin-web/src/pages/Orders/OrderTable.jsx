@@ -37,6 +37,7 @@ const OrderTable = ({ orders, onOrderSelect, getStatusBadgeClass }) => {
             <table className="orders-table">
                 <thead>
                     <tr>
+                        <th>STT</th>
                         <th>Mã đơn hàng</th>
                         <th>Khách hàng</th>
                         <th>Sản phẩm</th>
@@ -76,8 +77,9 @@ const OrderTable = ({ orders, onOrderSelect, getStatusBadgeClass }) => {
                     </tr>
                 </thead>
                 <tbody>
-                    {paginatedOrders.map((order) => (
+                    {paginatedOrders.map((order, index) => (
                         <tr key={order.id}>
+                            <td>{startIdx + index + 1}</td>
                             <td className="order-id">#{order.id}</td>
                             <td>
                                 <div className="customer-info">

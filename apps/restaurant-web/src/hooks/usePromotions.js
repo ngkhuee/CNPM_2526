@@ -19,9 +19,9 @@ export const usePromotions = () => {
       const data = await promotionService.getAll();
       setPromotions(data);
     } catch (err) {
-      console.error("Error fetching promotions:", err);
-      setError(err.message || "Failed to load promotions");
-      toast.error("Failed to load promotions");
+      console.error("Lỗi khi tải khuyến mãi:", err);
+      setError(err.message || "Không thể tải khuyến mãi");
+      toast.error("Không thể tải khuyến mãi");
     } finally {
       setLoading(false);
     }
@@ -37,11 +37,11 @@ export const usePromotions = () => {
       setLoading(true);
       const newPromotion = await promotionService.create(promotionData);
       setPromotions((prev) => [...prev, newPromotion]);
-      toast.success("Promotion created successfully!");
+      toast.success("Đã tạo khuyến mãi thành công!");
       return { success: true, data: newPromotion };
     } catch (err) {
-      console.error("Error adding promotion:", err);
-      toast.error("Error creating promotion");
+      console.error("Lỗi khi thêm khuyến mãi:", err);
+      toast.error("Lỗi khi tạo khuyến mãi");
       return { success: false, message: err.message };
     } finally {
       setLoading(false);
@@ -56,11 +56,11 @@ export const usePromotions = () => {
       setPromotions((prev) =>
         prev.map((promo) => (promo.id === id ? updated : promo))
       );
-      toast.success("Promotion updated successfully!");
+      toast.success("Đã cập nhật khuyến mãi thành công!");
       return { success: true, data: updated };
     } catch (err) {
-      console.error("Error updating promotion:", err);
-      toast.error("Error updating promotion");
+      console.error("Lỗi khi cập nhật khuyến mãi:", err);
+      toast.error("Lỗi khi cập nhật khuyến mãi");
       return { success: false, message: err.message };
     } finally {
       setLoading(false);
@@ -73,11 +73,11 @@ export const usePromotions = () => {
       setLoading(true);
       await promotionService.delete(id);
       setPromotions((prev) => prev.filter((promo) => promo.id !== id));
-      toast.success("Promotion deleted successfully!");
+      toast.success("Đã xóa khuyến mãi thành công!");
       return { success: true };
     } catch (err) {
-      console.error("Error deleting promotion:", err);
-      toast.error("Error deleting promotion");
+      console.error("Lỗi khi xóa khuyến mãi:", err);
+      toast.error("Lỗi khi xóa khuyến mãi");
       return { success: false, message: err.message };
     } finally {
       setLoading(false);

@@ -3,7 +3,7 @@ import "./Navbar.css";
 import { assets } from "../../assets/assets";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { AuthContext, CartContext } from "customer-shared";
-import { MdStorefront } from "react-icons/md";
+import { MdStorefront, MdShoppingCart, MdPerson, MdAccountCircle, MdShoppingBag, MdLogout } from "react-icons/md";
 
 const Navbar = ({ setShowLogin }) => {
   const { user, logout } = useContext(AuthContext);
@@ -48,7 +48,7 @@ const Navbar = ({ setShowLogin }) => {
 
       <div className="navbar-right">
         <NavLink to="/cart" className="navbar-search-icon">
-          <img src={assets.basket_icon} alt="Cart" />
+          <MdShoppingCart size={28} />
           <div className={cart?.items?.length > 0 ? "dot" : ""}></div>
         </NavLink>
 
@@ -56,21 +56,17 @@ const Navbar = ({ setShowLogin }) => {
           <button onClick={() => setShowLogin(true)}>Đăng nhập</button>
         ) : (
           <div className="navbar-profile">
-            <img
-              // ảnh user sau khi login
-              src={user.profile_icon || assets.profile_icon}
-              alt={user.name || "User"}
-            />
+            <MdAccountCircle size={40} />
             <ul className="navbar-profile-dropdown">
               <li onClick={() => navigate("/profile")}>
-                <img src={assets.profile_icon} alt="" /> <p>Hồ sơ</p>
+                <MdPerson size={24} /> <p>Hồ sơ</p>
               </li>
               <li onClick={() => navigate("/myorders")}>
-                <img src={assets.bag_icon} alt="" /> <p>Đơn hàng</p>
+                <MdShoppingBag size={24} /> <p>Đơn hàng</p>
               </li>
               <hr />
               <li onClick={logoutHandler}>
-                <img src={assets.logout_icon} alt="" /> <p>Đăng xuất</p>
+                <MdLogout size={24} /> <p>Đăng xuất</p>
               </li>
             </ul>
           </div>

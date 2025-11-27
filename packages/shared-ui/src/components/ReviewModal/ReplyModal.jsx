@@ -36,12 +36,12 @@ const ReplyModal = ({ review, onSubmit, onClose, loading = false }) => {
     const handleSubmit = async () => {
         // Validation
         if (!replyText.trim()) {
-            setError("Reply cannot be empty");
+            setError("Phản hồi không được để trống");
             return;
         }
 
         if (replyText.trim().length < 5) {
-            setError("Reply must be at least 5 characters");
+            setError("Phản hồi phải có ít nhất 5 ký tự");
             return;
         }
 
@@ -54,7 +54,7 @@ const ReplyModal = ({ review, onSubmit, onClose, loading = false }) => {
             setError("");
             onClose();
         } else {
-            setError(result?.message || "An error occurred");
+            setError(result?.message || "Có lỗi xảy ra");
         }
     };
 
@@ -63,7 +63,7 @@ const ReplyModal = ({ review, onSubmit, onClose, loading = false }) => {
             <div className="reply-modal" onClick={(e) => e.stopPropagation()}>
                 {/* Header */}
                 <div className="reply-modal-header">
-                    <h3>Reply to Review</h3>
+                    <h3>Phản hồi đánh giá</h3>
                     <button className="close-btn" onClick={onClose}>
                         <MdClose size={24} />
                     </button>
@@ -74,11 +74,11 @@ const ReplyModal = ({ review, onSubmit, onClose, loading = false }) => {
                     {/* Customer info */}
                     <div className="customer-info">
                         <div className="info-row">
-                            <label>Customer:</label>
-                            <span>{review?.user_id || "Guest"}</span>
+                            <label>Khách hàng:</label>
+                            <span>{review?.user_id || "Khách"}</span>
                         </div>
                         <div className="info-row">
-                            <label>Rating:</label>
+                            <label>Đánh giá:</label>
                             <span>
                                 {Array.from({ length: 5 }, (_, i) => i + 1).map((star) => (
                                     <span key={star} style={{ color: star <= (review?.rating || 0) ? "#ffc107" : "#ddd" }}>
@@ -91,7 +91,7 @@ const ReplyModal = ({ review, onSubmit, onClose, loading = false }) => {
 
                     {/* Customer comment (read-only) */}
                     <div className="customer-comment-section">
-                        <label>Customer Review:</label>
+                        <label>Nhận xét của khách hàng:</label>
                         <div className="customer-comment">
                             {review?.comment}
                         </div>
@@ -99,18 +99,18 @@ const ReplyModal = ({ review, onSubmit, onClose, loading = false }) => {
 
                     {/* Reply input */}
                     <div className="reply-input-section">
-                        <label>Your Reply:</label>
+                        <label>Phản hồi của bạn:</label>
                         <textarea
                             value={replyText}
                             onChange={handleReplyChange}
-                            placeholder="Enter your reply to the customer..."
+                            placeholder="Nhập phản hồi của bạn cho khách hàng..."
                             rows="5"
                             maxLength="500"
                             className="reply-textarea"
                             disabled={loading}
                         />
                         <div className="char-count">
-                            {charCount}/500 characters
+                            {charCount}/500 ký tự
                         </div>
                     </div>
 
@@ -125,14 +125,14 @@ const ReplyModal = ({ review, onSubmit, onClose, loading = false }) => {
                         onClick={onClose}
                         disabled={loading}
                     >
-                        Cancel
+                        Hủy
                     </button>
                     <button
                         className="btn btn-submit"
                         onClick={handleSubmit}
                         disabled={loading || !replyText.trim()}
                     >
-                        {loading ? "Sending..." : "Send Reply"}
+                        {loading ? "Đang gửi..." : "Gửi phản hồi"}
                     </button>
                 </div>
             </div>

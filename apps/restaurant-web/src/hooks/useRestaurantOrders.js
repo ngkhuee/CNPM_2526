@@ -32,8 +32,8 @@ export const useRestaurantOrders = () => {
         }
       } catch (err) {
         if (isActive) {
-          console.error("Error fetching restaurant orders:", err);
-          setError(err.message || "Failed to fetch orders");
+          console.error("Lỗi khi tải đơn hàng của nhà hàng:", err);
+          setError(err.message || "Không thể tải đơn hàng");
         }
       } finally {
         if (isActive) {
@@ -54,7 +54,7 @@ export const useRestaurantOrders = () => {
   const refreshOrders = async () => {
     const user = await authService.getCurrentUser();
     if (!user || !user.restaurantId) {
-      return { success: false, message: "No user or restaurantId found" };
+      return { success: false, message: "Không tìm thấy người dùng hoặc ID nhà hàng" };
     }
 
     try {
@@ -66,8 +66,8 @@ export const useRestaurantOrders = () => {
       setOrders(restaurantOrders);
       return { success: true, orders: restaurantOrders };
     } catch (err) {
-      console.error("Error refreshing restaurant orders:", err);
-      setError(err.message || "Failed to refresh orders");
+      console.error("Lỗi khi làm mới đơn hàng:", err);
+      setError(err.message || "Không thể làm mới đơn hàng");
       return { success: false, message: err.message };
     } finally {
       setLoading(false);
@@ -82,8 +82,8 @@ export const useRestaurantOrders = () => {
       setOrders((prev) => [...prev, newOrder]);
       return { success: true, order: newOrder };
     } catch (err) {
-      console.error("Error adding order:", err);
-      setError(err.message || "Failed to add order");
+      console.error("Lỗi khi thêm đơn hàng:", err);
+      setError(err.message || "Không thể thêm đơn hàng");
       return { success: false, message: err.message };
     } finally {
       setLoading(false);
@@ -100,8 +100,8 @@ export const useRestaurantOrders = () => {
       );
       return { success: true };
     } catch (err) {
-      console.error("Error updating order status:", err);
-      setError(err.message || "Failed to update order status");
+      console.error("Lỗi khi cập nhật trạng thái đơn hàng:", err);
+      setError(err.message || "Không thể cập nhật trạng thái đơn hàng");
       return { success: false, message: err.message };
     } finally {
       setLoading(false);
@@ -118,8 +118,8 @@ export const useRestaurantOrders = () => {
       );
       return { success: true };
     } catch (err) {
-      console.error("Error updating drone status:", err);
-      setError(err.message || "Failed to update drone status");
+      console.error("Lỗi khi cập nhật trạng thái drone:", err);
+      setError(err.message || "Không thể cập nhật trạng thái drone");
       return { success: false, message: err.message };
     } finally {
       setLoading(false);

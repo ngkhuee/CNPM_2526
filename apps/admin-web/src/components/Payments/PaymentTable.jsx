@@ -45,6 +45,7 @@ const PaymentTable = ({ data = [], onApprove, onReject, isLoading, activeTab }) 
             <table className="payment-table">
                 <thead>
                     <tr>
+                        <th>STT</th>
                         <th>ID</th>
                         <th>Nhà hàng</th>
                         <th>Số tiền</th>
@@ -54,8 +55,9 @@ const PaymentTable = ({ data = [], onApprove, onReject, isLoading, activeTab }) 
                     </tr>
                 </thead>
                 <tbody>
-                    {data.map((withdrawal) => (
+                    {data.map((withdrawal, index) => (
                         <tr key={withdrawal.id} className="table-row">
+                            <td>{index + 1}</td>
                             <td className="id-cell">
                                 <code>{withdrawal.id}</code>
                             </td>

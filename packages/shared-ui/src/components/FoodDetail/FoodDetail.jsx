@@ -156,7 +156,6 @@ const FoodDetail = ({
                 <div key={review.id} className="review-item">
                   <div className="review-header">
                     <div className="review-user-info">
-                      <strong>{review.user?.name || review.userId}</strong>
                       {renderStars(review.rating)}
                     </div>
                     <span className="review-date">
@@ -164,15 +163,32 @@ const FoodDetail = ({
                     </span>
                   </div>
 
-                  <p className="review-comment">{review.comment}</p>
+                  <div style={{ marginBottom: "4px" }}>
+                    <span style={{
+                      fontSize: "13px",
+                      fontWeight: "600",
+                      color: "#495057"
+                    }}>
+                      Khách hàng: #
+                    </span>
+                    <span style={{
+                      fontSize: "13px",
+                      color: "#6c757d",
+                      fontWeight: "normal"
+                    }}>
+                      {review.user_id || review.userId || "Ẩn danh"}
+                    </span>
+                  </div>
+
+                  <p className="review-comment" style={{ marginLeft: "20px", marginTop: "4px" }}>{review.comment}</p>
 
                   {/* Restaurant Reply */}
                   {review.restaurant_reply && (
                     <div className="restaurant-reply">
-                      <MdReply size={16} />
+                      <MdReply size={16} style={{ marginRight: "6px", color: "#17a2b8" }} />
                       <div>
-                        <strong>Nhà hàng:</strong>
-                        <p>{review.restaurant_reply}</p>
+                        <strong>Phản hồi của nhà hàng:</strong>
+                        <p style={{ marginLeft: "20px", marginTop: "4px" }}>{review.restaurant_reply}</p>
                       </div>
                     </div>
                   )}

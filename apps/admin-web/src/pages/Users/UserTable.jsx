@@ -9,6 +9,7 @@ const UserTable = ({ users, onStatusToggle, onDelete, getRoleBadgeClass }) => {
         <table className="users-table">
             <thead>
                 <tr>
+                    <th>STT</th>
                     <th>ID</th>
                     <th>Tên</th>
                     <th>Email</th>
@@ -20,8 +21,9 @@ const UserTable = ({ users, onStatusToggle, onDelete, getRoleBadgeClass }) => {
                 </tr>
             </thead>
             <tbody>
-                {users.map((user) => (
+                {users.map((user, index) => (
                     <tr key={user.id}>
+                        <td>{user.stt || index + 1}</td>
                         <td>{user.id}</td>
                         <td>{user.name}</td>
                         <td>{user.email}</td>

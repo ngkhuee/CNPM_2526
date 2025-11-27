@@ -1,21 +1,40 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { ReviewCard, ReplyModal } from "shared-ui";
 import { useRestaurantReviews } from "../../hooks/useRestaurantReviews";
 import { MdStar, MdRateReview, MdHourglassEmpty, MdCheckCircle, MdError, MdNavigateBefore, MdNavigateNext } from "react-icons/md";
 import { formatRating } from "@utils/formatters";
+import { RestaurantContext } from "../../Context/RestaurantContext";
+import { foodService } from "shared-services";
 import "./Reviews.css";
 
 const Reviews = () => {
     const { reviews, loading, error, fetchReviews, addReply, getStats } =
         useRestaurantReviews();
+    const { currentRestaurant } = useContext(RestaurantContext);
 
     const [filter, setFilter] = useState("all");
     const [showReplyModal, setShowReplyModal] = useState(false);
     const [selectedReview, setSelectedReview] = useState(null);
     const [submitting, setSubmitting] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
+    const [foods, setFoods] = useState([]);
 
     const ITEMS_PER_PAGE = 10;
+
+    // Fetch foods on mount
+    useEffect(() => {
+        const loadFoods = async () => {
+            if (currentRestaurant?.id) {
+                try {
+                    const foodsData = await foodService.getByRestaurant(currentRestaurant.id);
+                    setFoods(foodsData);
+                } catch (err) {
+                    console.error("Error fetching foods:", err);
+                }
+            }
+        };
+        loadFoods();
+    }, [currentRestaurant?.id]);
 
     // Fetch reviews on mount and when filter changes
     useEffect(() => {
@@ -63,10 +82,10 @@ const Reviews = () => {
     // Get stats
     const stats = getStats();
 
-    // Get food names (from menus - need to fetch)
+    // Get food name by ID
     const getFoodName = (foodId) => {
-        // This is a simplified version - in real app, fetch menus first
-        return `Food #${foodId}`;
+        const food = foods.find(f => f.id === foodId);
+        return food ? food.name : "Món ăn";
     };
 
     if (loading && reviews.length === 0) {
@@ -159,13 +178,29 @@ const Reviews = () => {
                 {/* Reviews List */}
                 <div className="reviews-list">
                     {paginatedReviews.length > 0 ? (
-                        paginatedReviews.map((review) => (
-                            <ReviewCard
-                                key={review.id}
-                                review={review}
-                                foodName={getFoodName(review.food_id)}
-                                onReplyClick={handleReplyClick}
-                            />
+                        paginatedReviews.map((review, index) => (
+                            <div key={review.id} style={{ position: "relative", marginBottom: "20px" }}>
+                                <div style={{
+                                    position: "absolute",
+                                    top: "-10px",
+                                    left: "20px",
+                                    background: "#ff6b35",
+                                    color: "white",
+                                    padding: "4px 12px",
+                                    borderRadius: "12px",
+                                    fontWeight: "bold",
+                                    fontSize: "16px",
+                                    zIndex: 10,
+                                    boxShadow: "0 2px 4px rgba(0,0,0,0.1)"
+                                }}>
+                                    #{startIndex + index + 1}
+                                </div>
+                                <ReviewCard
+                                    review={review}
+                                    foodName={getFoodName(review.food_id)}
+                                    onReplyClick={handleReplyClick}
+                                />
+                            </div>
                         ))
                     ) : (
                         <div className="empty-state">

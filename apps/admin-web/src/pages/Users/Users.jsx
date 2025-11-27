@@ -55,7 +55,10 @@ const Users = () => {
   const filteredUsers = getFilteredUsers();
   const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
   const startIdx = (currentPage - 1) * itemsPerPage;
-  const paginatedUsers = filteredUsers.slice(startIdx, startIdx + itemsPerPage);
+  const paginatedUsers = filteredUsers.slice(startIdx, startIdx + itemsPerPage).map((user, idx) => ({
+    ...user,
+    stt: startIdx + idx + 1
+  }));
 
   return (
     <div className="users-page">

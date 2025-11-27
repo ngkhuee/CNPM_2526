@@ -19,7 +19,7 @@ export const useRestaurantReviews = () => {
     const fetchReviews = useCallback(
         async (filter = "all") => {
             if (!currentRestaurant?.id) {
-                setError("No restaurant found");
+                setError("Không tìm thấy nhà hàng");
                 return;
             }
 
@@ -55,8 +55,8 @@ export const useRestaurantReviews = () => {
 
                 setReviews(filtered);
             } catch (err) {
-                console.error("Error fetching reviews:", err);
-                setError(err.message || "Failed to fetch reviews");
+                console.error("Lỗi khi tải đánh giá:", err);
+                setError(err.message || "Không thể tải đánh giá");
                 setReviews([]);
             } finally {
                 setLoading(false);
@@ -73,14 +73,14 @@ export const useRestaurantReviews = () => {
             if (!replyText || replyText.trim().length === 0) {
                 return {
                     success: false,
-                    message: "Reply text cannot be empty",
+                    message: "Nội dung phản hồi không được để trống",
                 };
             }
 
             if (replyText.trim().length > 500) {
                 return {
                     success: false,
-                    message: "Reply text cannot exceed 500 characters",
+                    message: "Nội dung phản hồi không được vượt quá 500 ký tự",
                 };
             }
 

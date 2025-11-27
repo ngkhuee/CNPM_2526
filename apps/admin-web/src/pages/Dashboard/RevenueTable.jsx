@@ -79,7 +79,7 @@ const RevenueTable = ({ restaurants, formatCurrency }) => {
                             fontWeight: "600",
                         }}
                     >
-                        TB/Đơn hàng
+                        Trung bình / Đơn hàng
                     </th>
                 </tr>
             </thead>

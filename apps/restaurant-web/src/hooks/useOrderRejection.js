@@ -7,8 +7,8 @@ export const useOrderRejection = (onSuccess) => {
 
     const rejectOrder = async (orderId, reason) => {
         if (!reason || !reason.trim()) {
-            toast.error("Please provide a reason for rejection");
-            return { success: false, message: "Reason required" };
+            toast.error("Vui lòng nhập lý do từ chối");
+            return { success: false, message: "Cần nhập lý do" };
         }
 
         try {
@@ -33,12 +33,12 @@ export const useOrderRejection = (onSuccess) => {
                 rejected_at: new Date().toISOString(),
             });
 
-            toast.success("Order rejected. Customer will be notified and refunded.");
+            toast.success("Đã từ chối đơn hàng. Khách hàng sẽ được thông báo và hoàn tiền.");
             if (onSuccess) onSuccess();
             return { success: true };
         } catch (error) {
-            console.error("Error rejecting order:", error);
-            toast.error("Failed to reject order");
+            console.error("Lỗi khi từ chối đơn hàng:", error);
+            toast.error("Không thể từ chối đơn hàng");
             return { success: false, message: error.message };
         } finally {
             setLoading(false);

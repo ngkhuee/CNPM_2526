@@ -12,11 +12,11 @@ export const useFoodManagement = () => {
             setLoading(true);
             const newFood = await foodService.create(foodData);
             setFoodList((prev) => [...prev, newFood]);
-            toast.success("Food added successfully!");
+            toast.success("Thêm món ăn thành công!");
             return { success: true, food: newFood };
         } catch (error) {
-            console.error("Error adding food:", error);
-            toast.error("Failed to add food");
+            console.error("Có lỗi khi thêm món ăn:", error);
+            toast.error("Thêm món ăn thất bại!");
             return { success: false, message: error.message };
         } finally {
             setLoading(false);
@@ -30,11 +30,11 @@ export const useFoodManagement = () => {
             setFoodList((prev) =>
                 prev.map((f) => (f.id === foodId ? updatedFood : f))
             );
-            toast.success("Food updated successfully!");
+            toast.success("Cập nhật món ăn thành công!");
             return { success: true, food: updatedFood };
         } catch (error) {
-            console.error("Error updating food:", error);
-            toast.error("Failed to update food");
+            console.error("Có lỗi khi cập nhật món ăn:", error);
+            toast.error("Cập nhật món ăn thất bại!");
             return { success: false, message: error.message };
         } finally {
             setLoading(false);
@@ -46,11 +46,11 @@ export const useFoodManagement = () => {
             setLoading(true);
             await foodService.delete(foodId);
             setFoodList((prev) => prev.filter((f) => f.id !== foodId));
-            toast.success("Food deleted successfully!");
+            toast.success("Xóa món ăn thành công!");
             return { success: true };
         } catch (error) {
-            console.error("Error deleting food:", error);
-            toast.error("Failed to delete food");
+            console.error("Có lỗi khi xóa món ăn:", error);
+            toast.error("Xóa món ăn thất bại!");
             return { success: false, message: error.message };
         } finally {
             setLoading(false);

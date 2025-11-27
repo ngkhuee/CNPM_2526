@@ -26,11 +26,11 @@ export const useAddFood = () => {
 
     const handleSubmit = async (onSuccess) => {
         if (!image) {
-            return { success: false, message: "Please upload an image" };
+            return { success: false, message: "Vui lòng tải lên ảnh" };
         }
 
         if (!formData.categoryId) {
-            return { success: false, message: "Please select a category!" };
+            return { success: false, message: "Vui lòng chọn danh mục!" };
         }
 
         setLoading(true);
@@ -40,7 +40,7 @@ export const useAddFood = () => {
             const uploadResult = await uploadService.uploadImage(image, "foods");
 
             if (!uploadResult.success) {
-                return { success: false, message: "Image upload failed" };
+                return { success: false, message: "Tải ảnh lên thất bại" };
             }
 
             // Step 2: Create food with uploaded image path

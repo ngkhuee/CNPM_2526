@@ -12,6 +12,7 @@ const BlockedPartnerTable = ({ restaurants, onUnblock, onDelete }) => {
         <table className="partners-table">
             <thead>
                 <tr>
+                    <th>STT</th>
                     <th>Nhà hàng</th>
                     <th>Email</th>
                     <th>Điện thoại</th>
@@ -20,8 +21,9 @@ const BlockedPartnerTable = ({ restaurants, onUnblock, onDelete }) => {
                 </tr>
             </thead>
             <tbody>
-                {restaurants.map((r) => (
+                {restaurants.map((r, index) => (
                     <tr key={r.id} className="blocked-row">
+                        <td>{r.stt || index + 1}</td>
                         <td>
                             <div className="restaurant-info">
                                 <img
