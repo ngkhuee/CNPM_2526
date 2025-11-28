@@ -76,6 +76,19 @@ export default function RestaurantFoodCard({ item, onPress, isHighlighted = fals
 
                     {/* Content - Right Side */}
                     <View style={styles.content}>
+
+
+                        {/* Price Row */}
+                        <View style={styles.priceRow}>
+                            <Text style={styles.price}>{priceFormatted}</Text>
+                            <TouchableOpacity
+                                style={styles.addButton}
+                                onPress={() => onAddToCart?.(item)}
+                            >
+                                <MaterialIcons name="add" size={22} color="#fff" />
+                            </TouchableOpacity>
+                        </View>
+
                         {/* Name */}
                         <Text style={styles.name} numberOfLines={2}>
                             {item.name}
@@ -92,17 +105,6 @@ export default function RestaurantFoodCard({ item, onPress, isHighlighted = fals
                         {soldCount > 0 && (
                             <Text style={styles.soldText}>Đã bán {soldCount.toLocaleString()}</Text>
                         )}
-
-                        {/* Price Row */}
-                        <View style={styles.priceRow}>
-                            <Text style={styles.price}>{priceFormatted}</Text>
-                            <TouchableOpacity
-                                style={styles.addButton}
-                                onPress={() => onAddToCart?.(item)}
-                            >
-                                <MaterialIcons name="add" size={22} color="#fff" />
-                            </TouchableOpacity>
-                        </View>
                     </View>
                 </TouchableOpacity>
             </Animated.View>
