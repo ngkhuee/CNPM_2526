@@ -158,7 +158,7 @@ const ExploreMenu = ({
     <div className="explore-menu" id="explore-menu">
       <h1 style={{ display: "flex", alignItems: "center", gap: "10px" }}>
         <MdRestaurant size={32} />
-        Khám phá Món ngon
+         aa Khám phá Món ngon
       </h1>
       <p className="explore-menu-text">
         Khám phá bộ sưu tập món ăn được đánh giá cao và bán chạy nhất.
