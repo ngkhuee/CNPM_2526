@@ -1,4 +1,4 @@
-import React, { useContext, useMemo } from "react";
+import React, { useContext, useMemo, useState, useEffect } from "react";
 import "./ExploreMenu.css";
 import { StoreContext } from "customer-shared";
 import {
@@ -36,6 +36,29 @@ const ExploreMenu = ({
   showOnlyNearby = false,
 }) => {
   const { restaurant_list, loading } = useContext(StoreContext);
+  
+  // Detect landscape orientation
+  const [isLandscape, setIsLandscape] = useState(
+    typeof window !== 'undefined' && window.matchMedia('(orientation: landscape)').matches
+  );
+  
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
+    const mediaQuery = window.matchMedia('(orientation: landscape)');
+    const handleOrientationChange = (e) => setIsLandscape(e.matches);
+    
+    // Modern browsers
+    if (mediaQuery.addEventListener) {
+      mediaQuery.addEventListener('change', handleOrientationChange);
+      return () => mediaQuery.removeEventListener('change', handleOrientationChange);
+    }
+    // Legacy browsers
+    else {
+      mediaQuery.addListener(handleOrientationChange);
+      return () => mediaQuery.removeListener(handleOrientationChange);
+    }
+  }, []);
 
   // Define filter options - Only show Top Rated and Best Selling for main section
   const filterOptions = useMemo(() => {

@@ -5,13 +5,10 @@ import {
     TouchableOpacity,
     Text,
     Animated,
-    Dimensions,
+    useWindowDimensions,
 } from 'react-native';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { styles, animationConfig } from './MenuDrawer.styles';
-
-const { width } = Dimensions.get('window');
-const DRAWER_WIDTH = width * 0.7;
 
 /**
  * MenuDrawer - Side drawer menu component
@@ -23,6 +20,8 @@ const DRAWER_WIDTH = width * 0.7;
  * - onNavigate: function - Navigate to screen
  */
 export default function MenuDrawer({ isVisible, onClose, onNavigate }) {
+    const { width } = useWindowDimensions();
+    const DRAWER_WIDTH = width * 0.7;
     const slideAnim = useRef(new Animated.Value(-DRAWER_WIDTH)).current;
 
     // Animate drawer open/close

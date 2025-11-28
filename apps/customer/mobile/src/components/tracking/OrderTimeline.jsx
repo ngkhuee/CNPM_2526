@@ -1,6 +1,6 @@
 // components/tracking/OrderTimeline.jsx
 import React, { useEffect, useState, useRef } from 'react';
-import { View, Text, StyleSheet, Animated, ScrollView, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, Animated, ScrollView, useWindowDimensions } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 
 const NODE_SIZE = 44;
@@ -8,9 +8,9 @@ const NODE_SIZE_CURRENT = 50;
 const LABEL_HEIGHT = 40;
 const ITEM_WIDTH = 80;
 const LINE_WIDTH = 50;
-const SCREEN_WIDTH = Dimensions.get('window').width;
 
 export const OrderTimeline = ({ timeline, currentStatusIndex }) => {
+    const { width: screenWidth } = useWindowDimensions();
     const [animatedValues, setAnimatedValues] = useState([]);
     const scrollViewRef = useRef(null);
 
@@ -36,12 +36,12 @@ export const OrderTimeline = ({ timeline, currentStatusIndex }) => {
                 const itemFullWidth = ITEM_WIDTH + LINE_WIDTH;
                 const scrollPosition = Math.max(
                     0,
-                    currentStatusIndex * itemFullWidth - SCREEN_WIDTH / 2 + ITEM_WIDTH / 2
+                    currentStatusIndex * itemFullWidth - screenWidth / 2 + ITEM_WIDTH / 2
                 );
                 scrollViewRef.current.scrollTo({ x: scrollPosition, animated: true });
             }
         }, 400);
-    }, [currentStatusIndex, timeline.length]);
+    }, [currentStatusIndex, timeline.length, screenWidth]);
 
     const renderTimelineItem = (step, index) => {
         const isCompleted = index < currentStatusIndex;
