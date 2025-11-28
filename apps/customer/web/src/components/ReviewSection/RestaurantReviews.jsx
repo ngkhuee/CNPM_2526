@@ -91,8 +91,12 @@ const RestaurantReviews = ({ restaurantId, maxReviews = 5 }) => {
                 {reviews.map((review) => (
                     <ReviewCard
                         key={review.id}
-                        review={review}
-                        foodName={review.food_name || "Sản phẩm"}
+                        review={{
+                            ...review,
+                            food_id: review.food_id || review.foodId || review.product_id,
+                            user_id: review.user_id || review.userId
+                        }}
+                        foodName={review.food_name || review.foodName || "Sản phẩm"}
                         showReplyButton={false}
                     />
                 ))}

@@ -12,11 +12,11 @@ const CategoryTable = ({
         <table className="category-table">
             <thead>
                 <tr>
-                    <th>Name</th>
-                    <th>Description</th>
-                    <th>Foods</th>
-                    <th>Status</th>
-                    <th>Actions</th>
+                    <th>Tên</th>
+                    <th>Mô tả</th>
+                    <th>Món ăn</th>
+                    {/* <th>Trạng thái</th> */}
+                    <th>Hành động</th>
                 </tr>
             </thead>
             <tbody>
@@ -38,11 +38,11 @@ const CategoryTable = ({
                                     món
                                 </button>
                             </td>
-                            <td>
+                            {/* <td>
                                 <span className={`status ${cat.status.toLowerCase()}`}>
                                     {cat.status}
                                 </span>
-                            </td>
+                            </td> */}
                             <td className="action-btn">
                                 <button
                                     className="edit-btn"
