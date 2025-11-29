@@ -71,20 +71,29 @@ export default function HomeScreen({ onNavigate }) {
     initLocation();
   }, []);
 
-  // Update address and nearby restaurants when GPS location changes
+  // Update address when GPS location changes
   useEffect(() => {
     if (gpsAddress) {
       console.log('[HomeScreen] GPS location obtained:', gpsAddress);
       setAddress(gpsAddress);
-
-      // Calculate nearby restaurants
-      if (location && restaurantList.length > 0) {
-        const nearby = getNearbyRestaurants(restaurantList, location, 5);
-        console.log('[HomeScreen] Nearby restaurants:', nearby.length);
-        setNearbyRestaurants(nearby);
-      }
     }
-  }, [gpsAddress, location, restaurantList]);
+  }, [gpsAddress]);
+
+  // Calculate nearby restaurants whenever location OR restaurantList changes
+  useEffect(() => {
+    if (location && restaurantList.length > 0) {
+      console.log('[HomeScreen] Calculating nearby restaurants...');
+      console.log('[HomeScreen] User location:', location);
+      console.log('[HomeScreen] Total restaurants:', restaurantList.length);
+
+      const nearby = getNearbyRestaurants(restaurantList, location, 5);
+      console.log('[HomeScreen] Nearby restaurants found:', nearby.length);
+      setNearbyRestaurants(nearby);
+    } else {
+      console.log('[HomeScreen] Cannot calculate nearby - location:', !!location, 'restaurants:', restaurantList.length);
+      setNearbyRestaurants([]);
+    }
+  }, [location, restaurantList]);
 
   useEffect(() => {
     fetchData();

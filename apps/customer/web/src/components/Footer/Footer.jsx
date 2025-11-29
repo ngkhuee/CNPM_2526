@@ -39,7 +39,7 @@ const Footer = () => {
       </div>
       <hr />
       <p className="footer-copyright">
-        Bản quyền 2024 © yummy.com - Tất cả quyền được bảo lưu.
+        Bản quyền 2025 © yummy.com - Tất cả quyền được bảo lưu.
       </p>
     </div>
   );
