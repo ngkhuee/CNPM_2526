@@ -97,7 +97,8 @@ export const useRestaurantRegistration = () => {
                 id: restaurantId,
                 name: formData.restaurantName,
                 owner_id: userId,
-                description: formData.description || 'No description provided',
+                owner_name: formData.ownerName,
+                description: formData.description || 'Không có mô tả',
                 address: formData.address,
                 latitude: 10.762622, // Default coords
                 longitude: 106.660172,
@@ -105,7 +106,6 @@ export const useRestaurantRegistration = () => {
                 email: formData.email,
                 image: '/images/restaurants/default.png',
                 banner_image: '/images/restaurants/default.png',
-                primary_category: 'Other',
                 rating: 0,
                 total_reviews: 0,
                 is_open: false,

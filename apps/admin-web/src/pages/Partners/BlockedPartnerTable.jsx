@@ -36,7 +36,14 @@ const BlockedPartnerTable = ({ restaurants, onUnblock, onDelete }) => {
                         </td>
                         <td>{r.email}</td>
                         <td>{r.phone}</td>
-                        <td>{new Date(r.updated_at).toLocaleDateString("vi-VN")}</td>
+                        <td>
+                            {(() => {
+                                const dateStr = r.updated_at || r.updatedAt || r.blocked_at || r.blockedAt;
+                                if (!dateStr) return "N/A";
+                                const date = new Date(dateStr);
+                                return isNaN(date.getTime()) ? "N/A" : date.toLocaleDateString("vi-VN");
+                            })()}
+                        </td>
                         <td>
                             <div className="action-buttons">
                                 <Link

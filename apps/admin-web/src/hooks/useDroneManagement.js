@@ -144,13 +144,41 @@ export const useDroneManagement = (onSuccess) => {
         return;
       }
 
-      if (!window.confirm("Xóa drone này?")) return;
+      // 2-step confirmation
+      if (!window.confirm("Bạn có chắc chắn muốn xóa drone này?")) return;
+
+      const typed = window.prompt(
+        'Để xác nhận xóa drone, hãy nhập chính xác: DELETE'
+      );
+
+      if (typed !== 'DELETE') {
+        alert('Xác nhận không khớp. Hủy thao tác xóa.');
+        return;
+      }
+
       try {
         await droneService.deleteDrone(id);
+        alert(`Đã xóa drone ${drone.identifier || drone.name} thành công`);
         onSuccess?.();
       } catch (err) {
         console.error("Failed to delete drone:", err);
-        alert("Không thể xóa drone");
+
+        // Enhanced error handling from backend
+        if (err.response?.data?.code === 'DRONE_IS_BUSY') {
+          const data = err.response.data;
+          alert(
+            `KHÔNG THỂ XÓA DRONE\n\n` +
+            `${data.message}\n\n` +
+            `Trạng thái: ${data.droneStatus}\n` +
+            `${data.assignedOrderId ? `Đơn hàng: #${data.assignedOrderId}\n` : ''}` +
+            `${data.orderInfo ? `Trạng thái đơn: ${data.orderInfo.status}\n` : ''}` +
+            `${data.orderInfo?.droneJourneyStage ? `Giai đoạn: ${data.orderInfo.droneJourneyStage}` : ''}`
+          );
+        } else if (err.response?.data?.code === 'DRONE_NOT_FOUND') {
+          alert('Không tìm thấy drone này');
+        } else {
+          alert(`Không thể xóa drone: ${err.response?.data?.message || err.message || 'Lỗi không xác định'}`);
+        }
       }
     },
     [onSuccess]

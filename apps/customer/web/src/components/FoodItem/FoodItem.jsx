@@ -76,21 +76,6 @@ const FoodItem = ({
         ) : null}
       </div>
       <div className="food-item-info">
-        <p className="food-item-price">{formatCurrency(price)}</p>
-        {sold !== undefined && sold !== null && (
-          <span
-            style={{
-              fontSize: "12px",
-              color: "#666",
-              display: "flex",
-              alignItems: "center",
-              gap: "4px",
-            }}
-          >
-            <MdLocalFireDepartment size={16} style={{ color: "#ff6b35" }} />
-            {sold > 0 ? `${sold} đã bán` : "0 đã bán"}
-          </span>
-        )}
         <div className="food-item-name-rating">
           <p>{name}</p>
           {displayRating !== undefined && displayRating !== null && (
@@ -118,6 +103,21 @@ const FoodItem = ({
             marginTop: "8px",
           }}
         >
+          <p className="food-item-price">{formatCurrency(price)}</p>
+          {sold !== undefined && sold !== null && (
+            <span
+              style={{
+                fontSize: "12px",
+                color: "#666",
+                display: "flex",
+                alignItems: "center",
+                gap: "4px",
+              }}
+            >
+              <MdLocalFireDepartment size={16} style={{ color: "#ff6b35" }} />
+              {sold > 0 ? `${sold} đã bán` : "0 đã bán"}
+            </span>
+          )}
         </div>
         <p
           className="food-item-restaurant"

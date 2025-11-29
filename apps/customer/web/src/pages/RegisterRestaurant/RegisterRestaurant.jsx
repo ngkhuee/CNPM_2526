@@ -121,6 +121,7 @@ const RegisterRestaurant = () => {
         id: restaurantId,
         name: formData.restaurantName,
         owner_id: userId,
+        owner_name: formData.ownerName,
         description: formData.description || "Chưa có mô tả",
         address: formData.address,
         latitude: 10.762622, // Default coords - should be updated later
@@ -129,7 +130,6 @@ const RegisterRestaurant = () => {
         email: formData.email,
         image: "/images/restaurants/default.png",
         banner_image: "/images/restaurants/default.png",
-        primary_category: "Other",
         rating: 0,
         total_reviews: 0,
         is_open: false,

@@ -29,7 +29,6 @@ export const RestaurantHeader = ({ restaurant }) => {
                                 ({restaurant.totalReviews})
                             </Text>
                         </View>
-                        <Text style={styles.category}>{restaurant.primaryCategory}</Text>
                     </View>
                 </View>
 

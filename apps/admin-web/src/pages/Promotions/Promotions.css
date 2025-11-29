@@ -72,15 +72,7 @@
   margin-bottom: 16px;
 }
 
-.promo-code {
-  background: linear-gradient(135deg, #ea9666 0%, #da8064 100%);
-  color: white;
-  padding: 8px 16px;
-  border-radius: 8px;
-  font-weight: 700;
-  font-size: 16px;
-  letter-spacing: 1px;
-}
+/* Removed old promo-code card style */
 
 .promo-status {
   padding: 4px 12px;
@@ -193,6 +185,264 @@
 .btn-delete:hover {
   background: #c82333;
   transform: translateY(-1px);
+}
+
+/* Table Styles */
+.promotions-table-container {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+}
+
+.promotions-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.promotions-table thead {
+  background: #f8f9fa;
+}
+
+.promotions-table thead th {
+  padding: 16px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 13px;
+  color: #495057;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 2px solid #dee2e6;
+}
+
+.promotions-table tbody tr.promotion-row {
+  border-bottom: 1px solid #f0f0f0;
+  transition: background-color 0.2s ease;
+}
+
+.promotions-table tbody tr.promotion-row:hover {
+  background: #f8f9fa;
+}
+
+.promotions-table tbody tr.promotion-row.expanded {
+  background: #f8f9fa;
+}
+
+.promotions-table tbody td {
+  padding: 16px;
+  vertical-align: middle;
+  color: #2c3e50;
+  font-size: 14px;
+}
+
+.promo-code {
+  font-weight: 500;
+  color: #495057;
+}
+
+.promo-name {
+  font-weight: 600;
+  color: #2c3e50;
+  max-width: 250px;
+}
+
+.type-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 12px;
+  background: #f8f9fa;
+  color: #495057;
+  font-weight: 600;
+  font-size: 12px;
+}
+
+.discount-value {
+  font-weight: 600;
+  color: #2c3e50;
+  font-size: 14px;
+}
+
+.usage-count {
+  color: #495057;
+  font-weight: 500;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 5px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.status-badge.status-active {
+  background: #d4edda;
+  color: #155724;
+}
+
+.status-badge.status-inactive {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.action-buttons button {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.btn-view {
+  background: #ff6b35;
+  color: white;
+}
+
+.btn-view:hover {
+  background: #e85a2a;
+  transform: translateY(-1px);
+}
+
+.btn-edit {
+  background: #0dcaf0;
+  color: white;
+}
+
+.btn-edit:hover {
+  background: #0bb5d6;
+  transform: translateY(-1px);
+}
+
+.btn-activate {
+  background: #28a745;
+  color: white;
+}
+
+.btn-activate:hover {
+  background: #218838;
+  transform: translateY(-1px);
+}
+
+.btn-block {
+  background: #ffc107;
+  color: #000;
+}
+
+.btn-block:hover {
+  background: #e0a800;
+  transform: translateY(-1px);
+}
+
+.btn-delete {
+  background: #dc3545;
+  color: white;
+}
+
+.btn-delete:hover {
+  background: #c82333;
+  transform: translateY(-1px);
+}
+
+/* Detail Row with Smooth Animation */
+.promotion-detail-row {
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.promotion-detail-row td {
+  padding: 0 !important;
+  background: #f8f9fa;
+}
+
+.promotion-detail-container {
+  max-height: 0;
+  overflow: hidden;
+  animation: expandDetail 0.3s ease-out forwards;
+}
+
+@keyframes expandDetail {
+  from {
+    max-height: 0;
+    opacity: 0;
+  }
+
+  to {
+    max-height: 500px;
+    opacity: 1;
+  }
+}
+
+/* Promotion Info Grid - Custom styles for detail expansion */
+.promotion-info-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  padding: 24px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+}
+
+.promotion-info-section {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border: 1px solid #e9ecef;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.promotion-info-section:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.promotion-info-section h4 {
+  margin: 0 0 16px 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: #2c3e50;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #ff6b35;
+}
+
+.promotion-info-field {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  margin-bottom: 12px;
+  padding: 8px 0;
+  font-size: 13px;
+  border-bottom: 1px dashed #e9ecef;
+}
+
+.promotion-info-field:last-child {
+  margin-bottom: 0;
+  border-bottom: none;
+}
+
+.promotion-info-field .label {
+  color: #6c757d;
+  font-weight: 600;
+  min-width: 140px;
+  flex-shrink: 0;
+}
+
+.promotion-info-field .value {
+  color: #2c3e50;
+  font-weight: 600;
+  text-align: right;
+  flex: 1;
+  word-break: break-word;
 }
 
 .no-data {
@@ -308,7 +558,23 @@
   background: #5a6268;
 }
 
+@media (max-width: 1200px) {
+  .promotion-info-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 @media (max-width: 768px) {
+  .promotions-page {
+    padding: 15px;
+  }
+
+  .promotions-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+
   .promotions-grid {
     grid-template-columns: 1fr;
   }
@@ -319,5 +585,57 @@
 
   .modal {
     padding: 20px;
+  }
+
+  .promotion-info-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    padding: 16px;
+  }
+
+  .promotion-info-section {
+    padding: 16px;
+  }
+
+  .promotion-info-field {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    padding: 10px 0;
+  }
+
+  .promotion-info-field .label {
+    min-width: auto;
+    font-size: 12px;
+  }
+
+  .promotion-info-field .value {
+    text-align: left;
+    font-size: 13px;
+  }
+
+  .promotions-table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .promotions-table {
+    min-width: 1000px;
+  }
+
+  .promotions-table th,
+  .promotions-table td {
+    padding: 12px 10px;
+    font-size: 13px;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .action-buttons button {
+    width: 100%;
+    padding: 8px 10px;
   }
 }

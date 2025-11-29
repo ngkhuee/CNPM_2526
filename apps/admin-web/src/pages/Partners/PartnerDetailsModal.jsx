@@ -42,10 +42,6 @@ const PartnerDetailsModal = ({ isOpen, onClose, restaurant }) => {
                         <span>{restaurant.description || "N/A"}</span>
                     </div>
                     <div className="detail-row">
-                        <strong>Danh mục:</strong>
-                        <span>{restaurant.primary_category || "N/A"}</span>
-                    </div>
-                    <div className="detail-row">
                         <strong>Trạng thái:</strong>
                         <span className={`status-badge status-${restaurant.status}`}>
                             {restaurant.status}

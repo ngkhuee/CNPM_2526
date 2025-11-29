@@ -1,5 +1,29 @@
 import apiClient from "../config/apiClient";
 
+// Helper to check if current time is within applicable time range
+const isWithinTimeRange = (timeRange) => {
+  if (!timeRange || timeRange === "Cả ngày") {
+    return true;
+  }
+
+  // Parse time range like "18:00 - 20:00"
+  const match = timeRange.match(/(\d{1,2}):(\d{2})\s*-\s*(\d{1,2}):(\d{2})/);
+  if (!match) {
+    return true; // If format is invalid, allow it
+  }
+
+  const [, startHour, startMin, endHour, endMin] = match;
+  const now = new Date();
+  const currentHour = now.getHours();
+  const currentMin = now.getMinutes();
+
+  const startTime = parseInt(startHour) * 60 + parseInt(startMin);
+  const endTime = parseInt(endHour) * 60 + parseInt(endMin);
+  const currentTime = currentHour * 60 + currentMin;
+
+  return currentTime >= startTime && currentTime <= endTime;
+};
+
 // Helper to map snake_case fields from backend to camelCase for frontend
 const mapPromotionToFrontend = (promo) => {
   if (!promo) return null;
@@ -19,6 +43,7 @@ const mapPromotionToFrontend = (promo) => {
     usedCount: promo.used_count,
     scope: promo.scope,
     restaurantId: promo.restaurant_id,
+    applicableTimeRange: promo.applicable_time_range || "Cả ngày",
     status: promo.status,
     createdAt: promo.created_at,
     updatedAt: promo.updated_at,
@@ -45,6 +70,7 @@ const mapPromotionToBackend = (promo) => {
   if (promo.usedCount !== undefined) payload.used_count = promo.usedCount;
   if (promo.scope) payload.scope = promo.scope;
   if (promo.restaurantId) payload.restaurant_id = promo.restaurantId;
+  if (promo.applicableTimeRange) payload.applicable_time_range = promo.applicableTimeRange;
   if (promo.status) payload.status = promo.status;
 
   return payload;
@@ -54,14 +80,22 @@ const promotionService = {
   /**
    * Get all promotions (with optional filter)
    * @param {string} status - Optional status filter ('active', 'inactive', or empty for all)
+   * @param {boolean} filterByTime - Filter by applicable time range (default: false)
    * @returns {Promise<Array>}
    */
-  async getAll(status = null) {
+  async getAll(status = null, filterByTime = false) {
     try {
       const url = status ? `/promotions?status=${status}` : "/promotions";
       const response = await apiClient.get(url);
       // apiClient already returns response.data
-      return response.map(mapPromotionToFrontend);
+      let promotions = response.map(mapPromotionToFrontend);
+
+      // Filter by time range if requested (for customer view)
+      if (filterByTime) {
+        promotions = promotions.filter(promo => isWithinTimeRange(promo.applicableTimeRange));
+      }
+
+      return promotions;
     } catch (error) {
       console.error("Error fetching promotions:", error);
       throw error;
@@ -120,6 +154,16 @@ const promotionService = {
         return {
           valid: false,
           message: "Mã khuyến mãi đã hết hạn",
+          promotion: null,
+        };
+      }
+
+      // Check applicable time range
+      if (!isWithinTimeRange(promotion.applicableTimeRange)) {
+        const timeRange = promotion.applicableTimeRange;
+        return {
+          valid: false,
+          message: `Mã khuyến mãi chỉ áp dụng trong khung giờ ${timeRange}. Vui lòng kiểm tra lại!`,
           promotion: null,
         };
       }
@@ -199,16 +243,24 @@ const promotionService = {
   /**
    * Get promotions by restaurant
    * @param {string} restaurantId - Restaurant ID
+   * @param {boolean} filterByTime - Filter by applicable time range (default: true for customer)
    * @returns {Promise<Array>}
    */
-  async getByRestaurant(restaurantId) {
+  async getByRestaurant(restaurantId, filterByTime = true) {
     try {
       // Query with backend field name (restaurant_id)
       const response = await apiClient.get(
         `/promotions?status=active&restaurant_id=${restaurantId}`
       );
       // apiClient already returns response.data
-      return response.map(mapPromotionToFrontend);
+      let promotions = response.map(mapPromotionToFrontend);
+
+      // Filter by time range (default for customer view)
+      if (filterByTime) {
+        promotions = promotions.filter(promo => isWithinTimeRange(promo.applicableTimeRange));
+      }
+
+      return promotions;
     } catch (error) {
       console.error("Error fetching restaurant promotions:", error);
       throw error;

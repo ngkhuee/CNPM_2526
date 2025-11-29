@@ -137,6 +137,58 @@ const PromotionModal = ({
                         />
                     </div>
 
+                    <div className="form-group">
+                        <label>Khung giờ áp dụng</label>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
+                            <label style={{ display: 'flex', alignItems: 'center', gap: '6px', margin: 0, cursor: 'pointer' }}>
+                                <input
+                                    type="checkbox"
+                                    checked={formData.isAllDay}
+                                    onChange={(e) => {
+                                        onChange("isAllDay", e.target.checked);
+                                        if (e.target.checked) {
+                                            onChange("applicableTimeRange", "Cả ngày");
+                                        }
+                                    }}
+                                    style={{ width: 'auto', cursor: 'pointer' }}
+                                />
+                                <span style={{ fontWeight: '500', fontSize: '14px' }}>Cả ngày</span>
+                            </label>
+                        </div>
+                        {!formData.isAllDay && (
+                            <div className="form-row" style={{ marginTop: '8px' }}>
+                                <div className="form-group" style={{ marginBottom: 0 }}>
+                                    <label style={{ fontSize: '13px' }}>Từ giờ</label>
+                                    <input
+                                        type="time"
+                                        value={formData.startTime || ""}
+                                        onChange={(e) => {
+                                            onChange("startTime", e.target.value);
+                                            if (e.target.value && formData.endTime) {
+                                                onChange("applicableTimeRange", `${e.target.value} - ${formData.endTime}`);
+                                            }
+                                        }}
+                                        required={!formData.isAllDay}
+                                    />
+                                </div>
+                                <div className="form-group" style={{ marginBottom: 0 }}>
+                                    <label style={{ fontSize: '13px' }}>Đến giờ</label>
+                                    <input
+                                        type="time"
+                                        value={formData.endTime || ""}
+                                        onChange={(e) => {
+                                            onChange("endTime", e.target.value);
+                                            if (formData.startTime && e.target.value) {
+                                                onChange("applicableTimeRange", `${formData.startTime} - ${e.target.value}`);
+                                            }
+                                        }}
+                                        required={!formData.isAllDay}
+                                    />
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
                     <div className="modal-actions">
                         <button type="submit" className="btn-save">
                             {isEditing ? "Cập nhật" : "Tạo mới"}

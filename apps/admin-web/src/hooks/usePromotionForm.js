@@ -12,6 +12,10 @@ const INITIAL_FORM_DATA = {
     startDate: "",
     endDate: "",
     usageLimit: "",
+    applicableTimeRange: "Cả ngày",
+    isAllDay: true,
+    startTime: "",
+    endTime: "",
     status: "active",
 };
 
@@ -28,6 +32,20 @@ export const usePromotionForm = (onSuccess) => {
     const openModal = useCallback((promotion = null) => {
         if (promotion) {
             setEditingPromotion(promotion);
+            const timeRange = promotion.applicableTimeRange || "Cả ngày";
+            const isAllDay = timeRange === "Cả ngày";
+            let startTime = "";
+            let endTime = "";
+
+            // Parse time range if not all day
+            if (!isAllDay) {
+                const match = timeRange.match(/(\d{1,2}:\d{2})\s*-\s*(\d{1,2}:\d{2})/);
+                if (match) {
+                    startTime = match[1];
+                    endTime = match[2];
+                }
+            }
+
             setFormData({
                 code: promotion.code,
                 name: promotion.name,
@@ -39,6 +57,10 @@ export const usePromotionForm = (onSuccess) => {
                 startDate: promotion.startDate ? promotion.startDate.split("T")[0] : "",
                 endDate: promotion.endDate ? promotion.endDate.split("T")[0] : "",
                 usageLimit: promotion.usageLimit,
+                applicableTimeRange: timeRange,
+                isAllDay: isAllDay,
+                startTime: startTime,
+                endTime: endTime,
                 status: promotion.status,
             });
         } else {
@@ -54,6 +76,19 @@ export const usePromotionForm = (onSuccess) => {
     const handleSubmit = useCallback(async (e) => {
         e.preventDefault();
 
+        // Validate time range if not all day
+        if (!formData.isAllDay) {
+            if (!formData.startTime || !formData.endTime) {
+                alert("Vui lòng nhập đầy đủ khung giờ áp dụng!");
+                return;
+            }
+            // Check if start time is before end time
+            if (formData.startTime >= formData.endTime) {
+                alert("Giờ bắt đầu phải nhỏ hơn giờ kết thúc!");
+                return;
+            }
+        }
+
         const promotionData = {
             ...formData,
             value: Number(formData.value),
@@ -61,22 +96,28 @@ export const usePromotionForm = (onSuccess) => {
             maxDiscount: Number(formData.maxDiscount) || 0,
             usageLimit: Number(formData.usageLimit) || 0,
             usedCount: editingPromotion ? editingPromotion.usedCount : 0,
+            applicableTimeRange: formData.applicableTimeRange || "Cả ngày",
             applicableRestaurants: [],
         };
+
+        // Remove UI-only fields
+        delete promotionData.isAllDay;
+        delete promotionData.startTime;
+        delete promotionData.endTime;
 
         try {
             if (editingPromotion) {
                 await promotionService.update(editingPromotion.id, promotionData);
-                alert("Promotion updated successfully!");
+                alert("Cập nhật khuyến mãi thành công!");
             } else {
                 await promotionService.create(promotionData);
-                alert("Promotion created successfully!");
+                alert("Tạo khuyến mãi thành công!");
             }
             closeModal();
             resetForm();
             onSuccess?.();
         } catch (error) {
-            alert("Failed to save promotion: " + error.message);
+            alert("Lỗi khi lưu khuyến mãi: " + error.message);
         }
     }, [formData, editingPromotion, closeModal, resetForm, onSuccess]);
 

@@ -18,11 +18,12 @@ export const usePromotions = (restaurantId = null) => {
             try {
                 setLoading(true);
                 setError(null);
-                const data = await promotionService.getAll();
+                // Filter by time for customer view
+                const data = await promotionService.getAll('active', true);
                 if (isActive) {
                     console.log('[usePromotions] Loaded promotions:', {
                         total: data.length,
-                        promos: data.map(p => ({ code: p.code, status: p.status, scope: p.scope, restaurant_id: p.restaurant_id }))
+                        promos: data.map(p => ({ code: p.code, status: p.status, scope: p.scope, restaurant_id: p.restaurant_id, timeRange: p.applicableTimeRange }))
                     });
                     setPromotions(data);
                 }
@@ -83,49 +84,41 @@ export const usePromotions = (restaurantId = null) => {
     };
 
     /**
-     * Validate promotion code
+     * Validate promotion code using promotionService
      * @param {string} code - Promotion code
      * @param {number} orderTotal - Order total
      * @param {string} restaurantId - Current restaurant ID to validate scope
-     * @returns {Object} {valid, message, promotion}
+     * @returns {Promise<Object>} {valid, message, promotion}
      */
-    const validatePromotion = (code, orderTotal, restaurantId) => {
-        const promo = promotions.find(
-            p => p.code?.toUpperCase() === code.toUpperCase() && p.status === 'active'
-        );
+    const validatePromotion = async (code, orderTotal, restaurantId) => {
+        try {
+            // Use promotionService.validate which includes time range check
+            const result = await promotionService.validate(code, orderTotal);
 
-        if (!promo) {
-            return { valid: false, message: 'Invalid promotion code' };
-        }
+            if (!result.valid) {
+                return result;
+            }
 
-        // Check if promotion applies to this restaurant
-        if (promo.scope === 'restaurant' && promo.restaurant_id !== restaurantId) {
-            return { valid: false, message: 'This promotion is not available for this restaurant' };
-        }
+            const promo = result.promotion;
 
-        // Check minimum order value (support both camelCase and snake_case)
-        const minOrderValue = promo.minOrderValue || promo.min_order_value || 0;
-        if (minOrderValue > 0 && orderTotal < minOrderValue) {
+            // Additional check: if promotion applies to this restaurant
+            if (promo.scope === 'restaurant' && promo.restaurant_id !== restaurantId) {
+                return {
+                    valid: false,
+                    message: 'Mã khuyến mãi không áp dụng cho nhà hàng này',
+                    promotion: null
+                };
+            }
+
+            return result;
+        } catch (error) {
+            console.error('[usePromotions] Error validating promotion:', error);
             return {
                 valid: false,
-                message: `Đơn tối thiểu: ₫${minOrderValue.toLocaleString('vi-VN')}`,
+                message: 'Lỗi khi kiểm tra mã khuyến mãi',
+                promotion: null
             };
         }
-
-        // Check date range
-        const now = new Date();
-        const startDate = new Date(promo.startDate || promo.start_date);
-        const endDate = new Date(promo.endDate || promo.end_date);
-
-        if (now < startDate) {
-            return { valid: false, message: 'Promotion not started yet' };
-        }
-
-        if (now > endDate) {
-            return { valid: false, message: 'Promotion expired' };
-        }
-
-        return { valid: true, promotion: promo };
     };
 
     /**

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { promotionService } from "shared-services";
 import { usePromotionForm } from "../../hooks/usePromotionForm";
 import PromotionModal from "./PromotionModal";
-import PromotionCard from "./PromotionCard";
+import PromotionTable from "./PromotionTable";
 import "./Promotions.css";
 
 const Promotions = () => {
@@ -57,21 +57,18 @@ const Promotions = () => {
         </button>
       </div>
 
-      <div className="promotions-grid">
-        {promotions.map((promo) => (
-          <PromotionCard
-            key={promo.id}
-            promotion={promo}
+      {promotions.length === 0 ? (
+        <div className="no-data">
+          <p>Chưa có khuyến mãi. Tạo khuyến mãi đầu tiên cho toàn hệ thống!</p>
+        </div>
+      ) : (
+        <div className="promotions-table-container">
+          <PromotionTable
+            promotions={promotions}
             onEdit={openModal}
             onToggleStatus={handleToggleStatus}
             onDelete={handleDelete}
           />
-        ))}
-      </div>
-
-      {promotions.length === 0 && (
-        <div className="no-data">
-          <p>Chưa có khuyến mãi. Tạo khuyến mãi đầu tiên cho toàn hệ thống!</p>
         </div>
       )}
 

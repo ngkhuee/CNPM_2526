@@ -972,6 +972,21 @@ server.post("/orders", (req, res) => {
     });
   }
 
+  // Check restaurant status (must be active)
+  if (restaurant.status !== 'active') {
+    console.log("[POST /orders] ❌ Restaurant not active:", restaurant.status);
+    return res.status(400).json({
+      success: false,
+      message: restaurant.status === 'blocked'
+        ? "Nha hang nay hien dang bi khoa va khong the nhan don hang"
+        : restaurant.status === 'pending'
+          ? "Nha hang nay dang cho duyet"
+          : "Nha hang nay khong kha dung de dat hang",
+      code: "RESTAURANT_NOT_ACTIVE",
+      restaurantStatus: restaurant.status
+    });
+  }
+
   // Check opening hours
   const isOpen = isRestaurantOpenHelper(restaurant.opening_hours);
   console.log("[POST /orders] Restaurant open check:", {
@@ -2191,6 +2206,161 @@ server.get("/addresses", (req, res, next) => {
   addresses = addresses.filter(addr => addr.user_id === userId);
 
   res.json(addresses);
+});
+
+// ========== CUSTOM DELETE RESTAURANT ENDPOINT (SOFT DELETE) ==========
+// DELETE /restaurants/:id - Soft delete restaurant
+server.delete("/restaurants/:id", (req, res) => {
+  const db = router.db;
+  const restaurantId = req.params.id;
+
+  console.log(`[DELETE /restaurants/:id] Request to delete restaurant ${restaurantId}`);
+
+  // 1. Check if restaurant exists
+  const restaurant = db.get("restaurants").find({ id: restaurantId }).value();
+  if (!restaurant) {
+    return res.status(404).json({
+      success: false,
+      message: "Khong tim thay nha hang",
+    });
+  }
+
+  // 2. Check for active orders
+  const orders = db.get("orders").filter({ restaurant_id: restaurantId }).value();
+  const activeOrders = orders.filter(o =>
+    !['delivered', 'cancelled', 'rejected'].includes(o.status)
+  );
+
+  if (activeOrders.length > 0) {
+    return res.status(400).json({
+      success: false,
+      message: `Khong the xoa nha hang: Co ${activeOrders.length} don hang dang xu ly`,
+      code: 'ACTIVE_ORDERS_EXIST',
+      activeOrdersCount: activeOrders.length,
+      orderStatuses: activeOrders.map(o => ({ id: o.id, status: o.status }))
+    });
+  }
+
+  // 3. Perform SOFT DELETE
+  db.get("restaurants")
+    .find({ id: restaurantId })
+    .assign({
+      status: 'deleted',
+      isOpen: false,
+      deleted_at: new Date().toISOString(),
+    })
+    .write();
+
+  // 4. Update owner user status
+  if (restaurant.owner_id) {
+    const user = db.get("users").find({ id: restaurant.owner_id }).value();
+    if (user) {
+      db.get("users")
+        .find({ id: restaurant.owner_id })
+        .assign({
+          status: 'deleted',
+          updated_at: new Date().toISOString()
+        })
+        .write();
+    }
+  }
+
+  // 5. Mark menus as unavailable
+  const menusUpdated = db.get("menus")
+    .filter({ restaurant_id: restaurantId })
+    .value();
+
+  menusUpdated.forEach(menu => {
+    db.get("menus")
+      .find({ id: menu.id })
+      .assign({
+        is_available: false,
+        deleted_at: new Date().toISOString()
+      })
+      .write();
+  });
+
+  console.log(`[DELETE /restaurants/:id] Soft deleted restaurant ${restaurantId}`);
+
+  res.json({
+    success: true,
+    message: "Đã đánh dấu xóa nhà hàng thành công",
+    affected: {
+      menus: menusUpdated.length,
+      orders: orders.length
+    }
+  });
+});
+
+// ========== CUSTOM DELETE DRONE ENDPOINT (SOFT DELETE) ==========
+// DELETE /drones/:id - Soft delete drone (only when not delivering)
+server.delete("/drones/:id", (req, res) => {
+  const db = router.db;
+  const droneId = req.params.id;
+
+  console.log(`[DELETE /drones/:id] Request to delete drone ${droneId}`);
+
+  // 1. Check if drone exists
+  const drone = db.get("drones").find({ id: droneId }).value();
+  if (!drone) {
+    return res.status(404).json({
+      success: false,
+      message: "Khong tim thay drone",
+      code: 'DRONE_NOT_FOUND'
+    });
+  }
+
+  // 2. Check if drone is busy or has assigned order
+  const isBusy = drone.status === 'busy' || drone.status === 'delivering';
+  const hasOrder = drone.assigned_order_id !== null && drone.assigned_order_id !== undefined;
+
+  if (isBusy || hasOrder) {
+    console.log(`[DELETE /drones/:id] Cannot delete: Drone is busy or has order`);
+
+    // Get order details if exists
+    let orderInfo = null;
+    if (hasOrder) {
+      const order = db.get("orders").find({ id: drone.assigned_order_id }).value();
+      if (order) {
+        orderInfo = {
+          orderId: order.id,
+          status: order.status,
+          droneJourneyStage: order.drone_journey_stage
+        };
+      }
+    }
+
+    return res.status(400).json({
+      success: false,
+      message: "Khong the xoa drone: Drone dang trong trang thai van chuyen hoac co don hang gan ket",
+      code: 'DRONE_IS_BUSY',
+      droneStatus: drone.status,
+      assignedOrderId: drone.assigned_order_id,
+      orderInfo: orderInfo
+    });
+  }
+
+  // 3. Perform SOFT DELETE - set status to 'deleted'
+  db.get("drones")
+    .find({ id: droneId })
+    .assign({
+      status: 'deleted',
+      deleted_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    })
+    .write();
+
+  console.log(`[DELETE /drones/:id] Soft deleted drone ${droneId}`);
+
+  res.json({
+    success: true,
+    message: "Da danh dau drone la da xoa",
+    drone: {
+      id: droneId,
+      identifier: drone.identifier,
+      previousStatus: drone.status
+    }
+  });
 });
 
 // Use default router

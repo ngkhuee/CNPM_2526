@@ -1,9 +1,8 @@
 import React from "react";
-import { Link } from "react-router-dom";
 import { getImageUrl } from "shared-utils";
 import { MdVisibility, MdCheckCircle } from "react-icons/md";
 
-const PendingPartnerTable = ({ restaurants, onApprove }) => {
+const PendingPartnerTable = ({ restaurants, onApprove, onViewDetails }) => {
     if (restaurants.length === 0) {
         return <div className="empty-state">Không có nhà hàng chờ duyệt</div>;
     }
@@ -38,16 +37,23 @@ const PendingPartnerTable = ({ restaurants, onApprove }) => {
                         <td>{r.email}</td>
                         <td>{r.phone}</td>
                         <td className="address-cell">{r.address}</td>
-                        <td>{new Date(r.created_at).toLocaleDateString("vi-VN")}</td>
+                        <td>
+                            {(() => {
+                                const dateStr = r.created_at || r.createdAt;
+                                if (!dateStr) return "N/A";
+                                const date = new Date(dateStr);
+                                return isNaN(date.getTime()) ? "N/A" : date.toLocaleDateString("vi-VN");
+                            })()}
+                        </td>
                         <td>
                             <div className="action-buttons">
-                                <Link
-                                    to={`/admin/partners/${r.id}`}
+                                <button
                                     className="btn-view"
-                                    title="Xem chi tiết"
+                                    onClick={() => onViewDetails(r)}
+                                    title="Xem thông tin đăng ký"
                                 >
                                     <MdVisibility /> Xem
-                                </Link>
+                                </button>
                                 <button
                                     className="btn-approve"
                                     onClick={() => onApprove(r.id)}

@@ -30,7 +30,6 @@ export const RestaurantHeaderCompact = ({ restaurant }) => {
                                 ({restaurant.totalReviews})
                             </Text>
                         </View>
-                        <Text style={styles.category}>{restaurant.primaryCategory}</Text>
                     </View>
                 </View>
 

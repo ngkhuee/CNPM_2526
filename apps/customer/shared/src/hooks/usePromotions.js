@@ -17,7 +17,8 @@ export const usePromotions = (restaurantId = null) => {
       try {
         setLoading(true);
         setError(null);
-        const data = await promotionService.getAll();
+        // Filter by time for customer view
+        const data = await promotionService.getAll("active", true);
         if (isActive) {
           setPromotions(data);
         }
@@ -65,47 +66,36 @@ export const usePromotions = (restaurantId = null) => {
     });
   };
 
-  // Validate promotion code
-  const validatePromotion = (code, orderTotal, restaurantId) => {
-    const promo = promotions.find(
-      (p) =>
-        p.code?.toUpperCase() === code.toUpperCase() && p.status === "active"
-    );
+  // Validate promotion code using promotionService
+  const validatePromotion = async (code, orderTotal, restaurantId) => {
+    try {
+      // Use promotionService.validate which includes time range check
+      const result = await promotionService.validate(code, orderTotal);
 
-    if (!promo) {
-      return { valid: false, message: "This promotion is invalid" };
-    }
+      if (!result.valid) {
+        return result;
+      }
 
-    // Check if promotion applies to this restaurant
-    // Note: promotionService maps restaurant_id to restaurantId (camelCase)
-    if (promo.scope === "restaurant" && promo.restaurantId !== restaurantId) {
-      return { valid: false, message: "This promotion does not apply to this restaurant" };
-    }
+      const promo = result.promotion;
 
-    // Check minOrderValue (camelCase from promotionService mapping)
-    const minOrderValue = promo.minOrderValue || promo.min_order_value || 0;
-    if (minOrderValue && orderTotal < minOrderValue) {
+      // Additional check: if promotion applies to this restaurant
+      if (promo.scope === "restaurant" && promo.restaurantId !== restaurantId) {
+        return {
+          valid: false,
+          message: "Mã khuyến mãi không áp dụng cho nhà hàng này",
+          promotion: null
+        };
+      }
+
+      return result;
+    } catch (error) {
+      console.error("Error validating promotion:", error);
       return {
         valid: false,
-        message: `Minimum order value ₫${minOrderValue.toLocaleString('vi-VN')}`,
+        message: "Lỗi khi kiểm tra mã khuyến mãi",
+        promotion: null
       };
     }
-
-    // Check if promotion is within date range
-    // Support both camelCase (startDate/endDate) and snake_case (start_date/end_date)
-    const now = new Date();
-    const startDate = new Date(promo.startDate || promo.start_date);
-    const endDate = new Date(promo.endDate || promo.end_date);
-
-    if (now < startDate) {
-      return { valid: false, message: "Promotion has not started yet" };
-    }
-
-    if (now > endDate) {
-      return { valid: false, message: "Promotion has expired" };
-    }
-
-    return { valid: true, promotion: promo };
   };
 
   // Calculate discount amount

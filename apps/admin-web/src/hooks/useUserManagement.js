@@ -10,6 +10,7 @@ export const useUserManagement = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [filter, setFilter] = useState("all");
+    const [searchTerm, setSearchTerm] = useState("");
 
     // Fetch all users
     const fetchUsers = useCallback(async () => {
@@ -86,11 +87,28 @@ export const useUserManagement = () => {
 
     // Get filtered users
     const getFilteredUsers = useCallback(() => {
-        if (filter === "all") return users;
-        if (filter === "active") return users.filter((u) => u.status === "active" || !u.status);
-        if (filter === "blocked") return users.filter((u) => u.status === "blocked");
-        return users;
-    }, [users, filter]);
+        let filtered = users;
+
+        // Filter by status
+        if (filter === "active") {
+            filtered = filtered.filter((u) => u.status === "active" || !u.status);
+        } else if (filter === "blocked") {
+            filtered = filtered.filter((u) => u.status === "blocked");
+        }
+
+        // Filter by search term (id or name)
+        if (searchTerm.trim()) {
+            const term = searchTerm.toLowerCase().trim();
+            filtered = filtered.filter((u) => {
+                const id = (u.id || "").toString().toLowerCase();
+                const name = (u.name || u.full_name || "").toLowerCase();
+                const email = (u.email || "").toLowerCase();
+                return id.includes(term) || name.includes(term) || email.includes(term);
+            });
+        }
+
+        return filtered;
+    }, [users, filter, searchTerm]);
 
     // Get count of users by filter
     const getFilteredCount = useCallback((filterType) => {
@@ -112,6 +130,8 @@ export const useUserManagement = () => {
         error,
         filter,
         setFilter,
+        searchTerm,
+        setSearchTerm,
         fetchUsers,
         handleStatusToggle,
         handleDelete,

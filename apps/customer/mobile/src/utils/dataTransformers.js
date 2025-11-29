@@ -9,7 +9,6 @@ export const transformRestaurant = (restaurant) => {
         name: restaurant.name || 'Unknown',
         image: restaurant.image || '/images/restaurants/default.png',
         banner_image: restaurant.banner_image || restaurant.image || '/images/restaurants/default.png',
-        primary_category: restaurant.primary_category || 'Other',
         rating: restaurant.rating || 0,
         total_reviews: restaurant.total_reviews || 0,
         delivery_time_minutes: restaurant.delivery_time_minutes || 30,

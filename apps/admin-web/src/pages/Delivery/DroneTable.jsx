@@ -121,6 +121,7 @@ const DroneTable = ({
                       style={{
                         opacity: !canToggle(drone) ? 0.5 : 1,
                         cursor: !canToggle(drone) ? "not-allowed" : "pointer",
+                         width: "80px", textAlign: "center",
                       }}
                     >
                       {drone.status === "locked" ? "Mở khóa" : "Khóa"}

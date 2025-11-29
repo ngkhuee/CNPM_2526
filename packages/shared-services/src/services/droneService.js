@@ -8,21 +8,23 @@ import { ENDPOINTS } from "../config/endpoints";
 export const getAllDrones = async () => {
   try {
     const response = await apiClient.get(ENDPOINTS.DRONES.BASE);
-    // Map db.json fields to camelCase
-    return (response || []).map((drone) => ({
-      id: drone.id,
-      identifier: drone.identifier,
-      status: drone.status,
-      battery_level: drone.battery_level,
-      latitude: drone.latitude,
-      longitude: drone.longitude,
-      current_location: drone.current_location,
-      max_weight_kg: drone.max_weight_kg,
-      assigned_order_id: drone.assigned_order_id,
-      last_maintenance: drone.last_maintenance,
-      created_at: drone.created_at,
-      updated_at: drone.updated_at,
-    }));
+    // Filter out deleted drones and map db.json fields to camelCase
+    return (response || [])
+      .filter((drone) => drone.status !== 'deleted')
+      .map((drone) => ({
+        id: drone.id,
+        identifier: drone.identifier,
+        status: drone.status,
+        battery_level: drone.battery_level,
+        latitude: drone.latitude,
+        longitude: drone.longitude,
+        current_location: drone.current_location,
+        max_weight_kg: drone.max_weight_kg,
+        assigned_order_id: drone.assigned_order_id,
+        last_maintenance: drone.last_maintenance,
+        created_at: drone.created_at,
+        updated_at: drone.updated_at,
+      }));
   } catch (error) {
     console.error("Error fetching drones:", error);
     throw error;

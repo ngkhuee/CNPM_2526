@@ -11,8 +11,9 @@ export const restaurantService = {
         params, // Support lat, lng, radius, time parameters
       });
       // Filter only ACTIVE restaurants unless includeAll is true (for admin)
+      // Always exclude DELETED restaurants from all views
       const filteredRestaurants = includeAll
-        ? response
+        ? response.filter((r) => r.status !== 'deleted')
         : response.filter((r) => r.status === 'active');
       // Map backend to frontend
       return filteredRestaurants.map((restaurant) => ({
@@ -27,7 +28,6 @@ export const restaurantService = {
           lng: restaurant.longitude,
           address: restaurant.address,
         },
-        category: restaurant.primary_category,
         rating: restaurant.rating || 0,
         isOpen: isRestaurantOpen(restaurant.opening_hours),
         images: [restaurant.image, restaurant.banner_image].filter(Boolean),
@@ -80,7 +80,6 @@ export const restaurantService = {
           lng: response.longitude,
           address: response.address,
         },
-        category: response.primary_category,
         rating: response.rating || 0,
         isOpen: isRestaurantOpen(response.opening_hours),
         images: [response.image, response.banner_image].filter(Boolean),
@@ -173,7 +172,6 @@ export const restaurantService = {
         longitude: restaurantData.location?.lng || restaurantData.longitude,
         phone: restaurantData.ownerPhone || restaurantData.phone,
         email: restaurantData.ownerEmail || restaurantData.email,
-        primary_category: restaurantData.category,
         image: restaurantData.image,
         banner_image: restaurantData.banner || restaurantData.banner_image,
         opening_hours: restaurantData.opening_hours,

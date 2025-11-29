@@ -11,6 +11,8 @@ const Users = () => {
     loading,
     filter,
     setFilter,
+    searchTerm,
+    setSearchTerm,
     getFilteredUsers,
     getFilteredCount,
     handleStatusToggle,
@@ -43,10 +45,10 @@ const Users = () => {
     }
   };
 
-  // Reset page when filter changes
+  // Reset page when filter or search changes
   useEffect(() => {
     setCurrentPage(1);
-  }, [filter]);
+  }, [filter, searchTerm]);
 
   if (loading) {
     return <div className="users-page">Đang tải...</div>;
@@ -64,6 +66,24 @@ const Users = () => {
     <div className="users-page">
       <div className="users-header">
         <h2>Quản lý Khách hàng</h2>
+        <div className="search-bar">
+          <input
+            type="text"
+            placeholder="Tìm kiếm theo ID, tên hoặc email..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="search-input"
+          />
+          {searchTerm && (
+            <button
+              onClick={() => setSearchTerm("")}
+              className="clear-search"
+              title="Xóa tìm kiếm"
+            >
+              ✕
+            </button>
+          )}
+        </div>
         <UserFilter
           filter={filter}
           onFilterChange={setFilter}
