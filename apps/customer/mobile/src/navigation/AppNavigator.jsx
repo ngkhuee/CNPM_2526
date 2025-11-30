@@ -1,11 +1,12 @@
 import React, { useState, useContext, useEffect } from 'react';
-import { View } from 'react-native';
+import { View, BackHandler } from 'react-native';
 import { AuthContext } from '../contexts/AuthContext';
 import { NavigationContext } from '../contexts/NavigationContext';
 import SplashScreen from '../screens/auth/SplashScreen';
 import LoginAuthScreen from '../screens/auth/LoginAuthScreen';
 import RegisterRestaurantScreen from '../screens/auth/RegisterRestaurantScreen';
 import HomeScreen from '../screens/home/HomeScreen';
+import ExploreScreen from '../screens/explore/ExploreScreen';
 import OrdersScreen from '../screens/orders/OrdersScreen';
 import ProfileScreen from '../screens/profile/ProfileScreen';
 import RestaurantDetail from '../screens/restaurant/RestaurantDetail';
@@ -61,7 +62,62 @@ export default function AppNavigator() {
 function AppStack({ activeScreen, selectedFood, setSelectedFood }) {
     const { navigate, orderId } = useContext(NavigationContext);
 
-    const renderScreen = () => {
+    // Define navigation history stack
+    const [navigationHistory, setNavigationHistory] = useState(['home']);
+    const [isBackAction, setIsBackAction] = useState(false);
+
+    // Update history when screen changes
+    useEffect(() => {
+        setNavigationHistory((prev) => {
+            // If this is a back action, don't modify history
+            if (isBackAction) {
+                setIsBackAction(false);
+                return prev;
+            }
+
+            // Don't add if it's the same as current screen
+            if (prev[prev.length - 1] === activeScreen) {
+                return prev;
+            }
+
+            // Add new screen to history
+            return [...prev, activeScreen];
+        });
+    }, [activeScreen, isBackAction]);
+
+    // Handle Android back button
+    useEffect(() => {
+        const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+            console.log('[AppNavigator] Back button pressed. Current:', activeScreen, 'History:', navigationHistory);
+
+            // If we're at home screen, allow default behavior (exit app)
+            if (activeScreen === 'home') {
+                return false;
+            }
+
+            // If we have history, go back to previous screen
+            if (navigationHistory.length > 1) {
+                const newHistory = [...navigationHistory];
+                newHistory.pop(); // Remove current screen
+                const previousScreen = newHistory[newHistory.length - 1];
+
+                console.log('[AppNavigator] Going back to:', previousScreen);
+                setNavigationHistory(newHistory);
+                setIsBackAction(true);
+                navigate(previousScreen);
+
+                return true; // Prevent default behavior (exit app)
+            }
+
+            // Otherwise go to home
+            console.log('[AppNavigator] No history, going to home');
+            setIsBackAction(true);
+            navigate('home');
+            return true;
+        });
+
+        return () => backHandler.remove();
+    }, [activeScreen, navigationHistory, navigate]); const renderScreen = () => {
         switch (activeScreen) {
             case 'login':
                 return <LoginAuthScreen onBackPress={() => navigate('home')} />;
@@ -69,6 +125,8 @@ function AppStack({ activeScreen, selectedFood, setSelectedFood }) {
                 return <RegisterRestaurantScreen onNavigate={navigate} />;
             case 'home':
                 return <HomeScreen onNavigate={navigate} />;
+            case 'explore':
+                return <ExploreScreen onNavigate={navigate} />;
             case 'restaurant':
                 return <RestaurantDetail onNavigate={navigate} onSelectFood={setSelectedFood} />;
             case 'food-detail':

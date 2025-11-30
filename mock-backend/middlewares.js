@@ -32,6 +32,7 @@ const validateToken = (req, res, next) => {
     "/payments",
     "/notifications",
     "/reviews", // GET reviews is public
+    "/users", // GET user info is public (needed for displaying review authors)
     "/withdrawals", // GET withdrawals is public (for admin dashboard)
     "/restaurant_balances", // GET balances is public (for admin dashboard)
   ];

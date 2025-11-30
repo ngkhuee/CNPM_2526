@@ -1,5 +1,5 @@
 // screens/search/SearchResultsScreen.jsx
-import React, { useEffect, useState } from 'react';
+import React, { useContext } from 'react';
 import {
     View,
     StyleSheet,
@@ -9,83 +9,39 @@ import {
     TouchableOpacity,
     FlatList,
     ActivityIndicator,
+    Image,
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-import axios from 'axios';
-import FoodCard from '../home/components/FoodCard';
-import { transformFoods } from '../../utils/dataTransformers';
+import { NavigationContext } from '../../contexts/NavigationContext';
+import { getImageUrl } from '../../shared/imageHelper';
+import { useFoodsAndRestaurants } from '../../hooks/useFoodsAndRestaurants';
+import { useRestaurantFiltering } from '../../hooks/useRestaurantFiltering';
 import { useNavigateToRestaurant } from '../../hooks/useNavigateToRestaurant';
-import apiConfig from '../../config/api.config';
-
-const API_BASE = apiConfig.api.baseURL;
+import { useNavigateToRestaurantOnly } from '../../hooks/useNavigateToRestaurantOnly';
 
 export default function SearchResultsScreen({ searchQuery, onBack, onNavigate }) {
-    const [foodList, setFoodList] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+    const { navigate } = useContext(NavigationContext);
 
-    // Hook để navigate tới restaurant detail
+    // Use shared data fetching hook
+    const { foodList, restaurantList, loading, error } = useFoodsAndRestaurants();
+
+    // Use shared filtering hook with search query
+    const { restaurantsWithFoods, totalResults } = useRestaurantFiltering(
+        restaurantList,
+        foodList,
+        searchQuery
+    );
+
+    // Use navigation hooks for proper restaurant navigation
     const navigateToRestaurant = useNavigateToRestaurant(onNavigate);
+    const navigateToRestaurantOnly = useNavigateToRestaurantOnly(onNavigate);
 
-    useEffect(() => {
-        fetchSearchResults();
-    }, [searchQuery]);
-
-    const fetchSearchResults = async () => {
-        try {
-            setLoading(true);
-            setError(null);
-
-            if (!searchQuery || searchQuery.trim() === '') {
-                setFoodList([]);
-                setLoading(false);
-                return;
-            }
-
-            // Fetch all foods from API
-            const response = await axios.get(`${API_BASE}/menus`);
-            const allFoods = transformFoods(response.data || []);
-
-            // Filter by search query (name or description)
-            const results = allFoods.filter(food =>
-                food.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                (food.description && food.description.toLowerCase().includes(searchQuery.toLowerCase()))
-            );
-
-            setFoodList(results);
-        } catch (err) {
-            console.error('Search error:', err);
-            setError(err.message);
-        } finally {
-            setLoading(false);
-        }
+    const handleViewRestaurant = (restaurantId) => {
+        navigateToRestaurantOnly(restaurantId);
     };
 
-    const renderGrid = () => {
-        const numColumns = 2;
-        const rows = [];
-
-        for (let i = 0; i < foodList.length; i += numColumns) {
-            rows.push(foodList.slice(i, i + numColumns));
-        }
-
-        return (
-            <View style={styles.gridWrapper}>
-                {rows.map((row, rowIndex) => (
-                    <View key={rowIndex} style={styles.gridRow}>
-                        {row.map(food => (
-                            <View key={food.id} style={styles.gridItem}>
-                                <FoodCard item={food} onPress={navigateToRestaurant} />
-                            </View>
-                        ))}
-                        {row.length < numColumns &&
-                            [...Array(numColumns - row.length)].map((_, idx) => (
-                                <View key={`empty-${idx}`} style={styles.gridItem} />
-                            ))}
-                    </View>
-                ))}
-            </View>
-        );
+    const handleFoodPress = (food, restaurantId) => {
+        navigateToRestaurant({ ...food, restaurantId });
     };
 
     return (
@@ -107,7 +63,7 @@ export default function SearchResultsScreen({ searchQuery, onBack, onNavigate })
             {!loading && (
                 <View style={styles.resultsInfo}>
                     <Text style={styles.resultsCount}>
-                        Tìm thấy {foodList.length} kết quả
+                        Tìm thấy {totalResults} món ăn từ {restaurantsWithFoods.length} nhà hàng
                     </Text>
                 </View>
             )}
@@ -116,7 +72,6 @@ export default function SearchResultsScreen({ searchQuery, onBack, onNavigate })
             <ScrollView
                 style={styles.content}
                 showsVerticalScrollIndicator={false}
-                contentContainerStyle={styles.contentPadding}
             >
                 {loading ? (
                     <View style={styles.centerContainer}>
@@ -128,7 +83,7 @@ export default function SearchResultsScreen({ searchQuery, onBack, onNavigate })
                         <MaterialIcons name="error-outline" size={48} color="#f44336" />
                         <Text style={styles.errorText}>{error}</Text>
                     </View>
-                ) : foodList.length === 0 ? (
+                ) : restaurantsWithFoods.length === 0 ? (
                     <View style={styles.emptyContainer}>
                         <MaterialIcons name="search-off" size={48} color="#ddd" />
                         <Text style={styles.emptyTitle}>Không tìm thấy kết quả</Text>
@@ -137,7 +92,14 @@ export default function SearchResultsScreen({ searchQuery, onBack, onNavigate })
                         </Text>
                     </View>
                 ) : (
-                    renderGrid()
+                    restaurantsWithFoods.map((restaurant) => (
+                        <RestaurantSection
+                            key={restaurant.id}
+                            restaurant={restaurant}
+                            onViewRestaurant={handleViewRestaurant}
+                            onFoodPress={handleFoodPress}
+                        />
+                    ))
                 )}
 
                 <View style={{ height: 20 }} />
@@ -146,11 +108,95 @@ export default function SearchResultsScreen({ searchQuery, onBack, onNavigate })
     );
 }
 
+// Restaurant Section Component (same as ExploreScreen)
+const RestaurantSection = ({ restaurant, onViewRestaurant, onFoodPress }) => {
+    return (
+        <View style={styles.restaurantSection}>
+            {/* Restaurant Header */}
+            <View style={styles.restaurantHeader}>
+                <View style={styles.restaurantInfo}>
+                    <Image
+                        source={{ uri: getImageUrl(restaurant.image) }}
+                        style={styles.restaurantAvatar}
+                    />
+                    <View style={styles.restaurantDetails}>
+                        <Text style={styles.restaurantName}>{restaurant.name}</Text>
+                        <View style={styles.restaurantMeta}>
+                            <View style={styles.ratingBadge}>
+                                <MaterialIcons name="star" size={14} color="#ffc107" />
+                                <Text style={styles.ratingText}>
+                                    {(restaurant.rating || 0).toFixed(1)}
+                                </Text>
+                            </View>
+                            <Text style={styles.foodCount}>{restaurant.foods.length} món</Text>
+                        </View>
+                    </View>
+                </View>
+                <TouchableOpacity
+                    style={styles.viewRestaurantBtn}
+                    onPress={() => onViewRestaurant(restaurant.id)}
+                >
+                    <Text style={styles.viewRestaurantText}>Xem chi tiết</Text>
+                    <MaterialIcons name="chevron-right" size={20} color="#ff6b35" />
+                </TouchableOpacity>
+            </View>
+
+            {/* Food Items Horizontal Scroll */}
+            <FlatList
+                horizontal
+                data={restaurant.foods}
+                keyExtractor={(item) => item.id.toString()}
+                renderItem={({ item }) => (
+                    <FoodCard
+                        food={item}
+                        onPress={() => onFoodPress(item, restaurant.id)}
+                    />
+                )}
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.foodList}
+            />
+        </View>
+    );
+};
+
+// Food Card Component (same as ExploreScreen)
+const FoodCard = ({ food, onPress }) => {
+    return (
+        <TouchableOpacity style={styles.foodCard} onPress={onPress}>
+            <Image
+                source={{ uri: getImageUrl(food.image) }}
+                style={styles.foodImage}
+            />
+            <View style={styles.foodContent}>
+                <Text style={styles.foodName} numberOfLines={2}>
+                    {food.name}
+                </Text>
+                {food.description && (
+                    <Text style={styles.foodDescription} numberOfLines={2}>
+                        {food.description}
+                    </Text>
+                )}
+                <View style={styles.foodFooter}>
+                    <Text style={styles.foodPrice}>
+                        {food.price?.toLocaleString('vi-VN')}₫
+                    </Text>
+                    {food.rating > 0 && (
+                        <View style={styles.foodRating}>
+                            <MaterialIcons name="star" size={12} color="#ffc107" />
+                            <Text style={styles.foodRatingText}>{food.rating.toFixed(1)}</Text>
+                        </View>
+                    )}
+                </View>
+            </View>
+        </TouchableOpacity>
+    );
+};
+
 const styles = StyleSheet.create({
     container: {
         flex: 1,
         paddingTop: 40,
-        backgroundColor: '#f8f8f8',
+        backgroundColor: '#f8f9fa',
     },
     header: {
         flexDirection: 'row',
@@ -197,10 +243,6 @@ const styles = StyleSheet.create({
     content: {
         flex: 1,
     },
-    contentPadding: {
-        paddingHorizontal: 12,
-        paddingTop: 12,
-    },
     centerContainer: {
         flex: 1,
         justifyContent: 'center',
@@ -234,15 +276,116 @@ const styles = StyleSheet.create({
         marginTop: 8,
         textAlign: 'center',
     },
-    gridWrapper: {
-        marginBottom: 12,
+    restaurantSection: {
+        marginBottom: 24,
+        backgroundColor: '#fff',
+        paddingVertical: 16,
     },
-    gridRow: {
+    restaurantHeader: {
         flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingHorizontal: 16,
         marginBottom: 12,
     },
-    gridItem: {
+    restaurantInfo: {
+        flexDirection: 'row',
+        alignItems: 'center',
         flex: 1,
-        marginHorizontal: 6,
+    },
+    restaurantAvatar: {
+        width: 48,
+        height: 48,
+        borderRadius: 8,
+        marginRight: 12,
+    },
+    restaurantDetails: {
+        flex: 1,
+    },
+    restaurantName: {
+        fontSize: 16,
+        fontWeight: '700',
+        color: '#333',
+        marginBottom: 4,
+    },
+    restaurantMeta: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 12,
+    },
+    ratingBadge: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 4,
+    },
+    ratingText: {
+        fontSize: 13,
+        fontWeight: '600',
+        color: '#333',
+    },
+    foodCount: {
+        fontSize: 13,
+        color: '#999',
+    },
+    viewRestaurantBtn: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingLeft: 8,
+    },
+    viewRestaurantText: {
+        fontSize: 13,
+        color: '#ff6b35',
+        fontWeight: '600',
+    },
+    foodList: {
+        paddingHorizontal: 12,
+    },
+    foodCard: {
+        width: 160,
+        marginHorizontal: 4,
+        backgroundColor: '#fff',
+        borderRadius: 8,
+        overflow: 'hidden',
+        borderWidth: 1,
+        borderColor: '#e0e0e0',
+    },
+    foodImage: {
+        width: '100%',
+        height: 120,
+        backgroundColor: '#f0f0f0',
+    },
+    foodContent: {
+        padding: 10,
+    },
+    foodName: {
+        fontSize: 14,
+        fontWeight: '600',
+        color: '#333',
+        marginBottom: 4,
+    },
+    foodDescription: {
+        fontSize: 12,
+        color: '#999',
+        marginBottom: 8,
+    },
+    foodFooter: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
+    foodPrice: {
+        fontSize: 14,
+        fontWeight: '700',
+        color: '#ff6b35',
+    },
+    foodRating: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 2,
+    },
+    foodRatingText: {
+        fontSize: 12,
+        color: '#333',
+        fontWeight: '600',
     },
 });

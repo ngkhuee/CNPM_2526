@@ -18,6 +18,7 @@ import ProfileTabs from '../../components/profile/ProfileTabs';
 import AccountInfo from '../../components/profile/AccountInfo';
 import AddressList from '../../components/profile/AddressList';
 import AddressForm from '../../components/profile/AddressForm';
+import AvatarPickerModal from '../../components/profile/AvatarPickerModal';
 import { useProfile } from '../../hooks/useProfile';
 import { useAddress } from '../../hooks/useAddress';
 
@@ -25,6 +26,7 @@ export default function ProfileScreen({ onNavigate }) {
     const { activeRoute, navigate } = useContext(NavigationContext);
     const { isAuthenticated } = useContext(AuthContext);
     const [activeTab, setActiveTab] = useState('account');
+    const [showAvatarPicker, setShowAvatarPicker] = useState(false);
 
     // Profile hook
     const {
@@ -37,6 +39,7 @@ export default function ProfileScreen({ onNavigate }) {
         handleInputChange,
         handleSaveProfile,
         handleLogout,
+        handleAvatarChange,
     } = useProfile();
 
     // Address hook
@@ -124,10 +127,20 @@ export default function ProfileScreen({ onNavigate }) {
                         name={formData.name}
                         email={formData.email}
                         avatar={formData.avatar}
+                        onAvatarPress={() => setShowAvatarPicker(true)}
                     />
 
                     {/* Tabs */}
                     <ProfileTabs activeTab={activeTab} onTabChange={setActiveTab} />
+
+                    {/* Avatar Picker Modal */}
+                    <AvatarPickerModal
+                        visible={showAvatarPicker}
+                        onClose={() => setShowAvatarPicker(false)}
+                        onSelectAvatar={handleAvatarChange}
+                        currentAvatar={formData.avatar}
+                        userName={formData.name}
+                    />
 
                     {/* Account Tab Content */}
                     {activeTab === 'account' && (

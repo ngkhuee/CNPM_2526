@@ -11,7 +11,6 @@ import {
   Alert,
 } from 'react-native';
 import { useContext } from 'react';
-import axios from 'axios';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { NavigationContext } from '../../contexts/NavigationContext';
 import Header from '../../components/Header';
@@ -26,58 +25,44 @@ import SectionTitleWithIcon from './components/SectionTitleWithIcon';
 import CategoryTabs from '../../components/CategoryTabs';
 import BottomNavigation from '../../components/BottomNavigation';
 import SearchResultsScreen from '../search/SearchResultsScreen';
-import { transformFoods, transformRestaurants } from '../../utils/dataTransformers';
 import { getNearbyRestaurants } from '../../utils/locationUtils';
 import ErrorBoundary from '../../utils/ErrorBoundary';
 import { useNavigateToRestaurant } from '../../hooks/useNavigateToRestaurant';
 import { useNavigateToRestaurantOnly } from '../../hooks/useNavigateToRestaurantOnly';
-import { useGeolocation } from '../../hooks/useGeolocation';
-import apiConfig from '../../config/api.config';
-
-const API_BASE = apiConfig.api.baseURL;
+import { useHeaderLogic } from '../../hooks/useHeaderLogic';
+import { useFoodsAndRestaurants } from '../../hooks/useFoodsAndRestaurants';
 
 export default function HomeScreen({ onNavigate }) {
   const { activeRoute, navigate } = useContext(NavigationContext);
-  const [foodList, setFoodList] = useState([]);
-  const [restaurantList, setRestaurantList] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+
+  // HomeScreen unique states (not in shared hooks)
   const [selectedCategory, setSelectedCategory] = useState('');
   const [nearbyRestaurants, setNearbyRestaurants] = useState([]);
-  const [address, setAddress] = useState('Chọn vị trí');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [showSearchOverlay, setShowSearchOverlay] = useState(false);
-  const [showSearchResults, setShowSearchResults] = useState(false);
   const [searchSuggestions, setSearchSuggestions] = useState([]);
-  const [drawerVisible, setDrawerVisible] = useState(false);
-  const [gpsLoading, setGpsLoading] = useState(true);
+  const [showSearchOverlay, setShowSearchOverlay] = useState(false);
 
-  // GPS Geolocation hook
-  const { location, address: gpsAddress, loading: gpsLoading2, requestLocation } = useGeolocation();
+  // Use shared header logic
+  const {
+    address,
+    searchQuery,
+    showSearchResults,
+    drawerVisible,
+    location,
+    handleLocationPress,
+    handleMenuPress,
+    handleCloseDrawer,
+    handleSearchPress: setSearchQuery,
+    handleSearchSubmit,
+    handleNavigateBack,
+    handleAvatarPress,
+  } = useHeaderLogic();
+
+  // Use shared data fetching hook
+  const { foodList, restaurantList, loading, error } = useFoodsAndRestaurants();
 
   // Hook để navigate tới restaurant detail
   const navigateToRestaurant = useNavigateToRestaurant(onNavigate);
   const navigateToRestaurantOnly = useNavigateToRestaurantOnly(onNavigate);
-
-  // Request GPS on mount
-  useEffect(() => {
-    const initLocation = async () => {
-      setGpsLoading(true);
-      console.log('[HomeScreen] Requesting GPS location on mount...');
-      await requestLocation();
-      setGpsLoading(false);
-    };
-
-    initLocation();
-  }, []);
-
-  // Update address when GPS location changes
-  useEffect(() => {
-    if (gpsAddress) {
-      console.log('[HomeScreen] GPS location obtained:', gpsAddress);
-      setAddress(gpsAddress);
-    }
-  }, [gpsAddress]);
 
   // Calculate nearby restaurants whenever location OR restaurantList changes
   useEffect(() => {
@@ -94,29 +79,6 @@ export default function HomeScreen({ onNavigate }) {
       setNearbyRestaurants([]);
     }
   }, [location, restaurantList]);
-
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  const fetchData = async () => {
-    try {
-      setLoading(true);
-      const [foodRes, restaurantRes] = await Promise.all([
-        axios.get(`${API_BASE}/menus`),
-        axios.get(`${API_BASE}/restaurants`),
-      ]);
-
-      setFoodList(transformFoods(foodRes.data || []));
-      setRestaurantList(transformRestaurants(restaurantRes.data || []));
-      setError(null);
-    } catch (err) {
-      console.error('Fetch error:', err);
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   // Filter foods by category AND search query
   const filteredFoods = foodList.filter(f => {
@@ -140,21 +102,30 @@ export default function HomeScreen({ onNavigate }) {
     .sort((a, b) => (b.sold || 0) - (a.sold || 0))
     .slice(0, 8);
 
-  const topRestaurants = restaurantList.slice(0, 6);
-
-  // Handle location button press - request GPS
-  const handleLocationPress = async () => {
-    console.log('[HomeScreen] Location button pressed - requesting GPS...');
-    setGpsLoading(true);
-    try {
-      await requestLocation();
-    } catch (err) {
-      console.error('[HomeScreen] Error requesting location:', err);
-      Alert.alert('Lỗi', 'Không thể lấy vị trí. Vui lòng kiểm tra cài đặt GPS.');
-    } finally {
-      setGpsLoading(false);
-    }
-  };
+  // Top restaurants sorted by rating (highest first)
+  const topRestaurants = [...restaurantList]
+    .sort((a, b) => (b.rating || 0) - (a.rating || 0))
+    .slice(0, 6)
+    .map((restaurant) => {
+      // Calculate distance if location is available
+      if (location && restaurant.latitude && restaurant.longitude) {
+        const userLat = location.lat || location.latitude;
+        const userLon = location.lng || location.longitude;
+        const R = 6371; // Earth's radius in km
+        const dLat = (restaurant.latitude - userLat) * (Math.PI / 180);
+        const dLon = (restaurant.longitude - userLon) * (Math.PI / 180);
+        const a =
+          Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+          Math.cos(userLat * (Math.PI / 180)) *
+          Math.cos(restaurant.latitude * (Math.PI / 180)) *
+          Math.sin(dLon / 2) *
+          Math.sin(dLon / 2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        const distance = R * c;
+        return { ...restaurant, distance };
+      }
+      return { ...restaurant, distance: 0 };
+    });
 
   const handleSearchPress = (query) => {
     setSearchQuery(query);
@@ -174,37 +145,22 @@ export default function HomeScreen({ onNavigate }) {
   };
 
   const handleSearchFocus = () => {
-    setShowSearchOverlay(false);
+    setShowSearchOverlay(true);
   };
 
   const handleSearchBlur = () => {
-    setShowSearchOverlay(false);
-  };
-
-  const handleSearchSubmit = () => {
-    if (searchQuery.trim() !== '') {
-      setShowSearchOverlay(false);
-      setShowSearchResults(true);
-    }
+    setTimeout(() => setShowSearchOverlay(false), 200);
   };
 
   const handleSelectSuggestion = (item) => {
     console.log('[HomeScreen] Suggestion selected:', item);
-    // Set the search query to the selected item's name
     setSearchQuery(item.name);
-    // Close overlay immediately
     setShowSearchOverlay(false);
-    // Show search results
-    setShowSearchResults(true);
+    handleSearchSubmit(item.name);
   };
 
   const handleCloseSearchOverlay = () => {
     setShowSearchOverlay(false);
-  };
-
-  const handleNavigateBack = () => {
-    setShowSearchResults(false);
-    setSearchQuery('');
   };
 
   const handleNavigate = (route) => {
@@ -221,16 +177,8 @@ export default function HomeScreen({ onNavigate }) {
     navigate(route);
   };
 
-  const handleMenuPress = () => {
-    setDrawerVisible(true);
-  };
-
-  const handleCloseDrawer = () => {
-    setDrawerVisible(false);
-  };
-
   const handleDrawerNavigate = (screen) => {
-    setDrawerVisible(false);
+    handleCloseDrawer();
 
     if (screen === 'register-restaurant') {
       navigate('register-restaurant');
@@ -261,6 +209,7 @@ export default function HomeScreen({ onNavigate }) {
           onSearchBlur={handleSearchBlur}
           onSearchSubmit={handleSearchSubmit}
           onMenuPress={handleMenuPress}
+          onAvatarPress={() => handleAvatarPress(onNavigate)}
         />
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color="#ff6b35" />
@@ -281,6 +230,7 @@ export default function HomeScreen({ onNavigate }) {
           onSearchBlur={handleSearchBlur}
           onSearchSubmit={handleSearchSubmit}
           onMenuPress={handleMenuPress}
+          onAvatarPress={() => handleAvatarPress(onNavigate)}
         />
         <View style={styles.errorContainer}>
           <Text style={styles.errorText}>Error: {error}</Text>
@@ -302,6 +252,7 @@ export default function HomeScreen({ onNavigate }) {
         onSearchBlur={handleSearchBlur}
         onSearchSubmit={handleSearchSubmit}
         onMenuPress={handleMenuPress}
+        onAvatarPress={() => handleAvatarPress(onNavigate)}
       />
       <SearchOverlay
         visible={showSearchOverlay}
@@ -350,20 +301,24 @@ export default function HomeScreen({ onNavigate }) {
               icon="star"
               iconColor="#FFB800"
             />
-            <View style={styles.gridContainer}>
-              <View style={styles.gridWrapper}>
-                {topRatedFoods.map((item) => (
-                  <View key={item.id?.toString()} style={styles.gridItem}>
-                    <ErrorBoundary>
-                      <FoodCard
-                        item={item}
-                        onPress={navigateToRestaurant}
-                      />
-                    </ErrorBoundary>
-                  </View>
-                ))}
-              </View>
-            </View>
+            <FlatList
+              horizontal
+              scrollEnabled
+              showsHorizontalScrollIndicator={false}
+              data={topRatedFoods}
+              keyExtractor={(item) => item.id?.toString()}
+              renderItem={({ item }) => (
+                <View style={styles.horizontalFoodItem}>
+                  <ErrorBoundary>
+                    <FoodCard
+                      item={item}
+                      onPress={navigateToRestaurant}
+                    />
+                  </ErrorBoundary>
+                </View>
+              )}
+              contentContainerStyle={styles.horizontalListContent}
+            />
           </View>
         )}
 
@@ -375,36 +330,14 @@ export default function HomeScreen({ onNavigate }) {
               icon="local-fire-department"
               iconColor="#FF6B35"
             />
-            <View style={styles.gridContainer}>
-              <View style={styles.gridWrapper}>
-                {bestSellerFoods.map((item) => (
-                  <View key={item.id?.toString()} style={styles.gridItem}>
-                    <ErrorBoundary>
-                      <FoodCard
-                        item={item}
-                        onPress={navigateToRestaurant}
-                      />
-                    </ErrorBoundary>
-                  </View>
-                ))}
-              </View>
-            </View>
-          </View>
-        )}
-
-        {/* Category Tabs */}
-        <CategoryTabs
-          selectedCategory={selectedCategory}
-          onCategoryChange={setSelectedCategory}
-        />
-
-        {/* Foods Grid */}
-        <View style={styles.section}>
-          <SectionTitle title="Món phổ biến" />
-          <View style={styles.gridContainer}>
-            <View style={styles.gridWrapper}>
-              {filteredFoods.map((item) => (
-                <View key={item.id?.toString()} style={styles.gridItem}>
+            <FlatList
+              horizontal
+              scrollEnabled
+              showsHorizontalScrollIndicator={false}
+              data={bestSellerFoods}
+              keyExtractor={(item) => item.id?.toString()}
+              renderItem={({ item }) => (
+                <View style={styles.horizontalFoodItem}>
                   <ErrorBoundary>
                     <FoodCard
                       item={item}
@@ -412,10 +345,11 @@ export default function HomeScreen({ onNavigate }) {
                     />
                   </ErrorBoundary>
                 </View>
-              ))}
-            </View>
+              )}
+              contentContainerStyle={styles.horizontalListContent}
+            />
           </View>
-        </View>
+        )}
 
         {/* Top Rated Restaurants */}
         <View style={styles.section}>
@@ -461,6 +395,10 @@ const styles = StyleSheet.create({
   },
   gridItem: {
     width: '50%',
+  },
+  horizontalFoodItem: {
+    width: 160,
+    marginRight: 12,
   },
   horizontalListContent: {
     paddingRight: 16,

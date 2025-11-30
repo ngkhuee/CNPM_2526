@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { formatRating } from '../../../shared/formatters';
 import { getRestaurantImageUrl } from '../../../shared/imageHelper';
+import { DroneIcon } from '../../../components/tracking/DroneIcon';
 
 export default function RestaurantCard({ item, onPress }) {
     if (!item) {
@@ -14,8 +15,12 @@ export default function RestaurantCard({ item, onPress }) {
     const ratingValue = parseFloat(item.rating) || 0;
     const ratingText = formatRating(ratingValue);
 
-    const deliveryTime = String(item.delivery_time_minutes || 30);
     const distance = item.distance || 0;
+
+    // Calculate delivery time based on distance (drone speed ~50 km/h)
+    // Base time: 10 minutes (preparation) + travel time
+    const travelTimeMinutes = distance > 0 ? Math.ceil((distance / 50) * 60) : 0;
+    const deliveryTime = String(10 + travelTimeMinutes);
 
     return (
         <TouchableOpacity
@@ -44,7 +49,7 @@ export default function RestaurantCard({ item, onPress }) {
 
                     {/* Delivery Time */}
                     <View style={styles.infoItem}>
-                        <MaterialIcons name="two-wheeler" size={15} color="#ff6b35" />
+                        <DroneIcon size={15} color="#ff6b35" />
                         <Text style={styles.infoText}>{deliveryTime} phút</Text>
                     </View>
                 </View>

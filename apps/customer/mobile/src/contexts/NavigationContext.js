@@ -71,9 +71,19 @@ export const NavigationProvider = ({ children }) => {
         setActiveRouteInternal(route);
     }, []);
 
+    /**
+     * Go back to previous screen (will be used by AppNavigator's back handler)
+     */
+    const goBack = useCallback(() => {
+        console.log('[NavigationContext] Going back from:', activeRoute);
+        // This will be handled by AppNavigator's back handler
+        // Just log here for debugging
+    }, [activeRoute]);
+
     const value = {
         activeRoute,
         navigate,
+        goBack,
         ...navigationState,
         setNavigationState,
         resetNavigationState,

@@ -12,11 +12,14 @@ export const transformRestaurant = (restaurant) => {
         rating: restaurant.rating || 0,
         total_reviews: restaurant.total_reviews || 0,
         delivery_time_minutes: restaurant.delivery_time_minutes || 30,
+        deliveryTimeMinutes: restaurant.delivery_time_minutes || 30,
         description: restaurant.description || '',
         address: restaurant.address || '',
         phone: restaurant.phone || '',
         email: restaurant.email || '',
         is_open: restaurant.is_open !== undefined ? restaurant.is_open : true,
+        latitude: restaurant.latitude || null,
+        longitude: restaurant.longitude || null,
         ...restaurant
     };
 };

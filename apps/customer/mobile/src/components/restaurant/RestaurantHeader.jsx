@@ -5,6 +5,7 @@ import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { formatRating } from '../../shared/formatters';
 import { isRestaurantOpen, getTodayHours } from '../../utils/hoursHelper';
 import { getRestaurantImageUrl, getRestaurantBannerUrl } from '../../shared/imageHelper';
+import { DroneIcon } from '../tracking/DroneIcon';
 
 export const RestaurantHeader = ({ restaurant }) => {
     const imageUrl = getRestaurantImageUrl(restaurant);
@@ -12,6 +13,13 @@ export const RestaurantHeader = ({ restaurant }) => {
     const rating = formatRating(restaurant.rating);
     const isOpen = isRestaurantOpen(restaurant.openingHours);
     const todayHours = getTodayHours(restaurant.openingHours);
+
+    const distance = restaurant.distance || 0;
+
+    // Calculate delivery time based on distance (drone speed ~50 km/h)
+    // Base time: 10 minutes (preparation) + travel time
+    const travelTimeMinutes = distance > 0 ? Math.ceil((distance / 50) * 60) : 0;
+    const deliveryTime = String(10 + travelTimeMinutes);
 
     return (
         <>
@@ -21,30 +29,36 @@ export const RestaurantHeader = ({ restaurant }) => {
                 <View style={styles.infoHeader}>
                     <Image source={{ uri: imageUrl }} style={styles.restaurantImage} />
                     <View style={styles.infoContent}>
-                        <Text style={styles.restaurantName}>{restaurant.name}</Text>
-                        <View style={styles.ratingRow}>
-                            <MaterialIcons name="star" size={14} color="#ffc107" />
-                            <Text style={styles.ratingText}>{rating}</Text>
-                            <Text style={styles.reviewCount}>
-                                ({restaurant.totalReviews})
+                        <Text style={styles.restaurantName} numberOfLines={2}>{restaurant.name}</Text>
+
+                        {/* Info Row: Rating, Distance, Delivery Time */}
+                        <View style={styles.infoRow}>
+                            {/* Rating */}
+                            <View style={styles.infoItem}>
+                                <MaterialIcons name="star" size={16} color="#ff6b35" />
+                                <Text style={styles.infoText}>{rating}</Text>
+                            </View>
+
+                            {/* Distance */}
+                            <View style={styles.infoItem}>
+                                <MaterialIcons name="location-on" size={15} color="#ff6b35" />
+                                <Text style={styles.infoText}>{distance.toFixed(1)} km</Text>
+                            </View>
+
+                            {/* Delivery Time */}
+                            <View style={styles.infoItem}>
+                                <DroneIcon size={15} color="#ff6b35" />
+                                <Text style={styles.infoText}>{deliveryTime} phút</Text>
+                            </View>
+                        </View>
+
+                        {/* Address */}
+                        <View style={styles.addressRow}>
+                            <MaterialIcons name="place" size={14} color="#666" />
+                            <Text style={styles.addressText} numberOfLines={1}>
+                                {restaurant.address}
                             </Text>
                         </View>
-                    </View>
-                </View>
-
-                {/* Quick Info */}
-                <View style={styles.quickInfo}>
-                    <View style={styles.quickInfoItem}>
-                        <MaterialIcons name="schedule" size={16} color="#ff6b35" />
-                        <Text style={styles.quickInfoText}>
-                            {restaurant.deliveryTimeMinutes} phút
-                        </Text>
-                    </View>
-                    <View style={styles.quickInfoItem}>
-                        <MaterialIcons name="location-on" size={16} color="#ff6b35" />
-                        <Text style={styles.quickInfoText} numberOfLines={1}>
-                            {restaurant.address}
-                        </Text>
                     </View>
                 </View>
 
@@ -108,17 +122,15 @@ const styles = StyleSheet.create({
         borderBottomWidth: 1,
         borderBottomColor: '#eee',
     },
-    infoHeader: { flexDirection: 'row', alignItems: 'flex-start', marginBottom: 12 },
-    restaurantImage: { width: 60, height: 60, borderRadius: 8, marginRight: 12, backgroundColor: '#eee' },
-    infoContent: { flex: 1 },
-    restaurantName: { fontSize: 16, fontWeight: '700', color: '#333', marginBottom: 4 },
-    ratingRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 4 },
-    ratingText: { fontSize: 12, fontWeight: '600', color: '#333', marginLeft: 4 },
-    reviewCount: { fontSize: 12, color: '#999', marginLeft: 4 },
-    category: { fontSize: 12, color: '#999' },
-    quickInfo: { gap: 8 },
-    quickInfoItem: { flexDirection: 'row', alignItems: 'center' },
-    quickInfoText: { fontSize: 12, color: '#666', marginLeft: 8, flex: 1 },
+    infoHeader: { flexDirection: 'row', alignItems: 'flex-start', marginBottom: 10 },
+    restaurantImage: { width: 85, height: 85, borderRadius: 42.5, marginRight: 14, backgroundColor: '#eee' },
+    infoContent: { flex: 1, justifyContent: 'center' },
+    restaurantName: { fontSize: 15, fontWeight: '700', color: '#333', marginBottom: 6 },
+    infoRow: { flexDirection: 'row', alignItems: 'center', marginBottom: 4 },
+    infoItem: { flexDirection: 'row', alignItems: 'center', marginRight: 12 },
+    infoText: { fontSize: 12, fontWeight: '600', color: '#333', marginLeft: 3 },
+    addressRow: { flexDirection: 'row', alignItems: 'center' },
+    addressText: { fontSize: 12, color: '#666', marginLeft: 4, flex: 1 },
     statusSection: { flexDirection: 'row', alignItems: 'center', gap: 12, marginHorizontal: 12, marginTop: 12 },
     statusBadge: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20, gap: 6 },
     statusOpen: { backgroundColor: '#4CAF50' },

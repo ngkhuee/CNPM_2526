@@ -24,15 +24,37 @@ apiClient.interceptors.request.use(
     async (config) => {
         console.log('[API Request]', config.method?.toUpperCase(), config.url);
 
-        // Get token from AsyncStorage and attach to header
-        try {
-            const token = await AsyncStorage.getItem('token');
-            if (token) {
-                config.headers.Authorization = `Bearer ${token}`;
-                console.log('[API Request] Token attached');
+        // List of public endpoints that don't require authentication for GET requests
+        const publicEndpoints = [
+            '/auth/login',
+            '/auth/register',
+            '/restaurants',
+            '/menus',
+            '/categories',
+            '/promotions',
+            '/foods',
+            '/reviews',
+            '/settings',
+            '/users', // GET user info is public (for displaying review authors)
+        ];
+
+        // Check if this is a GET request to a public endpoint
+        const isPublicGet = config.method?.toLowerCase() === 'get' &&
+            publicEndpoints.some(endpoint => config.url?.startsWith(endpoint) || config.url?.includes(endpoint));
+
+        // Only attach token if NOT a public GET request
+        if (!isPublicGet) {
+            try {
+                const token = await AsyncStorage.getItem('token');
+                if (token) {
+                    config.headers.Authorization = `Bearer ${token}`;
+                    console.log('[API Request] Token attached');
+                }
+            } catch (error) {
+                console.error('[API Request] Error getting token:', error);
             }
-        } catch (error) {
-            console.error('[API Request] Error getting token:', error);
+        } else {
+            console.log('[API Request] Public endpoint - no token attached');
         }
 
         return config;
@@ -52,12 +74,18 @@ apiClient.interceptors.response.use(
     async (error) => {
         const status = error.response?.status;
         const message = error.response?.data?.message || error.message;
+        const url = error.config?.url;
 
-        console.error('[API Response Error]', status, message);
+        // Don't log 404 errors for cart endpoints (expected when cart is empty)
+        const isCartNotFound = status === 404 && url?.includes('/carts') && message?.toLowerCase().includes('cart not found');
 
-        // Log full error data for debugging
-        if (error.response?.data) {
-            console.error('[API Response] Backend error data:', error.response.data);
+        if (!isCartNotFound) {
+            console.error('[API Response Error]', status, message);
+
+            // Log full error data for debugging
+            if (error.response?.data) {
+                console.error('[API Response] Backend error data:', error.response.data);
+            }
         }
 
         // Handle 401 - token expired or invalid credentials

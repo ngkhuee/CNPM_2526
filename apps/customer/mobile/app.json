@@ -30,8 +30,13 @@
         "android.permission.ACCESS_COARSE_LOCATION",
         "android.permission.ACCESS_NETWORK_STATE"
       ],
-      "usesCleartextTraffic": false,
-      "softwareKeyboardLayoutMode": "pan"
+      "usesCleartextTraffic": true,
+      "softwareKeyboardLayoutMode": "pan",
+      "config": {
+        "googleMaps": {
+          "apiKey": ""
+        }
+      }
     },
     "web": {
       "favicon": "./assets/icon.png"

@@ -489,9 +489,10 @@ const Orders = () => {
                                                 <div
                                                     style={{
                                                         display: "flex",
-                                                        gap: "8px",
+                                                        gap: "6px",
                                                         alignItems: "center",
-                                                        flexWrap: "wrap",
+                                                        flexWrap: "nowrap",
+                                                        minWidth: "fit-content",
                                                     }}
                                                 >
                                                     <button
@@ -507,30 +508,12 @@ const Orders = () => {
                                                             <button
                                                                 className="btn-confirm"
                                                                 onClick={() => handleConfirmOrder(order.id)}
-                                                                style={{
-                                                                    background: "#4caf50",
-                                                                    color: "white",
-                                                                    padding: "6px 12px",
-                                                                    border: "none",
-                                                                    borderRadius: "4px",
-                                                                    cursor: "pointer",
-                                                                    fontSize: "12px",
-                                                                }}
                                                             >
                                                                 Xác nhận
                                                             </button>
                                                             <button
                                                                 className="btn-reject"
                                                                 onClick={() => openRejectModal(order)}
-                                                                style={{
-                                                                    background: "#f44336",
-                                                                    color: "white",
-                                                                    padding: "6px 12px",
-                                                                    border: "none",
-                                                                    borderRadius: "4px",
-                                                                    cursor: "pointer",
-                                                                    fontSize: "12px",
-                                                                }}
                                                             >
                                                                 Từ chối
                                                             </button>
@@ -541,15 +524,6 @@ const Orders = () => {
                                                         <button
                                                             className="btn-prepare"
                                                             onClick={() => handleStartPreparing(order.id)}
-                                                            style={{
-                                                                background: "#2196f3",
-                                                                color: "white",
-                                                                padding: "6px 12px",
-                                                                border: "none",
-                                                                borderRadius: "4px",
-                                                                cursor: "pointer",
-                                                                fontSize: "12px",
-                                                            }}
                                                         >
                                                             Bắt đầu chuẩn bị
                                                         </button>
@@ -561,22 +535,13 @@ const Orders = () => {
                                                                 className="btn-ready"
                                                                 onClick={() => handleMarkReady(order.id)}
                                                                 disabled={droneStatuses[order.id]?.stage !== "at_restaurant"}
-                                                                style={{
-                                                                    background: droneStatuses[order.id]?.stage === "at_restaurant" ? "#ff9800" : "#ccc",
-                                                                    color: "white",
-                                                                    padding: "6px 12px",
-                                                                    border: "none",
-                                                                    borderRadius: "4px",
-                                                                    cursor: droneStatuses[order.id]?.stage === "at_restaurant" ? "pointer" : "not-allowed",
-                                                                    fontSize: "12px",
-                                                                }}
                                                                 title={droneStatuses[order.id]?.stage !== "at_restaurant" ? "Đang chờ drone đến..." : "Đánh dấu sẵn sàng"}
                                                             >
                                                                 Sẵn sàng
                                                             </button>
                                                             {droneStatuses[order.id]?.stage !== "at_restaurant" && (
-                                                                <span style={{ fontSize: "11px", color: "#666", marginLeft: "4px" }}>
-                                                                    (Đang chờ drone)
+                                                                <span className="waiting-drone-text">
+                                                                    (Chờ drone)
                                                                 </span>
                                                             )}
                                                         </>

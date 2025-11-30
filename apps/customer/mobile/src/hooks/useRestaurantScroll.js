@@ -35,12 +35,39 @@ export const useRestaurantScroll = (categories, allFoods, highlightedFoodId) => 
     }, [highlightedFoodId, allFoods, categories]);
 
     const handleScrollToCategory = (categoryId) => {
+        console.log('[useRestaurantScroll] Scrolling to category:', categoryId);
+
+        // Update current category immediately for UI feedback
+        setCurrentCategoryId(categoryId);
+
         const sectionIndex = sectionIndexMap.current[categoryId];
+        console.log('[useRestaurantScroll] Section index:', sectionIndex);
+
         if (sectionIndex !== undefined && sectionListRef.current) {
-            sectionListRef.current.scrollToLocation({
+            // Use setTimeout to ensure SectionList is ready
+            setTimeout(() => {
+                try {
+                    // Scroll so that section header appears right below the sticky category filter
+                    // viewOffset should account for:
+                    // - Header height (~200-280px)
+                    // - Search bar (~50px)
+                    // - Category filter (~50px)
+                    sectionListRef.current?.scrollToLocation({
+                        sectionIndex,
+                        itemIndex: 0,
+                        animated: true,
+                        viewPosition: 0, // Position at top
+                        viewOffset: -350, // Negative offset to show section header below sticky filter
+                    });
+                    console.log('[useRestaurantScroll] Scroll executed to section:', sectionIndex);
+                } catch (error) {
+                    console.error('[useRestaurantScroll] Scroll error:', error);
+                }
+            }, 100);
+        } else {
+            console.warn('[useRestaurantScroll] Cannot scroll - ref or index missing', {
                 sectionIndex,
-                itemIndex: 0,
-                animated: true,
+                hasRef: !!sectionListRef.current
             });
         }
     };

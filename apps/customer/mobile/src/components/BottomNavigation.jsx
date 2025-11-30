@@ -1,6 +1,6 @@
 /**
  * BottomNavigation.jsx - Navigation bar ở dưới cùng
- * 4 tab: Home, Cart (với badge), Orders, Me
+ * 5 tab: Home, Explore, Cart (với badge), Orders, Me
  */
 
 import React, { useContext } from 'react';
@@ -12,7 +12,7 @@ export default function BottomNavigation({ activeRoute, onNavigate }) {
     const { getTotalItems } = useContext(CartContext);
     const cartItemsCount = getTotalItems();
 
-    const isActive = (route) => activeRoute === route;
+    const isActive = (route) => activeRoute === route || (route === 'Explore' && activeRoute === 'explore');
     const iconColor = (route) => isActive(route) ? '#ff6b35' : '#999';
     const textColor = (route) => isActive(route) ? '#ff6b35' : '#666';
 
@@ -29,6 +29,19 @@ export default function BottomNavigation({ activeRoute, onNavigate }) {
                     color={iconColor('home')}
                 />
                 <Text style={[styles.label, { color: textColor('home') }]}>Trang chủ</Text>
+            </TouchableOpacity>
+
+            {/* Explore */}
+            <TouchableOpacity
+                style={[styles.navItem, isActive('Explore') && styles.activeItem]}
+                onPress={() => onNavigate('explore')}
+            >
+                <MaterialIcons
+                    name="explore"
+                    size={24}
+                    color={iconColor('Explore')}
+                />
+                <Text style={[styles.label, { color: textColor('Explore') }]}>Khám phá</Text>
             </TouchableOpacity>
 
             {/* Cart với Badge */}

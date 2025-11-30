@@ -18,30 +18,33 @@ import {
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { NavigationContext } from '../../contexts/NavigationContext';
-import { AuthContext } from '../../contexts/AuthContext';
 import * as orderService from '../../services/orderService';
-import { reviewService } from '../../services/reviewService';
-import { useReview } from '../../hooks/useReview';
-import { showToast } from '../../utils/toastHelper';
+import { useReviewForm } from '../../hooks/useReviewForm';
 
 const ReviewScreen = ({ orderId }) => {
     const { navigate } = useContext(NavigationContext);
-    const { user } = useContext(AuthContext);
-    const { submitReview, getReviewedFoodIds } = useReview();
 
     const [order, setOrder] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [submitting, setSubmitting] = useState(false);
 
-    const [reviewedFoods, setReviewedFoods] = useState({});
-    const [selectedItem, setSelectedItem] = useState(null);
-    const [showReviewModal, setShowReviewModal] = useState(false);
-    const [rating, setRating] = useState(5);
-    const [comment, setComment] = useState('');
+    // Use review form hook
+    const {
+        reviewedFoods,
+        selectedItem,
+        showReviewModal,
+        rating,
+        comment,
+        submitting,
+        setRating,
+        setComment,
+        handleOpenReview,
+        handleCloseReview,
+        handleSubmitReview,
+        isItemReviewed,
+    } = useReviewForm(orderId, order);
 
     useEffect(() => {
         fetchOrder();
-        checkReviewedItems();
     }, [orderId]);
 
     const fetchOrder = async () => {
@@ -63,70 +66,7 @@ const ReviewScreen = ({ orderId }) => {
         }
     };
 
-    const checkReviewedItems = async () => {
-        if (!user?.id) return;
-        try {
-            const reviewed = await getReviewedFoodIds(user.id);
-            setReviewedFoods(reviewed);
-        } catch (error) {
-            console.error('[ReviewScreen] Error checking reviewed items:', error);
-        }
-    };
 
-    const handleOpenReview = (item) => {
-        setSelectedItem(item);
-        setShowReviewModal(true);
-        setRating(5);
-        setComment('');
-    };
-
-    const handleSubmitReview = async () => {
-        if (!selectedItem || !order || !user) return;
-
-        if (rating === 0) {
-            Alert.alert('Lỗi', 'Vui lòng chọn số sao');
-            return;
-        }
-
-        if (!comment.trim() || comment.trim().length < 10) {
-            Alert.alert('Lỗi', 'Đánh giá phải có ít nhất 10 ký tự');
-            return;
-        }
-
-        try {
-            setSubmitting(true);
-
-            const result = await submitReview({
-                foodId: selectedItem.foodId,
-                userId: user.id,
-                restaurantId: order?.restaurant_id || order?.restaurantId,
-                orderId: order.id,
-                rating,
-                comment,
-            });
-
-            if (result.success) {
-                showToast('success', 'Đã gửi đánh giá!');
-                setShowReviewModal(false);
-
-                // Update reviewedFoods state
-                const reviewKey = `${selectedItem.foodId}_${order.id}`;
-                setReviewedFoods(prev => ({
-                    ...prev,
-                    [reviewKey]: true,
-                }));
-
-                setSelectedItem(null);
-            } else {
-                Alert.alert('Lỗi', result.message || 'Không thể gửi đánh giá');
-            }
-        } catch (error) {
-            console.error('[ReviewScreen] Error submitting review:', error);
-            Alert.alert('Lỗi', 'Không thể gửi đánh giá');
-        } finally {
-            setSubmitting(false);
-        }
-    };
 
     if (loading) {
         return (
@@ -176,8 +116,7 @@ const ReviewScreen = ({ orderId }) => {
                     {order.items && order.items.length > 0 ? (
                         <View style={styles.itemsContainer}>
                             {order.items.map((item, idx) => {
-                                const reviewKey = `${item.foodId}_${order.id}`;
-                                const isReviewed = reviewedFoods[reviewKey];
+                                const itemIsReviewed = isItemReviewed(item.foodId);
 
                                 return (
                                     <View key={idx} style={styles.itemCard}>
@@ -185,7 +124,7 @@ const ReviewScreen = ({ orderId }) => {
                                             <Text style={styles.itemName}>{item.name || item.food_name}</Text>
                                             <Text style={styles.itemQuantity}>SL: {item.quantity}</Text>
                                         </View>
-                                        {isReviewed ? (
+                                        {itemIsReviewed ? (
                                             <View style={styles.reviewedBadge}>
                                                 <MaterialIcons name="check-circle" size={20} color="#4caf50" />
                                                 <Text style={styles.reviewedText}>Đã đánh giá</Text>
@@ -280,7 +219,7 @@ const ReviewScreen = ({ orderId }) => {
                         <View style={styles.modalActions}>
                             <TouchableOpacity
                                 style={styles.cancelButton}
-                                onPress={() => setShowReviewModal(false)}
+                                onPress={handleCloseReview}
                             >
                                 <Text style={styles.cancelButtonText}>Hủy</Text>
                             </TouchableOpacity>

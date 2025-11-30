@@ -1,9 +1,11 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 import { useFoodManagement } from "./useFoodManagement";
 import { uploadService } from "shared-services";
+import { RestaurantContext } from "../Context/RestaurantContext";
 
 export const useAddFood = () => {
     const { addFood } = useFoodManagement();
+    const { currentRestaurant } = useContext(RestaurantContext);
     const [formData, setFormData] = useState({
         name: "",
         description: "",
@@ -33,6 +35,10 @@ export const useAddFood = () => {
             return { success: false, message: "Vui lòng chọn danh mục!" };
         }
 
+        if (!currentRestaurant?.id) {
+            return { success: false, message: "Không tìm thấy thông tin nhà hàng!" };
+        }
+
         setLoading(true);
 
         try {
@@ -49,6 +55,7 @@ export const useAddFood = () => {
                 description: formData.description,
                 price: Number(formData.price),
                 categoryId: formData.categoryId,
+                restaurantId: currentRestaurant.id,
                 image: uploadResult.path, // Use path returned from server
                 isAvailable: true,
                 isFeatured: false,

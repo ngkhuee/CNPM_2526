@@ -12,6 +12,7 @@ const FoodEditModal = ({ food, isOpen, onClose, onSubmit, categories, restaurant
     });
     const [uploading, setUploading] = useState(false);
     const [uploadError, setUploadError] = useState("");
+    const [imagePreview, setImagePreview] = useState(null);
 
     useEffect(() => {
         if (food) {
@@ -30,6 +31,13 @@ const FoodEditModal = ({ food, isOpen, onClose, onSubmit, categories, restaurant
     const handleImageChange = async (file) => {
         if (!file) return;
 
+        // Show preview immediately
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            setImagePreview(reader.result);
+        };
+        reader.readAsDataURL(file);
+
         setUploading(true);
         setUploadError("");
 
@@ -42,10 +50,12 @@ const FoodEditModal = ({ food, isOpen, onClose, onSubmit, categories, restaurant
                 setEditFood((prev) => ({ ...prev, image: uploadResult.path }));
             } else {
                 setUploadError("Tải ảnh lên thất bại");
+                setImagePreview(null);
             }
         } catch (error) {
             console.error("Image upload error:", error);
             setUploadError(error.message || "Failed to upload image");
+            setImagePreview(null);
         } finally {
             setUploading(false);
         }
@@ -136,6 +146,7 @@ const FoodEditModal = ({ food, isOpen, onClose, onSubmit, categories, restaurant
                                 setEditFood({ ...editFood, description: e.target.value })
                             }
                             rows={4}
+                            placeholder="Viết mô tả sản phẩm"
                         />
                     </label>
                     <label>
@@ -146,6 +157,20 @@ const FoodEditModal = ({ food, isOpen, onClose, onSubmit, categories, restaurant
                             onChange={(e) => handleImageChange(e.target.files[0])}
                             disabled={uploading}
                         />
+                        {imagePreview && (
+                            <div style={{ marginTop: "10px" }}>
+                                <img
+                                    src={imagePreview}
+                                    alt="Preview"
+                                    style={{
+                                        maxWidth: "200px",
+                                        maxHeight: "200px",
+                                        objectFit: "cover",
+                                        borderRadius: "8px"
+                                    }}
+                                />
+                            </div>
+                        )}
                         {uploading && <span style={{ color: "blue" }}>Đang tải lên...</span>}
                         {uploadError && <span style={{ color: "red" }}>{uploadError}</span>}
                     </label>

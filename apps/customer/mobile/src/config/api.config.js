@@ -11,7 +11,9 @@ const ENV = process.env.EXPO_PUBLIC_ENV || 'development';
 // API Configurations based on environment
 const API_CONFIGS = {
     development: {
-        baseURL: process.env.EXPO_PUBLIC_API_URL || 'http://localhost:4000',
+        // Use host machine IP for Android emulator/physical device
+        // localhost only works on iOS simulator
+        baseURL: process.env.EXPO_PUBLIC_API_URL || 'http://192.168.0.102:4000',
         timeout: 10000,
     },
     staging: {

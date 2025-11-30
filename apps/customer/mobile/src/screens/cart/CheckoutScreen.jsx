@@ -39,6 +39,8 @@ import { usePromotions } from '../../hooks/usePromotions';
 import { useSettings } from '../../hooks/useSettings';
 import { useCheckoutProcessing } from '../../hooks/useCheckoutProcessing';
 import { useOrderAutoCancel } from '../../hooks/useOrderAutoCancel';
+import { useCheckoutForm } from '../../hooks/useCheckoutForm';
+import { useCheckoutPromotion } from '../../hooks/useCheckoutPromotion';
 
 // Services
 import { showToast } from '../../utils/toastHelper';
@@ -72,57 +74,25 @@ const CheckoutScreen = () => {
     // Hooks
     const { addresses, handleGetGPS: requestGPSLocation } = useAddress(user?.id);
     const { location, address: gpsAddress, loading: gpsLoading, requestLocation } = useGeolocation();
-    const { promotions, getApplicablePromotions, validatePromotion, calculateDiscount } = usePromotions();
+    const promotionsHook = usePromotions();
     const { deliveryFee } = useSettings();
     const { processCheckoutOrder, loading: processingOrder } = useCheckoutProcessing();
-    // Auto-cancel is now handled by backend, not client-side
 
-    // Form State
-    const [checkoutData, setCheckoutData] = useState({
-        customerName: user?.name || '',
-        phone: user?.phone || '',
-        email: user?.email || '',
-        address: '',
-        addressId: null,
-        paymentMethod: 'card',
-        gps: null,
-        specialInstructions: '',
-    });
-
-    const [selectedAddress, setSelectedAddress] = useState(null);
-    const [manualAddress, setManualAddress] = useState('');
-    const [promoCode, setPromoCode] = useState('');
-    const [appliedPromo, setAppliedPromo] = useState(null);
-    const [errors, setErrors] = useState({});
-    const [touched, setTouched] = useState({});
-    const [showPromosModal, setShowPromosModal] = useState(false);
-    const [applicablePromos, setApplicablePromos] = useState([]);
-
-    // GPS Location effect
-    useEffect(() => {
-        if (gpsAddress) {
-            setManualAddress(gpsAddress);
-            setCheckoutData(prev => ({
-                ...prev,
-                address: gpsAddress,
-                gps: location,
-            }));
-        }
-    }, [gpsAddress, location]);
-
-    // Load applicable promotions for current restaurant
-    useEffect(() => {
-        if (cart?.restaurant_id) {
-            const promos = getApplicablePromotions(cart.restaurant_id);
-            console.log('[CheckoutScreen] Applicable promotions:', {
-                restaurantId: cart.restaurant_id,
-                allPromotions: promotions.length,
-                applicablePromos: promos.length,
-                promosList: promos.map(p => ({ code: p.code, type: p.type, status: p.status, scope: p.scope, restaurant_id: p.restaurant_id }))
-            });
-            setApplicablePromos(promos);
-        }
-    }, [cart?.restaurant_id, promotions]);
+    // Use checkout form hook for form management
+    const {
+        checkoutData,
+        selectedAddress,
+        manualAddress,
+        errors,
+        touched,
+        setCheckoutData,
+        setManualAddress,
+        handleFormChange,
+        handleFieldBlur,
+        handleAddressSelect,
+        validateForm,
+        getFinalCheckoutData,
+    } = useCheckoutForm(user, { address: gpsAddress, location });
 
     // Calculate totals
     const subtotal = cart?.items?.reduce(
@@ -131,86 +101,25 @@ const CheckoutScreen = () => {
     ) || 0;
 
     const fee = deliveryFee || 25000;
-    const discount = appliedPromo ? calculateDiscount(appliedPromo, subtotal) : 0;
+
+    // Use promotion hook for promotion management
+    const {
+        promoCode,
+        appliedPromo,
+        showPromosModal,
+        applicablePromos,
+        setPromoCode,
+        setShowPromosModal,
+        handleApplyPromo,
+        handleRemovePromo,
+        handleApplyPromoFromList,
+        getDiscount,
+    } = useCheckoutPromotion(promotionsHook, subtotal, cart?.restaurant_id);
+
+    const discount = getDiscount();
     const total = subtotal + fee - discount;
 
-    // Debug log
-    console.log('[CheckoutScreen] Totals:', {
-        appliedPromo: appliedPromo ? { code: appliedPromo.code, type: appliedPromo.type, value: appliedPromo.value } : null,
-        subtotal,
-        discount,
-        fee,
-        total,
-    });
 
-    /**
-     * Validate form fields
-     */
-    const validateForm = () => {
-        const newErrors = {};
-
-        if (!checkoutData.customerName?.trim()) {
-            newErrors.customerName = 'Vui lòng nhập họ tên';
-        }
-
-        if (!checkoutData.phone?.trim()) {
-            newErrors.phone = 'Vui lòng nhập số điện thoại';
-        } else if (!/^[0-9]{10,}$/.test(checkoutData.phone.replace(/\D/g, ''))) {
-            newErrors.phone = 'Số điện thoại không hợp lệ';
-        }
-
-        if (!checkoutData.email?.trim()) {
-            newErrors.email = 'Vui lòng nhập email';
-        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(checkoutData.email)) {
-            newErrors.email = 'Email không hợp lệ';
-        }
-
-        const finalAddress = selectedAddress?.address_line || manualAddress || checkoutData.address;
-        if (!finalAddress?.trim()) {
-            newErrors.address = 'Vui lòng nhập địa chỉ giao hàng';
-        }
-
-        if (!checkoutData.paymentMethod || !['card', 'momo'].includes(checkoutData.paymentMethod)) {
-            newErrors.paymentMethod = 'Vui lòng chọn phương thức thanh toán';
-        }
-
-        setErrors(newErrors);
-        return Object.keys(newErrors).length === 0;
-    };
-
-    /**
-     * Handle form field changes
-     */
-    const handleFormChange = (data) => {
-        setCheckoutData(data);
-        if (touched[Object.keys(data)[0]]) {
-            validateForm();
-        }
-    };
-
-    /**
-     * Handle field blur for validation
-     */
-    const handleFieldBlur = (field) => {
-        setTouched(prev => ({ ...prev, [field]: true }));
-        validateForm();
-    };
-
-    /**
-     * Handle address selection
-     */
-    const handleAddressSelect = (address) => {
-        setSelectedAddress(address);
-        setCheckoutData(prev => ({
-            ...prev,
-            address: address.address_line || address.address,
-            addressId: address.id,
-            // Use {lat, lng} format for consistency across platforms
-            gps: address.latitude && address.longitude
-                ? { lat: address.latitude, lng: address.longitude }
-                : null,
-        }));
-    };
 
     /**
      * Handle GPS request
@@ -221,72 +130,6 @@ const CheckoutScreen = () => {
         } catch (error) {
             Alert.alert('Lỗi vị trí', error.message || 'Không thể lấy vị trí');
         }
-    };
-
-    /**
-     * Handle applying promo code
-     */
-    const handleApplyPromo = () => {
-        if (!promoCode.trim()) {
-            showToast('error', 'Vui lòng nhập mã khuyến mãi');
-            return;
-        }
-
-        const validation = validatePromotion(promoCode, subtotal, cart.restaurant_id);
-        if (validation.valid) {
-            setAppliedPromo(validation.promotion);
-            showToast('success', `Đã áp dụng mã: ${validation.promotion.code}`);
-            setPromoCode('');
-        } else {
-            showToast('error', validation.message);
-        }
-    };
-
-    /**
-     * Handle removing promo
-     */
-    const handleRemovePromo = () => {
-        setAppliedPromo(null);
-        setPromoCode('');
-        showToast('success', 'Đã xóa mã khuyến mãi');
-    };
-
-    /**
-     * Handle apply promo from list - WITH VALIDATION
-     */
-    const handleApplyPromoFromList = (promo) => {
-        console.log('[CheckoutScreen] Applying promo from list:', promo);
-
-        // Validate minimum order value before applying
-        const minOrderValue = promo.minOrderValue || promo.min_order_value || 0;
-        if (minOrderValue > 0 && subtotal < minOrderValue) {
-            showToast('error', `Đơn tối thiểu: ₫${minOrderValue.toLocaleString('vi-VN')}. Đơn hiện tại: ₫${subtotal.toLocaleString('vi-VN')}`);
-            setShowPromosModal(false);
-            return;
-        }
-
-        // Validate date range
-        const now = new Date();
-        const startDate = new Date(promo.startDate || promo.start_date);
-        const endDate = new Date(promo.endDate || promo.end_date);
-
-        if (now < startDate) {
-            showToast('error', 'Khuyến mãi chưa bắt đầu');
-            setShowPromosModal(false);
-            return;
-        }
-
-        if (now > endDate) {
-            showToast('error', 'Khuyến mãi đã hết hạn');
-            setShowPromosModal(false);
-            return;
-        }
-
-        // All validations passed
-        setAppliedPromo(promo);
-        setPromoCode(promo.code);
-        setShowPromosModal(false);
-        showToast('success', `Đã áp dụng mã: ${promo.code}`);
     };
 
     /**
@@ -317,16 +160,8 @@ const CheckoutScreen = () => {
                 showToast('error', 'Lỗi kiểm tra trạng thái nhà hàng. Vui lòng thử lại.');
                 return;
             }
-            // Prepare final checkout data
-            const finalCheckoutData = {
-                ...checkoutData,
-                address: selectedAddress?.address_line || manualAddress || checkoutData.address,
-                addressId: selectedAddress?.id,
-                gps: selectedAddress?.latitude && selectedAddress?.longitude
-                    ? { latitude: selectedAddress.latitude, longitude: selectedAddress.longitude }
-                    : location,
-            };
-
+            // Prepare final checkout data using hook helper
+            const finalCheckoutData = getFinalCheckoutData(location);
             console.log('[CheckoutScreen] Placing order with data:', finalCheckoutData);
 
             // Process order - pass restaurant_id from cart

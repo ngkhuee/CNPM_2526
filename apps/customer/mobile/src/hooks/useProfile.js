@@ -77,6 +77,33 @@ export const useProfile = () => {
         }
     };
 
+    const handleAvatarChange = async (avatarUrl) => {
+        try {
+            setSaveLoading(true);
+            if (user?.id) {
+                // Update avatar via API
+                const response = await authService.updateProfile(user.id, { avatar: avatarUrl });
+                if (response.success && response.user) {
+                    // Update both local state and AuthContext
+                    setUser(response.user);
+                    setAuthUser(response.user);
+                    setFormData(prev => ({
+                        ...prev,
+                        avatar: response.user.avatar || avatarUrl,
+                    }));
+                    Alert.alert('Success', 'Avatar updated successfully');
+                } else {
+                    Alert.alert('Error', response.message || 'Failed to update avatar');
+                }
+            }
+        } catch (error) {
+            console.error('Error updating avatar:', error);
+            Alert.alert('Error', 'Failed to update avatar');
+        } finally {
+            setSaveLoading(false);
+        }
+    };
+
     const handleLogout = () => {
         Alert.alert(
             'Logout',
@@ -105,5 +132,6 @@ export const useProfile = () => {
         handleInputChange,
         handleSaveProfile,
         handleLogout,
+        handleAvatarChange,
     };
 };

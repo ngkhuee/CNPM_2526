@@ -190,11 +190,25 @@
       ],
       "status": "active",
       "created_at": "2025-11-25T09:34:02.203Z",
-      "updated_at": "2025-11-26T05:53:45.664Z",
+      "updated_at": "2025-11-30T14:28:09.949Z",
       "gender": "",
       "dob": "",
-      "avatar": "",
+      "avatar": "http://192.168.0.102:4000/images/avatars/86d3153b-5cba-4e3f-8e6d-575b1c801d35_1764512889839.jpeg",
       "full_name": "cust2"
+    },
+    {
+      "id": "u1764512395453",
+      "email": "customer1@gmail.com",
+      "password": "123",
+      "name": "Cus1aaa",
+      "phone": "",
+      "roles": [
+        "customer"
+      ],
+      "status": "active",
+      "created_at": "2025-11-30T14:19:55.453Z",
+      "updated_at": "2025-11-30T14:29:09.756Z",
+      "avatar": "http://192.168.0.102:4000/images/avatars/1edbdaf5-533a-4cb6-a84c-c3dca39ed1f5_1764512949466.jpeg"
     }
   ],
   "addresses": [
@@ -213,19 +227,6 @@
     },
     {
       "user_id": "u1762957623609",
-      "address_line": "123abc",
-      "district": "District 4",
-      "city": "Ho Chi Minh",
-      "phone": "",
-      "note": "",
-      "lat": null,
-      "lng": null,
-      "is_default": true,
-      "created_at": "2025-11-06T04:24:47.640Z",
-      "id": "fQzDEg1"
-    },
-    {
-      "user_id": "u1762957623609",
       "address_line": "Công Ty TNHH Magnon Việt Nam, Lầu 7, Hẻm 18A Nguyễn Thị Minh Khai, Khu phố 10, Phường Sài Gòn, Thành phố Thủ Đức",
       "district": "District 2",
       "city": "Ho Chi Minh",
@@ -237,19 +238,6 @@
       "created_at": "2025-11-19T04:39:18.438Z",
       "updated_at": "2025-11-19T04:39:18.438Z",
       "id": "9HzSNcv"
-    },
-    {
-      "user_id": "u1762957623609",
-      "address_line": "undefined, District 1, Ho Chi Minh",
-      "district": "District 1",
-      "city": "Ho Chi Minh",
-      "phone": "",
-      "note": "",
-      "lat": null,
-      "lng": null,
-      "is_default": false,
-      "created_at": "2025-11-17T03:11:54.671Z",
-      "id": "VKHUyAF"
     },
     {
       "user_id": "u1762957623609",
@@ -276,6 +264,41 @@
       "created_at": "2025-11-26T05:54:41.250Z",
       "updated_at": "2025-11-26T05:54:48.849Z",
       "id": "c7ZIvc6"
+    },
+    {
+      "city": "Thành phố Hồ Chí Minh",
+      "district": "Quận 1",
+      "address_line": "18A/11 Đường Nguyễn Thị Minh Khai",
+      "note": "",
+      "isDefault": true,
+      "lat": 10.7867631,
+      "lng": 106.7001273,
+      "userId": "u1764512395453",
+      "id": "I6aBzyP"
+    },
+    {
+      "city": "Thành phố Hồ Chí Minh",
+      "district": "Quận 1",
+      "address_line": "18A/11 Đường Nguyễn Thị Minh Khai 18A/11",
+      "note": "",
+      "isDefault": true,
+      "lat": 10.7867631,
+      "lng": 106.7001273,
+      "userId": "u1764512395453",
+      "id": "qTN5cmB"
+    },
+    {
+      "id": "addr1764515226023",
+      "user_id": "u1764512395453",
+      "city": "Thành phố Hồ Chí Minh",
+      "district": "Quận 1",
+      "address_line": "18A/11 Đường Nguyễn Thị Minh Khai",
+      "note": "",
+      "isDefault": true,
+      "lat": 10.7867643,
+      "lng": 106.7001169,
+      "created_at": "2025-11-30T15:07:06.023Z",
+      "updated_at": "2025-11-30T15:07:06.023Z"
     }
   ],
   "restaurants": [
@@ -350,7 +373,7 @@
       "phone": "0902345678",
       "email": "lotteria@yummy.com",
       "image": "/images/restaurants/menu_2.png",
-      "banner_image": "/images/restaurants/menu_2.png",
+      "banner_image": "/images/other/ga-sot-sochu_1764402218787.jpg",
       "primary_category": "Chicken",
       "rating": 4.2,
       "total_reviews": 0,
@@ -389,7 +412,7 @@
       "min_order_amount": 40000,
       "status": "active",
       "created_at": "2015-09-01T00:00:00.000Z",
-      "updated_at": "2025-11-05T13:59:08.666Z"
+      "updated_at": "2025-11-29T07:43:41.202Z"
     },
     {
       "id": "r3",
@@ -414,15 +437,15 @@
       "opening_hours": {
         "monday": {
           "open": "09:00",
-          "close": "22:00"
+          "close": "23:00"
         },
         "tuesday": {
           "open": "09:00",
-          "close": "22:00"
+          "close": "23:00"
         },
         "wednesday": {
           "open": "09:00",
-          "close": "22:00"
+          "close": "23:00"
         },
         "thursday": {
           "open": "07:00",
@@ -438,14 +461,14 @@
         },
         "sunday": {
           "open": "09:00",
-          "close": "22:00"
+          "close": "23:00"
         }
       },
       "delivery_time_minutes": 35,
       "min_order_amount": 100000,
       "status": "active",
       "created_at": "2021-11-15T00:00:00.000Z",
-      "updated_at": "2025-11-27T01:47:46.195Z"
+      "updated_at": "2025-11-30T15:02:43.491Z"
     },
     {
       "id": "r4",
@@ -731,12 +754,12 @@
       "updated_at": "2020-01-01T00:00:00.000Z"
     },
     {
-      "name": "Chicken",
+      "name": "Gà rán",
       "description": "chicken chicken",
       "status": "active",
       "restaurant_id": "r2",
       "created_at": "2025-11-05T13:57:19.434Z",
-      "updated_at": "2025-11-05T13:57:19.434Z",
+      "updated_at": "2025-11-29T07:13:35.610Z",
       "id": "F2EtzMG"
     },
     {
@@ -810,6 +833,33 @@
       "created_at": "2025-11-29T04:50:40.894Z",
       "updated_at": "2025-11-29T04:50:40.894Z",
       "id": "t97Ojtm"
+    },
+    {
+      "name": "Bánh Wrap",
+      "description": "Bánh tortilla cuộn topping",
+      "status": "active",
+      "restaurant_id": "r2",
+      "created_at": "2025-11-29T07:15:17.422Z",
+      "updated_at": "2025-11-29T07:15:35.485Z",
+      "id": "E5QVUrZ"
+    },
+    {
+      "name": "Cơm",
+      "description": "Cơm kèm topping",
+      "status": "active",
+      "restaurant_id": "r2",
+      "created_at": "2025-11-29T07:16:43.642Z",
+      "updated_at": "2025-11-29T07:16:43.642Z",
+      "id": "JV-nFe7"
+    },
+    {
+      "name": "Thức uống",
+      "description": "đồ uống ",
+      "status": "active",
+      "restaurant_id": "r2",
+      "created_at": "2025-11-29T07:55:32.797Z",
+      "updated_at": "2025-11-29T07:55:32.797Z",
+      "id": "VUBa8KN"
     }
   ],
   "menus": [
@@ -876,15 +926,15 @@
     {
       "id": 5,
       "restaurant_id": "r2",
-      "category_id": "F2EtzMG",
-      "name": "Fried Chicken Wings",
-      "description": "Crispy fried chicken wings with special sauce",
+      "category_id": "E5QVUrZ",
+      "name": "Bánh Wrap Gà Giòn",
+      "description": "Bánh tortilla cuộn gà giòn, xà lách tươi, cà chua, hành tím và sốt nhẹ, tiện lợi và đầy hương vị.",
       "price": 89000,
       "image": "/images/foods/food_7.png",
       "is_available": true,
       "preparation_time_minutes": 12,
       "created_at": "2024-01-01T00:00:00.000Z",
-      "updated_at": "2025-11-05T13:57:29.527Z",
+      "updated_at": "2025-11-29T07:15:56.822Z",
       "rating": 4,
       "sold": 0
     },
@@ -892,29 +942,29 @@
       "id": 6,
       "restaurant_id": "r2",
       "category_id": "F2EtzMG",
-      "name": "Chicken Burger",
-      "description": "Juicy chicken patty with fresh vegetables",
-      "price": 69000,
+      "name": "Gà Rán Giòn Truyền Thống",
+      "description": "Miếng gà rán vàng ruộm, lớp vỏ giòn rụm, thịt mềm mọng nước – kiểu gà rán kinh điển.",
+      "price": 49000,
       "image": "/images/foods/food_8.png",
       "is_available": true,
       "preparation_time_minutes": 10,
       "created_at": "2024-01-01T00:00:00.000Z",
-      "updated_at": "2025-11-05T13:57:39.348Z",
+      "updated_at": "2025-11-29T07:16:20.113Z",
       "rating": 4.1,
       "sold": 0
     },
     {
       "id": 7,
       "restaurant_id": "r2",
-      "category_id": "F2EtzMG",
-      "name": "Chicken Combo",
-      "description": "Complete meal with fried chicken, fries and drink",
+      "category_id": "JV-nFe7",
+      "name": "Cơm Risotto Gà Sốt Kem",
+      "description": "Món risotto Ý sánh mịn nấu cùng gà và sốt kem, đậm vị, béo thơm và rất “comfort food”.",
       "price": 129000,
       "image": "/images/foods/food_9.png",
       "is_available": true,
       "preparation_time_minutes": 15,
       "created_at": "2024-01-01T00:00:00.000Z",
-      "updated_at": "2025-11-05T13:57:46.515Z",
+      "updated_at": "2025-11-29T07:17:00.425Z",
       "rating": 4.2,
       "sold": 0
     },
@@ -922,14 +972,14 @@
       "id": 8,
       "restaurant_id": "r2",
       "category_id": "VE_iV61",
-      "name": "Spicy Chicken Set",
-      "description": "Spicy fried chicken with sides",
+      "name": "Mì Ý Hải Sản Sốt Cà Chua",
+      "description": "Spaghetti xào cùng tôm, mực, nghêu và sốt cà chua đậm đà, mang hương vị biển đặc trưng.",
       "price": 149000,
       "image": "/images/foods/food_10.png",
       "is_available": true,
       "preparation_time_minutes": 15,
       "created_at": "2024-01-01T00:00:00.000Z",
-      "updated_at": "2025-11-25T09:42:59.497Z",
+      "updated_at": "2025-11-29T07:17:18.528Z",
       "rating": 4.3,
       "sold": 0
     },
@@ -1127,6 +1177,57 @@
       "updated_at": "2025-11-07T02:40:56.365Z",
       "rating": 4.1,
       "sold": 0
+    },
+    {
+      "category_id": "F2EtzMG",
+      "name": "Gà Sốt Gochu (1 miếng)",
+      "price": 41000,
+      "description": "1 phần Gà rán giòn tan hòa quyện cùng nước sốt Gochu thơm ngon.",
+      "image": "/images/foods/ga-sot-sochu_1764400838043.jpg",
+      "is_available": true,
+      "preparation_time_minutes": 20,
+      "created_at": "2025-11-29T07:20:38.056Z",
+      "updated_at": "2025-11-29T07:20:38.056Z",
+      "id": 22
+    },
+    {
+      "restaurant_id": "r2",
+      "category_id": "F2EtzMG",
+      "name": "Gà Sốt Gochu (1 miếng)",
+      "price": 41000,
+      "description": "1 phần hà rán cùng nước sốt Gochu thơm ngon.",
+      "image": "/images/foods/ga-sot-sochu_1764402331761.jpg",
+      "is_available": true,
+      "preparation_time_minutes": 20,
+      "created_at": "2025-11-29T07:28:24.182Z",
+      "updated_at": "2025-11-29T07:45:32.949Z",
+      "id": 23
+    },
+    {
+      "restaurant_id": "r2",
+      "category_id": "VUBa8KN",
+      "name": "Cà phê sữa",
+      "price": 25000,
+      "description": "cà phê sữaa",
+      "image": "/images/foods/ca-phe-sua_1764403036786.png",
+      "is_available": true,
+      "preparation_time_minutes": 20,
+      "created_at": "2025-11-29T07:57:16.797Z",
+      "updated_at": "2025-11-29T07:57:16.797Z",
+      "id": 24
+    },
+    {
+      "restaurant_id": "r2",
+      "category_id": "VUBa8KN",
+      "name": "Matcha Latte",
+      "price": 30000,
+      "description": "",
+      "image": "/images/foods/l_coffee_matcha_latte-16_1764403331393.png",
+      "is_available": true,
+      "preparation_time_minutes": 20,
+      "created_at": "2025-11-29T08:02:11.409Z",
+      "updated_at": "2025-11-29T08:02:11.409Z",
+      "id": 25
     }
   ],
   "orders": [
@@ -2239,6 +2340,58 @@
         "latitude": 10.782743081604394,
         "longitude": 106.71928730085762
       }
+    },
+    {
+      "id": "ord_1764515277964_q7gols3yg",
+      "user_id": "u1764512395453",
+      "restaurant_id": "r3",
+      "items": [
+        {
+          "menu_id": 11,
+          "name": "Hamburger đầy đủ",
+          "quantity": 1,
+          "unit_price": 52000,
+          "subtotal": 52000
+        }
+      ],
+      "subtotal": 52000,
+      "delivery_fee": 15000,
+      "discount_amount": 0,
+      "total_amount": 67000,
+      "payment_method": "card",
+      "payment_status": "paid",
+      "status": "delivered",
+      "special_instructions": "",
+      "customer": {
+        "name": "Cus1aaa",
+        "phone": "0123456789",
+        "email": "customer1@gmail.com",
+        "address": "18A/11 Đường Nguyễn Thị Minh Khai"
+      },
+      "delivery_address": "18A/11 Đường Nguyễn Thị Minh Khai",
+      "pickup_gps": {
+        "lat": 10.77,
+        "lng": 106.68
+      },
+      "dropoff_gps": {
+        "lat": 10.788593614152836,
+        "lng": 106.68398320769307,
+        "latitude": 10.788593614152836,
+        "longitude": 106.68398320769307
+      },
+      "promotion_code": null,
+      "promotion_id": null,
+      "order_number": "ORD-1764515276435",
+      "created_at": "2025-11-30T15:07:56.425Z",
+      "updated_at": "2025-11-30T15:34:23.106Z",
+      "drone_id": "drone3",
+      "drone_journey_stage": "at_customer",
+      "current_gps": {
+        "lat": 10.788593614152836,
+        "lng": 106.68398320769307,
+        "latitude": 10.788593614152836,
+        "longitude": 106.68398320769307
+      }
     }
   ],
   "order_tracking": [
@@ -2580,7 +2733,7 @@
       "id": "drone3",
       "identifier": "Drone 3",
       "status": "available",
-      "battery_level": 25,
+      "battery_level": 100,
       "latitude": 10.7626,
       "longitude": 106.682,
       "current_location": {
@@ -2592,7 +2745,7 @@
       "assigned_order_id": null,
       "last_maintenance": "2025-10-25T00:00:00.000Z",
       "created_at": "2025-01-01T00:00:00.000Z",
-      "updated_at": "2025-11-26T09:50:13.067Z"
+      "updated_at": "2025-11-30T15:34:29.376Z"
     },
     {
       "id": "drone4",
@@ -2716,9 +2869,29 @@
     {
       "id": 2,
       "user_id": "u1764063242203",
+      "restaurant_id": "r1",
+      "items": [
+        {
+          "item_id": "item_1764504167952_7hyyoytgc",
+          "food_id": 4,
+          "name": "Combo Burger Gà Giòn Phô Mai",
+          "price": 99000,
+          "image": "/images/foods/food_4.png",
+          "quantity": 1,
+          "note": "",
+          "subtotal": 99000
+        }
+      ],
+      "updated_at": "2025-11-30T12:02:47.952Z",
+      "total": 99000,
+      "restaurant_name": "Belga Pizza"
+    },
+    {
+      "id": 3,
+      "user_id": "u1764512395453",
       "restaurant_id": null,
       "items": [],
-      "updated_at": "2025-11-27T05:37:41.091Z",
+      "updated_at": "2025-11-30T15:07:58.172Z",
       "total": 0,
       "restaurant_name": null
     }

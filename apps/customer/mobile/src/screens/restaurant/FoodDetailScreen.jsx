@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, useRef } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import {
     View,
     Text,
@@ -13,7 +13,6 @@ import {
     Animated,
 } from 'react-native';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { NavigationContext } from '../../contexts/NavigationContext';
 import { CartContext } from '../../contexts/CartContext';
 import { AuthContext } from '../../contexts/AuthContext';
@@ -23,9 +22,9 @@ import { reviewService } from '../../services/reviewService';
 import { getFoodImageUrl } from '../../shared/imageHelper';
 import { isRestaurantOpen } from '../../utils/hoursHelper';
 import { showToast } from '../../utils/toastHelper';
-import { createBubbleAnimation } from '../../utils/animationHelpers';
 import { MiniCartBubble } from '../../components/MiniCartBubble';
 import { CartModal } from '../../components/CartModal';
+import { useFoodDetailCart } from '../../hooks/useFoodDetailCart';
 
 /**
  * FoodDetailScreen - Product detail page (based on web version)
@@ -36,30 +35,25 @@ import { CartModal } from '../../components/CartModal';
 export default function FoodDetailScreen({ foodItem, onNavigate }) {
     const { resetNavigationState, navigate, pendingLocalCart, setNavigationState, selectedRestaurant } = useContext(NavigationContext);
     const cartContext = useContext(CartContext);
-    const { addItem, canAddFromRestaurant, getCurrentRestaurantName, clearCart } = cartContext;
     const { isAuthenticated } = useContext(AuthContext);
 
-    // Use pendingLocalCart from context (passed from RestaurantDetail)
-    // This ensures we keep the current restaurant's cart items
-    const [localCart, setLocalCart] = useState(pendingLocalCart || {
-        items: [],
-        restaurant_id: foodItem?.restaurant_id,
-        restaurant_name: null,
-        total: 0,
-    });
-
-    const bubbleAnimation = useRef(createBubbleAnimation());
+    // Use cart management hook
+    const {
+        localCart,
+        quantity,
+        isAdding,
+        bubbleAnimation,
+        setQuantity,
+        handleAddToCart,
+        handleClearAndSwitch,
+        getTotalItems,
+    } = useFoodDetailCart(foodItem, pendingLocalCart, cartContext);
 
     // UI state
-    const [quantity, setQuantity] = useState(1);
-    const [isAdding, setIsAdding] = useState(false);
     const [reviews, setReviews] = useState([]);
     const [reviewsLoading, setReviewsLoading] = useState(true);
     const [showCartModal, setShowCartModal] = useState(false);
     const [showLoginModal, setShowLoginModal] = useState(false);
-
-    // Keep track of latest localCart for cleanup
-    const localCartRef = useRef(localCart);
 
     // Fetch reviews on mount
     useEffect(() => {
@@ -67,87 +61,6 @@ export default function FoodDetailScreen({ foodItem, onNavigate }) {
             fetchReviews();
         }
     }, [foodItem?.id]);
-
-    /**
-     * Restore cart from AsyncStorage if pendingLocalCart not provided
-     */
-    useEffect(() => {
-        const restoreCartFromStorage = async () => {
-            if (pendingLocalCart && pendingLocalCart.items && pendingLocalCart.items.length > 0) {
-                // Already have pendingLocalCart from navigation
-                console.log('[FoodDetailScreen] Using pendingLocalCart:', pendingLocalCart);
-                return;
-            }
-
-            // Try to restore from AsyncStorage
-            const restaurantId = foodItem?.restaurant_id;
-            if (restaurantId) {
-                try {
-                    const cartJson = await AsyncStorage.getItem(`cart_restaurant_${restaurantId}`);
-                    if (cartJson) {
-                        const savedCart = JSON.parse(cartJson);
-                        console.log('[FoodDetailScreen] Restored cart from AsyncStorage:', restaurantId);
-                        setLocalCart(savedCart);
-                    }
-                } catch (err) {
-                    console.error('[FoodDetailScreen] Error restoring cart:', err.message);
-                }
-            }
-        };
-
-        restoreCartFromStorage();
-    }, [foodItem?.restaurant_id, pendingLocalCart]);
-
-    /**
-     * CRITICAL: Sync local cart to global cart when screen mounts or food item changes
-     * This ensures backend knows which restaurant is currently active
-     * Use merge=false because local cart from AsyncStorage is the latest state
-     */
-    useEffect(() => {
-        const syncCartToGlobal = async () => {
-            if (localCart && localCart.items && localCart.items.length > 0) {
-                const restaurantId = localCart.restaurant_id || foodItem?.restaurant_id;
-                if (restaurantId) {
-                    try {
-                        if (cartContext?.syncLocalCartToGlobal) {
-                            await cartContext.syncLocalCartToGlobal(localCart, false);
-                            console.log('[FoodDetailScreen] Synced local cart to global on mount:', restaurantId);
-                        }
-                        if (cartContext?.setLastActive) {
-                            await cartContext.setLastActive(restaurantId);
-                        }
-                    } catch (error) {
-                        console.error('[FoodDetailScreen] Error syncing cart on mount:', error.message);
-                    }
-                }
-            }
-        };
-
-        syncCartToGlobal();
-    }, [foodItem?.restaurant_id]); // Run when food item changes
-
-    // Keep track of latest localCart for cleanup
-    useEffect(() => {
-        localCartRef.current = localCart;
-    }, [localCart]);
-
-    /**
-     * Save cart to AsyncStorage when component unmounts
-     * Use ref to capture latest cart state
-     */
-    useEffect(() => {
-        return () => {
-            // Save current cart when leaving this screen
-            // Use ref to get latest cart, not stale closure value
-            if (localCartRef.current && localCartRef.current.items && localCartRef.current.items.length > 0) {
-                const restaurantId = localCartRef.current.restaurant_id || foodItem?.restaurant_id;
-                if (restaurantId) {
-                    AsyncStorage.setItem(`cart_restaurant_${restaurantId}`, JSON.stringify(localCartRef.current));
-                    console.log('[FoodDetailScreen] Saved cart on unmount:', restaurantId, 'items:', localCartRef.current.items.length);
-                }
-            }
-        };
-    }, []);
 
     const fetchReviews = async () => {
         try {
@@ -256,93 +169,27 @@ export default function FoodDetailScreen({ foodItem, onNavigate }) {
         }
     };
 
-    const handleAddToCart = async () => {
+    const handleAddToCartClick = async () => {
+        // Check authentication
         if (!isAuthenticated) {
             setShowLoginModal(true);
             return;
         }
 
-        // Check if restaurant is open using data from context
+        // Check if restaurant is open
         if (selectedRestaurant && !isRestaurantOpen(selectedRestaurant.openingHours)) {
             showToast('error', 'This restaurant is currently closed');
             return;
         }
 
-        try {
-            setIsAdding(true);
+        // Use hook's handleAddToCart with additional handlers
+        await handleAddToCart(selectedRestaurant, (currentName, newName) => {
+            // Show switch restaurant modal
+            setShowCartModal(true);
+        });
 
-            // Get restaurant ID - fallback to selectedRestaurant if foodItem doesn't have it
-            const restaurantId = foodItem.restaurant_id || selectedRestaurant?.id;
-
-            // Log foodItem để debug
-            console.log('[FoodDetailScreen] foodItem:', {
-                id: foodItem.id,
-                restaurant_id: foodItem.restaurant_id,
-                selectedRestaurantId: selectedRestaurant?.id,
-                finalRestaurantId: restaurantId,
-                name: foodItem.name,
-                price: foodItem.price,
-            });
-
-            // Add to API backend cart
-            // Parse food_id to number to match backend schema
-            const updatedCart = await cartContext.addItem(
-                restaurantId,
-                parseInt(foodItem.id) || foodItem.id,
-                quantity,
-                ''
-            );
-
-            if (updatedCart) {
-                setLocalCart(updatedCart);
-                showToast('success', `${foodItem.name} added to cart!`);
-
-                // Sync to AsyncStorage for backup
-                if (cartContext?.saveLocalCart) {
-                    await cartContext.saveLocalCart(restaurantId, updatedCart);
-                    console.log('[FoodDetailScreen] Saved updated cart to AsyncStorage:', restaurantId, 'items:', updatedCart.items.length);
-                } else {
-                    console.warn('[FoodDetailScreen] saveLocalCart not available');
-                }
-
-                // IMPORTANT: Sync to global cart to ensure backend knows current active restaurant
-                // Use merge=false because backend has already handled merging/clearing logic
-                if (cartContext?.syncLocalCartToGlobal) {
-                    await cartContext.syncLocalCartToGlobal(updatedCart, false);
-                    console.log('[FoodDetailScreen] Synced cart to global after add');
-                }
-
-                // Set as last active restaurant
-                if (cartContext?.setLastActive) {
-                    await cartContext.setLastActive(restaurantId);
-                }
-
-                // CRITICAL: Update pendingLocalCart in NavigationContext so RestaurantDetail can get it
-                // when user navigates back (even without explicit navigation)
-                setNavigationState({ pendingLocalCart: updatedCart });
-                console.log('[FoodDetailScreen] Updated pendingLocalCart in NavigationContext');
-
-                // Trigger bubble animation
-                if (bubbleAnimation?.current?.pulse) {
-                    bubbleAnimation.current.pulse();
-                }
-            }
-        } catch (error) {
-            console.error('[FoodDetailScreen] Error adding to cart:', error);
-
-            // If API fails, show specific error message
-            if (error.message?.includes('different restaurant')) {
-                showToast('error', 'Cart already has items from another restaurant');
-                setShowCartModal(true);
-            } else if (error.message?.includes('401') || error.message?.includes('Unauthorized')) {
-                setShowLoginModal(true);
-                showToast('error', 'Please login to add items to cart');
-            } else {
-                showToast('error', `Không thể thêm vào giỏ: ${error.message || 'Lỗi không xác định'}`);
-            }
-        } finally {
-            setIsAdding(false);
-        }
+        // Update NavigationContext after successful add
+        setNavigationState({ pendingLocalCart: localCart });
     };
 
     const renderReviewItem = ({ item }) => {
@@ -531,7 +378,7 @@ export default function FoodDetailScreen({ foodItem, onNavigate }) {
                         styles.addToCartButton,
                         isAdding && styles.addToCartButtonLoading,
                     ]}
-                    onPress={handleAddToCart}
+                    onPress={handleAddToCartClick}
                     disabled={isAdding}
                 >
                     {isAdding ? (
@@ -560,7 +407,7 @@ export default function FoodDetailScreen({ foodItem, onNavigate }) {
             {/* Mini Cart Bubble */}
             {bubbleAnimation?.current?.scale && (
                 <MiniCartBubble
-                    totalItems={localCart.items.reduce((sum, item) => sum + item.quantity, 0)}
+                    totalItems={getTotalItems()}
                     onPress={() => setShowCartModal(true)}
                     animatedScale={bubbleAnimation.current.scale}
                 />

@@ -40,7 +40,7 @@ const ReviewCard = ({ review, foodName, onReplyClick, showReplyButton = true }) 
             {/* Food name & Rating */}
             <div className="review-card-header">
                 <h4 className="review-food-name">
-                    #{review.food_id} {foodName ? `[${foodName}]` : ''}
+                    {foodName || ''}
                 </h4>
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "4px" }}>
                     <div className="review-rating">
@@ -64,7 +64,13 @@ const ReviewCard = ({ review, foodName, onReplyClick, showReplyButton = true }) 
                     alignItems: "center",
                     gap: "6px"
                 }}>
-                    Khách hàng: <span style={{ color: "#6c757d", fontWeight: "normal" }}>#{review.user_id || "Ẩn danh"}</span>
+                    Khách hàng: <span style={{ color: "#6c757d", fontWeight: "normal" }}>
+                        {(() => {
+                            const name = review.user_name || review.user?.name || review.user?.full_name || "Ẩn danh";
+                            if (name === "Ẩn danh" || name.length <= 2) return name;
+                            return `${name[0]}***${name[name.length - 1]}`;
+                        })()}
+                    </span>
                 </div>
                 <p style={{ marginLeft: "20px" }}>{review.comment}</p>
             </div>

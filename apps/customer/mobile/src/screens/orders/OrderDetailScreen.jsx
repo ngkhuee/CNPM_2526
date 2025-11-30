@@ -3,7 +3,7 @@
  * Display complete order details with items, pricing, tracking, and review
  */
 
-import React, { useContext, useState, useEffect } from 'react';
+import React, { useContext, useState, useEffect, useCallback } from 'react';
 import {
     View,
     Text,
@@ -33,21 +33,18 @@ const ORDER_STATUS_LABELS = {
 const PaymentStatusLabels = {
     pending: { label: 'Chờ thanh toán', color: '#ff9800' },
     processing: { label: 'Đang xử lý', color: '#ff9800' },
+    paid: { label: 'Đã thanh toán', color: '#4caf50' },
     completed: { label: 'Hoàn tất', color: '#4caf50' },
     failed: { label: 'Thất bại', color: '#e53935' },
 };
 
 const OrderDetailScreen = ({ orderId }) => {
-    const { navigate } = useContext(NavigationContext);
+    const { navigate, currentScreen } = useContext(NavigationContext);
     const [order, setOrder] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    useEffect(() => {
-        fetchOrderDetail();
-    }, [orderId]);
-
-    const fetchOrderDetail = async () => {
+    const fetchOrderDetail = useCallback(async () => {
         try {
             setLoading(true);
             const data = await orderService.getOrderDetail(orderId);
@@ -59,7 +56,19 @@ const OrderDetailScreen = ({ orderId }) => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [orderId]);
+
+    // Fetch on mount and when orderId changes
+    useEffect(() => {
+        fetchOrderDetail();
+    }, [fetchOrderDetail]);
+
+    // Re-fetch when returning to this screen
+    useEffect(() => {
+        if (currentScreen === 'order-detail') {
+            fetchOrderDetail();
+        }
+    }, [currentScreen, fetchOrderDetail]);
 
     const handleCancelOrder = () => {
         Alert.alert(

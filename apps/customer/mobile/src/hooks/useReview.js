@@ -13,7 +13,7 @@ export const useReview = () => {
      */
     const submitReview = useCallback(
         async (reviewData) => {
-            const { foodId, userId, restaurantId, orderId, rating, comment } =
+            const { foodId, userId, restaurantId, orderId, rating, comment, userName } =
                 reviewData;
 
             // Strict validation
@@ -42,6 +42,7 @@ export const useReview = () => {
                 const review = await reviewService.create({
                     food_id: foodId,
                     user_id: userId,
+                    user_name: userName || 'Người dùng',
                     restaurant_id: restaurantId,
                     order_id: orderId,
                     rating,

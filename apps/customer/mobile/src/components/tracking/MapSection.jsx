@@ -1,5 +1,5 @@
 // components/tracking/MapSection.jsx - Enhanced with arrival detection using WebView with real-time drone updates
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { View, Text, StyleSheet, Animated, TouchableOpacity, Linking, ActivityIndicator } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { WebView } from 'react-native-webview';
@@ -11,9 +11,11 @@ console.log('[MapSection] Component loaded');
 export const MapSection = ({ order }) => {
     const [pulseAnim] = useState(new Animated.Value(1));
     const [mapLoading, setMapLoading] = useState(true);
+    const [mapHTML, setMapHTML] = useState(null);
     const webViewRef = useRef(null);
     const hasArrivedRef = useRef(false);
     const lastDroneGPSRef = useRef(null);
+    const mapInitializedRef = useRef(false);
 
     // Check if order is in active delivery states
     const isActiveDelivery = ['confirmed', 'preparing', 'ready', 'delivering', 'arrived'].includes(order?.status);
@@ -68,10 +70,14 @@ export const MapSection = ({ order }) => {
         }
     }, [isActiveDelivery, hasDroneGPS]);
 
-    // Fit map to show pickup and dropoff locations
+    // Generate map HTML only once when pickup/dropoff changes, not when drone moves
     useEffect(() => {
-        // Map will be updated through WebView whenever currentGPS changes
-    }, [order.pickup_gps, order.dropoff_gps, order.current_gps]);
+        if (!mapInitializedRef.current) {
+            const html = generateMapHTML();
+            setMapHTML(html);
+            mapInitializedRef.current = true;
+        }
+    }, [order.pickup_gps, order.dropoff_gps]);
 
     // Update drone position in map when current_gps changes
     useEffect(() => {
@@ -402,43 +408,45 @@ export const MapSection = ({ order }) => {
             {/* Map Container */}
             <View style={styles.section}>
                 <View style={styles.mapContainer}>
-                    <WebView
-                        ref={webViewRef}
-                        source={{ html: generateMapHTML() }}
-                        style={styles.map}
-                        scrollEnabled={false}
-                        onLoadEnd={() => {
-                            console.log('[MapSection] WebView loaded');
-                            setMapLoading(false);
-                        }}
-                        onError={(syntheticEvent) => {
-                            const { nativeEvent } = syntheticEvent;
-                            console.error('[MapSection] WebView Error:', nativeEvent);
-                            setMapLoading(false);
-                        }}
-                        onHttpError={(syntheticEvent) => {
-                            const { nativeEvent } = syntheticEvent;
-                            console.warn('[MapSection] HTTP Error:', nativeEvent.statusCode);
-                        }}
-                        onMessage={(event) => {
-                            console.log('[MapSection] WebView Message:', event.nativeEvent.data);
-                        }}
-                        javaScriptEnabled={true}
-                        domStorageEnabled={true}
-                        startInLoadingState={true}
-                        mixedContentMode="always"
-                        allowUniversalAccessFromFileURLs={true}
-                        allowFileAccess={true}
-                        originWhitelist={['*']}
-                        androidLayerType="hardware"
-                        cacheEnabled={true}
-                        cacheMode="LOAD_DEFAULT"
-                        setSupportMultipleWindows={false}
-                        onContentProcessDidTerminate={() => {
-                            console.log('[MapSection] Content process terminated, reloading...');
-                            webViewRef.current?.reload();
-                        }}
-                    />
+                    {mapHTML && (
+                        <WebView
+                            ref={webViewRef}
+                            source={{ html: mapHTML }}
+                            style={styles.map}
+                            scrollEnabled={false}
+                            onLoadEnd={() => {
+                                console.log('[MapSection] WebView loaded');
+                                setMapLoading(false);
+                            }}
+                            onError={(syntheticEvent) => {
+                                const { nativeEvent } = syntheticEvent;
+                                console.error('[MapSection] WebView Error:', nativeEvent);
+                                setMapLoading(false);
+                            }}
+                            onHttpError={(syntheticEvent) => {
+                                const { nativeEvent } = syntheticEvent;
+                                console.warn('[MapSection] HTTP Error:', nativeEvent.statusCode);
+                            }}
+                            onMessage={(event) => {
+                                console.log('[MapSection] WebView Message:', event.nativeEvent.data);
+                            }}
+                            javaScriptEnabled={true}
+                            domStorageEnabled={true}
+                            startInLoadingState={true}
+                            mixedContentMode="always"
+                            allowUniversalAccessFromFileURLs={true}
+                            allowFileAccess={true}
+                            originWhitelist={['*']}
+                            androidLayerType="hardware"
+                            cacheEnabled={true}
+                            cacheMode="LOAD_DEFAULT"
+                            setSupportMultipleWindows={false}
+                            onContentProcessDidTerminate={() => {
+                                console.log('[MapSection] Content process terminated, reloading...');
+                                webViewRef.current?.reload();
+                            }}
+                        />
+                    )}
                     {mapLoading && (
                         <View style={styles.loadingContainer}>
                             <ActivityIndicator size="large" color="#FF6B35" />

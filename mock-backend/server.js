@@ -751,8 +751,9 @@ server.use((req, res, next) => {
 // Configure storage for file uploads
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    const category = req.body.category || "other";
-    const uploadDir = path.join(__dirname, "public/images", category);
+    // NOTE: req.body is not yet populated here during multer processing
+    // We'll move files to correct category after upload
+    const uploadDir = path.join(__dirname, "public/images/temp");
 
     // Create directory if not exists
     if (!fs.existsSync(uploadDir)) {
@@ -792,6 +793,9 @@ const upload = multer({
 // ========== IMAGE UPLOAD ENDPOINT ==========
 server.post("/upload", upload.single("file"), (req, res) => {
   try {
+    console.log("[UPLOAD] Category received:", req.body.category);
+    console.log("[UPLOAD] File uploaded:", req.file?.filename);
+
     if (!req.file) {
       return res.status(400).json({
         success: false,
@@ -799,11 +803,26 @@ server.post("/upload", upload.single("file"), (req, res) => {
       });
     }
 
+    // Move file from temp to correct category folder
     const category = req.body.category || "other";
+    const categoryDir = path.join(__dirname, "public/images", category);
+
+    // Create category directory if not exists
+    if (!fs.existsSync(categoryDir)) {
+      fs.mkdirSync(categoryDir, { recursive: true });
+    }
+
+    // Move file from temp to category folder
+    const tempPath = req.file.path;
+    const finalPath = path.join(categoryDir, req.file.filename);
+    fs.renameSync(tempPath, finalPath);
+
     const imagePath = `/images/${category}/${req.file.filename}`;
     const protocol = req.protocol || "http";
     const host = req.get("host") || `localhost:${PORT}`;
     const imageUrl = `${protocol}://${host}${imagePath}`;
+
+    console.log("[UPLOAD] Final path:", imagePath);
 
     res.json({
       success: true,
@@ -813,6 +832,7 @@ server.post("/upload", upload.single("file"), (req, res) => {
       url: imageUrl,
     });
   } catch (error) {
+    console.error("[UPLOAD] Error:", error);
     res.status(500).json({
       success: false,
       message: error.message || "Upload failed",
@@ -2003,6 +2023,11 @@ server.patch("/orders/:id", (req, res) => {
     }
   }
 
+  if (updateData.payment_status !== undefined) {
+    updatedOrder.payment_status = updateData.payment_status;
+    console.log(`[PATCH /orders/:id] Payment status updated to: ${updateData.payment_status}`);
+  }
+
   if (updateData.drone_id !== undefined) {
     updatedOrder.drone_id = updateData.drone_id;
     console.log(`[PATCH /orders/:id] Drone ID updated to: ${updateData.drone_id}`);
@@ -2206,6 +2231,31 @@ server.get("/addresses", (req, res, next) => {
   addresses = addresses.filter(addr => addr.user_id === userId);
 
   res.json(addresses);
+});
+
+// POST /users/:userId/addresses - Add new address for user
+server.post("/users/:userId/addresses", (req, res) => {
+  const db = router.db;
+  const userId = req.params.userId;
+  const addressData = req.body;
+
+  console.log(`[POST /users/:userId/addresses] Adding address for user ${userId}`);
+
+  // Generate new ID
+  const newId = `addr${Date.now()}`;
+  const newAddress = {
+    id: newId,
+    user_id: userId,
+    ...addressData,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  };
+
+  // Add to database
+  db.get("addresses").push(newAddress).write();
+
+  console.log(`[POST /users/:userId/addresses] Address created:`, newAddress);
+  res.status(201).json(newAddress);
 });
 
 // ========== CUSTOM DELETE RESTAURANT ENDPOINT (SOFT DELETE) ==========

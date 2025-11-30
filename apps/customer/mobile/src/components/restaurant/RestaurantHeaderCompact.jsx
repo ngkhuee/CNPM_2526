@@ -4,6 +4,7 @@ import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { formatRating } from '../../shared/formatters';
 import { isRestaurantOpen, getTodayHours } from '../../utils/hoursHelper';
 import { getRestaurantImageUrl, getRestaurantBannerUrl } from '../../shared/imageHelper';
+import { DroneIcon } from '../tracking/DroneIcon';
 
 export const RestaurantHeaderCompact = ({ restaurant }) => {
     const imageUrl = getRestaurantImageUrl(restaurant);
@@ -36,7 +37,7 @@ export const RestaurantHeaderCompact = ({ restaurant }) => {
                 {/* Quick Info */}
                 <View style={styles.quickInfo}>
                     <View style={styles.quickInfoItem}>
-                        <MaterialIcons name="schedule" size={16} color="#ff6b35" />
+                        <DroneIcon size={16} color="#ff6b35" />
                         <Text style={styles.quickInfoText}>
                             {restaurant.deliveryTimeMinutes} phút
                         </Text>

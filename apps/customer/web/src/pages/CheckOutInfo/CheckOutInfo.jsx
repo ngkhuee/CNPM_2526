@@ -102,6 +102,18 @@ const CheckoutInfo = () => {
     }
   }, [user]);
 
+  // Auto-fill default address on mount
+  useEffect(() => {
+    if (addresses && addresses.length > 0 && !selectedAddressId) {
+      const defaultAddr = addresses.find(addr => addr.isDefault || addr.is_default);
+      if (defaultAddr) {
+        console.log('[CheckoutInfo] Auto-filling default address:', defaultAddr);
+        handleSelectSavedAddress(defaultAddr, setGpsLocation);
+        setUseNewAddress(false);
+      }
+    }
+  }, [addresses]);
+
   const handleInput = (e) => {
     const { name, value } = e.target;
     setCustomer((prev) => ({

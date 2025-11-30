@@ -44,21 +44,33 @@ export const useAddress = (userId) => {
 
     const handleAddAddress = async () => {
         try {
-            if (!newAddress.city || !newAddress.district || !newAddress.address_line) {
-                Alert.alert('Error', 'Please fill in all required fields');
+            // If has GPS coordinates, allow save even without city/district
+            const hasGPS = newAddress.lat && newAddress.lng;
+            const hasRequiredFields = newAddress.address_line;
+            const hasFullAddress = newAddress.city && newAddress.district && newAddress.address_line;
+
+            if (!hasGPS && !hasFullAddress) {
+                Alert.alert('Lỗi', 'Vui lòng nhập đầy đủ thông tin địa chỉ hoặc sử dụng GPS');
+                return;
+            }
+
+            if (!hasRequiredFields) {
+                Alert.alert('Lỗi', 'Vui lòng nhập địa chỉ chi tiết');
                 return;
             }
 
             setSaveLoading(true);
             const result = await addressService.addAddress(userId, newAddress);
-            const addressToAdd = result.id ? result : { id: Date.now().toString(), ...newAddress };
+            console.log('[useAddress.handleAddAddress] API response:', result);
 
-            setAddresses(prev => [...prev, addressToAdd]);
+            // Refresh addresses from server to ensure sync
+            await fetchAddresses();
+
             resetAddressForm();
-            Alert.alert('Success', 'Address added successfully');
+            Alert.alert('Thành công', 'Địa chỉ đã được thêm');
         } catch (error) {
-            console.error('Error adding address:', error);
-            Alert.alert('Error', 'Failed to add address');
+            console.error('[useAddress.handleAddAddress] Error:', error);
+            Alert.alert('Lỗi', 'Không thể thêm địa chỉ');
         } finally {
             setSaveLoading(false);
         }
@@ -123,8 +135,13 @@ export const useAddress = (userId) => {
 
             const { latitude, longitude } = result.coords;
 
-            // Reverse geocode to get address text
-            let addressText = `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
+            // Reverse geocode to get full address info
+            let addressData = {
+                city: '',
+                district: '',
+                address_line: `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`,
+            };
+
             try {
                 const addresses = await Location.reverseGeocodeAsync({
                     latitude,
@@ -133,16 +150,45 @@ export const useAddress = (userId) => {
 
                 if (addresses && addresses.length > 0) {
                     const addr = addresses[0];
-                    addressText = [
-                        addr.street,
-                        addr.district,
-                        addr.city,
-                    ]
-                        .filter(Boolean)
-                        .join(', ') || addressText;
+                    console.log('[useAddress.handleGetGPS] Geocoded address:', addr);
+
+                    // Parse full address components
+                    addressData = {
+                        city: addr.city || addr.region || '',
+                        district: addr.district || addr.subregion || '',
+                        address_line: [
+                            addr.streetNumber,
+                            addr.street,
+                            addr.name,
+                        ]
+                            .filter(Boolean)
+                            .join(' ') || addressData.address_line,
+                    };
                 }
             } catch (geocodeError) {
                 console.error('Geocoding error:', geocodeError);
+            }
+
+            // Check for duplicate address by coordinates (within 100m radius)
+            const isDuplicate = addresses.some(existingAddr => {
+                if (!existingAddr.lat || !existingAddr.lng) return false;
+
+                const distance = Math.sqrt(
+                    Math.pow(existingAddr.lat - latitude, 2) +
+                    Math.pow(existingAddr.lng - longitude, 2)
+                ) * 111000; // Convert to meters approximately
+
+                return distance < 100; // Less than 100 meters
+            });
+
+            if (isDuplicate) {
+                Alert.alert(
+                    'Địa chỉ đã tồn tại',
+                    'Địa chỉ này đã được lưu trong danh sách của bạn.',
+                    [{ text: 'OK' }]
+                );
+                setGpsLoading(false);
+                return;
             }
 
             // Update address form with GPS data
@@ -150,8 +196,12 @@ export const useAddress = (userId) => {
                 ...prev,
                 lat: latitude,
                 lng: longitude,
-                address_line: addressText,
+                city: addressData.city,
+                district: addressData.district,
+                address_line: addressData.address_line,
             }));
+
+            console.log('[useAddress.handleGetGPS] Updated address form:', addressData);
 
             Alert.alert('Success', 'GPS location added to address');
         } catch (error) {

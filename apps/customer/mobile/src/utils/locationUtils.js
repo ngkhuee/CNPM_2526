@@ -19,7 +19,14 @@ export const getNearbyRestaurants = (restaurants, userLocation, limit = 5) => {
         return [];
     }
 
-    const { latitude: userLat, longitude: userLon } = userLocation;
+    // Support both {lat, lng} and {latitude, longitude} formats
+    const userLat = userLocation.lat || userLocation.latitude;
+    const userLon = userLocation.lng || userLocation.longitude;
+
+    if (!userLat || !userLon) {
+        console.warn('[getNearbyRestaurants] Invalid user location:', userLocation);
+        return [];
+    }
 
     const nearby = restaurants
         .map((restaurant) => {

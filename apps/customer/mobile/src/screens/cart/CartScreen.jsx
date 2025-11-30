@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect } from 'react';
+import React, { useContext } from 'react';
 import {
     View,
     Text,
@@ -11,42 +11,25 @@ import {
 import { MaterialIcons } from '@expo/vector-icons';
 import { NavigationContext } from '../../contexts/NavigationContext';
 import { AuthContext } from '../../contexts/AuthContext';
-import { CartContext } from '../../contexts/CartContext';
 import BottomNavigation from '../../components/BottomNavigation';
 import CartItem from '../../components/CartItem';
 import { formatCurrency } from '../../shared/formatters';
-import { showToast } from '../../utils/toastHelper';
+import { useCartOperations } from '../../hooks/useCartOperations';
 
 const CartScreen = ({ onNavigate }) => {
     const { navigate, activeRoute } = useContext(NavigationContext);
     const { isAuthenticated } = useContext(AuthContext);
-    const cartContext = useContext(CartContext);
 
-    // Get global cart from CartContext
-    const globalCart = cartContext?.cart || { items: [], total: 0 };
-    const fetchCart = cartContext?.fetchCart;
-    const saveLocalCart = cartContext?.saveLocalCart;
-
-    // Local state để quản lý display (independent from global cart sync issues)
-    const [localCart, setLocalCart] = useState(null);
-
-    // Initialize local cart from global cart on mount
-    useEffect(() => {
-        if (fetchCart) {
-            fetchCart();
-            console.log('[CartScreen] Fetched cart from AsyncStorage on mount');
-        }
-    }, [fetchCart]);
-
-    // Sync global cart to local state
-    useEffect(() => {
-        if (globalCart && globalCart.items && globalCart.items.length > 0) {
-            setLocalCart(globalCart);
-            console.log('[CartScreen] Synced global cart to local state:', globalCart);
-        } else if (!localCart) {
-            setLocalCart({ items: [], total: 0, restaurant_id: null, restaurant_name: null });
-        }
-    }, [globalCart]);
+    // Use cart operations hook
+    const {
+        localCart,
+        isLoading,
+        handleRemoveItem,
+        handleUpdateQuantity,
+        saveCartBeforeCheckout,
+        calculateTotals,
+        isEmpty
+    } = useCartOperations();
 
     // Check if user is authenticated - show login prompt instead of cart
     if (!isAuthenticated) {
@@ -80,73 +63,8 @@ const CartScreen = ({ onNavigate }) => {
         );
     }
 
-    // Lấy số item
-    const cartItems = localCart?.items || [];
-    const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
-
-    /**
-     * Xử lý khi user click xóa item
-     * Call API backend to remove from cart
-     */
-    const handleRemoveItem = async (itemMenuId) => {
-        try {
-            // Find item by any ID field (item_id, menu_id, food_id, id)
-            const item = globalCart.items?.find(
-                i => i.item_id === itemMenuId || (i.menu_id || i.food_id || i.id) === itemMenuId
-            );
-
-            if (!item || !item.item_id) {
-                showToast('error', 'Item not found');
-                return;
-            }
-
-            // Call API to remove item
-            const updatedCart = await cartContext.removeItem(item.item_id);
-
-            if (updatedCart) {
-                setLocalCart(updatedCart);
-                showToast('success', 'Đã xóa sản phẩm');
-                console.log('[CartScreen] Item removed from API:', itemMenuId);
-            }
-        } catch (error) {
-            console.error('[CartScreen] Error removing item:', error.message);
-            showToast('error', 'Không thể xóa sản phẩm');
-        }
-    };
-
-    /**
-     * Xử lý khi user cập nhật số lượng item
-     * Call API backend to update item quantity
-     */
-    const handleUpdateQuantity = async (itemMenuId, quantity) => {
-        if (quantity <= 0) {
-            await handleRemoveItem(itemMenuId);
-            return;
-        }
-
-        try {
-            // Find item by any ID field (item_id, menu_id, food_id, id)
-            const item = globalCart.items?.find(
-                i => i.item_id === itemMenuId || (i.menu_id || i.food_id || i.id) === itemMenuId
-            );
-
-            if (!item || !item.item_id) {
-                showToast('error', 'Item not found');
-                return;
-            }
-
-            // Call API to update item quantity
-            const updatedCart = await cartContext.updateItem(item.item_id, quantity, '');
-
-            if (updatedCart) {
-                setLocalCart(updatedCart);
-                console.log('[CartScreen] Item quantity updated via API:', { itemMenuId, quantity });
-            }
-        } catch (error) {
-            console.error('[CartScreen] Error updating item:', error.message);
-            showToast('error', 'Không thể cập nhật sản phẩm');
-        }
-    };
+    // Get cart totals from hook
+    const { subtotal, totalItems, items: cartItems } = calculateTotals();
 
     /**
      * Render item trong FlatList
@@ -160,15 +78,10 @@ const CartScreen = ({ onNavigate }) => {
     );
 
     /**
-     * Render footer - tổng tiền, checkout button (simplified)
+     * Render footer - tổng tiền, checkout button
      */
     const renderFooter = () => {
-        if (cartItems.length === 0) return null;
-
-        const subtotal = cartItems.reduce(
-            (sum, item) => sum + (item.price * item.quantity),
-            0
-        );
+        if (isEmpty) return null;
 
         return (
             <View style={styles.footer}>
@@ -186,14 +99,11 @@ const CartScreen = ({ onNavigate }) => {
                 <TouchableOpacity
                     style={styles.checkoutButton}
                     onPress={() => {
-                        // Save final cart before checkout
-                        if (saveLocalCart && localCart.restaurant_id) {
-                            saveLocalCart(localCart.restaurant_id, localCart);
-                        }
+                        saveCartBeforeCheckout();
                         onNavigate('checkout');
                     }}
+                    disabled={isLoading}
                 >
-                    {/* <MaterialIcons name="arrow-forward" size={20} color="#fff" /> */}
                     <Text style={styles.checkoutText}>Tiến hành thanh toán</Text>
                 </TouchableOpacity>
 
@@ -211,7 +121,7 @@ const CartScreen = ({ onNavigate }) => {
     /**
      * Render empty state
      */
-    if (cartItems.length === 0) {
+    if (isEmpty) {
         return (
             <View style={styles.screenContainer}>
                 <SafeAreaView style={styles.emptyContainer}>

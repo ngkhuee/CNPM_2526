@@ -1,4 +1,5 @@
 import React, { useContext } from "react";
+import { useNavigate } from "react-router-dom";
 import "./Add.css";
 import { assets } from "../../assets/assets";
 import { toast } from "react-toastify";
@@ -8,6 +9,7 @@ import { MdLocationOn, MdHourglassEmpty } from "react-icons/md";
 import { useAddFood } from "../../hooks/useAddFood";
 
 const Add = () => {
+  const navigate = useNavigate();
   const { currentRestaurant } = useContext(RestaurantContext);
   const { categories } = useContext(CategoryContext);
   const {
@@ -24,6 +26,10 @@ const Add = () => {
     event.preventDefault();
     const result = await handleSubmit(() => {
       toast.success("Đã thêm sản phẩm thành công!");
+      // Navigate to food list page after successful add
+      setTimeout(() => {
+        navigate("/list");
+      }, 1000);
     });
     if (!result.success) {
       toast.error(result.message);
@@ -82,7 +88,6 @@ const Add = () => {
               onChange={handleInputChange}
               rows={4}
               placeholder="Viết mô tả sản phẩm"
-              required
               disabled={loading}
             />
 

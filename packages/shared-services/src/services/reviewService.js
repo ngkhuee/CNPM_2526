@@ -4,7 +4,28 @@ import { ENDPOINTS } from "../config/endpoints";
 export const reviewService = {
   async getAll() {
     try {
-      return await apiClient.get(ENDPOINTS.REVIEWS.BASE);
+      const reviews = await apiClient.get(ENDPOINTS.REVIEWS.BASE);
+
+      // Fetch user info for reviews that don't have user_name
+      const reviewsWithUser = await Promise.all(
+        reviews.map(async (review) => {
+          if (review.user_name) return review;
+
+          let userName = null;
+          if (review.user_id) {
+            try {
+              const user = await apiClient.get(`/users/${review.user_id}`);
+              userName = user?.name || user?.full_name;
+            } catch (err) {
+              console.error(`Failed to fetch user ${review.user_id}:`, err.message);
+            }
+          }
+
+          return { ...review, user_name: userName };
+        })
+      );
+
+      return reviewsWithUser;
     } catch (error) {
       throw error;
     }
@@ -12,7 +33,28 @@ export const reviewService = {
 
   async getByFood(foodId) {
     try {
-      return await apiClient.get(ENDPOINTS.REVIEWS.BY_FOOD(foodId));
+      const reviews = await apiClient.get(ENDPOINTS.REVIEWS.BY_FOOD(foodId));
+
+      // Fetch user info for reviews that don't have user_name
+      const reviewsWithUser = await Promise.all(
+        reviews.map(async (review) => {
+          if (review.user_name) return review;
+
+          let userName = null;
+          if (review.user_id) {
+            try {
+              const user = await apiClient.get(`/users/${review.user_id}`);
+              userName = user?.name || user?.full_name;
+            } catch (err) {
+              console.error(`Failed to fetch user ${review.user_id}:`, err.message);
+            }
+          }
+
+          return { ...review, user_name: userName };
+        })
+      );
+
+      return reviewsWithUser;
     } catch (error) {
       throw error;
     }
@@ -28,7 +70,28 @@ export const reviewService = {
 
   async getByRestaurant(restaurantId) {
     try {
-      return await apiClient.get(ENDPOINTS.REVIEWS.BY_RESTAURANT(restaurantId));
+      const reviews = await apiClient.get(ENDPOINTS.REVIEWS.BY_RESTAURANT(restaurantId));
+
+      // Fetch user info for reviews that don't have user_name
+      const reviewsWithUser = await Promise.all(
+        reviews.map(async (review) => {
+          if (review.user_name) return review;
+
+          let userName = null;
+          if (review.user_id) {
+            try {
+              const user = await apiClient.get(`/users/${review.user_id}`);
+              userName = user?.name || user?.full_name;
+            } catch (err) {
+              console.error(`Failed to fetch user ${review.user_id}:`, err.message);
+            }
+          }
+
+          return { ...review, user_name: userName };
+        })
+      );
+
+      return reviewsWithUser;
     } catch (error) {
       throw error;
     }

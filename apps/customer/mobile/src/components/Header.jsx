@@ -1,8 +1,11 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, TextInput } from 'react-native';
+import React, { useState, useContext } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, Image } from 'react-native';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { AuthContext } from '../contexts/AuthContext';
 
 export default function Header({
+    title,
+    showBackButton = true,
     userLocation,
     onLocationPress,
     onSearchPress,
@@ -10,7 +13,10 @@ export default function Header({
     onSearchBlur,
     onSearchSubmit,
     onMenuPress,
+    onAvatarPress,
+    searchPlaceholder = "Tìm kiếm món ăn...",
 }) {
+    const { user } = useContext(AuthContext);
     const [searchFocused, setSearchFocused] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
 
@@ -64,8 +70,22 @@ export default function Header({
                     </Text>
                 </TouchableOpacity>
 
-                <TouchableOpacity style={styles.avatarBtn}>
-                    <MaterialIcons name="account-circle" size={32} color="#ff6b35" />
+                <TouchableOpacity style={styles.avatarBtn} onPress={onAvatarPress}>
+                    {user?.avatar ? (
+                        <Image
+                            source={{ uri: user.avatar }}
+                            style={styles.avatarImage}
+                            resizeMode="cover"
+                        />
+                    ) : user?.name ? (
+                        <View style={styles.avatarPlaceholder}>
+                            <Text style={styles.avatarPlaceholderText}>
+                                {user.name.charAt(0).toUpperCase()}
+                            </Text>
+                        </View>
+                    ) : (
+                        <MaterialIcons name="account-circle" size={32} color="#ff6b35" />
+                    )}
                 </TouchableOpacity>
             </View>
 
@@ -74,7 +94,7 @@ export default function Header({
                 <MaterialIcons name="search" size={20} color="#999" />
                 <TextInput
                     style={styles.searchInput}
-                    placeholder="Tìm kiếm món ăn..."
+                    placeholder={searchPlaceholder}
                     placeholderTextColor="#ccc"
                     onFocus={handleSearchFocus}
                     onBlur={handleSearchBlur}
@@ -148,6 +168,26 @@ const styles = StyleSheet.create({
         height: 40,
         justifyContent: 'center',
         alignItems: 'center',
+    },
+    avatarImage: {
+        width: 36,
+        height: 36,
+        borderRadius: 18,
+        borderWidth: 2,
+        borderColor: '#ff6347',
+    },
+    avatarPlaceholder: {
+        width: 36,
+        height: 36,
+        borderRadius: 18,
+        backgroundColor: '#ff6347',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    avatarPlaceholderText: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: '#fff',
     },
     searchContainer: {
         flexDirection: 'row',

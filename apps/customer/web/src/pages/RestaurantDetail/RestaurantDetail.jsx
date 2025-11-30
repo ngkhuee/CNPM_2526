@@ -71,11 +71,13 @@ const RestaurantDetail = () => {
   }
 
   const bannerUrl = getImageUrl(restaurant.banner || restaurant.image);
+  const logoUrl = getImageUrl(restaurant.image);
   const isOpen = isRestaurantOpen(restaurant.opening_hours);
   const todayHours = getTodayHours(restaurant.opening_hours);
 
   console.log("Restaurant data:", restaurant);
   console.log("Banner URL:", bannerUrl);
+  console.log("Logo URL:", logoUrl);
   console.log("Is Open:", isOpen);
   console.log("Today Hours:", todayHours);
 
@@ -183,6 +185,11 @@ const RestaurantDetail = () => {
         {/* Banner Image */}
         <div className="restaurant-banner">
           <img src={bannerUrl} alt={restaurant.name} />
+        </div>
+
+        {/* Restaurant Logo */}
+        <div className="restaurant-logo">
+          <img src={logoUrl} alt={`${restaurant.name} logo`} />
         </div>
 
         {/* Restaurant Info Card */}
