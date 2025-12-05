@@ -99,7 +99,7 @@ export const usePromotionForm = (restaurantId, onSuccess) => {
             value: Number(formData.value),
             minOrderValue: Number(formData.minOrderValue) || 0,
             maxDiscount: Number(formData.maxDiscount) || 0,
-            usageLimit: Number(formData.usageLimit) || 0,
+            usageLimit: Number(formData.usageLimit) || 0, // 0 = unlimited
             usedCount: editingPromotion ? editingPromotion.usedCount : 0,
             applicableTimeRange: formData.applicableTimeRange || "Cả ngày",
             restaurantId: restaurantId, // Set restaurant ID
