@@ -29,6 +29,7 @@ import { useRestaurantCart } from '../../hooks/useRestaurantCart';
 import { useRestaurantScroll } from '../../hooks/useRestaurantScroll';
 import { useFoodSearch } from '../../hooks/useFoodSearch';
 import { useLocalCart } from '../../hooks/useLocalCart';
+import { useGeolocation } from '../../hooks/useGeolocation';
 
 export default function RestaurantDetail({ onNavigate, onSelectFood }) {
     const navigationContext = useContext(NavigationContext);
@@ -42,9 +43,17 @@ export default function RestaurantDetail({ onNavigate, onSelectFood }) {
         setNavigationState,
     } = navigationContext;
 
+    // Get user location for distance calculation
+    const { location, requestLocation } = useGeolocation();
+
+    // Request location on mount
+    useEffect(() => {
+        requestLocation();
+    }, []);
+
     // Custom hooks
     const { restaurant, allFoods, categories, reviews, avgRating, loading, error, refetch } =
-        useRestaurantDetail(targetRestaurantId);
+        useRestaurantDetail(targetRestaurantId, location);
 
     const { localCart: initialLocalCart, setLocalCart } = useLocalCart(targetRestaurantId);
 

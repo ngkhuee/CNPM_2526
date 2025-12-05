@@ -13,6 +13,13 @@ export const RestaurantHeaderCompact = ({ restaurant }) => {
     const isOpen = isRestaurantOpen(restaurant.openingHours);
     const todayHours = getTodayHours(restaurant.openingHours);
 
+    const distance = restaurant.distance || 0;
+
+    // Calculate delivery time based on distance (drone speed ~50 km/h)
+    // Base time: 10 minutes (preparation) + travel time
+    const travelTimeMinutes = distance > 0 ? Math.ceil((distance / 50) * 60) : 0;
+    const deliveryTime = String(10 + travelTimeMinutes);
+
     return (
         <>
             {/* Banner */}
@@ -39,7 +46,7 @@ export const RestaurantHeaderCompact = ({ restaurant }) => {
                     <View style={styles.quickInfoItem}>
                         <DroneIcon size={16} color="#ff6b35" />
                         <Text style={styles.quickInfoText}>
-                            {restaurant.deliveryTimeMinutes} phút
+                            {deliveryTime} phút
                         </Text>
                     </View>
                     <View style={styles.quickInfoItem}>
